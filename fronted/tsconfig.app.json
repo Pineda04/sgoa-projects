@@ -1,0 +1,47 @@
+{
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+		"target": "ES2022",
+		"useDefineForClassFields": true,
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": false,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"jsx": "react-jsx",
+
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"erasableSyntaxOnly": false,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedSideEffectImports": true,
+
+		"baseUrl": ".",
+		"paths": {
+			"@lib/*": ["src/lib/*"],
+			"@utils": ["src/utils/index"],
+			"@utils/*": ["src/utils/*"], // Por si no se agrega al archivo de barril un nuevo archivo
+			"@types": ["src/types/index"],
+			"@types/*": ["src/types/*"], // Por si no se agrega al archivo de barril un nuevo archivo
+			"@constants": ["src/constants/index"],
+			"@constants/*": ["src/constants/*"],
+			"@features/*": ["src/features/*"],
+			"@providers/*": ["src/providers/*"],
+			"@hooks": ["src/hooks/index"],
+			"@hooks/*": ["src/hooks/*"], // Por si no se agrega al archivo de barril un nuevo archivo
+			"@components": ["src/components/index"],
+			"@components/*": ["src/components/*"], // Por si no se agrega al archivo de barril un nuevo archivo
+			"@schemas": ["src/schemas/index"],
+			"@schemas/*": ["src/schemas/*"], // Por si no se agrega al archivo de barril un nuevo archivo
+			"@assets/*": ["src/assets/*"]
+		}
+	},
+	"include": ["src", "**/*.tsx", "**/*.ts"]
+}

@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+@import '@fontsource/poppins';
+
+@keyframes shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+.animate-shimmer {
+	animation: shimmer 2s linear infinite;
+}
+
+.input-style {
+	@apply block py-2 px-0 w-full text-sm bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 font-medium transition-colors duration-200;
+	color: var(--foreground);
+	border-color: var(--border);
+}
+
+.input-style::placeholder {
+	color: var(--muted-foreground);
+}
+
+.input-style:focus {
+	border-color: var(--primary);
+}
+
+.dark .input-style {
+	border-color: var(--border-strong);
+}
+
+.dark .input-style:focus {
+	border-color: var(--primary);
+}
