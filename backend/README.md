@@ -1,4 +1,4 @@
-# SGOA - Sistema de Gestión y Organización Académica
+# SGOA - Sistema de Gestión y Organización Académica (Versión 1)
 
 Backend REST API para la gestión y organización académica de una universidad, desarrollado con NestJS y Prisma ORM.
 

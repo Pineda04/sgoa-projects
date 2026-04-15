@@ -1,4 +1,4 @@
-# SGOA - Sistema de Gestión y Organización Académica
+# SGOA - Sistema de Gestión y Organización Académica (Versión 1)
 
 <!-- badges -->
 

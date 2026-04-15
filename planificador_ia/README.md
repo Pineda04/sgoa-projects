@@ -1,4 +1,4 @@
-# SGOA - Sistema de Gestión y Organización Académica
+# SGOA - Sistema de Gestión y Organización Académica (Versión 1)
 
 API de planificación académica basada en inteligencia artificial que utiliza Google OR-Tools para generar horarios óptimos para instituciones educativas.
 
