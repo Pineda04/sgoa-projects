@@ -62,14 +62,14 @@ SGOA es un sistema integral para la administración académica que permite gesti
 
 ## Estudiantes
 
-| Nombre        | Correo                          |
-| ------------- | ------------------------------- |
-| Carlos Su     | carlosj.sup@gmail.com           |
-| Jorge Canales | jorgecanalesortega935@gmail.com |
-| Lesvi Flores  | floresyadira585@gmail.com       |
-| Paola Madrid  | paolamadridt@gmail.com          |
-| Raúl Urquía   |                                 |
-| Fredy Vasquez |                                 |
+| Nombre | Contacto |
+| ------ | -------- |
+| Carlos Su | [correo](mailto:carlosj.sup@gmail.com) |
+| Jorge Canales | [correo](mailto:jorgecanalesortega935@gmail.com) |
+| Lesvi Flores | [correo](mailto:floresyadira585@gmail.com) |
+| Paola Madrid | [correo](mailto:paolamadridt@gmail.com) |
+| Raúl Urquía | --- |
+| Fredy Vasquez | --- |
 
 > Proyecto desarrollado como parte de la clase de **Tópicos Especiales y Avanzados** - II PAC 2025
 

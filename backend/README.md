@@ -8,10 +8,10 @@ SGOA es un sistema integral para la administración académica que permite gesti
 
 ## Participantes
 
-| Nombre        | Correo                          |
-| ------------- | ------------------------------- |
-| Carlos Su     | carlosj.sup@gmail.com           |
-| Jorge Canales | jorgecanalesortega935@gmail.com |
+| Nombre | Contacto |
+| ------ | -------- |
+| Carlos Su | [correo](mailto:carlosj.sup@gmail.com) |
+| Jorge Canales | [correo](mailto:jorgecanalesortega935@gmail.com) |
 
 ## Tecnologías
 
