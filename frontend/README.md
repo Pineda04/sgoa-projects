@@ -33,11 +33,12 @@ SGOA es una aplicación web desarrollada para la Universidad Nacional Autónoma 
 
 ## Participantes
 
-- Carlos Su ([carlosj.sup@gmail.com](mailto:carlosj.sup@gmail.com))
-- Jorge Canales ([jorgecanalesortega935@gmail.com](mailto:jorgecanalesortega935@gmail.com))
-- Lesvi Flores ([floresyadira585@gmail.com](mailto:floresyadira585@gmail.com))
-- Paola Madrid ([paolamadridt@gmail.com](mailto:paolamadridt@gmail.com))
-- Raúl Urquía
+- Carlos Su [@CarlosSu02](https://github.com/CarlosSu02)
+- Jorge Canales [@JrgCanales](https://github.com/JrgCanales)
+- Lesvi Flores [@Lesvi18](https://github.com/Lesvi18)
+- Paola Madrid [@PaolaMad](https://github.com/PaolaMad)
+- Raúl Urquía [@JRAUL19](https://github.com/JRAUL19)
+- Fredy Vasquez [@FredyVasquez16](https://github.com/FredyVasquez16)
 
 > Proyecto desarrollado como parte de la clase de Tópicos Especiales y Avanzados del II PAC 2025.
 

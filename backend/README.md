@@ -8,10 +8,14 @@ SGOA es un sistema integral para la administración académica que permite gesti
 
 ## Participantes
 
-| Nombre | Contacto |
-| ------ | -------- |
-| Carlos Su | [correo](mailto:carlosj.sup@gmail.com) |
-| Jorge Canales | [correo](mailto:jorgecanalesortega935@gmail.com) |
+| Nombre | GitHub |
+| ------ | ------ |
+| Carlos Su | [@CarlosSu02](https://github.com/CarlosSu02) |
+| Jorge Canales | [@JrgCanales](https://github.com/JrgCanales) |
+| Lesvi Flores | [@Lesvi18](https://github.com/Lesvi18) |
+| Paola Madrid | [@PaolaMad](https://github.com/PaolaMad) |
+| Raúl Urquía | [@JRAUL19](https://github.com/JRAUL19) |
+| Fredy Vasquez | [@FredyVasquez16](https://github.com/FredyVasquez16) |
 
 ## Tecnologías
 
