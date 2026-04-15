@@ -1,0 +1,695 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["relationJoins", "postgresqlExtensions", "views"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  schemas    = ["auth", "academic", "infraestructure", "inventory", "public", "ai"]
+  extensions = [unaccent]
+}
+
+// # User - Teachers
+model Role {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
+  // users       User[]
+  userRoles   UserRole[]
+
+  @@map("roles")
+  @@schema("auth")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  name         String
+  email        String?  @unique
+  code         String   @unique
+  hash         String
+  hashedRt     String?
+  activeStatus Boolean  @default(true) // para no eliminar al usuario, solo desactivarlo
+  // roleId       String   @db.Uuid
+
+  // Relations
+  // role                Role                 @relation(fields: [roleId], references: [id])
+  teacher             Teacher?
+  resetPasswordTokens ResetPasswordToken[]
+  userRoles           UserRole[]
+
+  @@map("users") // use map
+  @@schema("auth")
+}
+
+model UserRole {
+  userId String @db.Uuid
+  roleId String @db.Uuid
+
+  // Relations
+  role Role @relation(fields: [roleId], references: [id])
+  User User @relation(fields: [userId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+  @@schema("auth")
+}
+
+model Teacher {
+  id             String    @id @default(uuid()) @db.Uuid
+  categoryId     String    @db.Uuid
+  contractTypeId String    @db.Uuid
+  shiftId        String    @db.Uuid
+  shiftStart     DateTime? @db.Time
+  shiftEnd       DateTime? @db.Time
+  userId         String    @unique @db.Uuid
+
+  // Relations
+  category            TeacherCategory              @relation(fields: [categoryId], references: [id])
+  contractType        ContractType                 @relation(fields: [contractTypeId], references: [id])
+  shift               Shift                        @relation(fields: [shiftId], references: [id])
+  user                User                         @relation(fields: [userId], references: [id])
+  positionHeld        TeacherDepartmentPosition[]
+  academicReports     AcademicAssignmentReport[]
+  undergradDegrees    TeacherUndergraduateDegree[]
+  postgraduateDegrees TeacherPostgraduateDegree[]
+  preferredClasses    TeacherPreferredClass[]
+
+  @@map("teachers")
+  @@schema("academic")
+}
+
+model UndergraduateDegree {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  undergraduateDegrees TeacherUndergraduateDegree[]
+
+  @@map("undergraduate_degrees")
+  @@schema("academic")
+}
+
+model PostgraduateDegree {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  postgraduateDegrees TeacherPostgraduateDegree[]
+
+  @@map("postgraduate_degrees")
+  @@schema("academic")
+}
+
+model TeacherUndergraduateDegree {
+  teacherId       String @db.Uuid
+  undergraduateId String @db.Uuid
+
+  // Relations
+  teacher       Teacher             @relation(fields: [teacherId], references: [id])
+  undergraduate UndergraduateDegree @relation(fields: [undergraduateId], references: [id])
+
+  @@id([teacherId, undergraduateId])
+  @@map("teacher_undergraduate_degrees")
+  @@schema("academic")
+}
+
+// Tabla intermedia para posgrado
+model TeacherPostgraduateDegree {
+  teacherId      String @db.Uuid
+  postgraduateId String @db.Uuid
+
+  // Relations
+  teacher      Teacher            @relation(fields: [teacherId], references: [id])
+  postgraduate PostgraduateDegree @relation(fields: [postgraduateId], references: [id])
+
+  @@id([teacherId, postgraduateId])
+  @@map("teacher_postgraduate_degrees")
+  @@schema("academic")
+}
+
+model TeacherCategory {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String @unique
+  description String
+
+  // Relations
+  teachers Teacher[]
+
+  @@map("teacher_categories")
+  @@schema("academic")
+}
+
+model ContractType {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  teachers Teacher[]
+
+  @@map("contract_types")
+  @@schema("academic")
+}
+
+model Shift {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  teachers Teacher[]
+
+  @@map("shifts")
+  @@schema("academic")
+}
+
+// # University
+model Center {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  buildings   Building[]
+  departments CenterDepartment[]
+
+  @@map("centers")
+  @@schema("academic")
+}
+
+model Faculty {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  departments Department[]
+
+  @@map("faculties")
+  @@schema("academic")
+}
+
+model Department {
+  id        String @id @default(uuid()) @db.Uuid
+  name      String @unique
+  uvs       Int?
+  facultyId String @db.Uuid
+
+  // Relations
+  faculty Faculty            @relation(fields: [facultyId], references: [id])
+  courses Course[]
+  centers CenterDepartment[]
+
+  @@map("departments")
+  @@schema("academic")
+}
+
+model Course {
+  id           String  @id @default(uuid()) @db.Uuid
+  name         String
+  code         String  @unique
+  uvs          Int
+  activeStatus Boolean @default(true) // por si cambian de clases, solo se desactivan para evitar ser seleccionadas
+  departmentId String  @db.Uuid
+
+  // Relations
+  department            Department              @relation(fields: [departmentId], references: [id])
+  courseClassroom       CourseClassroom[]
+  teacherPreferredClass TeacherPreferredClass[]
+  courseInfoView        CourseInfoView?
+
+  @@map("courses")
+  @@schema("academic")
+}
+
+model TeacherDepartmentPosition {
+  id                 String    @id @default(uuid()) @db.Uuid
+  teacherId          String    @db.Uuid
+  centerDepartmentId String    @db.Uuid
+  positionId         String    @db.Uuid
+  startDate          DateTime  @default(now()) // por si no se agrega al momento de agregar el dato.
+  endDate            DateTime?
+
+  // Relations
+  position         Position         @relation(fields: [positionId], references: [id])
+  teacher          Teacher          @relation(fields: [teacherId], references: [id])
+  centerDepartment CenterDepartment @relation(fields: [centerDepartmentId], references: [id])
+
+  @@unique([teacherId, centerDepartmentId]) // Para que un docente solo pueda estar una vez en un departamento, esta quiza invalida la anterior.
+  @@map("teacher_department_position")
+  @@schema("academic")
+}
+
+// Relación entre un docente, un centro-departamento y un cargo académico
+model CenterDepartment {
+  id           String @id @default(uuid()) @db.Uuid
+  centerId     String @db.Uuid
+  departmentId String @db.Uuid
+
+  // Relations
+  center              Center                      @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  department          Department                  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  teacherAppointments TeacherDepartmentPosition[]
+  academicReports     AcademicAssignmentReport[]
+
+  @@unique([centerId, departmentId])
+  @@map("center_departments")
+  @@schema("academic")
+}
+
+// ## cargos académicos
+model Position {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  appointments TeacherDepartmentPosition[]
+
+  @@map("positions")
+  @@schema("academic")
+}
+
+// # Classrooms
+model Building {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  color    String?
+  floors   String?
+  centerId String  @db.Uuid
+  center   Center  @relation(fields: [centerId], references: [id])
+
+  // Relationss
+  classrooms Classroom[]
+
+  @@map("buildings")
+  @@schema("infraestructure")
+}
+
+model Classroom {
+  id               String  @id @default(uuid()) @db.Uuid
+  name             String
+  desks            Int
+  tables           Int
+  projectors       Int
+  powerOutlets     Int
+  lights           Int
+  blackboards      Int
+  lecterns         Int
+  windows          Int
+  buildingId       String  @db.Uuid
+  roomTypeId       String  @db.Uuid
+  connectivityId   String? @db.Uuid
+  audioEquipmentId String? @db.Uuid
+  conditionId      String? @db.Uuid
+  maxCapacity      Int?
+
+  // Relations
+  building          Building           @relation(fields: [buildingId], references: [id])
+  roomType          RoomType           @relation(fields: [roomTypeId], references: [id])
+  connectivity      Connectivity?      @relation(fields: [connectivityId], references: [id])
+  audioEquipment    AudioEquipment?    @relation(fields: [audioEquipmentId], references: [id])
+  condition         Condition?         @relation(fields: [conditionId], references: [id])
+  airConditioners   AirConditioner[]
+  courseClassrooms  CourseClassroom[]
+  pcEquipments      PcEquipment[]
+  classroomInfoView ClassroomInfoView?
+
+  @@map("classrooms")
+  @@schema("infraestructure")
+}
+
+model RoomType {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  classrooms Classroom[]
+
+  @@map("room_types")
+  @@schema("infraestructure")
+}
+
+model Connectivity {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  classrooms Classroom[]
+
+  @@map("connectivities")
+  @@schema("inventory")
+}
+
+model AudioEquipment {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  classrooms Classroom[]
+
+  @@map("audio_equipments")
+  @@schema("inventory")
+}
+
+model Brand {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
+  // Relations
+  pcEquipments    PcEquipment[]
+  airConditioners AirConditioner[]
+
+  @@map("brands")
+  @@schema("inventory")
+}
+
+model Condition {
+  id     String @id @default(uuid()) @db.Uuid
+  status String
+
+  // Relations
+  pcEquipments    PcEquipment[]
+  airConditioners AirConditioner[]
+  Classroom       Classroom[]
+
+  @@map("conditions")
+  @@schema("inventory")
+}
+
+model AirConditioner {
+  id          String  @id @default(uuid()) @db.Uuid
+  description String?
+  brandId     String  @db.Uuid
+  conditionId String  @db.Uuid
+  classroomId String? @db.Uuid
+
+  // Relations
+  brand     Brand      @relation(fields: [brandId], references: [id])
+  condition Condition  @relation(fields: [conditionId], references: [id])
+  classroom Classroom? @relation(fields: [classroomId], references: [id])
+
+  @@map("air_conditioners")
+  @@schema("inventory")
+}
+
+model PcEquipment {
+  id              String  @id @default(uuid()) @db.Uuid
+  inventoryNumber String
+  processor       String
+  ram             String
+  disk            String
+  brandId         String  @db.Uuid
+  conditionId     String  @db.Uuid
+  monitorTypeId   String  @db.Uuid
+  monitorSizeId   String  @db.Uuid
+  pcTypeId        String  @db.Uuid
+  classroomId     String? @db.Uuid
+  departmentId    String? @db.Uuid
+
+  // Relations
+  brand       Brand       @relation(fields: [brandId], references: [id])
+  condition   Condition   @relation(fields: [conditionId], references: [id])
+  monitorType MonitorType @relation(fields: [monitorTypeId], references: [id])
+  monitorSize MonitorSize @relation(fields: [monitorSizeId], references: [id])
+  pcType      PcType      @relation(fields: [pcTypeId], references: [id])
+  classroom   Classroom?  @relation(fields: [classroomId], references: [id])
+
+  @@map("pc_equipments")
+  @@schema("inventory")
+}
+
+model MonitorType {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  pcEquipments PcEquipment[]
+
+  @@map("monitor_types")
+  @@schema("inventory")
+}
+
+model MonitorSize {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  pcEquipments PcEquipment[]
+
+  @@map("monitor_sizes")
+  @@schema("inventory")
+}
+
+model PcType {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Relations
+  pcEquipments PcEquipment[]
+
+  @@map("pc_types")
+  @@schema("inventory")
+}
+
+model CourseClassroom {
+  id                String  @id @default(uuid()) @db.Uuid
+  courseId          String  @db.Uuid
+  classroomId       String  @db.Uuid
+  teachingSessionId String  @db.Uuid
+  section           String // 10:00 A.M. - 12:00 P.M. => "10:00 - 12:00"
+  days              String // Por si colocan 3 o LuMaMi, o tambien 4 o LuMaMiJu, o 5 o LuMaMiJuVi
+  // startHour         DateTime
+  // endHour           DateTime
+  studentCount      Int
+  modalityId        String  @db.Uuid
+  nearGraduation    Boolean
+  groupCode         String  @default("G1") // "G1", "G2" => identificar secciones/grupos, por si se abre doble vez una clase, la otra alternativa es hacer uso de startHour como unique tambien
+  observation       String?
+
+  // Relations
+  course          Course           @relation(fields: [courseId], references: [id])
+  classroom       Classroom        @relation(fields: [classroomId], references: [id])
+  teachingSession TeachingSession  @relation(fields: [teachingSessionId], references: [id], onDelete: Cascade)
+  modality        Modality         @relation(fields: [modalityId], references: [id])
+  courseStadistic CourseStadistic?
+
+  @@unique([courseId, classroomId, teachingSessionId, groupCode])
+  @@map("course_classrooms")
+  @@schema("academic")
+}
+
+model Modality {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  courseClassrooms CourseClassroom[]
+
+  @@map("modalities")
+  @@schema("academic")
+}
+
+// # Academic Period
+model AcademicPeriod {
+  id           String @id @default(uuid()) @db.Uuid
+  year         Int
+  pac          Int
+  pac_modality String @default("Trimestre") // Trimestre o semestres
+  // Nos da la posibilidad de agregar mas datos y con la posibilidad de estandarizarlos o que no se repitan
+
+  // Relations
+  assignmentReports AcademicAssignmentReport[]
+
+  @@unique([year, pac, pac_modality])
+  @@map("academic_periods")
+  @@schema("academic")
+}
+
+// # Academic Assignment
+model AcademicAssignmentReport {
+  id                 String @id @default(uuid()) @db.Uuid
+  teacherId          String @db.Uuid
+  centerDepartmentId String @db.Uuid
+  periodId           String @db.Uuid
+
+  // Relations
+  centerDepartment        CenterDepartment        @relation(fields: [centerDepartmentId], references: [id])
+  teacher                 Teacher                 @relation(fields: [teacherId], references: [id])
+  period                  AcademicPeriod          @relation(fields: [periodId], references: [id])
+  complementaryActivities ComplementaryActivity[]
+  teachingSession         TeachingSession?
+
+  @@unique([teacherId, centerDepartmentId, periodId])
+  @@map("academic_assignment_reports")
+  @@schema("academic")
+}
+
+model TeachingSession {
+  id                 String    @id @default(uuid()) @db.Uuid
+  consultHour        DateTime?
+  tutoringHour       DateTime?
+  assignmentReportId String    @unique @db.Uuid
+
+  // Relations
+  assignmentReport AcademicAssignmentReport @relation(fields: [assignmentReportId], references: [id], onDelete: Cascade)
+  courseClassrooms CourseClassroom[]
+
+  @@map("teaching_sessions")
+  @@schema("academic")
+}
+
+model CourseStadistic {
+  id                String @id @default(uuid()) @db.Uuid
+  APB               Int
+  RPB               Int
+  NSP               Int
+  ABD               Int
+  courseClassroomId String @unique @db.Uuid
+
+  // Relations
+  courseClassroom CourseClassroom @relation(fields: [courseClassroomId], references: [id], onDelete: Cascade)
+
+  @@map("course_staditics")
+  @@schema("academic")
+}
+
+model ComplementaryActivity {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  isRegistered       Boolean?
+  fileNumber         String?
+  progressLevel      String
+  assignmentReportId String   @db.Uuid
+  activityTypeId     String   @db.Uuid
+
+  // Relations
+  assignmentReport  AcademicAssignmentReport @relation(fields: [assignmentReportId], references: [id], onDelete: Cascade)
+  activityType      ActivityType             @relation(fields: [activityTypeId], references: [id])
+  verificationMedia VerificationMedia?
+
+  @@map("complementary_activities")
+  @@schema("academic")
+}
+
+model ActivityType {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  // Relations
+  complementaryActivities ComplementaryActivity[]
+
+  @@map("activity_types")
+  @@schema("academic")
+}
+
+model VerificationMedia {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+  activityId  String @unique @db.Uuid
+
+  // Relations
+  complementaryActivity  ComplementaryActivity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  verificationMediaFiles VerificationMediaFile[]
+
+  @@map("verification_medias")
+  @@schema("academic")
+}
+
+// Solo cuando agregan archivos
+model VerificationMediaFile {
+  id                  String @id @default(uuid()) @db.Uuid
+  url                 String
+  public_id           String // para eliminar imagenes de cloudinary
+  multimediaTypeId    String @db.Uuid
+  verificationMediaId String @db.Uuid
+
+  // Relations
+  multimediaType    MultimediaType    @relation(fields: [multimediaTypeId], references: [id])
+  verificationMedia VerificationMedia @relation(fields: [verificationMediaId], references: [id], onDelete: Cascade)
+
+  @@map("verification_media_files")
+  @@schema("academic")
+}
+
+model MultimediaType {
+  id          String @id @default(uuid()) @db.Uuid
+  description String @unique
+
+  // Relations
+  verificationMediaFiles VerificationMediaFile[]
+
+  @@map("multimedia_types")
+  @@schema("academic")
+}
+
+model CommonDatesAcademicPeriods {
+  id           String   @id @default(uuid()) @db.Uuid
+  pac          Int
+  pac_modality String   @default("Trimestre") // Trimestre o semestres
+  startDate    DateTime
+  endDate      DateTime
+
+  @@unique([pac, pac_modality])
+  @@map("common_dates_academic_periods")
+  @@schema("academic")
+}
+
+// Para llevar un control de los tokens
+model ResetPasswordToken {
+  id         String   @id @default(uuid()) @db.Uuid
+  token      String   @unique
+  expiryDate DateTime
+  userId     String   @db.Uuid
+  isActive   Boolean  @default(true)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("reset_password_tokens")
+  @@schema("auth")
+}
+
+// Preferencias del docente
+model TeacherPreferredClass {
+  id        String @id @default(uuid()) @db.Uuid
+  courseId  String @db.Uuid
+  teacherId String @db.Uuid
+
+  // Relations
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, courseId])
+  @@map("teacher_preferred_classes")
+  @@schema("ai")
+}
+
+// Views
+view ClassroomInfoView {
+  id             String  @unique @db.Uuid
+  normalizedName String?
+
+  // Relations
+  classroom Classroom @relation(fields: [id], references: [id])
+
+  @@map("vw_classroom_info")
+  @@schema("infraestructure")
+}
+
+view CourseInfoView {
+  id             String  @unique @db.Uuid
+  normalizedName String?
+  normalizedCode String?
+
+  // Relations
+  course Course @relation(fields: [id], references: [id])
+
+  @@map("vw_course_info")
+  @@schema("infraestructure")
+}
