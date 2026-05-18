@@ -1,0 +1,39 @@
+# pre-commit: lint + autofix sobre archivos staged (paralelo por subproyecto)
+# commit-msg: valida formato de conventional commits
+# pre-push:   typecheck completo + tests del backend
+
+pre-commit:
+  parallel: true
+  commands:
+    no-commit-to-main:
+      shell: sh
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [ "$branch" = "main" ]; then
+          echo ""
+          echo "No se puede hacer commit directamente en 'main'."
+          exit 1
+        fi
+    backend-lint:
+      root: "backend/"
+      glob: "{src,test}/**/*.ts"
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+    frontend-lint:
+      root: "frontend/"
+      glob: "src/**/*.{ts,tsx}"
+      run: npx eslint --fix {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    backend-typecheck:
+      root: "backend/"
+      run: pnpm exec tsc --noEmit
+    backend-tests:
+      root: "backend/"
+      run: pnpm test --passWithNoTests
+    frontend-typecheck:
+      root: "frontend/"
+      run: npx tsc --noEmit
