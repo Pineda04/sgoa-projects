@@ -12,12 +12,12 @@ default:
 
 # Configurar el proyecto por primera vez: copia .env, instala dependencias, levanta la BD y activa hooks
 [unix]
-setup: _env-unix install db-setup hooks
+setup: _env-unix install db-setup 
     @echo ""
     @echo "Setup completo. Edita backend/.env y frontend/.env con tus valores reales antes de ejecutar 'just dev'."
 
 [windows]
-setup: _env-windows install db-setup hooks
+setup: _env-windows install db-setup 
     Write-Host ""
     Write-Host "Setup completo. Edita backend\.env y frontend\.env con tus valores reales antes de ejecutar 'just dev'."
 
