@@ -5,59 +5,61 @@ import {
 	XCircleIcon,
 	DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
-import type { IPlanification } from '../../shared/planifications';
+import { TPlanification } from '../schemas/planification.schemas';
 
 // TODO: Falta la logica del backend
 export const EditPlanification = () => {
 	//set para filas de tabla
 	const [planificationRows, setPlanificationRows] = useState<
-		IPlanification[]
+		TPlanification[]
 	>([
 		{
-			tacherCode: '',
+			teacherCode: '',
 			teacherName: '',
-			code: '',
-			name: '',
+			courseCode: '',
+			courseName: '',
+			uv: 0,
 			section: '',
-			uvs: 0,
-			days: '',
 			studentCount: 0,
-			classroom: '',
-			department: '',
-			coordinator: '',
+			days: '',
 			center: '',
+			classroomName: '',
+			departmentName: '',
+			coordinator: '',
+			nearGraduation: false,
 			observation: '',
 		},
 	]);
 
 	//Funciones para agregar y quitar filas
 	const addRowPlanification = (
-		rows: IPlanification[],
-		setRows: React.Dispatch<React.SetStateAction<IPlanification[]>>
+		rows: TPlanification[],
+		setRows: React.Dispatch<React.SetStateAction<TPlanification[]>>
 	) => {
 		setRows([
 			...rows,
 			{
-				tacherCode: '',
+				teacherCode: '',
 				teacherName: '',
-				code: '',
-				name: '',
+				courseCode: '',
+				courseName: '',
+				uv: 0,
 				section: '',
-				uvs: 0,
-				days: '',
 				studentCount: 0,
-				classroom: '',
-				department: '',
-				coordinator: '',
+				days: '',
 				center: '',
+				classroomName: '',
+				departmentName: '',
+				coordinator: '',
+				nearGraduation: false,
 				observation: '',
 			},
 		]);
 	};
 
 	const removeRowPlanification = (
-		rows: IPlanification[],
-		setRows: React.Dispatch<React.SetStateAction<IPlanification[]>>
+		rows: TPlanification[],
+		setRows: React.Dispatch<React.SetStateAction<TPlanification[]>>
 	) => {
 		if (rows.length > 1) setRows(rows.slice(0, -1));
 	};
