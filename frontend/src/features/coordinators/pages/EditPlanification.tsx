@@ -1,71 +1,80 @@
 import { Button } from '@components/ui/button';
-import { useState } from 'react';
+import { useFormik, FieldArray, FormikProvider } from 'formik';
 import {
 	PlusCircleIcon,
 	XCircleIcon,
 	DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
-import { TPlanification } from '../schemas/planification.schemas';
+import { TPlanification, planificationSchema } from '../schemas/planification.schemas';
+import { errorsFormik } from '@utils';
+import z from 'zod';
 
 // TODO: Falta la logica del backend
-export const EditPlanification = () => {
-	//set para filas de tabla
-	const [planificationRows, setPlanificationRows] = useState<
-		TPlanification[]
-	>([
-		{
-			teacherCode: '',
-			teacherName: '',
-			courseCode: '',
-			courseName: '',
-			uv: 0,
-			section: '',
-			studentCount: 0,
-			days: '',
-			center: '',
-			classroomName: '',
-			departmentName: '',
-			coordinator: '',
-			nearGraduation: false,
-			observation: '',
-		},
-	]);
+const planificationArraySchema = z.object({
+	planificationRows: z.array(planificationSchema),
+});
 
-	//Funciones para agregar y quitar filas
-	const addRowPlanification = (
-		rows: TPlanification[],
-		setRows: React.Dispatch<React.SetStateAction<TPlanification[]>>
-	) => {
-		setRows([
-			...rows,
-			{
-				teacherCode: '',
-				teacherName: '',
-				courseCode: '',
-				courseName: '',
-				uv: 0,
-				section: '',
-				studentCount: 0,
-				days: '',
-				center: '',
-				classroomName: '',
-				departmentName: '',
-				coordinator: '',
-				nearGraduation: false,
-				observation: '',
-			},
-		]);
+type TPlanificationArray = z.infer<typeof planificationArraySchema>;
+
+export const EditPlanification = () => {
+	const initialRow: TPlanification = {
+		teacherCode: '',
+		teacherName: '',
+		courseCode: '',
+		courseName: '',
+		uv: 0,
+		section: '',
+		studentCount: 0,
+		days: '',
+		center: '',
+		classroomName: '',
+		departmentName: '',
+		coordinator: '',
+		nearGraduation: false,
+		observation: '',
 	};
 
-	const removeRowPlanification = (
-		rows: TPlanification[],
-		setRows: React.Dispatch<React.SetStateAction<TPlanification[]>>
+	const formik = useFormik<TPlanificationArray>({
+		initialValues: {
+			planificationRows: [initialRow],
+		},
+		validate: (values) => {
+			const result = planificationArraySchema.safeParse(values);
+			if (result.success) return {};
+			return errorsFormik<TPlanificationArray>(result);
+		},
+		onSubmit: (values) => {
+			console.log('Datos guardados:', values.planificationRows);
+			// Aquí irá la lógica para enviar al backend
+		},
+		validateOnChange: true,
+	});
+
+	const handleRowChange = (
+		index: number,
+		field: keyof TPlanification,
+		value: string | number | boolean
 	) => {
-		if (rows.length > 1) setRows(rows.slice(0, -1));
+		const updatedRows = [...formik.values.planificationRows];
+		updatedRows[index] = {
+			...updatedRows[index],
+			[field]: value,
+		};
+		formik.setFieldValue('planificationRows', updatedRows);
+	};
+
+	const getFieldError = (index: number, field: keyof TPlanification): string | undefined => {
+		return (formik.errors.planificationRows as Array<Record<string, string | undefined>> | undefined)?.[index]?.[field];
+	};
+
+	const getInputClass = (index: number, field: keyof TPlanification): string => {
+		const baseClass = 'ps-1 py-1 text-center rounded-md border';
+		const hasError = getFieldError(index, field);
+		return hasError ? `${baseClass} border-red-500 bg-red-50` : `${baseClass} border-gray-300`;
 	};
 
 	return (
-		<>
+		<FormikProvider value={formik}>
 			{/* Titulos */}
 			<div className="mt-10 flex flex-col items-center">
 				<label className="text-2xl font-semibold">
@@ -74,7 +83,7 @@ export const EditPlanification = () => {
 				<label>Asignación Académica Presencial</label>
 			</div>
 
-			<form className="mb-20">
+			<form onSubmit={formik.handleSubmit} className="mb-20">
 				{/*Datos de la planificacion, Botones Agregar quitar filas*/}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 w-[85%] mx-auto my-10">
 					<div className="flex flex-col">
@@ -113,34 +122,36 @@ export const EditPlanification = () => {
 						</div>
 					</div>
 					<div className="flex flex-row gap-10 my-auto">
-						<Button
-							type="button"
-							onClick={() =>
-								addRowPlanification(
-									planificationRows,
-									setPlanificationRows
-								)
-							}
-							className="w-[150px] justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 rounded-xl transition flex flex-row gap-2 duration-500"
-							variant="unstyled"
-						>
-							<PlusCircleIcon className="size-6" />
-							Agregar fila
-						</Button>
-						<Button
-							type="button"
-							onClick={() =>
-								removeRowPlanification(
-									planificationRows,
-									setPlanificationRows
-								)
-							}
-							className="w-[150px] justify-center bg-[#DC3545] text-white p-2 hover:bg-red-300 rounded-xl transition flex flex-row gap-2 duration-500"
-							variant="unstyled"
-						>
-							<XCircleIcon className="size-6" />
-							Quitar fila
-						</Button>
+						<FieldArray name="planificationRows">
+							{(fieldArrayHelpers) => (
+								<>
+									<Button
+										type="button"
+										onClick={() =>
+											fieldArrayHelpers.push(initialRow)
+										}
+										className="w-[150px] justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 rounded-xl transition flex flex-row gap-2 duration-500"
+										variant="unstyled"
+									>
+										<PlusCircleIcon className="size-6" />
+										Agregar fila
+									</Button>
+									<Button
+										type="button"
+										onClick={() => {
+											if (formik.values.planificationRows.length > 1) {
+												fieldArrayHelpers.pop();
+											}
+										}}
+										className="w-[150px] justify-center bg-[#DC3545] text-white p-2 hover:bg-red-300 rounded-xl transition flex flex-row gap-2 duration-500"
+										variant="unstyled"
+									>
+										<XCircleIcon className="size-6" />
+										Quitar fila
+									</Button>
+								</>
+							)}
+						</FieldArray>
 					</div>
 				</div>
 
@@ -173,160 +184,390 @@ export const EditPlanification = () => {
 								</tr>
 							</thead>
 							<tbody className="[&>tr:nth-child(odd)]:bg-white [&>tr:nth-child(even)]:bg-gray-100 text-center">
-								{planificationRows.map((_, index) => (
+								{formik.values.planificationRows.map((row, index) => (
 									<tr key={index}>
 										<td className="py-fit border">
-											{/*# de fila*/}
 											<input
-												name="numeroFila"
+												name={`planificationRows.${index}.row`}
 												readOnly
 												value={index + 1}
 												className="rounded-md w-12 text-center"
 											/>
 										</td>
 										<td className="py-fit border">
-											{/*No Empleado*/}
 											<input
-												name="numeroEmpleado"
-												type="number"
-												className="ps-1 w-16 py-1 text-center"
-											/>
-										</td>
-										<td className="py-fit border">
-											{/*Nombre Empleado*/}
-											<input
-												name="nombreEmpleado"
+												name={`planificationRows.${index}.teacherCode`}
 												type="text"
-												className="ps-1 py-1 text-center"
+												value={row.teacherCode}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'teacherCode',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'teacherCode'
+												)}
 											/>
+											{getFieldError(index, 'teacherCode') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'teacherCode')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Codigo*/}
 											<input
-												name="codigo"
-												type="number"
-												className="ps-1 w-12 py-1 text-center"
-											/>
-										</td>
-										<td className="py-fit border">
-											{/*Asignatura*/}
-											<input
-												name="asignatura"
+												name={`planificationRows.${index}.teacherName`}
 												type="text"
-												className="ps-1 py-1 text-center"
+												value={row.teacherName}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'teacherName',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'teacherName'
+												)}
 											/>
+											{getFieldError(index, 'teacherName') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'teacherName')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*#Seccion*/}
 											<input
-												name="seccion"
+												name={`planificationRows.${index}.courseCode`}
 												type="text"
-												className="ps-1 w-12 py-1 text-center"
+												value={row.courseCode}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'courseCode',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'courseCode'
+												)}
 											/>
+											{getFieldError(index, 'courseCode') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'courseCode')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*UV*/}
 											<input
-												name="uv"
-												type="number"
-												className="ps-1 w-12 py-1 text-center"
+												name={`planificationRows.${index}.courseName`}
+												type="text"
+												value={row.courseName}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'courseName',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'courseName'
+												)}
 											/>
+											{getFieldError(index, 'courseName') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'courseName')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Dias*/}
+											<input
+												name={`planificationRows.${index}.section`}
+												type="text"
+												value={row.section}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'section',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'section'
+												)}
+											/>
+											{getFieldError(index, 'section') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'section')}
+												</div>
+											)}
+										</td>
+										<td className="py-fit border">
+											<input
+												name={`planificationRows.${index}.uv`}
+												type="number"
+												value={row.uv}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'uv',
+														Number(e.target.value)
+													)
+												}
+												className={getInputClass(
+													index,
+													'uv'
+												)}
+											/>
+											{getFieldError(index, 'uv') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'uv')}
+												</div>
+											)}
+										</td>
+										<td className="py-fit border">
 											<select
-												name="diasClase"
-												className="w-full py-1 text-sm"
+												name={`planificationRows.${index}.days`}
+												value={row.days}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'days',
+														e.target.value
+													)
+												}
+												className={
+													getFieldError(index, 'days')
+														? 'w-full py-1 text-sm border border-red-500 bg-red-50 rounded-md'
+														: 'w-full py-1 text-sm border border-gray-300 rounded-md'
+												}
 											>
 												<option value="">
 													Seleccione...
 												</option>
-												<option value="OpcionA">
-													LuMaMiJuVi
-												</option>
-												<option value="OpcionB">
-													LuMaMiJu
-												</option>
-												<option value="OpcionC">
+												<option value="Lu">Lu</option>
+												<option value="Ma">Ma</option>
+												<option value="Mi">Mi</option>
+												<option value="Ju">Ju</option>
+												<option value="Vi">Vi</option>
+												<option value="LuMa">LuMa</option>
+												<option value="LuMi">LuMi</option>
+												<option value="LuJu">LuJu</option>
+												<option value="LuVi">LuVi</option>
+												<option value="MaMi">MaMi</option>
+												<option value="MaJu">MaJu</option>
+												<option value="MaVi">MaVi</option>
+												<option value="MiJu">MiJu</option>
+												<option value="MiVi">MiVi</option>
+												<option value="JuVi">JuVi</option>
+												<option value="LuMaMi">
 													LuMaMi
 												</option>
-												<option value="OpcionC">
-													LuMa
+												<option value="LuMaJu">
+													LuMaJu
 												</option>
-												<option value="OpcionC">
-													Lu
+												<option value="LuMaVi">
+													LuMaVi
+												</option>
+												<option value="LuMiJu">
+													LuMiJu
+												</option>
+												<option value="LuMiVi">
+													LuMiVi
+												</option>
+												<option value="LuJuVi">
+													LuJuVi
+												</option>
+												<option value="MaMiJu">
+													MaMiJu
+												</option>
+												<option value="MaMiVi">
+													MaMiVi
+												</option>
+												<option value="MaJuVi">
+													MaJuVi
+												</option>
+												<option value="MiJuVi">
+													MiJuVi
+												</option>
+												<option value="LuMaMiJu">
+													LuMaMiJu
+												</option>
+												<option value="LuMaMiVi">
+													LuMaMiVi
+												</option>
+												<option value="LuMaJuVi">
+													LuMaJuVi
+												</option>
+												<option value="LuMiJuVi">
+													LuMiJuVi
+												</option>
+												<option value="MaMiJuVi">
+													MaMiJuVi
+												</option>
+												<option value="LuMaMiJuVi">
+													LuMaMiJuVi
 												</option>
 											</select>
+											{getFieldError(index, 'days') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'days')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Numero de alumnos*/}
 											<input
-												name="numAlumnos"
+												name={`planificationRows.${index}.studentCount`}
 												type="number"
-												className="ps-1 w-25 py-1 text-center"
+												value={row.studentCount}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'studentCount',
+														Number(e.target.value)
+													)
+												}
+												className={getInputClass(
+													index,
+													'studentCount'
+												)}
 											/>
+											{getFieldError(index, 'studentCount') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'studentCount')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Numero de aula*/}
 											<input
-												name="numAula"
-												type="number"
-												className="ps-1 w-20 py-1 text-center"
-											/>
-										</td>
-										<td className="py-fit border">
-											{/*Carrera o area*/}
-											<select
-												name="carreraArea"
-												className="w-full py-1 text-sm"
-											>
-												<option value="">
-													Seleccione...
-												</option>
-												<option value="OpcionA">
-													Sacar de la DB
-												</option>
-											</select>
-										</td>
-										<td className="py-fit border">
-											{/*Jefe\Coordinador*/}
-											<input
-												readOnly
-												name="jefeCoordinador"
+												name={`planificationRows.${index}.classroomName`}
 												type="text"
-												className="ps-1 py-1 text-center"
-												value={'Sacar de la DB'}
+												value={row.classroomName}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'classroomName',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'classroomName'
+												)}
 											/>
+											{getFieldError(index, 'classroomName') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'classroomName')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Centro\telecentro*/}
-											<select
-												name="centroTelecentro"
-												className="w-full py-1 text-sm"
-											>
-												<option value="">
-													Seleccione...
-												</option>
-												<option value="OpcionA">
-													Sacar de la DB
-												</option>
-											</select>
+											<input
+												name={`planificationRows.${index}.departmentName`}
+												type="text"
+												value={row.departmentName}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'departmentName',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'departmentName'
+												)}
+											/>
+											{getFieldError(index, 'departmentName') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'departmentName')}
+												</div>
+											)}
 										</td>
 										<td className="py-fit border">
-											{/*Observaciones*/}
+											<input
+												name={`planificationRows.${index}.coordinator`}
+												type="text"
+												value={row.coordinator}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'coordinator',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'coordinator'
+												)}
+											/>
+											{getFieldError(index, 'coordinator') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'coordinator')}
+												</div>
+											)}
+										</td>
+										<td className="py-fit border">
+											<input
+												name={`planificationRows.${index}.center`}
+												type="text"
+												value={row.center}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'center',
+														e.target.value
+													)
+												}
+												className={getInputClass(
+													index,
+													'center'
+												)}
+											/>
+											{getFieldError(index, 'center') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'center')}
+												</div>
+											)}
+										</td>
+										<td className="py-fit border">
 											<textarea
-												name="observaciones"
-												className="ps-1 resize-none overflow-hidden w-50"
-												onInput={e => {
+												name={`planificationRows.${index}.observation`}
+												value={row.observation || ''}
+												onChange={(e) =>
+													handleRowChange(
+														index,
+														'observation',
+														e.target.value
+													)
+												}
+												className={`ps-1 resize-none overflow-hidden w-50 ${
+													getFieldError(index, 'observation')
+														? 'border-red-500 bg-red-50'
+														: 'border-gray-300'
+												}`}
+												onInput={(e) => {
 													const target =
 														e.currentTarget;
 													target.style.height =
-														'auto'; // reset height
+														'auto';
 													target.style.height =
 														target.scrollHeight +
-														'px'; // set new height
+														'px';
 												}}
 											/>
+											{getFieldError(index, 'observation') && (
+												<div className="text-red-500 text-xs mt-1">
+													{getFieldError(index, 'observation')}
+												</div>
+											)}
 										</td>
 									</tr>
 								))}
@@ -347,6 +588,6 @@ export const EditPlanification = () => {
 				</Button>
 				{/*Fin del formulario*/}
 			</form>
-		</>
+		</FormikProvider>
 	);
 };
