@@ -196,7 +196,7 @@ export class AcademicPeriodsService {
   currentAcademicPeriod = async (
     pac_modality: TPacModality = 'Trimestre',
   ): Promise<TCurrentAcademicPeriod> => {
-    const localDate = new Date();
+    const localDate = startOfDay(new Date());
     //const yearReplace = 2025;
 
     //const localDate = startOfDay(setYear(currentDate, yearReplace));

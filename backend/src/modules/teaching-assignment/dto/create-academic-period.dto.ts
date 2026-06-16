@@ -10,7 +10,7 @@ export class CreateAcademicPeriodDto {
   })
   @IsInt({ message: 'La propiedad <year> debe ser un número entero.' })
   @Min(2000, { message: 'La propiedad <year> debe ser mayor o igual a 2000.' })
-  @Max(2500, { message: 'La propiedad <year> debe ser menor o igual a 2100.' })
+  @Max(2500, { message: 'La propiedad <year> debe ser menor o igual a 2500.' })
   @IsNotEmpty({ message: 'La propiedad <year> no debe estar vacía.' })
   year: number;
 
