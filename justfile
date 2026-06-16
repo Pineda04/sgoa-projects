@@ -76,6 +76,12 @@ db-up:
 db-down:
     docker compose down
 
+# ── GIT HOOKS ────────────────────────────────────────────────────────────────
+
+# Instalar los git hooks con Lefthook
+hooks:
+    pnpm dlx lefthook install
+
 # ── DESARROLLO ───────────────────────────────────────────────────────────────
 
 # Iniciar backend y frontend en modo desarrollo (la BD debe estar corriendo)

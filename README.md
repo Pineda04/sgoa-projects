@@ -1,4 +1,4 @@
-# SGOA - Sistema de Gestión y Organización Académica (Versión 1)
+# SGOA - Sistema de Gestión y Organización Académica (Versión 2)
 
 <!-- badges -->
 
@@ -70,8 +70,16 @@ SGOA es un sistema integral para la administración académica que permite gesti
 | Paola Madrid | [@PaolaMad](https://github.com/PaolaMad) |
 | Raúl Urquía | [@JRAUL19](https://github.com/JRAUL19) |
 | Fredy Vasquez | [@FredyVasquez16](https://github.com/FredyVasquez16) |
+| Anthony Miranda | [@AnthonyEMF](https://github.com/AnthonyEMF) |
+| Carlos Pineda | [@Pineda04](https://github.com/Pineda04) |
+| Gonzalo Monroy | [@MonroyMusic](https://github.com/MonroyMusic) |
+| Cristian Gomez | [@CristianGmz7](https://github.com/CristianGmz7) |
+| Ever Garcia | [@everjosue56](https://github.com/everjosue56) |
+| Kenneth Galdamez | [@Kenneth-Galdamez](https://github.com/Kenneth-Galdamez) |
+| Ana Henríquez | [@anyta58](https://github.com/anyta58) |
+| Samael Garcia | [@SamaelGarcia](https://github.com/SamaelGarcia) |
 
-> Proyecto desarrollado como parte de la clase de **Tópicos Especiales y Avanzados** - II PAC 2025
+> Proyecto desarrollado como parte de la clase de **Tópicos Especiales y Avanzados** - II PAC 2025 & 2026
 
 ## Tecnologías
 
@@ -154,18 +162,18 @@ uvicorn main:app --reload
 sgoa-projects/
 ├── backend/              # API REST con NestJS
 │   ├── src/
-│   │   ├── modules/     # Módulos de la aplicación
+│   │   ├── modules/      # Módulos de la aplicación
 │   │   └── main.ts
 │   └── package.json
 │
-├── frontend/            # Aplicación web con React
+├── frontend/             # Aplicación web con React
 │   ├── src/
-│   │   ├── app/       # Configuración y router
+│   │   ├── app/          # Configuración y router
 │   │   ├── components/
 │   │   └── features/
 │   └── package.json
 │
-├── planificador_ia/    # API de optimización
+├── planificador_ia/      # API de optimización
 │   ├── main.py
 │   └── requirements.txt
 │
