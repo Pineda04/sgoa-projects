@@ -1,4 +1,4 @@
-import { IsInt, Min, Max, IsNotEmpty, IsString, IsEnum } from 'class-validator';
+import { IsInt, Min, Max, IsNotEmpty, IsString, IsEnum, IsDateString } from 'class-validator';
 import { EModality } from '../enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -10,9 +10,29 @@ export class CreateAcademicPeriodDto {
   })
   @IsInt({ message: 'La propiedad <year> debe ser un número entero.' })
   @Min(2000, { message: 'La propiedad <year> debe ser mayor o igual a 2000.' })
-  @Max(2100, { message: 'La propiedad <year> debe ser menor o igual a 2100.' })
+  @Max(2500, { message: 'La propiedad <year> debe ser menor o igual a 2100.' })
   @IsNotEmpty({ message: 'La propiedad <year> no debe estar vacía.' })
   year: number;
+
+  @ApiProperty({
+    description: 'Fecha de inicio del periodo académico.',
+    example: '2025-01-01',
+    required: true,
+  })
+
+  // Quiza necesite mas limites a futuro...
+  @IsDateString({}, { message: 'La propiedad <startDate> debe ser una fecha válida.' })
+  @IsNotEmpty({ message: 'La propiedad <startDate> no debe estar vacía.' })
+  startDate: string;
+
+@ApiProperty({
+  description: 'Fecha de fin del periodo académico.',
+  example: '2025-04-30',
+  required: true,
+})
+@IsDateString({}, { message: 'La propiedad <endDate> debe ser una fecha válida.' })
+@IsNotEmpty({ message: 'La propiedad <endDate> no debe estar vacía.' })
+endDate: string;
 
   @ApiProperty({
     description: 'Número del periodo académico (PAC).',

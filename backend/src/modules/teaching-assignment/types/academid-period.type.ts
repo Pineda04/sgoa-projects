@@ -3,6 +3,8 @@ export type TAcademicPeriod = {
   year: number;
   pac: number;
   pac_modality: string;
+  startDate: Date;
+  endDate: Date;
   // assignmentReports?: TAcademicAssignmentReport[]; // Assuming you have this type defined
 };
 
