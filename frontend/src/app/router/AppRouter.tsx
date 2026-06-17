@@ -14,6 +14,7 @@ import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
 import { usersRoutes } from '@features/shared/users/routes';
 import { coursesRoutes } from '@features/shared/courses/routes/CoursesRoutes';
+import { centersRoutes } from '@features/centers/routes/CentersRoutes';
 
 const router = createBrowserRouter(
 	[
@@ -79,6 +80,13 @@ const router = createBrowserRouter(
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
+		{
+			path: '/rrhh/centros',
+			element: <PrivateRoute />,
+			children: centersRoutes,
+			errorElement: <div>404</div>,
+		},
+
 	],
 	{
 		basename: process.env.NODE_ENV === 'development' ? '/' : '/',
