@@ -1,1 +1,1 @@
-export * from './ListCenters';
+export * from './ListCentersPage';
