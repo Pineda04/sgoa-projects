@@ -31,6 +31,33 @@ export class AcademicPeriodsService {
   async create(
     createAcademicPeriodDto: CreateAcademicPeriodDto,
   ): Promise<TCreateAcademicPeriod> {
+
+        const { startDate, endDate, year } = createAcademicPeriodDto;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end <= start) {
+      throw new BadRequestException(
+        'La fecha de fin debe ser posterior a la fecha de inicio.',
+      );
+    }
+
+    const endYear = end.getFullYear();
+    const startYear = start.getFullYear();
+
+    if ( year !=  startYear) {
+      throw new BadRequestException(
+        'La fecha de inicio no encaja con el año especificado.',
+      );
+    }    
+    
+    if ( year !=  endYear) {
+      throw new BadRequestException(
+        'La fecha de fin no encaja con el año especificado.',
+      );
+    }
+
     const newAcademicPeriod = await this.prisma.academicPeriod.create({
       data: {
         ...createAcademicPeriodDto,
@@ -41,7 +68,7 @@ export class AcademicPeriodsService {
   }
 
   async findAll(): Promise<TAcademicPeriod[]> {
-    await this.currentAcademicPeriod();
+   // await this.currentAcademicPeriod(); Kenneth: Comentado porque literalmente no se para que llama este servicio, solo estorba en el caso de que no haya un trimestre registrado.
     const academicPeriods = await this.prisma.academicPeriod.findMany();
 
     return academicPeriods;
@@ -95,6 +122,55 @@ export class AcademicPeriodsService {
     id: string,
     updateAcademicPeriodDto: UpdateAcademicPeriodDto,
   ): Promise<TUpdateAcademicPeriod> {
+
+
+    const academicPeriod = await this.prisma.academicPeriod.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!academicPeriod)
+      throw new NotFoundException(
+        `El periodo académico con id <${id}> no fue encontrado.`,
+      );
+
+
+    const mergedAcademicPeriod = {
+      ...academicPeriod,
+      ...updateAcademicPeriodDto,
+    };
+
+    const { startDate, endDate, year } = mergedAcademicPeriod;
+
+    if (isNaN(Date.parse(String(startDate))) || isNaN(Date.parse(String(endDate)))) {
+      throw new BadRequestException('Las fechas proporcionadas no son válidas.');
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end <= start) {
+      throw new BadRequestException(
+        'La fecha de fin debe ser posterior a la fecha de inicio.',
+      );
+    }
+
+    const endYear = end.getFullYear();
+    const startYear = start.getFullYear();
+
+    if ( year !=  startYear) {
+      throw new BadRequestException(
+        'La fecha de inicio no encaja con el año especificado.',
+      );
+    }
+
+    if ( year !=  endYear) {
+      throw new BadRequestException(
+        'La fecha de fin no encaja con el año especificado.',
+      );
+    }
+
     const academicPeriodUpdate = await this.prisma.academicPeriod.update({
       where: {
         id,
@@ -120,10 +196,10 @@ export class AcademicPeriodsService {
   currentAcademicPeriod = async (
     pac_modality: TPacModality = 'Trimestre',
   ): Promise<TCurrentAcademicPeriod> => {
-    const currentDate = new Date();
-    const yearReplace = 2025;
+    const localDate = startOfDay(new Date());
+    //const yearReplace = 2025;
 
-    const localDate = startOfDay(setYear(currentDate, yearReplace));
+    //const localDate = startOfDay(setYear(currentDate, yearReplace));
 
     // const utcDate = new Date(
     //   Date.UTC(
@@ -133,7 +209,7 @@ export class AcademicPeriodsService {
     //   ),
     // );
 
-    const period = await this.prisma.commonDatesAcademicPeriods.findFirst({
+    const period = await this.prisma.academicPeriod.findFirst({
       where: {
         startDate: {
           lte: localDate,
@@ -158,16 +234,11 @@ export class AcademicPeriodsService {
     //
     // return currentPeriod;
 
-    const year = getYear(currentDate);
+    const year = getYear(localDate);
 
-    const currentPeriod = await this.findOneByYearPacModality(
-      year,
-      period.pac,
-      pac_modality,
-    );
 
     return {
-      id: currentPeriod.id,
+      id: period.id,
       pac: period.pac,
       pac_modality,
       year,
