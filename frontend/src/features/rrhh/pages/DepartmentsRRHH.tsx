@@ -1,0 +1,28 @@
+import { useGetDepartments, DepartmentTable } from "@features/shared/departments"
+import { useNavigate } from "react-router-dom"
+
+export const DepartmentsRRHH = () => {
+
+  const { isLoading, isError, data } = useGetDepartments();
+  const navigate = useNavigate();
+
+  if (!data && !isLoading) {
+    // TODO: Se puede agregar una tabla vacia o agregar algun texto como vacio o icono
+    return <p>No hay usuarios agregados...</p>;
+  }
+
+  return (
+    <>
+      {
+        data && (
+          <DepartmentTable
+            data={data}
+            isError={isError}
+            isLoading={isLoading}
+            onNavigateToCreate={() => navigate('/rrhh/crear-departamento')}
+          />
+        )
+      }
+    </>
+  )
+}

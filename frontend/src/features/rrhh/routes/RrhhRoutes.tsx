@@ -1,6 +1,7 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
-import { UsersRHHH, CoursesRRHH } from '../pages';
+import { UsersRHHH, CoursesRRHH, DepartmentsRRHH } from '../pages';
 import React from 'react';
+import { CreateDepartment } from '@features/shared/departments';
 
 const CreateUserLazy = React.lazy(() =>
 	import('../../shared/users/pages/CreateUser').then(module => ({
@@ -25,6 +26,14 @@ export const rrhhRoutes: RouteObject[] = [
 	{
 		path: 'clases',
 		element: <CoursesRRHH />,
+	},
+	{
+		path: 'departamentos',
+		element: <DepartmentsRRHH />,
+	},
+	{
+		path: 'crear-departamento',
+		element: <CreateDepartment />
 	},
 	{
 		path: '*',

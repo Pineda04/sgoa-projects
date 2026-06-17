@@ -92,7 +92,7 @@ export class DepartmentsService {
         name: dept.name,
         uvs: dept.uvs,
         facultyId: dept.facultyId,
-        // facultyName: dept.faculty?.name,
+        facultyName: dept.faculty?.name,
         coordinations,
       };
     });
