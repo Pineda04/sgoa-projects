@@ -21,9 +21,11 @@ export const DeleteAcademicPeriodModal = ({
 			<div className="p-4">
 				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
 					¿Está seguro que desea eliminar el periodo{' '}
-					<span className="font-medium text-gray-800">
-						&lt;{periodTitle}&gt;
-					</span>
+					{periodTitle && (
+						<span className="font-medium text-gray-800">
+							&lt;{periodTitle}&gt;
+						</span>
+					)}
 					?
 				</p>
 

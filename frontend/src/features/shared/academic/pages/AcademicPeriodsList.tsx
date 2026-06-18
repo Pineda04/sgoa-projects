@@ -165,7 +165,11 @@ export const AcademicPeriodsList = () => {
 					setSelected(null);
 				}}
 				onConfirm={handleConfirmDelete}
-				periodTitle={selected?.title}
+				periodTitle={
+				selected
+					? `PAC ${selected.pac} ${selected.pac_modality} ${selected.year}`
+					: undefined
+			}
 				isPending={isDeleting}
 			/>
 		</div>
