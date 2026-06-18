@@ -1,0 +1,6 @@
+# Forzar LF en archivos de configuración de herramientas que corren en sh/bash
+# Evita errores de "unexpected EOF" en Windows con core.autocrlf=true
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.sh         text eol=lf
+.env*        text eol=lf
