@@ -1,6 +1,7 @@
 import { TCurrentAcademicPeriod, TPacModality } from '@features/teachers';
 import { api } from '@lib/api/axios';
 import { IResponse } from '@types';
+import { TCreateAcademicPeriodDto, TUpdateAcademicPeriodDto } from '../types';
 
 export const academicPeriodsApi = {
 	getCurrentAcademicPeriod: () =>
@@ -13,4 +14,13 @@ export const academicPeriodsApi = {
 		api.get<IResponse<TCurrentAcademicPeriod>>(
 			`academic-periods/next-to-create?modality=${modality}`
 		),
+
+	createAcademicPeriod: (data: TCreateAcademicPeriodDto) =>
+		api.post<IResponse<TCurrentAcademicPeriod>>(`/academic-periods`, data),
+
+	updateAcademicPeriod: (id: string, data: TUpdateAcademicPeriodDto) =>
+		api.patch<IResponse<TCurrentAcademicPeriod>>(`/academic-periods/${id}`, data),
+
+	deleteAcademicPeriod: (id: string) =>
+		api.delete<IResponse<void>>(`/academic-periods/${id}`),
 };
