@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
-import { Consolidated, DashboardAuthorities, CoursesAuthority } from '../pages';
+import { Consolidated, DashboardAuthorities } from '../pages';
+import { CoursesRRHH } from '@features/rrhh/pages';
 
 export const authoritiesRoutes: RouteObject[] = [
 	{
@@ -12,7 +13,7 @@ export const authoritiesRoutes: RouteObject[] = [
 	},
 	{
 		path: 'clases',
-		element: <CoursesAuthority />,
+		element: <CoursesRRHH />,
 	},
 	{
 		path: '*',

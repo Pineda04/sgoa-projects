@@ -1,6 +1,14 @@
 import { CourseList } from '@features/shared/courses';
+import { useAuth } from '@providers/auth';
+import { EUserRole } from '@types';
 
 export const CoursesRRHH = () => {
+	const { authState } = useAuth();
+	const roles = (authState.user?.roles ?? []) as EUserRole[];
+	const showDepartment = roles.some(r =>
+		[EUserRole.ADMIN, EUserRole.DIRECCION].includes(r)
+	);
+
 	return (
 		<div className="pb-8 sm:pb-12">
 			<div className="mb-6">
@@ -11,7 +19,7 @@ export const CoursesRRHH = () => {
 					Ver todas las asignaturas por departamento
 				</p>
 			</div>
-			<CourseList showDepartmentFilter />
+			<CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />
 		</div>
 	);
 };

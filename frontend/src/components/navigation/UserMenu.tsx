@@ -1,9 +1,9 @@
 import { Button } from '@components/ui/button';
 import { useState, useEffect, useRef, useContext } from 'react';
 import {
-	UserCircleIcon,
 	LockClosedIcon,
 	ArrowLeftStartOnRectangleIcon,
+	XMarkIcon,
 } from '@heroicons/react/24/outline';
 import '../../App.css';
 import { useNavigate } from 'react-router-dom';
@@ -36,7 +36,6 @@ export const UserMenu = () => {
 		handleCloseModalUpdatePassword,
 	] = useModal();
 
-	//Handle cuando se da click fuera del contexto del menu de busqueda
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (
@@ -53,7 +52,6 @@ export const UserMenu = () => {
 
 	const handleLogOut = () => {
 		logout();
-
 		navigate('/', { replace: true });
 	};
 
@@ -62,72 +60,137 @@ export const UserMenu = () => {
 	};
 
 	const handleProfile = () => {
-		setIsOpen(prev => !prev);
-
+		setIsOpen(false);
 		navigate('/usuarios/perfil', { replace: true });
+	};
+
+	const getInitials = (name?: string) => {
+		if (!name) return 'U';
+		return name
+			.split(' ')
+			.map(n => n[0])
+			.join('')
+			.toUpperCase()
+			.slice(0, 2);
 	};
 
 	return (
 		<>
 			<div ref={searchRef} className="relative z-30">
-				{/* Boton de activacion del menu */}
-				<Button
-					onClick={handleToggle}
-					className="p-1 bg-white hover:bg-[#80C5E9] transition-all duration-500 ease-in-out cursor-pointer rounded-full"
-					variant="unstyled"
-				>
-					<UserCircleIcon className="size-6 text-black" />
+				<Button onClick={handleToggle} variant="unstyled">
+					<div className="size-8 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300 cursor-pointer flex items-center justify-center">
+						<span className="text-xs font-bold text-white/80">
+							{getInitials(userInfo?.name || user?.email)}
+						</span>
+					</div>
 				</Button>
 
-				{/*Menu lateral*/}
 				<div
 					className={`
-          top-[55px] w-full fixed md:top-[55px] right-0 h-full md:w-[35%] bg-white shadow-md p-4 border-t border-gray-200 transition-all duration-300 ease-in-out
-          ${
-				isOpen
-					? 'translate-x-0 opacity-100'
-					: 'translate-x-full opacity-0 pointer-events-none'
-			}
-        `}
+						fixed top-0 right-0 h-full w-full sm:w-80 bg-white shadow-2xl
+						transition-all duration-300 ease-out
+						${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}
+					`}
 				>
-					{/*Opciones del menu de usuario*/}
-					<ul className="flex flex-col items-center w-full text-black">
-						<li className="mb-2">
-							<h5>{user?.email}</h5>
-						</li>
+					<div className="flex flex-col h-full">
+						<div className="bg-linear-to-b from-primary to-primary-hover px-6 pt-8 pb-6">
+							<div className="flex items-center justify-between mb-6">
+								<span className="text-sm font-medium text-white/60 uppercase tracking-wider">
+									Menú de usuario
+								</span>
+								<button
+									onClick={() => setIsOpen(false)}
+									className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer"
+								>
+									<XMarkIcon className="size-5" />
+								</button>
+							</div>
 
-						<li className="p-2 hover:bg-gray-300 rounded-lg w-full transition-all duration-500 ease-in-out">
-							<Button
+							<div className="flex items-center gap-4">
+								<div className="size-14 rounded-full bg-white/20 flex items-center justify-center ring-2 ring-white/40">
+									<span className="text-xl font-bold text-white">
+										{getInitials(
+											userInfo?.name || user?.email
+										)}
+									</span>
+								</div>
+								<div className="flex-1 min-w-0">
+									<h3 className="text-white font-semibold text-base truncate">
+										{userInfo?.name
+											? `${userInfo.name}`
+											: 'Usuario'}
+									</h3>
+									<p className="text-white/60 text-sm truncate mt-0.5">
+										{user?.email}
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+							<button
 								onClick={handleProfile}
-								className={`flex items-center gap-2 w-full ${!userInfo ? 'cursor-not-allowed' : 'cursor-pointer'}`}
 								disabled={!userInfo}
-								variant="unstyled"
+								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
+									${
+										!userInfo
+											? 'opacity-50 cursor-not-allowed text-gray-400'
+											: 'text-gray-700 hover:bg-gray-100 hover:text-primary cursor-pointer'
+									}`}
 							>
-								<User className="size-5" />
-								<h5>Ver Perfil</h5>
-							</Button>
-						</li>
-						<li className="p-2 hover:bg-gray-300 rounded-lg w-full transition-all duration-500 ease-in-out">
-							<Button
+								<div
+									className={`size-9 rounded-lg flex items-center justify-center
+									${userInfo ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}
+								>
+									<User className="size-4.5" />
+								</div>
+								<div>
+									<p className="text-sm font-medium">
+										Ver Perfil
+									</p>
+									<p className="text-xs text-gray-400 mt-0.5">
+										Tus datos personales
+									</p>
+								</div>
+							</button>
+
+							<button
 								onClick={handleChangePassword}
-								className="flex items-center gap-2 w-full cursor-pointer"
-								variant="unstyled"
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
 							>
-								<LockClosedIcon className="size-5" />
-								<h5>Cambio de contraseña</h5>
-							</Button>
-						</li>
-						<li className="p-2 hover:bg-gray-300 rounded-lg w-full transition-all duration-500 ease-in-out">
-							<Button
+								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+									<LockClosedIcon className="size-4.5" />
+								</div>
+								<div>
+									<p className="text-sm font-medium">
+										Cambiar contraseña
+									</p>
+									<p className="text-xs text-gray-400 mt-0.5">
+										Actualiza tu clave de acceso
+									</p>
+								</div>
+							</button>
+						</div>
+
+						<div className="px-3 py-3 border-t border-gray-100">
+							<button
 								onClick={handleLogOut}
-								className="flex items-center gap-2 w-full cursor-pointer"
-								variant="unstyled"
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-red-600 hover:bg-red-50 transition-all duration-200 cursor-pointer"
 							>
-								<ArrowLeftStartOnRectangleIcon className="size-5" />
-								<h5>Cerrar sesion</h5>
-							</Button>
-						</li>
-					</ul>
+								<div className="size-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+									<ArrowLeftStartOnRectangleIcon className="size-4.5" />
+								</div>
+								<div>
+									<p className="text-sm font-medium">
+										Cerrar sesión
+									</p>
+									<p className="text-xs text-red-400 mt-0.5">
+										Salir de tu cuenta
+									</p>
+								</div>
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 			<ModalBase

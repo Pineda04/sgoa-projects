@@ -72,7 +72,7 @@ export const ResetPassword = () => {
 		<div className="flex h-screen">
 			<div className="w-1/2 flex items-center justify-center">
 				<img
-					src="/src/assets/logo-unah.png"
+					src="/src/assets/logo-unah-1.webp"
 					alt="Logo UNAH"
 					className="p-7 mb-16 object-cover"
 				/>
