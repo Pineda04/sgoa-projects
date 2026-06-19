@@ -11,6 +11,8 @@ export type TCurrentAcademicPeriod = {
 	pac_modality: TPacModality;
 	pac: number;
 	title: string;
+	startDate?: string;
+	endDate?: string;
 };
 
 export type TPacData = {
@@ -29,3 +31,13 @@ export type TPostgrad = {
 	userId: string;
 	postgradId: string;
 };
+
+export type TCreateAcademicPeriodDto = {
+	year: number;
+	pac: number;
+	pac_modality: TPacModality;
+	startDate: string;
+	endDate: string;
+};
+
+export type TUpdateAcademicPeriodDto = Partial<TCreateAcademicPeriodDto>;

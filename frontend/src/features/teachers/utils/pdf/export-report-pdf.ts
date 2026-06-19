@@ -1,5 +1,5 @@
-import logoUNAH from '@assets/Logo-unah-3.png';
-import logoSEDP from '@assets/SEDP_Logo.png';
+import logoUNAH from '@assets/logo-unah-3.webp';
+import logoSEDP from '@assets/sedp-logo.webp';
 import { EPdfFont, getJsPdfFontName, getPdfFontPreference } from '@lib/pdf-config';
 import { toBase64, formatHour } from './pdf-helpers';
 import { handleActivities } from '../activities';

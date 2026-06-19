@@ -499,6 +499,8 @@ model AcademicPeriod {
   id           String @id @default(uuid()) @db.Uuid
   year         Int
   pac          Int
+  startDate    DateTime
+  endDate      DateTime
   pac_modality String @default("Trimestre") // Trimestre o semestres
   // Nos da la posibilidad de agregar mas datos y con la posibilidad de estandarizarlos o que no se repitan
 
@@ -625,18 +627,6 @@ model MultimediaType {
   verificationMediaFiles VerificationMediaFile[]
 
   @@map("multimedia_types")
-  @@schema("academic")
-}
-
-model CommonDatesAcademicPeriods {
-  id           String   @id @default(uuid()) @db.Uuid
-  pac          Int
-  pac_modality String   @default("Trimestre") // Trimestre o semestres
-  startDate    DateTime
-  endDate      DateTime
-
-  @@unique([pac, pac_modality])
-  @@map("common_dates_academic_periods")
   @@schema("academic")
 }
 

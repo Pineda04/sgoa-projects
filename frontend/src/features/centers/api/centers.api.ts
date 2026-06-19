@@ -16,4 +16,13 @@ export const centersApi = {
 				}
 			>
 		>(`/centers/${id}`),
+
+	createCenter: (data: { name: string }) =>
+		api.post<IResponse<TCenter>>(`/centers`, data),
+
+	updateCenter: (id: string, data: { name: string }) =>
+		api.patch<IResponse<TCenter>>(`/centers/${id}`, data),
+
+	deleteCenter: (id: string) =>
+		api.delete<IResponse<void>>(`/centers/${id}`),
 };

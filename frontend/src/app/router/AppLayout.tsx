@@ -9,7 +9,6 @@ export const AppLayout = () => {
 			<div
 				className="
           min-h-screen
-          bg-slate-50
           pt-6 sm:pt-8 lg:pt-10 xl:pt-12
           pb-12 lg:pb-16
         "

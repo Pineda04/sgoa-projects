@@ -1,11 +1,21 @@
 import { Button } from '@components/ui/button';
-import { useContext, useState } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import '../../App.css';
 import { UserMenu } from './UserMenu';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import LogoUNAH from '../../assets/Logo-unah-2.png';
-import { Link } from 'react-router-dom';
+import {
+	Bars3Icon,
+	XMarkIcon,
+	ChevronDownIcon,
+	AcademicCapIcon,
+	ClipboardDocumentListIcon,
+	ShieldCheckIcon,
+	BookOpenIcon,
+	WrenchScrewdriverIcon,
+	CubeIcon,
+} from '@heroicons/react/24/outline';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@providers/auth';
+import type { ComponentType, SVGProps } from 'react';
 
 const ROLES = {
 	ADMIN: 'ADMIN',
@@ -13,103 +23,213 @@ const ROLES = {
 	RRHH: 'RRHH',
 	COORDINADOR_AREA: 'COORDINADOR_AREA',
 	DOCENTE: 'DOCENTE',
-};
+} as const;
 
-interface MenuItemConfig {
-	id: string;
+interface SectionConfig {
 	label: string;
 	path: string;
-	allowedRoles: string[];
-	className?: string;
+	allowedRoles?: string[];
 }
 
-const MENU_ITEMS: MenuItemConfig[] = [
+interface ModuleConfig {
+	id: string;
+	label: string;
+	icon: ComponentType<SVGProps<SVGSVGElement>>;
+	allowedRoles: string[];
+	sections: SectionConfig[];
+	disabled?: boolean;
+}
+
+const MODULES: ModuleConfig[] = [
 	{
-		id: 'inicio',
-		label: 'Docencia',
-		path: '/docentes/dashboard',
-		allowedRoles: [ROLES.DOCENTE],
-	},
-	{
-		id: 'dashboard-coordinador',
-		label: 'Coordinación',
-		path: '/coordinadores/dashboard-coordinador',
-		allowedRoles: [ROLES.ADMIN, ROLES.COORDINADOR_AREA],
-	},
-	{
-		id: 'dashboard-autoridades',
-		label: 'Autoridades',
-		path: '/autoridades/dashboard-autoridad',
-		allowedRoles: [ROLES.ADMIN, ROLES.DIRECCION],
-	},
-	{
-		id: 'autoridades-clases',
-		label: 'Clases',
-		path: '/autoridades/clases',
-		allowedRoles: [ROLES.ADMIN, ROLES.DIRECCION],
-	},
-	{
-		id: 'dashboard-rrhh',
-		label: 'Gestión de Usuarios',
-		path: '/rrhh/gestion-usuarios',
+		id: 'administracion',
+		label: 'Administración',
+		icon: ShieldCheckIcon,
 		allowedRoles: [ROLES.ADMIN, ROLES.RRHH],
+		sections: [
+			{
+				label: 'Usuarios',
+				path: '/rrhh/gestion-usuarios',
+				allowedRoles: [ROLES.ADMIN, ROLES.RRHH],
+			},
+			{
+				label: 'Informes',
+				path: '/autoridades/dashboard-autoridad',
+				allowedRoles: [ROLES.ADMIN],
+			},
+			{
+				label: 'Consolidado',
+				path: '/autoridades/consolidado',
+				allowedRoles: [ROLES.ADMIN],
+			},
+		],
 	},
 	{
-		id: 'rrhh-clases',
-		label: 'Clases',
-		path: '/rrhh/clases',
-		allowedRoles: [ROLES.RRHH],
+		id: 'docencia',
+		label: 'Docencia',
+		icon: AcademicCapIcon,
+		allowedRoles: [ROLES.DOCENTE],
+		sections: [
+			{
+				label: 'Mis Clases',
+				path: '/docentes/dashboard',
+				allowedRoles: [ROLES.DOCENTE],
+			},
+		],
 	},
 	{
-		id: 'ayuda',
-		label: 'Ayuda',
-		path: '/otros/ayuda',
-		allowedRoles: [
-			ROLES.ADMIN,
-			ROLES.DIRECCION,
-			ROLES.RRHH,
-			ROLES.COORDINADOR_AREA,
-			ROLES.DOCENTE,
+		id: 'coordinacion',
+		label: 'Coordinación',
+		icon: ClipboardDocumentListIcon,
+		allowedRoles: [ROLES.ADMIN, ROLES.COORDINADOR_AREA],
+		sections: [
+			{
+				label: 'Planificaciones',
+				path: '/coordinadores/datos-planificacion',
+				allowedRoles: [ROLES.ADMIN, ROLES.COORDINADOR_AREA],
+			},
+			{
+				label: 'Consolidado',
+				path: '/coordinadores/consolidado-rendimiento',
+				allowedRoles: [ROLES.COORDINADOR_AREA],
+			},
+		],
+	},
+	{
+		id: 'academica',
+		label: 'Gestión Académica',
+		icon: BookOpenIcon,
+		allowedRoles: [ROLES.ADMIN, ROLES.RRHH],
+		sections: [
+			{
+				label: 'Asignaturas',
+				path: '/rrhh/clases',
+				allowedRoles: [ROLES.ADMIN, ROLES.RRHH],
+			},
+			{
+				label: 'Departamentos',
+				path: '/',
+				allowedRoles: [ROLES.ADMIN],
+			},
+			{
+				label: 'Periodos',
+				path: '/',
+				allowedRoles: [ROLES.ADMIN],
+			},
+		],
+	},
+	{
+		id: 'infraestructura',
+		label: 'Infraestructura',
+		icon: WrenchScrewdriverIcon,
+		allowedRoles: [ROLES.ADMIN],
+		sections: [
+			{ label: 'Aulas', path: '/', allowedRoles: [ROLES.ADMIN] },
+			{ label: 'Edificios', path: '/', allowedRoles: [ROLES.ADMIN] },
+			{
+				label: 'Centros',
+				path: '/rrhh/centros',
+				allowedRoles: [ROLES.ADMIN],
+			},
+		],
+	},
+	{
+		id: 'inventario',
+		label: 'Inventario',
+		icon: CubeIcon,
+		allowedRoles: [ROLES.ADMIN],
+		sections: [
+			{
+				label: 'Equipos',
+				path: '/',
+				allowedRoles: [ROLES.ADMIN],
+			},
+			{ label: 'Marcas', path: '/', allowedRoles: [ROLES.ADMIN] },
+			{ label: 'Condiciones', path: '/', allowedRoles: [ROLES.ADMIN] },
 		],
 	},
 ];
 
 export const Navbar = () => {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [isOpen, setIsOpen] = useState(false);
+	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+	const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(
+		null
+	);
+	const navbarRef = useRef<HTMLDivElement>(null);
+	const location = useLocation();
+	const navigate = useNavigate();
+
 	const {
 		authState: { user, isAuthenticated, isLoading },
 	} = useContext(AuthContext);
 
 	const hasAnyRole = (allowedRoles: string[]): boolean => {
+		if (allowedRoles.includes('*')) return true;
 		if (!user?.roles) return false;
 		if (!Array.isArray(user.roles)) return false;
 		return user.roles.some(role => allowedRoles.includes(role));
 	};
 
-	const getVisibleMenuItems = (): MenuItemConfig[] => {
-		return MENU_ITEMS.filter(item => hasAnyRole(item.allowedRoles));
+	const getVisibleSections = (mod: ModuleConfig): SectionConfig[] => {
+		return mod.sections.filter(
+			s => !s.allowedRoles || hasAnyRole(s.allowedRoles)
+		);
 	};
 
-	const onToggleMenu = () => {
-		setIsOpen(!isOpen);
+	const visibleModules = MODULES.filter(mod => {
+		if (!hasAnyRole(mod.allowedRoles)) return false;
+		return getVisibleSections(mod).length > 0;
+	});
+
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (
+				navbarRef.current &&
+				!navbarRef.current.contains(e.target as Node)
+			) {
+				setOpenDropdownId(null);
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () =>
+			document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
+
+	useEffect(() => {
+		setOpenDropdownId(null);
+		setIsOpen(false);
+		setMobileExpandedId(null);
+	}, [location.pathname]);
+
+	const handleModuleClick = (moduleId: string) => {
+		setOpenDropdownId(prev => (prev === moduleId ? null : moduleId));
+	};
+
+	const isModuleActive = (moduleId: string): boolean => {
+		const mod = MODULES.find(m => m.id === moduleId);
+		if (!mod) return false;
+		return getVisibleSections(mod).some(s =>
+			location.pathname.startsWith(s.path.replace(/\/:\w+/g, ''))
+		);
+	};
+
+	const isSectionActive = (path: string): boolean => {
+		const basePath = path.replace(/\/:\w+/g, '');
+		return (
+			location.pathname === path ||
+			location.pathname.startsWith(basePath + '/')
+		);
 	};
 
 	if (isLoading) {
 		return (
 			<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50">
-				<Link
-					to={'/home/home'}
-					className="flex items-center gap-2 md:gap-3"
-				>
-					<img
-						src={LogoUNAH}
-						alt="Logo-UNAH"
-						className="w-7 h-9 md:w-8 md:h-10 object-contain"
-					/>
-					<span className="font-display text-lg md:text-xl text-white tracking-wide">
-						SPI
+				<div className="flex items-center gap-2 md:gap-3">
+					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide">
+						SPI UNAH
 					</span>
-				</Link>
+				</div>
 				<div className="text-white/60 text-xs md:text-sm animate-pulse">
 					Cargando...
 				</div>
@@ -117,66 +237,221 @@ export const Navbar = () => {
 		);
 	}
 
-	const visibleMenuItems = getVisibleMenuItems();
-
 	return (
-		<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20">
+		<nav
+			ref={navbarRef}
+			className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
+		>
 			<Link
-				to={'/home/home'}
+				to={'/home'}
 				className="flex items-center gap-2 md:gap-3 group"
 			>
-				<img
-					src={LogoUNAH}
-					alt="Logo-UNAH"
-					className="w-7 h-9 md:w-8 md:h-10 object-contain transition-transform duration-300 group-hover:scale-105"
-				/>
-				<span className="font-display text-lg md:text-xl text-white tracking-wide hidden sm:block">
+				<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
 					SPI UNAH
 				</span>
 			</Link>
 
-			{isAuthenticated && visibleMenuItems.length > 0 && (
+			{isAuthenticated && visibleModules.length > 0 && (
 				<>
 					<div className="hidden md:flex items-center gap-1">
-						{visibleMenuItems.map(item => (
-							<Link
-								key={item.id}
-								to={item.path}
-								className={`px-3 lg:px-4 py-2 text-sm font-medium text-white/80 rounded-lg 
-									transition-all duration-200 hover:bg-white/10 hover:text-white 
-									hover:shadow-md ${item.className || ''}`}
-							>
-								{item.label}
-							</Link>
-						))}
+						{visibleModules.map(mod => {
+							const visibleSections = getVisibleSections(mod);
+							return (
+								<div key={mod.id} className="relative">
+									<button
+										onClick={() =>
+											handleModuleClick(mod.id)
+										}
+										className={`
+                    flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                    text-white/80 hover:bg-white/10 hover:text-white`}
+										disabled={mod.disabled}
+									>
+										<mod.icon className="size-4 lg:size-5" />
+										<span className="hidden lg:inline">
+											{mod.label}
+										</span>
+										{visibleSections.length > 0 && (
+											<ChevronDownIcon
+												className={`size-3.5 transition-transform duration-200 ${
+													openDropdownId === mod.id
+														? 'rotate-180'
+														: ''
+												}`}
+											/>
+										)}
+									</button>
+
+									{openDropdownId === mod.id &&
+										visibleSections.length > 0 && (
+											<div
+												className="absolute top-full left-0 mt-2 min-w-52 bg-white rounded-xl shadow-2xl border border-gray-100
+												py-2 animate-in scale-in origin-top-left overflow-hidden"
+											>
+												{visibleSections.map(
+													section => (
+														<Link
+															key={section.path}
+															to={section.path}
+															onClick={() =>
+																setOpenDropdownId(
+																	null
+																)
+															}
+															className={`block px-4 py-2.5 text-sm transition-colors duration-150 border-b border-gray-50 last:border-b-0
+													${
+														isSectionActive(
+															section.path
+														)
+															? 'text-primary font-semibold bg-primary/5'
+															: 'text-gray-700 hover:bg-gray-50 hover:text-primary'
+													}`}
+														>
+															<div className="flex items-center gap-2">
+																<span
+																	className={`w-1 h-1 rounded-full ${
+																		isSectionActive(
+																			section.path
+																		)
+																			? 'bg-primary'
+																			: 'bg-gray-300'
+																	}`}
+																/>
+																{section.label}
+															</div>
+														</Link>
+													)
+												)}
+											</div>
+										)}
+
+									{openDropdownId === mod.id &&
+										mod.disabled && (
+											<div
+												className="absolute top-full left-0 mt-2 min-w-40 bg-white rounded-xl shadow-2xl border border-gray-100
+										py-4 px-4 animate-in scale-in origin-top-left text-center"
+											>
+												<span className="text-xs font-medium text-gray-400">
+													Próximamente
+												</span>
+											</div>
+										)}
+								</div>
+							);
+						})}
 					</div>
 
 					<div
-						className={`fixed md:hidden inset-0 top-[50px] sm:top-[56px] bg-primary/98 backdrop-blur-lg 
-							flex flex-col items-center justify-center gap-6 sm:gap-8 transition-all duration-300 z-40
-							${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+						className={`fixed md:hidden inset-0 top-[50px] sm:top-[56px] bg-primary/98 backdrop-blur-lg
+							flex flex-col items-start justify-start gap-1 transition-all duration-300 z-40 overflow-y-auto
+							${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
 					>
-						{visibleMenuItems.map(item => (
-							<Link
-								key={item.id}
-								to={item.path}
-								onClick={() => setIsOpen(false)}
-								className="text-lg sm:text-xl font-medium text-white/90 hover:text-white 
-									transition-colors duration-200"
-							>
-								{item.label}
-							</Link>
-						))}
+						<div className="w-full px-3 py-4 space-y-1">
+							{visibleModules.map(mod => {
+								const visibleSections = getVisibleSections(mod);
+								return (
+									<div key={mod.id} className="w-full">
+										<button
+											onClick={() => {
+												if (mod.disabled) return;
+												if (
+													visibleSections.length <= 1
+												) {
+													if (
+														visibleSections.length ===
+														1
+													) {
+														navigate(
+															visibleSections[0]
+																.path
+														);
+													}
+													setIsOpen(false);
+												} else {
+													setMobileExpandedId(prev =>
+														prev === mod.id
+															? null
+															: mod.id
+													);
+												}
+											}}
+											className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
+												${
+													mod.disabled
+														? 'opacity-40'
+														: isModuleActive(mod.id)
+															? 'bg-white/15'
+															: 'hover:bg-white/5'
+												}`}
+										>
+											<mod.icon className="size-5 text-white/70 shrink-0" />
+											<span className="text-base font-medium text-white/90 flex-1 text-left">
+												{mod.label}
+											</span>
+											{mod.disabled && (
+												<span className="text-[10px] uppercase tracking-wider text-white/30 font-medium">
+													Pronto
+												</span>
+											)}
+											{visibleSections.length > 1 && (
+												<ChevronDownIcon
+													className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${
+														mobileExpandedId ===
+														mod.id
+															? 'rotate-180'
+															: ''
+													}`}
+												/>
+											)}
+										</button>
+
+										{mobileExpandedId === mod.id &&
+											visibleSections.length > 1 && (
+												<div className="ml-5 mt-1 space-y-0.5 border-l-2 border-white/10 pl-4">
+													{visibleSections.map(
+														section => (
+															<Link
+																key={
+																	section.path
+																}
+																to={
+																	section.path
+																}
+																onClick={() =>
+																	setIsOpen(
+																		false
+																	)
+																}
+																className={`block px-4 py-2.5 rounded-lg text-sm transition-colors duration-150
+																	${
+																		isSectionActive(
+																			section.path
+																		)
+																			? 'text-accent font-medium bg-white/10'
+																			: 'text-white/70 hover:text-white hover:bg-white/5'
+																	}`}
+															>
+																{section.label}
+															</Link>
+														)
+													)}
+												</div>
+											)}
+									</div>
+								);
+							})}
+						</div>
 					</div>
 				</>
 			)}
 
-			<div className="flex items-center gap-2 md:gap-3">
-				{isAuthenticated && <UserMenu />}
-
-				{isAuthenticated && visibleMenuItems.length > 0 && (
+			<div className="flex lg:items-center lg:w-auto justify-between w-full gap-2 md:gap-3">
+				{isAuthenticated && visibleModules.length > 0 && (
 					<Button
-						onClick={onToggleMenu}
+						onClick={() => {
+							setIsOpen(!isOpen);
+							setMobileExpandedId(null);
+						}}
 						className="md:hidden p-1.5 sm:p-2 hover:bg-white/10 text-white"
 						variant="ghost"
 						size="icon"
@@ -188,6 +463,8 @@ export const Navbar = () => {
 						)}
 					</Button>
 				)}
+
+				{isAuthenticated && <UserMenu />}
 
 				{!isAuthenticated && (
 					<Link to="/login">
