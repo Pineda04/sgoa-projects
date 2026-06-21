@@ -1,16 +1,19 @@
-import { Button } from '@components/ui/button';
-import { useAuth } from '@providers/auth';
-import { genericAlert, ESwalIcons, errorsFormik } from '@utils';
+import LogoUNAH from '/logo-unah-2.webp';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForgotPassword } from '../hooks';
-import { useShowPassword } from '@hooks';
 import { useFormik } from 'formik';
-import { IAuthLogin } from '../types';
 import { EyeIcon, EyeOff, GraduationCap } from 'lucide-react';
-import LogoUNAH from '@assets/logo-unah-2.webp';
-import { Error } from '@components';
 import { loginSchema } from '../schemas';
+import { IAuthLogin, useForgotPassword } from '@api/auth';
+import { useAuth } from '@config';
+import {
+	Button,
+	Error,
+	errorsFormik,
+	ESwalIcons,
+	genericAlert,
+	useShowPassword,
+} from '@shared';
 
 type ForgotPasswordAction = (variables: { email: string }) => Promise<unknown>;
 
@@ -82,7 +85,7 @@ export const Login = () => {
 		try {
 			await login({ email, password });
 
-			const lastPath = localStorage.getItem('lastPath') || '/docentes';
+			const lastPath = localStorage.getItem('lastPath') || '/home';
 
 			genericAlert('Inicio de sesion exitoso!');
 			navigate(lastPath, { replace: true });
@@ -100,14 +103,14 @@ export const Login = () => {
 
 	useEffect(() => {
 		if (authState.isAuthenticated) {
-			const lastPath = localStorage.getItem('lastPath') || '/docentes';
+			const lastPath = localStorage.getItem('lastPath') || '/home';
 			navigate(lastPath, { replace: true });
 		}
 	}, [authState.isAuthenticated]);
 
 	return (
 		<div className="grid lg:grid-cols-2 md:grid-cols-1 h-screen">
-			<div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-[#1a5c8a] to-[#0d3556] min-h-[40vh] lg:min-h-auto">
+			<div className="relative flex items-center justify-center overflow-hidden bg-linear-to-br from-primary via-[#1a5c8a] to-[#0d3556] min-h-[40vh] lg:min-h-auto">
 				<div className="absolute inset-0 opacity-10">
 					<svg
 						className="w-full h-full"
