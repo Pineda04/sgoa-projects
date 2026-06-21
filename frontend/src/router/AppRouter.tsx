@@ -63,7 +63,7 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/planifications',
+			path: 'academic/planifications/*',
 			element: <PrivateRoute />,
 			children: planificationsRoutes,
 			errorElement: <div>404</div>,

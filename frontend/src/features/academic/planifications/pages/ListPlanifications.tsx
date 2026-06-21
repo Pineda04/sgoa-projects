@@ -61,7 +61,7 @@ export const ListPlanifications = () => {
 	];
 
 	return (
-		<div className="py-2">
+		<div className="py-2 bg-white">
 			<ResponsiveTable<PeriodData>
 				columns={columns}
 				data={periods}

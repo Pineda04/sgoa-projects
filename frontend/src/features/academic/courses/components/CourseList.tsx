@@ -2,8 +2,20 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, Plus } from 'lucide-react';
 import { CourseDepartmentFilter } from './CourseDepartmentFilter';
-import { Button, Error, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
-import { ICoursesListProps, TCourse, useGetAllCourses, useSearchCourses } from '@api/courses';
+import {
+	Button,
+	Error,
+	IResponsiveColumn,
+	Loading,
+	Pagination,
+	ResponsiveTable,
+} from '@shared/components';
+import {
+	ICoursesListProps,
+	TCourse,
+	useGetAllCourses,
+	useSearchCourses,
+} from '@api/courses';
 import { useAbility } from '@config';
 import { useDebounce } from '@shared/hooks';
 
@@ -102,10 +114,7 @@ export const CourseList = ({
 		? selectedDepartment || undefined
 		: centerDepartmentId;
 
-	const coursesInfo = useSearchCourses(
-		effectiveCenterDepartmentId,
-		debValue
-	);
+	const coursesInfo = useSearchCourses(effectiveCenterDepartmentId, debValue);
 
 	const allCoursesInfo = useGetAllCourses(showDepartmentFilter, debValue);
 
@@ -147,27 +156,7 @@ export const CourseList = ({
 
 	return (
 		<div className="space-y-4">
-			{canCreateCourse && (
-				<div className="flex justify-end">
-					<Button
-						onClick={() => navigate('/academic/courses/new')}
-						className="bg-green-600 hover:bg-green-700"
-					>
-						<Plus className="size-4 mr-1" />
-						Nueva Clase
-					</Button>
-				</div>
-			)}
-
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0">
-				{showDepartmentFilter && (
-					<CourseDepartmentFilter
-						value={selectedDepartment}
-						centerId={centerId}
-						onChange={setSelectedDepartment}
-						onCenterChange={handleCenterChange}
-					/>
-				)}
+			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0">
 				<div className="w-full">
 					<label className="block mb-2 font-semibold text-sm text-foreground">
 						Búsqueda por término
@@ -179,9 +168,28 @@ export const CourseList = ({
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 							setSearchTerm(e.target.value)
 						}
-						className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 					/>
 				</div>
+				{showDepartmentFilter && (
+					<CourseDepartmentFilter
+						value={selectedDepartment}
+						centerId={centerId}
+						onChange={setSelectedDepartment}
+						onCenterChange={handleCenterChange}
+					/>
+				)}
+				{canCreateCourse && (
+					<div className="flex w-full sm:justify-end justify-start">
+						<Button
+							onClick={() => navigate('/academic/courses/new')}
+							className="bg-green-600 hover:bg-green-700"
+						>
+							<Plus className="size-4 mr-1" />
+							Nueva Clase
+						</Button>
+					</div>
+				)}
 			</div>
 
 			<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">

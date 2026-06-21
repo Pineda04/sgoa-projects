@@ -26,7 +26,7 @@ export const CourseDepartmentFilter = ({
 		<>
 			<div>
 				<label
-					className="block mb-2 font-semibold text-sm"
+					className="block mb-2 font-semibold text-sm text-foreground"
 					htmlFor="center"
 				>
 					Centro
@@ -34,7 +34,7 @@ export const CourseDepartmentFilter = ({
 				<select
 					id="center"
 					name="centerId"
-					className="w-full bg-gray-100 shadow-md rounded-lg px-2 py-2 outline-none"
+					className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 					onChange={e => {
 						const newCenterId =
 							e.target.options[e.target.selectedIndex].id;

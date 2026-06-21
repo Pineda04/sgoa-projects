@@ -188,7 +188,8 @@ export const DashboardTeacher = () => {
 				value={currentTab}
 				onValueChange={setTab}
 				className="mt-4 sm:mt-8"
-			>
+      >
+        {/* TabsList */}
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
 					<TabsTrigger
 						value="0"
@@ -210,6 +211,7 @@ export const DashboardTeacher = () => {
 					</TabsTrigger>
 				</TabsList>
 
+				{/* Clases */}
 				<TabsContent value="0">
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">
 						<ResponsiveTable<CourseData>
@@ -222,8 +224,9 @@ export const DashboardTeacher = () => {
 					</div>
 				</TabsContent>
 
+				{/* Informes */}
 				<TabsContent value="1">
-					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 p-3 sm:p-6">
+					<div>
 						<Button
 							onClick={() =>
 								handleView(
@@ -255,7 +258,7 @@ export const DashboardTeacher = () => {
 							</span>
 						</Button>
 
-						<div className="mt-4 sm:mt-6">
+						<div className="mt-4 sm:mt-6 bg-white">
 							<ResponsiveTable<ReportPeriod>
 								columns={reportColumns}
 								data={academicAssignmentReportsPeriodsInfo.data || []}
