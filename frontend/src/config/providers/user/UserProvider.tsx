@@ -1,30 +1,19 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { UserContext } from './UserContext';
 import { IChildrenProps } from '@shared/interfaces';
-import { Loading } from '@shared/components';
+import { UserContext } from './UserContext';
+import { useMemo } from 'react';
+import { useGetCurrentTeacher } from '@api/teachers';
 import { getHeadPositions } from '@shared/utils';
-import { teachersApi, teachersKeys } from '@api/teachers';
-import { useAuth } from '@config/providers';
+import { Loading } from '@shared/components';
 
 // NOTE: Puede ser utilizado para otras cosas, edicion...
 export const UserProvider = ({ children }: IChildrenProps) => {
-	const {
-		authState: { isAuthenticated, isLoading: isAuthLoading },
-	} = useAuth();
-
-	const { data, isLoading, isError } = useQuery({
-		queryKey: teachersKeys.detail('current'),
-		queryFn: teachersApi.getCurrentTeacher,
-		enabled: isAuthenticated,
-		select: res => res.data.data,
-	});
+	const { data, isLoading, isError } = useGetCurrentTeacher();
 
 	const headPositions = useMemo(() => {
 		return getHeadPositions(data?.positions);
 	}, [data?.positions]);
 
-	if (isAuthLoading) return <Loading />;
+	if (isLoading) return <Loading />;
 
 	return (
 		<UserContext.Provider

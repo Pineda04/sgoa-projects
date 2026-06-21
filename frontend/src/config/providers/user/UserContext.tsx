@@ -1,5 +1,6 @@
+import { TPosition } from '@api/positions';
+import { TOutputTeacherPosition } from '@api/teachers';
 import { createContext, useContext } from 'react';
-import { TOutputTeacherPosition, TPosition } from '@api';
 
 export const UserContext = createContext(
 	{} as {

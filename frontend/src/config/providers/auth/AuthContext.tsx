@@ -1,5 +1,5 @@
+import { IContextProps } from '@shared/interfaces';
 import { createContext, useContext } from 'react';
-import { IContextProps } from '@shared';
 
 export const AuthContext = createContext({} as IContextProps);
 

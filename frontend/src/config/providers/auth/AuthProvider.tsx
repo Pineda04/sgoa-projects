@@ -1,14 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import {
-	setAccessToken,
-	removeAccessToken,
-	getAccessToken,
-} from '@features/auth/utils';
-import { IAuthStateProps, ITokenPayload } from '@shared/interfaces';
+import { IAuthStateProps, IChildrenProps, ITokenPayload } from '@shared/interfaces';
 import { authApi, IAuthLogin, useLogin } from '@api/auth';
-import { IChildrenProps } from '@shared/interfaces';
+import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
 
 const initialState: IAuthStateProps = {
 	isAuthenticated: false,
@@ -18,6 +13,8 @@ const initialState: IAuthStateProps = {
 };
 
 const checkSessionToken = async (token: string) => {
+	// const token = getAccessToken();
+
 	let decoded = jwtDecode<ITokenPayload>(token);
 	const currentTime = Date.now() / 1000;
 
@@ -36,6 +33,7 @@ const checkSessionToken = async (token: string) => {
 
 export const AuthProvider = ({ children }: IChildrenProps) => {
 	const [authState, setAuthState] = useState(initialState);
+	const effectChangeFetch = useRef(false);
 	const { mutateAsync: loginRequest } = useLogin();
 
 	const login = async (userCredentials: IAuthLogin) => {
@@ -116,7 +114,7 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				}));
 
 			const info = await checkSessionToken(access_token);
-			// console.log(info);
+			console.log(info);
 
 			setAuthState(prev => ({
 				...prev,
@@ -142,9 +140,21 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 		}
 	};
 
-	useEffect(() => {
-		checkSession();
-	}, []);
+	useEffect(
+		() => {
+			if (
+				effectChangeFetch.current === true ||
+				process.env.NODE_ENV !== 'development'
+			) {
+				checkSession();
+			}
+
+			return () => {
+				effectChangeFetch.current = true;
+			};
+		},
+		[] // solo corre al montar o renderizar
+	);
 
 	const cleanErrors = (errors: null) => {
 		setAuthState(prev => ({
