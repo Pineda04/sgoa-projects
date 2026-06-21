@@ -1,4 +1,4 @@
-import { courseClassroomSchema } from '@features/academic/course-classrooms/schemas';
+import { courseClassroomSchema } from '@features/academic/reports/schemas';
 import { TDepartment } from '..';
 import { TCenter } from '../centers';
 import { TAcademicCommonProps } from '../periods/periods.types';

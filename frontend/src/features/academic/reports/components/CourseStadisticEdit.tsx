@@ -6,7 +6,7 @@ import {
 	XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { TCourseClassroom, TCourseStadistic, TCourseStadisticOmit, useUpdateCourseStadistic } from '@api/courses';
-import { courseStadisticSchema } from '@features/index';
+import { courseStadisticSchema } from '../schemas/course-stadistic.schema';
 import { errorsFormik } from '@shared/utils';
 import { Button } from '@shared/components';
 

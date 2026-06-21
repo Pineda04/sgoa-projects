@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import { complementaryActivitySchema } from '../schemas';
 import { errorsFormik, ESwalIcons, genericAlert } from '@shared/utils';
 import { fileUploadSchema, TFileUpload } from '@shared/schemas';
 import { Button, Error, Loading, RadioButton } from '@shared/components';
 import { PreviewImages } from '@features/academic/reports';
+import { complementaryActivitySchema } from '../schemas';
 import {
 	activityRegistrationStatus,
 	EActivityType,

@@ -1,13 +1,13 @@
 import { TTeachingSession, useUpdateTeachingSession } from '@api/teachers';
-import { CourseStadisticEdit } from '@features/academic/courses/components';
+import { Button } from '@shared/components';
+import { toHondurasTimeInput } from '@shared/utils';
+import { useEffect, useState } from 'react';
+import { CourseStadisticEdit } from './CourseStadisticEdit';
 import {
 	PencilIcon,
 	CheckCircleIcon,
 	XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@shared/components';
-import { toHondurasTimeInput } from '@shared/utils';
-import { useEffect, useState } from 'react';
 
 export const TeachingSession = ({
 	reportId,

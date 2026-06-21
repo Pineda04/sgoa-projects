@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { EPdfFont } from '@config/lib';
+import { useUser } from '@config/providers';
+import { useGetAcademicAssignmentReportById } from '@api/assignment-reports';
+import { useGetTeacherPosition } from '@api/teachers';
+import { useTabWithReset } from '@shared/hooks';
+import { Button, Loading, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
+import { EActivityType } from '@shared/constants';
 import {
 	TableActivities,
 	AcademicPositionTeacher,
@@ -11,14 +19,6 @@ import {
 	exportReportActivities,
 	handleActivities,
 } from '../utils';
-import { EPdfFont } from '@config/lib';
-import { useUser } from '@config/providers';
-import { useGetAcademicAssignmentReportById } from '@api/assignment-reports';
-import { useGetTeacherPosition } from '@api/teachers';
-import { useTabWithReset } from '@shared/hooks';
-import { Button, Loading, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
-import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
-import { EActivityType } from '@shared/constants';
 
 export const AcademicAssignmentReport = () => {
 	const { id } = useParams();

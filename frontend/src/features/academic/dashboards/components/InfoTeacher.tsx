@@ -6,9 +6,7 @@ import { useEffect, useState } from 'react';
 export const InfoTeacher = () => {
 	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
-
 	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
-
 	const [selectedPosition, setSelectedPosition] = useState('');
 
 	useEffect(() => {

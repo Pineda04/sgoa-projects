@@ -2,12 +2,12 @@ import { useCallback } from 'react';
 import { IoAddSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, FileText, BookOpen, Users } from 'lucide-react';
-import { InfoTeacher } from '../../reports/components';
 import { useTabWithReset } from '@shared/hooks';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { useGetCurrentUserCourses } from '@api/courses';
 import { useGetAcademicAssignmentReportsPeriods } from '@api/assignment-reports';
 import { Button, IResponsiveColumn, ResponsiveTable, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import { InfoTeacher } from '../components';
 
 interface CourseData {
 	id: string;

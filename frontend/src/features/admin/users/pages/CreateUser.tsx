@@ -3,8 +3,7 @@ import { useGetAllPostgrads, useGetAllUndergrads } from '@api/degrees';
 import { useGetAllShifts } from '@api/shifts';
 import { useGetAllTeacherCategories } from '@api/teachers';
 import { TCreateUser, useCreateUser } from '@api/users';
-import { useAuth } from '@config/providers';
-import { EUserRole } from '@shared/constants';
+import { useAbility } from '@config';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { initialValuesUser, userCreateSchema } from '../schemas';
@@ -14,9 +13,7 @@ import { TAcademicCommonProps } from '@api/periods';
 import { SelectAccessRoles, SelectCenterDepartments } from '../components';
 
 export const CreateUser = () => {
-	const {
-		authState: { user },
-	} = useAuth();
+	const ability = useAbility();
 	const undergrads = useGetAllUndergrads();
 	const postgrads = useGetAllPostgrads();
 	const contractTypes = useGetAllContractTypes();
@@ -31,31 +28,11 @@ export const CreateUser = () => {
 		shifts,
 	].some(q => q.isLoading);
 
-	const hasRoleExtraFieldsRolesPosition = () => {
-		if (!user?.roles) return false;
-		if (!Array.isArray(user.roles)) return false;
-
-		return user.roles.some(role =>
-			[EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH].includes(
-				role as EUserRole
-			)
-		);
-	};
-
-	const hasRoleExtraFieldsCoordination = () => {
-		if (!user?.roles) return false;
-		if (!Array.isArray(user.roles)) return false;
-
-		return user.roles.some(role =>
-			[EUserRole.COORDINADOR_AREA].includes(role as EUserRole)
-		);
-	};
-
 	const { mutateAsync: addUserAsync } = useCreateUser();
 	const navigate = useNavigate();
 
-	const extraFieldsRolesPositionEnabled = hasRoleExtraFieldsRolesPosition();
-	const extraFieldsCoordinationEnabled = hasRoleExtraFieldsCoordination();
+	const canManageRoles = ability.can('manage', 'user-roles');
+	const canManageDepartments = ability.can('manage', 'user-departments');
 
 	const {
 		values,
@@ -70,7 +47,7 @@ export const CreateUser = () => {
 		initialValues: {
 			...initialValuesUser,
 			roles: [],
-			extraFieldsEnabled: extraFieldsRolesPositionEnabled,
+			extraFieldsEnabled: canManageRoles || canManageDepartments,
 		},
 		onSubmit: values => handleCreateUser(values),
 		validate: values => {
@@ -98,7 +75,7 @@ export const CreateUser = () => {
 			values: {
 				...initialValuesUser,
 				roles: [],
-				extraFieldsEnabled: extraFieldsRolesPositionEnabled,
+				extraFieldsEnabled: canManageRoles || canManageDepartments,
 			},
 		});
 
@@ -335,7 +312,7 @@ export const CreateUser = () => {
 						)}
 					</div>
 
-					{extraFieldsRolesPositionEnabled && (
+					{canManageRoles && (
 						<SelectAccessRoles
 							touched={touched}
 							values={values}
@@ -345,17 +322,15 @@ export const CreateUser = () => {
 						/>
 					)}
 
-					{/* Por defecto CORDINACION  */}
-					{extraFieldsCoordinationEnabled &&
-						!extraFieldsRolesPositionEnabled && (
-							<SelectCenterDepartments
-								touched={touched}
-								values={values}
-								setValues={setValues}
-								errors={errors}
-								handleBlur={handleBlur}
-							/>
-						)}
+					{canManageDepartments && !canManageRoles && (
+						<SelectCenterDepartments
+							touched={touched}
+							values={values}
+							setValues={setValues}
+							errors={errors}
+							handleBlur={handleBlur}
+						/>
+					)}
 
 					<div className="col-span-1 md:col-span-2 flex justify-center items-center gap-4 mt-6 flex-col sm:flex-row">
 						<Button

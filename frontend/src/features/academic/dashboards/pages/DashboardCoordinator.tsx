@@ -3,12 +3,7 @@ import { DocumentPlusIcon } from '@heroicons/react/24/outline';
 import { CourseList } from '@features/academic/courses';
 import { useTabWithReset } from '@shared/hooks';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
-import {
-	InfoCoordinator,
-	ListAcademicAssignmentReports,
-	ListPlanificationsCoordinator,
-	UsersCoordinator,
-} from '../../course-classrooms/components';
+import { InfoCoordinator, ListAcademicAssignmentReports, ListPlanificationsCoordinator, UsersCoordinator } from '../components';
 
 export const DashboardCoordinator = () => {
 	const { centerDepartmentId } = useParams();

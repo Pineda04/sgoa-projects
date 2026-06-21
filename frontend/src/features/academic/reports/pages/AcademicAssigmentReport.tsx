@@ -1,15 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-	exportReportActivities,
-	handleActivities,
-	IReportData,
-} from '@features/academic/reports/utils';
-import {
-	TeachingSession,
-	TableActivities,
-	AcademicPositionTeacher,
-} from '@features/academic/reports/components';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { EPdfFont } from '@config/lib';
 import { useGetAcademicAssignmentReportById } from '@api/assignment-reports';
@@ -18,6 +8,8 @@ import { useTabWithReset } from '@shared/hooks';
 import { Button, Loading, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
 import { EActivityType } from '@shared/constants';
+import { exportReportActivities, handleActivities, IReportData } from '../utils';
+import { AcademicPositionTeacher, TableActivities, TeachingSession } from '../components';
 
 export const AcademicAssigmentReport = () => {
 	const { id } = useParams();

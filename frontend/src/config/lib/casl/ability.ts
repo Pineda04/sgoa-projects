@@ -27,7 +27,7 @@ export type Subjects =
 	| 'contract-types'
 	| 'courses'
 	| 'courseClassrooms'
-	| 'degrees' // undergrads + postgrads
+	| 'degrees'
 	| 'departments'
 	| 'faculties'
 	| 'periods'
@@ -37,6 +37,9 @@ export type Subjects =
 	| 'pcEquipments'
 	| 'audioEquipments'
 	| 'users'
+	| 'user-roles'
+	| 'user-departments'
+	| 'user-status'
 	| 'home'
 	| 'help'
 	| 'profile';
@@ -51,42 +54,71 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		return build();
 	}
 
-	// ==================== Permisos para ADMIN ====================
 	if (roles.includes(EUserRole.ADMIN)) {
 		can('manage', 'all');
 		return build();
 	}
 
-	// ================== Permisos para DIRECCION ==================
+	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
-		can('read', ['all']);
-		can('create', ['all']);
-		can('update', ['all']);
-		can('delete', ['all']);
+		can('read', 'users');
+		can('manage', 'courses');
+		can('manage', 'departments');
+		can('read', 'centers');
+		can('read', 'pcEquipments');
+		can('read', 'audioEquipments');
+		can('read', 'degrees');
+		can('read', 'shifts');
+		can('read', 'contract-types');
+		can('read', 'periods');
+		can('read', 'faculties');
+		can('read', 'positions');
 	}
 
-	// ==================== Permisos para RRHH ====================
+	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
-		can('read', ['all']);
-		can('create', ['all']);
-		can('update', ['all']);
-		can('delete', ['all']);
+		can('manage', 'users');
+		can('manage', 'user-roles');
+		can('manage', 'user-status');
+		can('manage', 'courses');
+		can('manage', 'departments');
+		can('read', 'centers');
+		can('read', 'pcEquipments');
+		can('read', 'audioEquipments');
+		can('read', 'degrees');
+		can('read', 'shifts');
+		can('read', 'contract-types');
+		can('read', 'periods');
+		can('read', 'faculties');
+		can('read', 'positions');
 	}
 
-	// ============== Permisos para COORDINADOR_AREA ==============
+	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('read', ['all']);
-		can('create', ['all']);
-		can('update', ['all']);
-		can('delete', ['all']);
+		can('create', 'users');
+		can('read', 'users');
+		can('update', 'users');
+		can('manage', 'user-departments');
+		can('manage', 'user-status');
+		can('manage', 'courses');
+		can('read', 'departments');
+		can('read', 'pcEquipments');
+		can('read', 'audioEquipments');
+		can('read', 'degrees');
+		can('read', 'shifts');
+		can('read', 'contract-types');
+		can('read', 'periods');
+		can('read', 'faculties');
 	}
 
-	// =================== Permisos para DOCENTE ==================
+	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
-		can('read', ['all']);
-		can('create', ['all']);
-		can('update', ['all']);
-		can('delete', ['all']);
+		can('read', 'courses');
+		can('read', 'departments');
+		can('read', 'degrees');
+		can('read', 'shifts');
+		can('read', 'contract-types');
+		can('read', 'periods');
 	}
 
 	return build();

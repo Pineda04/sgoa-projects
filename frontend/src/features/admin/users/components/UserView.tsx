@@ -19,6 +19,7 @@ import {
 	TOutputTeacherPosition,
 	useGetAllTeacherCategories,
 } from '@api/teachers';
+import { useAbility } from '@config';
 import { useAuth } from '@config/providers';
 import {
 	useGetAllPostgrads,
@@ -31,7 +32,6 @@ import { useMemo, useState } from 'react';
 import { userUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
 import { Button, Error, Loading } from '@shared/components';
-import { EUserRole } from '@shared/constants';
 
 const customStyles: StylesConfig<
 	TCustomSelectOption,
@@ -187,6 +187,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 	const {
 		authState: { user },
 	} = useAuth();
+	const ability = useAbility();
 
 	const { updateUser, isPendingUpdate } = useUpdateUser(initialData.userId);
 	const { changeStatusActiveUser, isPendingChangeStatusActive } =
@@ -540,8 +541,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 							className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 mr-2 hover:bg-red-400 transition duration-500 cursor-pointer"
 							hidden={
 								initialData.userId === user?.sub ||
-								(user?.roles.length === 1 &&
-									user?.roles.includes(EUserRole.DOCENTE)) ||
+								!ability.can('manage', 'user-status') ||
 								isEdit
 							}
 							onClick={handleDeactivateUser}

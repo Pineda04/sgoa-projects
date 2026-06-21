@@ -1,7 +1,22 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { CourseClassroomsTable } from '@features/academic/planifications';
+import { ESwalIcons, genericAlert } from '@shared/utils';
+import { Button, Loading, ModalBase } from '@shared/components';
+import { useUser } from '@config/providers';
+import { useGetAcademicPeriodNextToCreate } from '@api/periods';
+import { useGetAllCoursesCoordinatorByPeriod } from '@api/courses';
+import { useModal } from '@shared/hooks';
+import {
+	CourseClassroomsTable,
+	PlanificationForm,
+	UploadPlanification,
+} from '@features/academic/planifications';
+import {
+	TPlanification,
+	TPlanificationWithErrors,
+	useCreateAcademicAssignmentArrayMutation,
+} from '@api/assignment-reports';
 import {
 	PlusCircleIcon,
 	DocumentCheckIcon,
@@ -9,14 +24,6 @@ import {
 	TrashIcon,
 	PencilIcon,
 } from '@heroicons/react/24/outline';
-import { useUser } from '@config/providers';
-import { useGetAcademicPeriodNextToCreate } from '@api/periods';
-import { useGetAllCoursesCoordinatorByPeriod } from '@api/courses';
-import { useModal } from '@shared/hooks';
-import { TPlanification, TPlanificationWithErrors, useCreateAcademicAssignmentArrayMutation } from '@api/assignment-reports';
-import { ESwalIcons, genericAlert } from '@shared/utils';
-import { Button, Loading, ModalBase } from '@shared/components';
-import { PlanificationForm, UploadPlanification } from '@features/academic/course-classrooms';
 
 export const CreatePlanification = () => {
 	const navigate = useNavigate();
@@ -299,7 +306,7 @@ export const CreatePlanification = () => {
 						</tbody>
 					</table>
 				</div>
-      </div>
+			</div>
 
 			{coursesInfo.data &&
 				coursesInfo.data.length &&

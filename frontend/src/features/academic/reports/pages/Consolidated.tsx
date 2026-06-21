@@ -1,8 +1,6 @@
 export const Consolidated = () => {
 	return (
 		<div className="min-h-screen bg-white">
-			{/* Aquí usas el Navbar y ya no dará el warning */}
-
 			{/* Título */}
 			<div className="px-8 py-6">
 				<h2 className="text-2xl font-semibold">
@@ -29,19 +27,11 @@ export const Consolidated = () => {
 								<th className="px-4 py-2">Nombre</th>
 								<th className="px-4 py-2">Carrera</th>
 								<th className="px-4 py-2">Modalidad</th>
-								<th className="px-4 py-2">
-									Índice de aprobación
-								</th>
-								<th className="px-4 py-2">
-									Índice de reprobación
-								</th>
-								<th className="px-4 py-2">
-									Índice de abandono
-								</th>
+								<th className="px-4 py-2">Índice de aprobación</th>
+								<th className="px-4 py-2">Índice de reprobación</th>
+								<th className="px-4 py-2">Índice de abandono</th>
 								<th className="px-4 py-2">Índice de NSP</th>
-								<th className="px-4 py-2">
-									Eficiencia terminal
-								</th>
+								<th className="px-4 py-2">Eficiencia terminal</th>
 								<th className="px-4 py-2">Período</th>
 								<th className="px-4 py-2">Año</th>
 							</tr>

@@ -1,12 +1,12 @@
 import logoUNAH from '/logo-unah-3.webp';
 import logoSEDP from '/sedp-logo.webp';
 import { toBase64, formatHour } from './pdf-helpers';
-import { handleActivities } from '../activities';
 import { IReportData, ILastAutoTable } from './types';
 import { TOutputTeacher, TTeacherPosition } from '@api';
 import { TCurrentAcademicPeriod } from '@api/periods/periods.types';
 import { EActivityType } from '@shared/constants';
 import { EPdfFont, getJsPdfFontName, getPdfFontPreference } from '@config/lib';
+import { handleActivities } from './handle-activities';
 
 type JsPDF = import('jspdf').default;
 

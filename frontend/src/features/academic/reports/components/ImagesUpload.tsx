@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 
-export const ImagenesUpload = () => {
+export const ImagesUpload = () => {
 	const [imagenesPreview, setImagenesPreview] = useState<string[]>([]);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 

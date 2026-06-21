@@ -6,7 +6,7 @@ import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { TCenterDepartment } from '@api/centers';
 import { TAcademicCommonProps } from '@api/periods';
 import { useModal } from '@shared/hooks';
-import { courseClassroomSchema } from '@features/index';
+import { courseClassroomSchema } from '../schemas';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import {
 	TCourseClassroom,

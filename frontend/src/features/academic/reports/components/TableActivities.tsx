@@ -6,7 +6,7 @@ import { PreviewImages } from './PreviewImages';
 import { activityRegistrationStatus, EActivityType } from '@shared/constants';
 import { useModal } from '@shared/hooks';
 import { Button, ModalBase } from '@shared/components';
-import { ComplementaryActivity } from '@features/academic/activities/components';
+import { ComplementaryActivity } from './ComplementaryActivity';
 import {
 	TComplementaryActivity,
 	useDeleteComplementaryActivity,
@@ -23,8 +23,7 @@ export const TableActivities = ({
 	activities: TComplementaryActivity[];
 	mode: 'view' | 'edit';
 }) => {
-	const { delComplementaryActivity } =
-		useDeleteComplementaryActivity(reportId);
+	const { delComplementaryActivity } = useDeleteComplementaryActivity(reportId);
 
 	// Modal
 	const [showModal, handleShowModal, handleCloseModal] = useModal();

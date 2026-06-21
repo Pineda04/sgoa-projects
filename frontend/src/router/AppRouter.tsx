@@ -9,12 +9,12 @@ import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
 import { periodsRoutes } from '@features/academic/periods/routes';
 import { coursesRoutes } from '@features/academic/courses/routes';
-import { courseClassroomsRoutes } from '@features/academic/course-classrooms/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
+import { dashboardsRoutes } from '@features/academic/dashboards';
 
 const router = createBrowserRouter(
 	[
@@ -45,27 +45,21 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'admin/users/*',
-			element: <PrivateRoute />,
-			children: usersRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
-			path: 'academic/periods',
-			element: <PrivateRoute />,
-			children: periodsRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
 			path: 'academic/courses/*',
 			element: <PrivateRoute />,
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/course-classrooms/*',
+			path: 'academic/dashboards/*',
 			element: <PrivateRoute />,
-			children: courseClassroomsRoutes,
+			children: dashboardsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'academic/periods',
+			element: <PrivateRoute />,
+			children: periodsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
@@ -78,6 +72,12 @@ const router = createBrowserRouter(
 			path: 'academic/reports/*',
 			element: <PrivateRoute />,
 			children: reportsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/users/*',
+			element: <PrivateRoute />,
+			children: usersRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

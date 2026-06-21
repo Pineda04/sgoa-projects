@@ -1,7 +1,7 @@
 import { useGetAllDepartments } from '@api/departments';
-import { useAuth, useUser } from '@config/providers';
+import { useAbility } from '@config';
+import { useUser } from '@config/providers';
 import { Loading } from '@shared/components';
-import { EUserRole } from '@shared/constants';
 
 interface CourseDepartmentSelectProps {
 	value: string;
@@ -11,13 +11,6 @@ interface CourseDepartmentSelectProps {
 	touched?: boolean;
 }
 
-const ALLOWED_ROLES = [
-	EUserRole.ADMIN,
-	EUserRole.DIRECCION,
-	EUserRole.RRHH,
-	EUserRole.COORDINADOR_AREA,
-];
-
 export const CourseDepartmentSelect = ({
 	value,
 	onChange,
@@ -25,32 +18,27 @@ export const CourseDepartmentSelect = ({
 	error,
 	touched,
 }: CourseDepartmentSelectProps) => {
-	const {
-		authState: { user },
-	} = useAuth();
-
+	const ability = useAbility();
 	const { headPositions, isLoading: isLoadingUser } = useUser();
-
 	const departmentsQuery = useGetAllDepartments();
 
-	const userRoles = (user?.roles ?? []) as EUserRole[];
-	const hasPriorityRole = userRoles.some(r =>
-		[EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH].includes(r)
-	);
-	const isCoordinatorOnly =
-		userRoles.includes(EUserRole.COORDINADOR_AREA) && !hasPriorityRole;
-	const isAllowedRole = userRoles.some(r => ALLOWED_ROLES.includes(r));
+	const canManageDepartments = ability.can('manage', 'departments');
+	const canUpdateDepartments = ability.can('update', 'departments');
+	const canReadDepartments =
+		ability.can('read', 'departments') &&
+		!canManageDepartments &&
+		!canUpdateDepartments;
 
 	const isLoadingCoordinator = isLoadingUser;
 	const isLoadingDepartments = departmentsQuery.isLoading;
 
-	const isLoading = isCoordinatorOnly
+	const isLoading = canReadDepartments
 		? isLoadingCoordinator
 		: isLoadingDepartments;
 
 	if (isLoading) return <Loading />;
 
-	if (!isAllowedRole) {
+	if (!ability.can('read', 'departments')) {
 		return (
 			<div className="md:col-span-2 space-y-2">
 				<p className="text-sm text-muted-foreground">
@@ -67,7 +55,7 @@ export const CourseDepartmentSelect = ({
 	};
 
 	const getDepartments = (): DepartmentOption[] => {
-		if (isCoordinatorOnly) {
+		if (canReadDepartments) {
 			return headPositions.map(p => ({
 				id: p.department.id,
 				name: p.department.name,
@@ -112,7 +100,7 @@ export const CourseDepartmentSelect = ({
 				<option value="">Seleccione un departamento</option>
 				{departments.map(dept => (
 					<option key={dept.id} value={dept.id}>
-						{isCoordinatorOnly
+						{canReadDepartments
 							? dept.name
 							: dept.name +
 								(dept.coordinations &&

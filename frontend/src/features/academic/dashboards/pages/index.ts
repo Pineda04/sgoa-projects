@@ -1,3 +1,3 @@
 export * from './DashboardCoordinator';
-export * from './DashboardTeacher';
 export * from './DashboardAuthorities';
+export * from './DashboardTeacher';

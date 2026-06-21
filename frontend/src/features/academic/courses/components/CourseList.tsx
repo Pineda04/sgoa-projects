@@ -4,8 +4,7 @@ import { EyeIcon, Plus } from 'lucide-react';
 import { CourseDepartmentFilter } from './CourseDepartmentFilter';
 import { Button, Error, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
 import { ICoursesListProps, TCourse, useGetAllCourses, useSearchCourses } from '@api/courses';
-import { useAuth } from '@config/providers';
-import { EUserRole } from '@shared/constants';
+import { useAbility } from '@config';
 import { useDebounce } from '@shared/hooks';
 
 interface CourseWithDepartment extends TCourse {
@@ -82,10 +81,8 @@ export const CourseList = ({
 	showDepartmentInTable = false,
 }: ICoursesListProps) => {
 	const navigate = useNavigate();
-	const { authState } = useAuth();
-	const userRoles = (authState.user?.roles ?? []) as EUserRole[];
-	const canCreateCourse = userRoles.includes(EUserRole.COORDINADOR_AREA) ||
-		[EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH].some(r => userRoles.includes(r));
+	const ability = useAbility();
+	const canCreateCourse = ability.can('create', 'courses');
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
 		centerDepartmentId ?? ''

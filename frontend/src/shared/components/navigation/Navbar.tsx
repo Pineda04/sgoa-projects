@@ -1,5 +1,5 @@
 import '../../../App.css';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { UserMenu } from './UserMenu';
 import {
 	Bars3Icon,
@@ -9,8 +9,7 @@ import {
 	BookOpenIcon,
 	WrenchScrewdriverIcon,
 	CubeIcon,
-	HomeIcon,
-	QuestionMarkCircleIcon,
+	ChartBarSquareIcon,
 } from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
@@ -31,17 +30,12 @@ interface ModuleConfig {
 	disabled?: boolean;
 }
 
-const MODULES: ModuleConfig[] = [
+	const MODULES: ModuleConfig[] = [
 	{
-		id: 'home',
-		label: 'Inicio',
-		icon: HomeIcon,
-		sections: [
-			{
-				label: 'Inicio',
-				path: '/home',
-			},
-		],
+		id: 'dashboard',
+		label: 'Panel de Control',
+		icon: ChartBarSquareIcon,
+		sections: [],
 	},
 	{
 		id: 'admin',
@@ -66,10 +60,6 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Asignaturas',
 				path: '/academic/courses',
-			},
-			{
-				label: 'Secciones',
-				path: '/academic/course-classrooms',
 			},
 			{
 				label: 'Planificaciones',
@@ -99,17 +89,6 @@ const MODULES: ModuleConfig[] = [
 		sections: [],
 		disabled: true,
 	},
-	{
-		id: 'help',
-		label: 'Ayuda',
-		icon: QuestionMarkCircleIcon,
-		sections: [
-			{
-				label: 'Ayuda',
-				path: '/help',
-			},
-		],
-	},
 ];
 
 const moduleSubjectMap: Record<string, Subjects> = {
@@ -121,23 +100,56 @@ const moduleSubjectMap: Record<string, Subjects> = {
 	help: 'help',
 };
 
+const DASHBOARD_CONFIG = [
+	{ roles: ['ADMIN', 'DIRECCION', 'RRHH'], path: '/academic/dashboards/authorities', label: 'Autoridades' },
+	{ roles: ['COORDINADOR_AREA'], path: '/academic/dashboards/coordinator', label: 'Coordinación' },
+	{ roles: ['DOCENTE'], path: '/academic/dashboards/teacher', label: 'Docencia' },
+] as const;
+
 export const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 	const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(null);
-	const {	authState: { isAuthenticated, isLoading } } = useAuth();
+	const {	authState: { isAuthenticated, isLoading, user } } = useAuth();
 	const navbarRef = useRef<HTMLDivElement>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
 	const ability = useAbility();
 
-	const visibleModules = MODULES.filter(mod => {
-		if (!isAuthenticated) return false;
-		if (mod.id === 'home') return true;
-		const subject = moduleSubjectMap[mod.id];
-		if (!subject) return false;
-		return ability.can('read', subject);
-	});
+	const availableDashboards = useMemo(() => {
+		if (!user?.roles) return [];
+		return DASHBOARD_CONFIG.filter(({ roles }) =>
+			roles.some(r => user.roles.includes(r))
+		);
+	}, [user?.roles]);
+
+	const dashboardSections: SectionConfig[] = useMemo(
+		() => availableDashboards.map(d => ({ label: d.label, path: d.path })),
+		[availableDashboards]
+	);
+
+	const modulesWithSections = useMemo(() =>
+		MODULES.map(mod =>
+			mod.id === 'dashboard'
+				? { ...mod, sections: dashboardSections }
+				: mod
+		),
+		[dashboardSections]
+	);
+
+	const visibleModules = useMemo(() => {
+		const mods = modulesWithSections.filter(mod => {
+			if (!isAuthenticated) return false;
+			if (mod.id === 'home' || mod.id === 'dashboard') return true;
+			const subject = moduleSubjectMap[mod.id];
+			if (!subject) return false;
+			return ability.can('read', subject);
+		});
+		if (availableDashboards.length === 0) {
+			return mods.filter(m => m.id !== 'dashboard');
+		}
+		return mods;
+	}, [isAuthenticated, ability, availableDashboards, modulesWithSections]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -164,7 +176,7 @@ export const Navbar = () => {
 	};
 
 	const isModuleActive = (moduleId: string): boolean => {
-		const mod = MODULES.find(m => m.id === moduleId);
+		const mod = modulesWithSections.find(m => m.id === moduleId);
 		if (!mod) return false;
 		return mod.sections.some(s =>
 			location.pathname.startsWith(s.path.replace(/\/:\w+/g, ''))
@@ -219,15 +231,17 @@ export const Navbar = () => {
 		<nav
 			ref={navbarRef}
 			className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
-		>
-			<Link
-				to={'/home'}
-				className="flex items-center gap-2 md:gap-3 group"
-			>
-				<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
-					SPI UNAH
-				</span>
-			</Link>
+    >
+      <div>
+  			<Link
+  				to={'/home'}
+  				className="flex items-center gap-2 md:gap-3 group"
+  			>
+  				<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
+  					SPI UNAH
+  				</span>
+        </Link>
+      </div>
 
 			{visibleModules.length > 0 && (
 				<>

@@ -26,14 +26,11 @@ const tags: Record<keyof IAcademicPositionSelected, EPosition> = {
 	director: EPosition.DIRECTOR,
 	academicSecretary: EPosition.ACADEMIC_SECRETARY,
 	departmentHead: EPosition.DEPARTMENT_HEAD,
-	undergraduateAcademicCoordinator:
-		EPosition.UNDERGRADUATE_ACADEMIC_COORDINATOR,
-	postgraduateAcademicCoordinator:
-		EPosition.POSTGRADUATE_ACADEMIC_COORDINATOR,
+	undergraduateAcademicCoordinator: EPosition.UNDERGRADUATE_ACADEMIC_COORDINATOR,
+	postgraduateAcademicCoordinator: EPosition.POSTGRADUATE_ACADEMIC_COORDINATOR,
 	courseCoordinator: EPosition.COURSE_COORDINATOR,
 	researchCoordinator: EPosition.RESEARCH_COORDINATOR,
-	universitySocietyLinkageCoordinator:
-		EPosition.UNIVERSITY_SOCIETY_LINKAGE_COORDINATOR,
+	universitySocietyLinkageCoordinator: EPosition.UNIVERSITY_SOCIETY_LINKAGE_COORDINATOR,
 	curricularDesignCoordinator: EPosition.CURRICULAR_DESIGN_COORDINATOR,
 	generalCouncilMember: EPosition.GENERAL_COUNCIL_MEMBER,
 	none: EPosition.NONE,

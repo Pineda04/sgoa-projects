@@ -7,6 +7,7 @@ import {
 	LockClosedIcon,
 	ArrowLeftStartOnRectangleIcon,
 	XMarkIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
 import { useModal } from '@shared/hooks';
@@ -17,7 +18,9 @@ export const UserMenu = () => {
 	const searchRef = useRef<HTMLDivElement>(null);
 	const handleToggle = () => setIsOpen(!isOpen);
 	const [isOpen, setIsOpen] = useState(false);
-	const { authState: { user } } = useAuth();
+	const {
+		authState: { user },
+	} = useAuth();
 	const { user: userInfo } = useUser();
 	const { logout } = useContext(AuthContext);
 	const [
@@ -118,6 +121,7 @@ export const UserMenu = () => {
 						</div>
 
 						<div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+							{/* Perfil */}
 							<button
 								onClick={handleProfile}
 								disabled={!userInfo}
@@ -144,6 +148,7 @@ export const UserMenu = () => {
 								</div>
 							</button>
 
+							{/* Cambiar contraseña */}
 							<button
 								onClick={handleChangePassword}
 								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
@@ -157,6 +162,22 @@ export const UserMenu = () => {
 									</p>
 									<p className="text-xs text-gray-400 mt-0.5">
 										Actualiza tu clave de acceso
+									</p>
+								</div>
+							</button>
+
+							{/* Ayuda */}
+							<button
+								onClick={() => navigate('/help')}
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+							>
+								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+									<QuestionMarkCircleIcon className="size-4.5" />
+								</div>
+								<div>
+									<p className="text-sm font-medium">Ayuda</p>
+									<p className="text-xs text-gray-400 mt-0.5">
+										Consulta el manual de soporte
 									</p>
 								</div>
 							</button>
