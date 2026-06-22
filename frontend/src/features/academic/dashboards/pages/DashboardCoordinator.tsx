@@ -31,7 +31,7 @@ export const DashboardCoordinator = () => {
 				<TabsContent value="0">
 					<div className="flex flex-row gap-10 justify-center mb-2 mt-4">
 						<Link
-							to={`/academic/course-classrooms/${centerDepartmentId}/planifications/new`}
+							to={`/academic/planifications/new/${centerDepartmentId}`}
 							style={{
 								pointerEvents: centerDepartmentId
 									? 'auto'

@@ -30,7 +30,7 @@ interface ModuleConfig {
 	disabled?: boolean;
 }
 
-	const MODULES: ModuleConfig[] = [
+const MODULES: ModuleConfig[] = [
 	{
 		id: 'dashboard',
 		label: 'Panel de Control',
@@ -101,16 +101,32 @@ const moduleSubjectMap: Record<string, Subjects> = {
 };
 
 const DASHBOARD_CONFIG = [
-	{ roles: ['ADMIN', 'DIRECCION', 'RRHH'], path: '/academic/dashboards/authorities', label: 'Autoridades' },
-	{ roles: ['COORDINADOR_AREA'], path: '/academic/dashboards/coordinator', label: 'Coordinación' },
-	{ roles: ['DOCENTE'], path: '/academic/dashboards/teacher', label: 'Docencia' },
+	{
+		roles: ['ADMIN', 'DIRECCION', 'RRHH'],
+		path: '/academic/dashboards/authorities',
+		label: 'Autoridades',
+	},
+	{
+		roles: ['COORDINADOR_AREA'],
+		path: '/academic/dashboards/coordinator',
+		label: 'Coordinación',
+	},
+	{
+		roles: ['DOCENTE'],
+		path: '/academic/dashboards/teacher',
+		label: 'Docencia',
+	},
 ] as const;
 
 export const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-	const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(null);
-	const {	authState: { isAuthenticated, isLoading, user } } = useAuth();
+	const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(
+		null
+	);
+	const {
+		authState: { isAuthenticated, isLoading, user },
+	} = useAuth();
 	const navbarRef = useRef<HTMLDivElement>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -128,12 +144,13 @@ export const Navbar = () => {
 		[availableDashboards]
 	);
 
-	const modulesWithSections = useMemo(() =>
-		MODULES.map(mod =>
-			mod.id === 'dashboard'
-				? { ...mod, sections: dashboardSections }
-				: mod
-		),
+	const modulesWithSections = useMemo(
+		() =>
+			MODULES.map(mod =>
+				mod.id === 'dashboard'
+					? { ...mod, sections: dashboardSections }
+					: mod
+			),
 		[dashboardSections]
 	);
 
@@ -231,17 +248,17 @@ export const Navbar = () => {
 		<nav
 			ref={navbarRef}
 			className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
-    >
-      <div>
-  			<Link
-  				to={'/home'}
-  				className="flex items-center gap-2 md:gap-3 group"
-  			>
-  				<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
-  					SPI UNAH
-  				</span>
-        </Link>
-      </div>
+		>
+			<div>
+				<Link
+					to={'/home'}
+					className="flex items-center gap-2 md:gap-3 group"
+				>
+					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
+						SPI UNAH
+					</span>
+				</Link>
+			</div>
 
 			{visibleModules.length > 0 && (
 				<>
@@ -249,9 +266,7 @@ export const Navbar = () => {
 						{visibleModules.map(mod => (
 							<div key={mod.id} className="relative">
 								<button
-									onClick={() =>
-										handleModuleClick(mod.id)
-									}
+									onClick={() => handleModuleClick(mod.id)}
 									className={`
                     flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
                     text-white/80 hover:bg-white/10 hover:text-white`}
@@ -274,19 +289,16 @@ export const Navbar = () => {
 
 								{openDropdownId === mod.id &&
 									mod.sections.length > 0 && (
-									<div
-										className="absolute top-full left-0 mt-2 min-w-52 bg-white rounded-xl shadow-2xl border border-gray-100
+										<div
+											className="absolute top-full left-0 mt-2 min-w-52 bg-white rounded-xl shadow-2xl border border-gray-100
 												py-2 animate-in scale-in origin-top-left overflow-hidden"
-									>
-										{mod.sections.map(
-											section => (
+										>
+											{mod.sections.map(section => (
 												<Link
 													key={section.path}
 													to={section.path}
 													onClick={() =>
-														setOpenDropdownId(
-															null
-														)
+														setOpenDropdownId(null)
 													}
 													className={`block px-4 py-2.5 text-sm transition-colors duration-150 border-b border-gray-50 last:border-b-0
 													${
@@ -296,27 +308,25 @@ export const Navbar = () => {
 															? 'text-primary font-semibold bg-primary/5'
 															: 'text-gray-700 hover:bg-gray-50 hover:text-primary'
 													}`}
-														>
-														<div className="flex items-center gap-2">
-															<span
-																className={`w-1 h-1 rounded-full ${
-																	isSectionActive(
-																		section.path
-																	)
-																		? 'bg-primary'
-																		: 'bg-gray-300'
-																}`}
-															/>
-															{section.label}
-														</div>
-													</Link>
-											)
-										)}
-									</div>
-								)}
+												>
+													<div className="flex items-center gap-2">
+														<span
+															className={`w-1 h-1 rounded-full ${
+																isSectionActive(
+																	section.path
+																)
+																	? 'bg-primary'
+																	: 'bg-gray-300'
+															}`}
+														/>
+														{section.label}
+													</div>
+												</Link>
+											))}
+										</div>
+									)}
 
-								{openDropdownId === mod.id &&
-									mod.disabled && (
+								{openDropdownId === mod.id && mod.disabled && (
 									<div
 										className="absolute top-full left-0 mt-2 min-w-40 bg-white rounded-xl shadow-2xl border border-gray-100
 										py-4 px-4 animate-in scale-in origin-top-left text-center"
@@ -341,16 +351,10 @@ export const Navbar = () => {
 									<button
 										onClick={() => {
 											if (mod.disabled) return;
-											if (
-												mod.sections.length <= 1
-											) {
-												if (
-													mod.sections.length ===
-													1
-												) {
+											if (mod.sections.length <= 1) {
+												if (mod.sections.length === 1) {
 													navigate(
-														mod.sections[0]
-															.path
+														mod.sections[0].path
 													);
 												}
 												setIsOpen(false);
@@ -383,8 +387,7 @@ export const Navbar = () => {
 										{mod.sections.length > 1 && (
 											<ChevronDownIcon
 												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${
-													mobileExpandedId ===
-													mod.id
+													mobileExpandedId === mod.id
 														? 'rotate-180'
 														: ''
 												}`}
@@ -394,20 +397,13 @@ export const Navbar = () => {
 
 									{mobileExpandedId === mod.id &&
 										mod.sections.length > 1 && (
-										<div className="ml-5 mt-1 space-y-0.5 border-l-2 border-white/10 pl-4">
-											{mod.sections.map(
-												section => (
+											<div className="ml-5 mt-1 space-y-0.5 border-l-2 border-white/10 pl-4">
+												{mod.sections.map(section => (
 													<Link
-														key={
-															section.path
-														}
-														to={
-															section.path
-														}
+														key={section.path}
+														to={section.path}
 														onClick={() =>
-															setIsOpen(
-																false
-															)
+															setIsOpen(false)
 														}
 														className={`block px-4 py-2.5 rounded-lg text-sm transition-colors duration-150
 																	${
@@ -420,10 +416,9 @@ export const Navbar = () => {
 													>
 														{section.label}
 													</Link>
-												)
-											)}
-										</div>
-									)}
+												))}
+											</div>
+										)}
 								</div>
 							))}
 						</div>

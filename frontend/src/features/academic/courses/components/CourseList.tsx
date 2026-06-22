@@ -16,7 +16,7 @@ import {
 	useGetAllCourses,
 	useSearchCourses,
 } from '@api/courses';
-import { useAbility } from '@config';
+import { useAbility, useAuth } from '@config';
 import { useDebounce } from '@shared/hooks';
 
 interface CourseWithDepartment extends TCourse {
@@ -94,6 +94,9 @@ export const CourseList = ({
 }: ICoursesListProps) => {
 	const navigate = useNavigate();
 	const ability = useAbility();
+	const { authState: { user } } = useAuth();
+	const roles = user?.roles ?? [];
+	const isCoordinatorOnly = roles.includes('COORDINADOR_AREA') && !roles.some(r => ['ADMIN', 'DIRECCION', 'RRHH'].includes(r));
 	const canCreateCourse = ability.can('create', 'courses');
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
@@ -157,7 +160,7 @@ export const CourseList = ({
 	return (
 		<div className="space-y-4">
 			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0">
-				<div className="w-full">
+				<div className="w-full col-span-1">
 					<label className="block mb-2 font-semibold text-sm text-foreground">
 						Búsqueda por término
 					</label>
@@ -170,26 +173,30 @@ export const CourseList = ({
 						}
 						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 					/>
+        </div>
+         <div className="w-full col-span-2">
+  				{showDepartmentFilter && !isCoordinatorOnly && (
+  					<CourseDepartmentFilter
+  						value={selectedDepartment}
+  						centerId={centerId}
+  						onChange={setSelectedDepartment}
+  						onCenterChange={handleCenterChange}
+  					/>
+  				)}
+         </div>
+         <div className={`w-full col-span-1 ${!showDepartmentFilter || isCoordinatorOnly ? 'md:col-start-4' : ''}`}>
+  				{canCreateCourse && (
+  					<div className="flex sm:justify-end justify-start">
+  						<Button
+  							onClick={() => navigate('/academic/courses/new')}
+  							className="bg-green-600 hover:bg-green-700"
+  						>
+  							<Plus className="size-4 mr-1" />
+  							Nueva Clase
+  						</Button>
+  					</div>
+  				)}
 				</div>
-				{showDepartmentFilter && (
-					<CourseDepartmentFilter
-						value={selectedDepartment}
-						centerId={centerId}
-						onChange={setSelectedDepartment}
-						onCenterChange={handleCenterChange}
-					/>
-				)}
-				{canCreateCourse && (
-					<div className="flex w-full sm:justify-end justify-start">
-						<Button
-							onClick={() => navigate('/academic/courses/new')}
-							className="bg-green-600 hover:bg-green-700"
-						>
-							<Plus className="size-4 mr-1" />
-							Nueva Clase
-						</Button>
-					</div>
-				)}
 			</div>
 
 			<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">

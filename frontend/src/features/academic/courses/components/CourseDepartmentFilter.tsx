@@ -23,8 +23,9 @@ export const CourseDepartmentFilter = ({
 	if (isLoading) return <Loading />;
 
 	return (
-		<>
-			<div>
+    <div className='grid grid-cols-1 md:grid-cols-2 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0'>
+      {/* Centro */}
+			<div className='w-full'>
 				<label
 					className="block mb-2 font-semibold text-sm text-foreground"
 					htmlFor="center"
@@ -47,27 +48,29 @@ export const CourseDepartmentFilter = ({
 					value={centerId}
 				>
 					<option value="" disabled>
-						Seleccione
+						Seleccionar Centro
 					</option>
 					{centers.data &&
 						setOptions<TAcademicCommonProps>(centers.data ?? [])}
 				</select>
-			</div>
-			<div>
+      </div>
+			{/* Departamento */}
+			<div className='w-full'>
 				<label className="block mb-2 font-semibold text-sm text-foreground">
 					Departamento
 				</label>
 				<select
 					value={value}
+					disabled={!centerId}
 					onChange={e => {
 						const centerDepartmentId =
 							e.target.options[e.target.selectedIndex].id;
 
 						onChange(centerDepartmentId);
 					}}
-					className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+					className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					<option value="">Todos los departamentos</option>
+					<option value="">{centerId ? 'Todos los departamentos' : 'Seleccione un centro'}</option>
 					{centerInfo.data &&
 						centerInfo.data.departments.map(
 							({ name, centerDepartmentId }) => (
@@ -82,6 +85,6 @@ export const CourseDepartmentFilter = ({
 						)}
 				</select>
 			</div>
-		</>
+    </div>
 	);
 };

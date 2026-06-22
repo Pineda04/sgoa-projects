@@ -26,7 +26,7 @@ export const InfoCoordinator = ({
 		if (!centerDepartmentId && currentUser.headPositions.length > 0) {
 			const defaultId = currentUser.headPositions[0].centerDepartmentId;
 
-			navigate(`/academic/course-classrooms/${defaultId}`, {
+			navigate(`/academic/dashboards/coordinator/${defaultId}`, {
 				replace: true,
 			});
 		}
@@ -71,7 +71,7 @@ export const InfoCoordinator = ({
 						onChange={e => {
 							const newId = e.target.value;
 							navigate(
-								`/academic/course-classrooms/${newId}`
+								`/academic/dashboards/coordinator/${newId}`
 							);
 						}}
 					>
