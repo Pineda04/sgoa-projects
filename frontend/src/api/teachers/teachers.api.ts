@@ -1,0 +1,77 @@
+import {
+	TCoordination,
+	TOutputTeacher,
+	TOutputTeacherPosition,
+	TTeacherBasicInfo,
+	TTeacherPosition,
+	TTeachingSession,
+	TTeachingSessionOmit,
+} from './teachers.types';
+import { TAcademicCommonProps } from '../periods/periods.types';
+import { IResponse } from '@shared/interfaces';
+import { api } from '@config/lib';
+
+export const teachersApi = {
+	getAllTeachers: (page: number, size: number) =>
+		api.get<IResponse<TOutputTeacherPosition[]>>(
+			`/teachers?page=${page}&size=${size}`
+		),
+
+	getOneTeacher: (id: string) =>
+		api.get<IResponse<TOutputTeacherPosition>>(`/teachers/${id}`),
+
+	getTeachersBySearchTerm: (
+		searchTerm: string,
+		page: number = 1,
+		size: number = 50
+	) =>
+		api.get<IResponse<TTeacherBasicInfo[]>>(
+			`/teachers/search?searchTerm=${searchTerm}&page=${page}&size=${size}`
+		),
+
+	getCurrentTeacher: () =>
+		api.get<IResponse<TOutputTeacherPosition>>(`/teachers/my`),
+
+	getOneTeacherByUserId: (id: string) =>
+		api.get<IResponse<TOutputTeacherPosition>>(`/teachers/teacher/${id}`),
+
+	getAllTeachersCoordinator: (
+		page: number,
+		size: number,
+		centerDepartmentId: string
+	) =>
+		api.get<IResponse<TOutputTeacher[]>>(
+			`/teachers/coordinator/center-department/${centerDepartmentId}?page=${page}&size=${size}`
+		),
+
+	changeStatusActiveTeacherUser: (teacherId: string) =>
+		api.delete(`/teachers/${teacherId}`),
+};
+
+export const teacherDepartmentPositionApi = {
+	getTeacherPosition: (centerDepartmentId: string) =>
+		api.get<IResponse<TTeacherPosition>>(
+			`/teacher-department-position/my/center-department/${centerDepartmentId}`
+		),
+
+	getAllMyCoordinations: () =>
+		api.get<IResponse<TCoordination[]>>(
+			`/teacher-department-position/my/coordinations`
+		),
+};
+
+export const teacherCategoriesApi = {
+	getAllTeacherCategories: () =>
+		api.get<IResponse<TAcademicCommonProps[]>>(`/teacher-categories`),
+};
+
+export const teachingSessionsApi = {
+	updateTeachingSession: (
+		teachingSessionId: string,
+		body: TTeachingSessionOmit
+	) =>
+		api.patch<IResponse<Omit<TTeachingSession, 'courseClassrooms'>>>(
+			`/teaching-sessions/${teachingSessionId}`,
+			body
+		),
+};

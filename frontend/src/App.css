@@ -199,7 +199,7 @@
 	body {
 		background-color: var(--background);
 		color: var(--foreground);
-		background-image: url('./assets/fondo-unah.webp');
+		background-image: url('/fondo-unah.webp');
 		background-size: cover;
 		background-repeat: no-repeat;
 		background-position: center;

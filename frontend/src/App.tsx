@@ -1,6 +1,6 @@
 import './App.css';
-import { AppProviders } from './app/provider';
-import { AppRouter } from './app/router';
+import { AppProviders } from './config';
+import { AppRouter } from './router';
 
 function App() {
 	return (
