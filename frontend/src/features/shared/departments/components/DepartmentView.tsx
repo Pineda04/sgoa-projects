@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { useGetAllFaculties } from '@features/shared/academic';
 import { useDeleteDepartmentMutation, useUpdateDepartment } from '../hooks';
 import { askDel } from '@features/teachers/utils/activities/delete-action';
+import { useNavigate } from 'react-router-dom';
 
 type TFacultyOption = { label: string; value: string };
 
@@ -34,6 +35,9 @@ interface IProps {
 }
 
 export const DepartmentView = ({ incomingData, isModal }: IProps) => {
+
+  const navigate = useNavigate();
+
   const faculties = useGetAllFaculties();
 
   const { updateDepartment, isPendingUpdate } = useUpdateDepartment(incomingData.id);
@@ -62,19 +66,29 @@ export const DepartmentView = ({ incomingData, isModal }: IProps) => {
     },
   });
 
-  const handleEdit = () => setIsEdit(prev => !prev);
+  const handleEdit = () => {
+    setIsEdit(prev => !prev)
+  };
 
   const onSubmitting = async (values: TUpdateDepartment) => {
     await updateDepartment({ id: incomingData.id, body: values });
     handleEdit();
+    navigate('/rrhh/departamentos');
   };
 
-  const handleDelete = async () =>
-    askDel(
+  const handleDelete = async () => {
+    const result = await askDel(
       incomingData.id,
       `eliminar el departamento <${incomingData.name}>`,
       deleteDepartment,
     );
+    if (result) {
+      // si efectivamente se eliminó se debe cerrar el modal y cargar nuevamente los departamentos, con la implementacion actual del ModalBase no permite hacer esta implementación
+      // por lo que se navegará nuevamente a la pagina con todos los departamentos
+      navigate('/rrhh/departamentos');
+    }
+  }
+
 
   // Opción actualmente seleccionada en el selector de facultad
   const selectedFaculty = useMemo<TFacultyOption | undefined>(() => {

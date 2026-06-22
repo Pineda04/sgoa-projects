@@ -11,7 +11,7 @@ export const useCreateDepartment = () =>
         onSuccess: async res => {
             alertSuccess(res);
             await Promise.all([
-                queryClient.refetchQueries({
+                queryClient.removeQueries({
                     queryKey: departmentKeys.all,
                 }),
                 //todo: verificar si se ocuparia invalidar en mas lugares

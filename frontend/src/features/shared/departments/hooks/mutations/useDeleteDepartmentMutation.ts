@@ -11,10 +11,10 @@ export const useDeleteDepartmentMutation = (departmentId: string) => {
             alertSuccess(res);
 
             await Promise.all([
-                queryClient.refetchQueries({
+                queryClient.removeQueries({
                     queryKey: departmentKeys.all,
                 }),
-                queryClient.refetchQueries({
+                queryClient.removeQueries({
                     queryKey: departmentKeys.detail(departmentId),
                 }),
                 //todo: verificar si se ocuparia invalidar en mas lugares
@@ -23,4 +23,4 @@ export const useDeleteDepartmentMutation = (departmentId: string) => {
     });
 
     return { deleteDepartment: mutateAsync, isPendingDelete: isPending };
-};
+};

@@ -10,7 +10,7 @@ import { TPosition } from 'src/modules/teachers-config/types';
 
 @Injectable()
 export class DepartmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<TDepartment> {
     // Pueden crear pero no necesariamente agregar de primeras a un departamento
@@ -92,7 +92,7 @@ export class DepartmentsService {
         name: dept.name,
         uvs: dept.uvs,
         facultyId: dept.facultyId,
-        facultyName: dept.faculty?.name,
+        facultyName: dept.faculty?.name ?? null,
         coordinations,
       };
     });

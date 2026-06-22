@@ -15,10 +15,10 @@ export const useUpdateDepartment = (departmentId: string) => {
             alertSuccess(res)
 
             await Promise.all([
-                queryClient.refetchQueries({
+                queryClient.removeQueries({
                     queryKey: departmentKeys.all,
                 }),
-                queryClient.refetchQueries({
+                queryClient.removeQueries({
                     queryKey: departmentKeys.detail(departmentId),
                 }),
                 //todo: verificar si se ocuparia invalidar en mas lugares

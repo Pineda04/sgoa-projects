@@ -6,9 +6,13 @@ export const DepartmentsRRHH = () => {
   const { isLoading, isError, data } = useGetDepartments();
   const navigate = useNavigate();
 
+  if (isError) {
+    return <p>Error al cargar los departamentos. Intenta nuevamente</p>;
+  }
+
   if (!data && !isLoading) {
     // TODO: Se puede agregar una tabla vacia o agregar algun texto como vacio o icono
-    return <p>No hay usuarios agregados...</p>;
+    return <p>No hay departamentos agregados...</p>;
   }
 
   return (

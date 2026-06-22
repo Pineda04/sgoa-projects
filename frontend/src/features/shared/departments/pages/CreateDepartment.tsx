@@ -69,7 +69,7 @@ export const CreateDepartment = () => {
                             type="text"
                             id="name"
                             name="name"
-                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
+                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                             placeholder="Ingrese el nombre del departamento"
                             onChange={handleChange}
                             onBlur={handleBlur}
@@ -90,7 +90,7 @@ export const CreateDepartment = () => {
                             id="uvs"
                             name="uvs"
                             min={0}
-                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
+                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                             placeholder="Ingrese las UVs (opcional)"
                             onChange={e => {
                                 const raw = e.target.value;
@@ -115,7 +115,7 @@ export const CreateDepartment = () => {
                         <select
                             id="faculty"
                             name="facultyId"
-                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
+                            className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                             onChange={e => {
                                 const facultyId = e.target.options[e.target.selectedIndex].id;
                                 setValues({ ...values, facultyId });

@@ -53,7 +53,7 @@ export const DepartmentTable = ({
       key: 'uvs',
       header: 'Unidades Valorativas',
       mobileLabel: 'UVs',
-      render: (row: TOutputDepartment) => row.uvs !== null ? row.uvs : '-'
+      render: (row: TOutputDepartment) => row.uvs !== null ? row.uvs : 'Sin UV'
     },
     { key: 'facultyName', header: 'Facultad', mobileLabel: 'Facultad' },
     {
@@ -62,6 +62,8 @@ export const DepartmentTable = ({
       mobileLabel: 'Acciones',
       render: (row: TOutputDepartment) => (
         <Button
+          aria-label={`Ver detalle del departamento ${row.name}`}
+          title={`Ver detalle del departamento ${row.name}`}
           onClick={() => handleSelectedDepartment(row)}
           className="cursor-pointer"
           variant="unstyled"
