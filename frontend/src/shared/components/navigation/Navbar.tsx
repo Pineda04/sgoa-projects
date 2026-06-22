@@ -87,7 +87,6 @@ const MODULES: ModuleConfig[] = [
 		label: 'Inventario',
 		icon: CubeIcon,
 		sections: [],
-		disabled: true,
 	},
 ];
 
@@ -103,17 +102,17 @@ const moduleSubjectMap: Record<string, Subjects> = {
 const DASHBOARD_CONFIG = [
 	{
 		roles: ['ADMIN', 'DIRECCION', 'RRHH'],
-		path: '/academic/dashboards/authorities',
+		path: '/dashboard/authorities',
 		label: 'Autoridades',
 	},
 	{
 		roles: ['COORDINADOR_AREA'],
-		path: '/academic/dashboards/coordinator',
+		path: '/dashboard/coordinator',
 		label: 'Coordinación',
 	},
 	{
 		roles: ['DOCENTE'],
-		path: '/academic/dashboards/teacher',
+		path: '/dashboard/teacher',
 		label: 'Docencia',
 	},
 ] as const;

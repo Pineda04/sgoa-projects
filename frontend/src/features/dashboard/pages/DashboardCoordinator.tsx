@@ -23,11 +23,12 @@ export const DashboardCoordinator = () => {
 			>
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
 					<TabsTrigger value="0">Planificaciones</TabsTrigger>
-					<TabsTrigger value="1">Gestión de usuarios</TabsTrigger>
-					<TabsTrigger value="2">Reportes</TabsTrigger>
+					<TabsTrigger value="1">Usuarios</TabsTrigger>
+					<TabsTrigger value="2">Informes</TabsTrigger>
 					<TabsTrigger value="3">Clases</TabsTrigger>
 				</TabsList>
 
+				{/* Planificaciones */}
 				<TabsContent value="0">
 					<div className="flex flex-row gap-10 justify-center mb-2 mt-4">
 						<Link
@@ -54,6 +55,7 @@ export const DashboardCoordinator = () => {
 					/>
 				</TabsContent>
 
+				{/* Usuarios */}
 				<TabsContent value="1">
 					<UsersCoordinator
 						key={centerDepartmentId}
@@ -61,6 +63,7 @@ export const DashboardCoordinator = () => {
 					/>
 				</TabsContent>
 
+				{/* Informes */}
 				<TabsContent value="2">
 					<ListAcademicAssignmentReports
 						key={centerDepartmentId}
@@ -68,6 +71,7 @@ export const DashboardCoordinator = () => {
 					/>
 				</TabsContent>
 
+				{/* Clases */}
 				<TabsContent value="3">
 					<CourseList
 						centerDepartmentId={centerDepartmentId ?? ''}

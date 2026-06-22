@@ -2,7 +2,7 @@ import { type RouteObject } from 'react-router-dom';
 import { DashboardAuthorities, DashboardCoordinator, DashboardTeacher } from '../pages';
 import { RedirectToDefaultDepartment } from './RedirectToDefaultDepartment';
 
-export const dashboardsRoutes: RouteObject[] = [
+export const dashboardRoutes: RouteObject[] = [
   {
     path: 'authorities',
     element: <DashboardAuthorities />,

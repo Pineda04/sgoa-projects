@@ -13,7 +13,7 @@ export const RedirectToDefaultDepartment = () => {
 		if (headPositions?.length > 0) {
 			const defaultId = headPositions[0].centerDepartmentId;
 
-			navigate(`/academic/dashboards/coordinator/${defaultId}`, {
+			navigate(`/dashboard/coordinator/${defaultId}`, {
 				replace: true,
 			});
 		} else {

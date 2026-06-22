@@ -11,7 +11,7 @@ export const reportsRoutes: RouteObject[] = [
     element: <AcademicAssigmentReport />,
   },
   {
-    path: 'consolidated',
+    path: '',
     element: <Consolidated />,
   },
 ];

@@ -14,7 +14,7 @@ import { reportsRoutes } from '@features/academic/reports/routes';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
-import { dashboardsRoutes } from '@features/academic/dashboards';
+import { dashboardRoutes } from '@features/dashboard';
 
 const router = createBrowserRouter(
 	[
@@ -45,15 +45,15 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/courses/*',
+			path: 'dashboard/*',
 			element: <PrivateRoute />,
-			children: coursesRoutes,
+			children: dashboardRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/dashboards/*',
+			path: 'academic/courses/*',
 			element: <PrivateRoute />,
-			children: dashboardsRoutes,
+			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

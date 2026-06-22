@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useTabWithReset } from '@shared/hooks';
-import { Button, IResponsiveColumn, ResponsiveTable, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import {
+	Button,
+	IResponsiveColumn,
+	ResponsiveTable,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@shared/components';
 
 interface FileData {
 	id: string;
@@ -34,11 +42,36 @@ export const DashboardAuthorities = () => {
 	const userColumns: IResponsiveColumn<UserData>[] = [
 		{ key: 'code', header: 'Código', mobileLabel: 'Cod.' },
 		{ key: 'name', header: 'Nombre', mobileLabel: 'Nombre' },
-		{ key: 'undergrad', header: 'Pregrado', mobileLabel: 'Pregrado', hiddenOnMobile: true },
-		{ key: 'postgrad', header: 'Posgrado', mobileLabel: 'Posgrado', hiddenOnMobile: true },
-		{ key: 'category', header: 'Categoría', mobileLabel: 'Categoría', hiddenOnMobile: true },
-		{ key: 'contract', header: 'Contratación', mobileLabel: 'Contrato', hiddenOnMobile: true },
-		{ key: 'otherData', header: 'Otros datos', mobileLabel: 'Otros', hiddenOnMobile: true },
+		{
+			key: 'undergrad',
+			header: 'Pregrado',
+			mobileLabel: 'Pregrado',
+			hiddenOnMobile: true,
+		},
+		{
+			key: 'postgrad',
+			header: 'Posgrado',
+			mobileLabel: 'Posgrado',
+			hiddenOnMobile: true,
+		},
+		{
+			key: 'category',
+			header: 'Categoría',
+			mobileLabel: 'Categoría',
+			hiddenOnMobile: true,
+		},
+		{
+			key: 'contract',
+			header: 'Contratación',
+			mobileLabel: 'Contrato',
+			hiddenOnMobile: true,
+		},
+		{
+			key: 'otherData',
+			header: 'Otros datos',
+			mobileLabel: 'Otros',
+			hiddenOnMobile: true,
+		},
 		{ key: 'actions', header: 'Acciones', mobileLabel: 'Acciones' },
 	];
 
@@ -49,7 +82,7 @@ export const DashboardAuthorities = () => {
 		<>
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold">
-					UNAH - Campus Copán IIIPAC 2025
+					UNAH - Campus Copán III PAC 2025
 				</h2>
 				<p className="text-sm">Nombre de Autoridad</p>
 				<p className="text-sm">10355</p>
@@ -57,23 +90,24 @@ export const DashboardAuthorities = () => {
 			</div>
 
 			<Tabs value={currentTab} onValueChange={setTab} className="mt-5">
-				<TabsList>
-					<TabsTrigger value="0">Informes de docentes</TabsTrigger>
-					<TabsTrigger value="1">Gestión de usuarios</TabsTrigger>
+				<TabsList variant="pills">
+					<TabsTrigger value="0">Informes</TabsTrigger>
+					<TabsTrigger value="1">Usuarios</TabsTrigger>
 				</TabsList>
 
+				{/* Informes de docentes */}
 				<TabsContent value="0">
-					<div className="flex justify-center mb-4">
+					<div className="flex justify-center my-4">
 						<input
 							type="text"
 							placeholder="Buscar informe..."
 							value={searchReport}
 							onChange={e => setSearchReport(e.target.value)}
-							className="border border-gray-300 px-4 py-2 rounded-md w-80 focus:outline-none focus:ring focus:border-blue-300"
+							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 						/>
 					</div>
 
-					<div className="py-2">
+					<div className="py-2 bg-white">
 						<ResponsiveTable<FileData>
 							columns={reportColumns}
 							data={emptyReports}
@@ -84,29 +118,27 @@ export const DashboardAuthorities = () => {
 					</div>
 				</TabsContent>
 
-				<TabsContent value="1">
-					<div className="flex flex-row gap-10 justify-center mb-5">
-						<Button
+				 {/* Usuarios */}
+				<TabsContent value="1" className="mt-4">
+					<div className="flex flex-col md:flex-row gap-4 justify-center mb-4">
+						<input
+							type="text"
+							placeholder="Buscar usuario..."
+							value={searchUser}
+							onChange={e => setSearchUser(e.target.value)}
+							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+            />
+            <Button
 							type="button"
-							className="w-fit justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500"
-							variant="unstyled"
+							className="w-fit justify-center shadow-md bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500"
+              variant="unstyled"
 						>
 							<Plus className="size-6" />
 							Nuevo usuario
 						</Button>
 					</div>
 
-					<div className="flex justify-center mb-4">
-						<input
-							type="text"
-							placeholder="Buscar usuario..."
-							value={searchUser}
-							onChange={e => setSearchUser(e.target.value)}
-							className="border border-gray-300 px-4 py-2 rounded-xl w-80 focus:outline-none focus:ring focus:border-blue-300"
-						/>
-					</div>
-
-					<div className="py-2">
+					<div className="py-2 bg-white">
 						<ResponsiveTable<UserData>
 							columns={userColumns}
 							data={emptyUsers}

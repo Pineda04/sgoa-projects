@@ -3,19 +3,19 @@ import { CreatePlanification, EditPlanification, ListPlanifications, Planificati
 
 export const planificationsRoutes: RouteObject[] = [
   {
-    path: ':id',
-    element: <Planification />,
-  },
+		path: 'new/:centerDepartmentId',
+		element: <CreatePlanification />,
+	},
+	{
+		path: 'edit/:id',
+		element: <EditPlanification />,
+	},
+	{
+		path: ':id',
+		element: <Planification />,
+	},
   {
     path: '',
     element: <ListPlanifications />,
-  },
-  {
-    path: 'new',
-    element: <CreatePlanification />,
-  },
-  {
-    path: 'edit/:id',
-    element: <EditPlanification />,
   },
 ];

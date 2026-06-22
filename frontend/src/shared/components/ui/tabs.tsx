@@ -28,6 +28,7 @@ const tabsListVariants = cva(
       variant: {
         default: "bg-muted/60 backdrop-blur-sm gap-1",
         line: "gap-3 bg-transparent border-b border-border pb-0 rounded-none",
+        // pills: "bg-white shadow-md border rounded-md gap-2 px-1",
         pills: "bg-muted/40 backdrop-blur-sm gap-2 px-1",
       },
     },

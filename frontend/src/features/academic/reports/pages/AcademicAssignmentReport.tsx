@@ -121,7 +121,7 @@ export const AcademicAssignmentReport = () => {
 				onValueChange={setTab}
 				className="mt-5"
 			>
-				<TabsList>
+				<TabsList variant="pills">
 					<TabsTrigger value="0">Docencia</TabsTrigger>
 					<TabsTrigger value="1">
 						{EActivityType.Research}

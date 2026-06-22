@@ -1,12 +1,20 @@
 import { useCallback } from 'react';
 import { IoAddSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
-import { EyeIcon, FileText, BookOpen, Users } from 'lucide-react';
+import { EyeIcon, Users } from 'lucide-react';
 import { useTabWithReset } from '@shared/hooks';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { useGetCurrentUserCourses } from '@api/courses';
 import { useGetAcademicAssignmentReportsPeriods } from '@api/assignment-reports';
-import { Button, IResponsiveColumn, ResponsiveTable, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import {
+	Button,
+	IResponsiveColumn,
+	ResponsiveTable,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@shared/components';
 import { InfoTeacher } from '../components';
 
 interface CourseData {
@@ -188,24 +196,16 @@ export const DashboardTeacher = () => {
 				value={currentTab}
 				onValueChange={setTab}
 				className="mt-4 sm:mt-8"
-      >
-        {/* TabsList */}
+			>
+				{/* TabsList */}
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
-					<TabsTrigger
-						value="0"
-						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
-					>
-						<BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
+					<TabsTrigger value="0" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
 						<span className="hidden xs:inline">
 							Clases asignadas
 						</span>
 						<span className="xs:hidden">Clases</span>
 					</TabsTrigger>
-					<TabsTrigger
-						value="1"
-						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
-					>
-						<FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+					<TabsTrigger value="1" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
 						<span className="hidden xs:inline">Informes</span>
 						<span className="xs:hidden">Informes</span>
 					</TabsTrigger>
@@ -261,9 +261,14 @@ export const DashboardTeacher = () => {
 						<div className="mt-4 sm:mt-6 bg-white">
 							<ResponsiveTable<ReportPeriod>
 								columns={reportColumns}
-								data={academicAssignmentReportsPeriodsInfo.data || []}
+								data={
+									academicAssignmentReportsPeriodsInfo.data ||
+									[]
+								}
 								getRowKey={r => r.id}
-								loading={academicAssignmentReportsPeriodsInfo.isLoading}
+								loading={
+									academicAssignmentReportsPeriodsInfo.isLoading
+								}
 								emptyMessage="No hay informes disponibles"
 								showRowNumber={false}
 							/>
