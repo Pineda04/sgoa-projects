@@ -1,8 +1,7 @@
-import { courseClassroomSchema } from '@features/academic/reports/schemas';
 import { TDepartment } from '..';
 import { TCenter } from '../centers';
 import { TAcademicCommonProps } from '../periods/periods.types';
-import { courseCreateSchema, courseUpdateSchema } from '@features/academic';
+import { courseClassroomSchema, courseCreateSchema, courseUpdateSchema } from '@features/academic';
 import z from 'zod';
 
 export type TCourse = {

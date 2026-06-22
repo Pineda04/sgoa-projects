@@ -1,5 +1,5 @@
 import { TVerificationMedia } from '@api/verification-medias';
-import { complementaryActivitySchema } from '@features/academic/activities/schemas';
+import { complementaryActivitySchema } from '@features/academic';
 import z from 'zod';
 
 export type TCreateComplementaryActivity = z.infer<
