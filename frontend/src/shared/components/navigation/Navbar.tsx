@@ -131,6 +131,9 @@ export const Navbar = () => {
 	const navigate = useNavigate();
 	const ability = useAbility();
 
+	const roles = user?.roles ?? [];
+	const isDocenteOnly = roles.includes('DOCENTE') && !roles.some(r => ['ADMIN', 'DIRECCION', 'RRHH', 'COORDINADOR_AREA'].includes(r));
+
 	const availableDashboards = useMemo(() => {
 		if (!user?.roles) return [];
 		return DASHBOARD_CONFIG.filter(({ roles }) =>
@@ -157,6 +160,7 @@ export const Navbar = () => {
 		const mods = modulesWithSections.filter(mod => {
 			if (!isAuthenticated) return false;
 			if (mod.id === 'home' || mod.id === 'dashboard') return true;
+			if (mod.id === 'academic' && isDocenteOnly) return false;
 			const subject = moduleSubjectMap[mod.id];
 			if (!subject) return false;
 			return ability.can('read', subject);

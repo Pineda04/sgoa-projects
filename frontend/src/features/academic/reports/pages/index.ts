@@ -1,3 +1,3 @@
-export * from './AcademicAssigmentReport';
+export * from './CoordinatorAssignmentReport';
 export * from './AcademicAssignmentReport';
 export * from './Consolidated';

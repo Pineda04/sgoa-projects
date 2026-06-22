@@ -11,7 +11,7 @@ import { EActivityType } from '@shared/constants';
 import { exportReportActivities, handleActivities, IReportData } from '../utils';
 import { AcademicPositionTeacher, TableActivities, TeachingSession } from '../components';
 
-export const AcademicAssigmentReport = () => {
+export const CoordinatorAssignmentReport = () => {
 	const { id } = useParams();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
@@ -96,7 +96,7 @@ export const AcademicAssigmentReport = () => {
 				onValueChange={setTab}
 				className="mt-5"
 			>
-				<TabsList>
+				<TabsList variant="pills">
 					<TabsTrigger value="0">Docencia</TabsTrigger>
 					<TabsTrigger value="1">
 						{EActivityType.Research}

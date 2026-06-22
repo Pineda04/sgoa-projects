@@ -1,5 +1,5 @@
 import { type RouteObject } from 'react-router-dom';
-import { AcademicAssigmentReport, AcademicAssignmentReport, Consolidated } from '../pages';
+import { AcademicAssignmentReport, Consolidated, CoordinatorAssignmentReport } from '../pages';
 
 export const reportsRoutes: RouteObject[] = [
   {
@@ -8,7 +8,7 @@ export const reportsRoutes: RouteObject[] = [
   },
   {
     path: 'coordinator/:id',
-    element: <AcademicAssigmentReport />,
+    element: <CoordinatorAssignmentReport />,
   },
   {
     path: '',
