@@ -85,7 +85,104 @@ export const PlanificationForm = ({
 	const useCoursesSearch = (st: string) =>
 		useGetCoursesCenterDepartmentBySearchTerm(centerDepartmentId, st);
 
-	const formik = useFormik<TPlanification>({
+	// Prefetch full objects from the APIs so we can provide a proper defaultOption
+	const teacherInitQuery = useGetTeachersBySearchTerm(
+		initialData?.teacherCode ?? ''
+	);
+
+	const courseInitQuery = useGetCoursesCenterDepartmentBySearchTerm(
+		centerDepartmentId,
+		initialData?.courseCode ?? ''
+	);
+
+	const classroomInitQuery = useGetClassroomsBySearchTerm(
+		initialData?.classroomName ?? '',
+		1,
+		50
+	);
+
+	const teacherDefaultOption =
+		teacherInitQuery.data?.data && teacherInitQuery.data.data.length
+			? {
+				value: teacherInitQuery.data.data[0].id,
+ 				label: teacherInitQuery.data.data[0].code,
+ 				data: teacherInitQuery.data.data[0],
+ 			}
+ 			: null;
+
+ 	const finalTeacherDefaultOption =
+ 		teacherDefaultOption ??
+ 		(initialData?.teacherCode
+ 			? {
+ 				value: initialData.teacherCode,
+ 				label: initialData.teacherCode,
+ 				data: {
+ 					id: initialData.teacherCode,
+ 					userId: initialData.teacherCode,
+ 					code: initialData.teacherCode,
+ 					name: initialData.teacherName ?? '',
+ 					email: null,
+ 				},
+ 			}
+ 			: null);
+
+ 	const courseDefaultOption =
+ 		courseInitQuery.data?.data && courseInitQuery.data.data.length
+ 			? {
+ 				value: courseInitQuery.data.data[0].id,
+ 				label: courseInitQuery.data.data[0].code,
+ 				data: courseInitQuery.data.data[0],
+ 			}
+ 			: null;
+
+ 	const finalCourseDefaultOption =
+ 		courseDefaultOption ??
+ 		(initialData?.courseCode
+ 			? {
+ 				value: initialData.courseCode,
+ 				label: initialData.courseCode,
+ 				data: {
+ 					id: initialData.courseCode,
+ 					code: initialData.courseCode,
+ 					name: initialData.courseName ?? '',
+ 					uvs: initialData.uv ?? 1,
+ 					activeStatus: true,
+ 					department: {
+ 						id: initialData.departmentName ?? '',
+ 						name: initialData.departmentName ?? '',
+ 					},
+ 				},
+ 			}
+ 			: null);
+
+ 	const classroomDefaultOption =
+ 		classroomInitQuery.data?.data && classroomInitQuery.data.data.length
+ 			? {
+ 				value: classroomInitQuery.data.data[0].id,
+ 				label: classroomInitQuery.data.data[0].name,
+ 				data: classroomInitQuery.data.data[0],
+ 			}
+ 			: null;
+
+ 	const finalClassroomDefaultOption =
+ 		classroomDefaultOption ??
+ 		(initialData?.classroomName
+ 			? {
+ 				value: initialData.classroomName,
+ 				label: initialData.classroomName,
+ 				data: {
+ 					id: initialData.classroomName,
+ 					name: initialData.classroomName,
+ 					building: {
+ 						id: initialData.center ?? initialData.classroomName,
+ 						name: initialData.center ?? '',
+ 					},
+ 				},
+ 			}
+ 			: null);
+
+ 	const formik = useFormik<TPlanification>({
+ 		enableReinitialize: true,
 		initialValues: initialData ?? {
 			teacherCode: '',
 			teacherName: '',
@@ -180,6 +277,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
+										defaultOption={finalTeacherDefaultOption}
 								/>
 							),
 						},
@@ -207,6 +305,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
+										defaultOption={finalCourseDefaultOption}
 								/>
 							),
 						},
@@ -273,6 +372,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
+										defaultOption={finalClassroomDefaultOption}
 								/>
 							),
 						},
@@ -295,21 +395,21 @@ export const PlanificationForm = ({
 							readOnly: true,
 						},
 					] as IFieldTag[]
-				).map(
-					({
-						label,
-						name,
-						type,
-						readOnly,
-						element,
-						checkboxLabel,
-					}) => (
+					).map(
+						({
+							label,
+							name,
+							type: fieldType,
+							readOnly,
+							element,
+							checkboxLabel,
+						}) => (
 						<div key={name}>
 							<label className="block mb-2 font-bold">
 								{label}
 							</label>
 
-							{type === FIELD_TYPE_TAG.SELECT ? (
+							{fieldType === FIELD_TYPE_TAG.SELECT ? (
 								<select
 									name={name}
 									value={
@@ -358,9 +458,11 @@ export const PlanificationForm = ({
 										LuMaMiJuVi
 									</option>
 								</select>
-							) : type === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
-								element && element
-							) : type === FIELD_TYPE_TAG.TIME_SELECT ? (
+							) : fieldType === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
+								// Render the provided custom element (SearchAsyncSelect). The select
+								// receives `defaultOption` so it will show the code when editing.
+								element ?? null
+											) : fieldType === FIELD_TYPE_TAG.TIME_SELECT ? (
 								<select
 									name={name}
 									value={
@@ -377,7 +479,7 @@ export const PlanificationForm = ({
 									</option>
 									{generateTimeOptions()}
 								</select>
-							) : type === FIELD_TYPE_TAG.CHECKBOX ? (
+							) : fieldType === FIELD_TYPE_TAG.CHECKBOX ? (
 								<div className="flex items-center gap-2">
 									<input
 										type="checkbox"
@@ -396,7 +498,7 @@ export const PlanificationForm = ({
 							) : (
 								<input
 									name={name}
-									type={type}
+									type={fieldType}
 									value={
 										typeof formik.values[
 											name as keyof TPlanification

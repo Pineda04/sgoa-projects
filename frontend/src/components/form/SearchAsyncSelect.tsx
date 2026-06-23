@@ -18,6 +18,9 @@ interface IProps<T> {
 				formatOptionLabelMeta: FormatOptionLabelMeta<IOptions<T>>
 		  ) => React.ReactNode)
 		| undefined;
+
+	/** Optional preselected option in Select shape: { value, label, data? } */
+	defaultOption?: { value: string; label: string; data?: T } | null;
 }
 
 const promiseOptions = <T,>(
@@ -34,12 +37,14 @@ const promiseOptions = <T,>(
 	);
 };
 
+
 export const SearchAsyncSelect = <T,>({
 	hook,
 	handleChange,
 	getOptionLabel,
 	getOptionValue,
 	formatOptionLabel,
+	defaultOption = null,
 }: IProps<T>) => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const { debouncedValue: debValue } = useDebounce(searchTerm, 1500);
@@ -52,10 +57,20 @@ export const SearchAsyncSelect = <T,>({
 	// 	setOptions(promiseOptions(data?.data, getOptionValue, getOptionLabel));
 	// }, [data, debValue]);
 
-	const options =
+	const fetchedOptions =
 		debValue!.length < 2
 			? []
 			: promiseOptions(data?.data, getOptionValue, getOptionLabel);
+
+	const options = defaultOption
+		? [defaultOption, ...fetchedOptions.filter(o => o.value !== defaultOption.value)]
+		: fetchedOptions;
+
+	const [selected, setSelected] = useState<{
+		value: string;
+		label: string;
+		data: T;
+	} | null>(defaultOption ? (defaultOption as any) : null);
 
 	const handleSelect = (
 		e: SingleValue<{
@@ -66,6 +81,7 @@ export const SearchAsyncSelect = <T,>({
 	) => {
 		if (!e) return;
 		handleChange(e.data);
+		setSelected(e as any);
 	};
 
 	const handleInputChange = (inputValue: string) => {
@@ -77,6 +93,7 @@ export const SearchAsyncSelect = <T,>({
 		<Select
 			isLoading={isLoading}
 			options={options}
+			value={selected}
 			inputValue={searchTerm}
 			onInputChange={handleInputChange}
 			formatOptionLabel={formatOptionLabel}

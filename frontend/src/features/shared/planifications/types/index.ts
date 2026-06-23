@@ -1,1 +1,1 @@
-export * from "./planification.interface";
+export * from '../../../coordinators/schemas/planification.schemas';

@@ -2,7 +2,7 @@ import { Button } from '@components/ui/button';
 import { PdfFontSelector } from '@components/ui/PdfFontSelector';
 import { useLocation } from 'react-router-dom';
 import { Loading } from '@components';
-import { IPlanification } from '../types';
+import { TPlanification } from '../components/schemas/planification.schemas';
 import { exportPlanification } from '../utils';
 import { useGetAllCoursesCoordinatorByPeriod } from '@features/coordinators';
 import { useUser } from '@providers/user';
@@ -38,23 +38,22 @@ export const Planification = () => {
 	// );
 
 	//datos del PDF
-	const planificationData: IPlanification[] =
+	const planificationData: TPlanification[] =
 		(coursesInfo.data &&
 			coursesInfo.data.flatMap(({ teacher, ...cc }) => ({
 				teacherName: teacher.code,
-				tacherCode: teacher.name,
-				code: cc.course.code,
-				name: cc.course.name,
+				teacherCode: teacher.name,
+				courseCode: cc.course.code,
+				courseName: cc.course.name,
+				uv: cc.course.uvs,
 				section: cc.section,
-				uvs: cc.course.uvs,
-				days: cc.days,
 				studentCount: cc.studentCount,
-				classroom: cc.classroom.name,
-				department: cc.course.department.name,
-				// coordinator: centerDepartmentInfo.data?.teacherName ?? '',
-				// center: centerDepartmentInfo.data?.center ?? '',
-				coordinator: cc.centerDepartment.coordinator.name,
+				days: cc.days,
 				center: cc.centerDepartment.center.name,
+				classroomName: cc.classroom.name,
+				departmentName: cc.course.department.name,
+				coordinator: cc.centerDepartment.coordinator.name,
+				nearGraduation: cc.nearGraduation,
 				observation: cc.observation ?? '',
 			}))) ??
 		[];

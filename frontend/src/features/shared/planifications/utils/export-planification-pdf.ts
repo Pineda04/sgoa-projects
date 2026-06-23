@@ -1,8 +1,8 @@
-import type { IPlanification } from '../types';
+import { TPlanification } from '../../../coordinators/schemas/planification.schemas';
 import { EPdfFont, getJsPdfFontName, getPdfFontPreference } from '@lib/pdf-config';
 
 export async function exportPlanification(
-	data: IPlanification[],
+	data: TPlanification[],
 	pac: number,
 	year: number,
 	responsible: string,
@@ -47,14 +47,15 @@ export async function exportPlanification(
 			'Nombre',
 			'Código',
 			'Asignatura',
-			'Sección',
 			'UV',
-			'Días',
+			'Sección',
 			'No. Alumnos',
+			'Días',
+			'Centro / Telecentro',
 			'N° de Aula',
 			'Carrera o Área',
 			'Jefe / Coordinador',
-			'Centro / Telecentro',
+			'Estudiantes por graduarse',
 			'Observaciones',
 		],
 	];
@@ -63,19 +64,22 @@ export async function exportPlanification(
 	const body = data.map((info, i) => [
 		i + 1,
 		info.teacherName,
-		info.tacherCode,
-		info.code,
-		info.name,
+		info.teacherCode,
+		info.courseCode,
+		info.courseName,
+		info.uv,
 		info.section,
-		info.uvs,
-		info.days,
 		info.studentCount,
-		info.classroom,
-		info.department,
-		info.coordinator,
+		info.days,
 		info.center,
+		info.classroomName,
+		info.departmentName,
+		info.coordinator,
+		info.nearGraduation,
 		info.observation,
 	]);
+
+	
 
 	autoTable(doc, {
 		head,
