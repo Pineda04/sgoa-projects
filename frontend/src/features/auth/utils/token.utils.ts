@@ -1,6 +1,6 @@
-import { api } from '@lib/api/axios';
-import { ITokenPayload } from '@types';
 import { jwtDecode } from 'jwt-decode';
+import { api } from '@config';
+import { ITokenPayload } from '@shared';
 
 export const setAccessToken = (token: string): void => {
 	localStorage.setItem('access_token', token);

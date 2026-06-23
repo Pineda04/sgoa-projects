@@ -7,7 +7,7 @@ export const authRoutes: RouteObject[] = [
 		element: <Login />,
 	},
 	{
-		path: 'recuperar',
+		path: 'reset-password',
 		element: <ResetPassword />,
 	},
 	{

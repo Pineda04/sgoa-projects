@@ -6,14 +6,7 @@ pre-commit:
   parallel: true
   commands:
     no-commit-to-main:
-      shell: sh
-      run: |
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        if [ "$branch" = "main" ]; then
-          echo ""
-          echo "No se puede hacer commit directamente en 'main'."
-          exit 1
-        fi
+      run: branch=$(git rev-parse --abbrev-ref HEAD) && if [ xmain = x$branch ]; then echo && echo 'No se puede hacer commit directamente en main.' && exit 1; fi
     backend-lint:
       root: "backend/"
       glob: "{src,test}/**/*.ts"

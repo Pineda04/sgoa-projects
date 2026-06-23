@@ -1,2 +1,2 @@
-export * from "./Login";
-export * from "./ResetPassword";
+export { Login } from "./Login";
+export { ResetPassword } from "./ResetPassword";

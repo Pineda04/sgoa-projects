@@ -44,42 +44,8 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   const rolesData = handleData(rolesSeed);
 
-  // Rangos
-  const commonDatesAcademicPeriods: {
-    pac: number;
-    startDate: Date;
-    endDate: Date;
-    pac_modality?: string;
-  }[] = [
-    {
-      pac: 1,
-      startDate: new Date(2025, 0, 13), // 13 de enero
-      endDate: new Date(2025, 4, 11), // 11 de mayo
-    },
-    {
-      pac: 2,
-      startDate: new Date(2025, 4, 12), // 12 de mayo
-      endDate: new Date(2025, 7, 31), // 31 de agosto
-    },
-    {
-      pac: 3,
-      startDate: new Date(2025, 8, 1), // 1 de septiembre
-      endDate: new Date(2025, 11, 20), // 20 de diciembre
-    },
-    {
-      pac: 1,
-      startDate: new Date(2025, 0, 10), // 10 de enero
-      endDate: new Date(2025, 5, 25), // 25 de junio
-      pac_modality: 'Semestre',
-    },
-    {
-      pac: 2,
-      startDate: new Date(2025, 6, 1), // 1 de julio
-      endDate: new Date(2025, 11, 20), // 20 de diciembre
-      pac_modality: 'Semestre',
-    },
-  ];
 
+ 
   const [
     roles,
     undergradDegrees,
@@ -102,7 +68,6 @@ async function main() {
     modalities,
     activityTypes,
     multimediaTypes,
-    commonDatesPeriods,
   ] = await Promise.all([
     prisma.role.createMany({
       data: rolesSeed,
@@ -188,10 +153,6 @@ async function main() {
       data: Object.values(MULTIMEDIA_TYPES).map((mt) => ({
         description: mt,
       })),
-      skipDuplicates: true,
-    }),
-    prisma.commonDatesAcademicPeriods.createMany({
-      data: commonDatesAcademicPeriods,
       skipDuplicates: true,
     }),
   ]);
@@ -324,8 +285,6 @@ async function main() {
   // Tipos de multimedia
   console.log({ multimediaTypes });
 
-  // Fechas comunes de periodos academicos
-  console.log({ commonDatesPeriods });
 }
 
 main()
