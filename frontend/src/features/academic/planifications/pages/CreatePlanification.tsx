@@ -128,9 +128,7 @@ export const CreatePlanification = () => {
 			},
 			{
 				onSuccess: () => {
-					navigate(
-						`/academic/course-classrooms/${centerDepartmentId}`
-					);
+					navigate(`/academic/planifications`);
 				},
 				onError: (error: unknown) => {
 					const axiosError = error as AxiosError<{

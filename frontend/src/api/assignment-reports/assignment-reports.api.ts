@@ -23,7 +23,7 @@ export const academicAssignmentReportsApi = {
 				courses: TPlanification[];
 				invalidElements: TPlanificationWithErrors[];
 			}>
-		>(`/assignment-reports/array/coordinator/${centerDepartmentId}`, {
+		>(`/academic-assignment-reports/array/coordinator/${centerDepartmentId}`, {
 			assignments,
 		}),
 

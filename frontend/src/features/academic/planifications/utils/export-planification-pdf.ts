@@ -1,8 +1,8 @@
-import { IPlanification } from '@api/assignment-reports';
+import { TPlanification } from '@api/assignment-reports';
 import { EPdfFont, getJsPdfFontName, getPdfFontPreference } from '@config/lib';
 
 export async function exportPlanification(
-	data: IPlanification[],
+	data: TPlanification[],
 	pac: number,
 	year: number,
 	responsible: string,
@@ -17,14 +17,12 @@ export async function exportPlanification(
 		import('jspdf-autotable'),
 	]);
 
-	//Tamano de papel y fuente
 	const doc = new jsPDF('l', 'pt', 'legal');
 	doc.setFont(jsPdfFont, 'normal');
 
 	const marginLeft = 40;
 	const headerY = 60;
 
-	//Encabezado de pagina
 	doc.setFontSize(16);
 	doc.text('UNAH Campus Copán', doc.internal.pageSize.getWidth() / 2, 40, {
 		align: 'center',
@@ -39,7 +37,6 @@ export async function exportPlanification(
 	doc.text(`Carrera o Área: ${departmentName}`, marginLeft, headerY + 20);
 	doc.text(`Responsable: ${responsible}`, marginLeft, headerY + 35);
 
-	//Encabezados de tabla
 	const head = [
 		[
 			'#',
@@ -47,19 +44,19 @@ export async function exportPlanification(
 			'Nombre',
 			'Código',
 			'Asignatura',
-			'Sección',
 			'UV',
-			'Días',
+			'Sección',
 			'No. Alumnos',
+			'Días',
+			'Centro / Telecentro',
 			'N° de Aula',
 			'Carrera o Área',
 			'Jefe / Coordinador',
-			'Centro / Telecentro',
+			'Estudiantes por graduarse',
 			'Observaciones',
 		],
 	];
 
-	// Filas de tabla
 	const body = data.map((info, i) => [
 		i + 1,
 		info.teacherCode,
@@ -72,8 +69,9 @@ export async function exportPlanification(
 		info.studentCount,
 		info.classroomName,
 		info.departmentName,
-    info.coordinator,
+		info.coordinator,
 		info.center,
+		info.nearGraduation,
 		info.observation,
 	]);
 
@@ -85,7 +83,6 @@ export async function exportPlanification(
 		headStyles: { fillColor: [20, 76, 116] },
 	});
 
-	// Espacio para firma
 	type LastAutoTable = { finalY?: number };
 	const lastTable = (doc as unknown as { lastAutoTable?: LastAutoTable })
 		.lastAutoTable;
@@ -127,7 +124,6 @@ export async function exportPlanification(
 		});
 	}
 
-	//Formato para el archivo
 	const fileName = 'Planificación académica ' + pac + 'PAC ' + year;
 	doc.save(fileName);
 }

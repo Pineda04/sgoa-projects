@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { useUser } from '@config/providers';
 import { EPdfFont } from '@config/lib';
 import { useGetAllCoursesCoordinatorByPeriod } from '@api/courses';
-import { IPlanification } from '@api/assignment-reports';
+import { TPlanification } from '@api/assignment-reports';
 import { Button, Loading } from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
 
@@ -22,13 +22,9 @@ export const Planification = () => {
 		centerDepartmentId
 	);
 
-	// Obtener la info de coordicacion, ya que esta pagina solo sera visible para coordinadores
-	// const centerDepartmentInfo = useGetTeacherPosition(centerDepartmentId);
-
 	const isLoading = [coursesInfo].some(q => q.isLoading);
 
-	//datos del PDF
-	const planificationData: IPlanification[] =
+	const planificationData: TPlanification[] =
 		(coursesInfo.data &&
 			coursesInfo.data.flatMap(({ teacher, ...cc }) => ({
 				teacherCode: teacher.code,
@@ -42,8 +38,8 @@ export const Planification = () => {
 				classroomName: cc.classroom.name,
 				departmentName: cc.course.department.name,
 				coordinator: cc.centerDepartment.coordinator.name,
-        center: cc.centerDepartment.center.name,
-        nearGraduation: cc.nearGraduation,
+				center: cc.centerDepartment.center.name,
+				nearGraduation: cc.nearGraduation,
 				observation: cc.observation ?? '',
 			}))) ??
 		[];
@@ -62,11 +58,9 @@ export const Planification = () => {
 				</h2>
 			</div>
 
-			{/*Exportar PDF*/}
 			<div className="flex flex-row gap-10 justify-center pt-10">
 					<Button
 						onClick={() => {
-							// NOTE: Un docente puede ser coordinador de varias carreras.
 							const userDepartment =
 								currentUser.headPositions.find(
 									p => p.centerDepartmentId === centerDepartmentId
@@ -95,7 +89,6 @@ export const Planification = () => {
 					/>
 			</div>
 
-			{/*Asignaciones de la carrera del coordi*/}
 			<CourseClassroomsTable coursesInfo={coursesInfo.data ?? []} />
 		</>
 	);
