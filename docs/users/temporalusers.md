@@ -1,50 +1,64 @@
-CREDENCIALES PARA LOS DISTINTOS USUARIOS SEGUN LOS ROLES QUE LES CORRESPONDA
+# Credenciales de Usuarios por Rol
 
-==========================================================================
-Rol: ADMIN
-admin1@gmail.com
-12345
+Documento de referencia con las credenciales temporales asignadas a cada rol del sistema, junto con los módulos visibles en el Navbar para cada uno.
 
-Acceso en el Navbar:
-Coordinacion, Autoridades, Clases, Gestion de Usuarios, Ayuda
-==========================================================================
+---
 
-==========================================================================
-Rol: DIRECCION
-reyna.vega@unah.edu.hn
-Temporal.12345
-Creado en el Seeder
+## Rol: ADMIN
 
-Acceso en el Navbar:
-Autoridades, Clases, Ayuda
-==========================================================================
+| Campo | Valor |
+|---|---|
+| Correo | admin1@gmail.com |
+| Contraseña | 12345 |
 
-==========================================================================
-Rol: RRHH
-rrhh2@gmail.com
-Temporal.12345
-Creado en el Seeder
+**Acceso en el Navbar:** Coordinación, Autoridades, Clases, Gestión de Usuarios, Ayuda
 
-Acceso en el Navbar:
-Gestion de Usuarios, Clases, Ayuda
-==========================================================================
+---
 
-==========================================================================
-Roles: COORDINADOR_AREA && DOCENTE
-psauceda@unah.edu.hn
-Temporal.12345
-Creado en el Seeder
+## Rol: DIRECCIÓN
 
-Acceso en el Navbar:
-Docencia, Coordinacion, Ayuda
-==========================================================================
+| Campo | Valor |
+|---|---|
+| Correo | reyna.vega@unah.edu.hn |
+| Contraseña | Temporal.12345 |
+| Origen | Creado en el Seeder |
 
-==========================================================================
-Rol: DOCENTE
-thernandezh@unah.edu.hn
-Temporal.12345
-Creado en el Seeder
+**Acceso en el Navbar:** Autoridades, Clases, Ayuda
 
-Acceso en el Navbar:
-Docencia, Coordinacion, Ayuda
-==========================================================================
+---
+
+## Rol: RRHH
+
+| Campo | Valor |
+|---|---|
+| Correo | rrhh2@gmail.com |
+| Contraseña | Temporal.12345 |
+| Origen | Creado en el Seeder |
+
+**Acceso en el Navbar:** Gestión de Usuarios, Clases, Ayuda
+
+---
+
+## Roles: COORDINADOR_AREA y DOCENTE
+
+| Campo | Valor |
+|---|---|
+| Correo | psauceda@unah.edu.hn |
+| Contraseña | Temporal.12345 |
+| Origen | Creado en el Seeder |
+
+**Acceso en el Navbar:** Docencia, Coordinación, Ayuda
+
+---
+
+## Rol: DOCENTE
+
+| Campo | Valor |
+|---|---|
+| Correo | thernandezh@unah.edu.hn |
+| Contraseña | Temporal.12345 |
+| Origen | Creado en el Seeder |
+
+**Acceso en el Navbar:** Docencia, Coordinación, Ayuda
+
+---
