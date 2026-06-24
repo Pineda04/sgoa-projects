@@ -15,6 +15,7 @@ import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
 import { dashboardRoutes } from '@features/dashboard';
+import { departmentsRoutes } from '@features/admin';
 
 const router = createBrowserRouter(
 	[
@@ -78,6 +79,12 @@ const router = createBrowserRouter(
 			path: 'admin/users/*',
 			element: <PrivateRoute />,
 			children: usersRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/departments/*',
+			element: <PrivateRoute />,
+			children: departmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
