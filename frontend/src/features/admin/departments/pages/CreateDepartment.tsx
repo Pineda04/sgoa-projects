@@ -1,13 +1,21 @@
 import { Button, Error, Loading } from '@shared/components';
 import { errorsFormik, setOptions } from '@shared/utils';
 import { useFormik } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useGetAllFaculties } from '@api/faculties';
 import { TFaculty } from '@api/faculties';
 import { TCreateDepartment, initialValuesDepartment, departmentCreateSchema } from '../schemas';
 import { useCreateDepartment } from '@api/departments';
+import { useAbility } from '@config';
 
 export const CreateDepartment = () => {
+    const ability = useAbility();
+    const canCreate = ability.can('create', 'departments');
+
+    if (!canCreate) {
+        return <Navigate to="/admin/departments" replace />;
+    }
+
     const faculties = useGetAllFaculties();
     const isLoading = faculties.isLoading;
 

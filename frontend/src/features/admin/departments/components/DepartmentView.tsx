@@ -11,6 +11,7 @@ import { useGetAllFaculties } from '@api/faculties';
 import { useDeleteDepartmentMutation, useUpdateDepartment } from '@api/departments';
 import { askDel } from '@shared/utils';
 import { useNavigate } from 'react-router-dom';
+import { useAbility } from '@config';
 
 type TFacultyOption = { label: string; value: string };
 
@@ -38,6 +39,10 @@ export const DepartmentView = ({ incomingData, isModal }: IProps) => {
     const navigate = useNavigate();
 
     const faculties = useGetAllFaculties();
+
+    const ability = useAbility();
+    const canUpdate = ability.can('update', 'departments');
+    const canDelete = ability.can('delete', 'departments');
 
     const { updateDepartment, isPendingUpdate } = useUpdateDepartment(incomingData.id);
     const { deleteDepartment, isPendingDelete } = useDeleteDepartmentMutation(incomingData.id);
@@ -121,56 +126,60 @@ export const DepartmentView = ({ incomingData, isModal }: IProps) => {
                     </h1>
 
                     <div className="mt-2 lg:mt-0 flex flex-wrap gap-2 items-center">
-                        {/* Eliminar — solo visible cuando NO se está editando */}
-                        <Button
-                            type="button"
-                            className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-red-400 transition duration-500 cursor-pointer"
-                            hidden={isEdit}
-                            onClick={handleDelete}
-                            variant="unstyled"
-                        >
-                            <Trash2 className="size-5" />
-                            Eliminar
-                        </Button>
+                        {/* Eliminar — solo visible cuando NO se está editando y tiene permisos */}
+                        {canDelete && !isEdit && (
+                            <Button
+                                type="button"
+                                className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-red-400 transition duration-500 cursor-pointer"
+                                onClick={handleDelete}
+                                variant="unstyled"
+                            >
+                                <Trash2 className="size-5" />
+                                Eliminar
+                            </Button>
+                        )}
 
-                        {/* Editar — solo visible cuando NO se está editando */}
-                        <Button
-                            type="button"
-                            className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
-                            hidden={isEdit}
-                            onClick={handleEdit}
-                            variant="unstyled"
-                        >
-                            <PencilIcon className="size-5" />
-                            Editar
-                        </Button>
+                        {/* Editar — solo visible cuando NO se está editando y tiene permisos */}
+                        {canUpdate && !isEdit && (
+                            <Button
+                                type="button"
+                                className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
+                                onClick={handleEdit}
+                                variant="unstyled"
+                            >
+                                <PencilIcon className="size-5" />
+                                Editar
+                            </Button>
+                        )}
 
-                        {/* Guardar — solo visible al editar */}
-                        <Button
-                            type="button"
-                            className="w-fit bg-[#5BC85C] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-green-300 transition duration-500 cursor-pointer"
-                            hidden={!isEdit}
-                            onClick={() => formik.handleSubmit()}
-                            variant="unstyled"
-                        >
-                            <Save className="size-5" />
-                            Guardar
-                        </Button>
+                        {/* Guardar — solo visible al editar y tiene permisos */}
+                        {canUpdate && isEdit && (
+                            <Button
+                                type="button"
+                                className="w-fit bg-[#5BC85C] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-green-300 transition duration-500 cursor-pointer"
+                                onClick={() => formik.handleSubmit()}
+                                variant="unstyled"
+                            >
+                                <Save className="size-5" />
+                                Guardar
+                            </Button>
+                        )}
 
-                        {/* Cancelar edición — solo visible al editar */}
-                        <Button
-                            type="button"
-                            className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-red-400 transition duration-500 cursor-pointer"
-                            hidden={!isEdit}
-                            onClick={() => {
-                                handleEdit();
-                                formik.resetForm({ values: initialValues });
-                            }}
-                            variant="unstyled"
-                        >
-                            <XCircle className="size-5" />
-                            Cancelar
-                        </Button>
+                        {/* Cancelar edición — solo visible al editar y tiene permisos */}
+                        {canUpdate && isEdit && (
+                            <Button
+                                type="button"
+                                className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-red-400 transition duration-500 cursor-pointer"
+                                onClick={() => {
+                                    handleEdit();
+                                    formik.resetForm({ values: initialValues });
+                                }}
+                                variant="unstyled"
+                            >
+                                <XCircle className="size-5" />
+                                Cancelar
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <hr className="h-px my-2 bg-gray-200 border-0" />

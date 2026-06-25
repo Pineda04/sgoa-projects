@@ -5,6 +5,7 @@ import { useModal } from '@shared/hooks';
 import { EyeIcon, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { DepartmentView } from "./DepartmentView";
+import { useAbility } from "@config";
 
 interface DepartmentTableProps {
     isLoading: boolean;
@@ -18,6 +19,9 @@ export const DepartmentTable = ({
     data,
     onNavigateToCreate
 }: DepartmentTableProps) => {
+
+    const ability = useAbility();
+    const canCreate = ability.can('create', 'departments');
 
     const [
         showModalUpdateDeparment,
@@ -75,17 +79,19 @@ export const DepartmentTable = ({
     return (
         <>
             <div className="mt-5">
-                <div className="flex justify-center mb-5">
-                    <Button
-                        type='button'
-                        className="w-fit justify-start bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row duration-500"
-                        onClick={onNavigateToCreate}
-                        variant="unstyled"
-                    >
-                        <Plus className="size-6" />
-                        Nuevo departamento
-                    </Button>
-                </div>
+                {canCreate && (
+                    <div className="flex justify-center mb-5">
+                        <Button
+                            type='button'
+                            className="w-fit justify-start bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row duration-500"
+                            onClick={onNavigateToCreate}
+                            variant="unstyled"
+                        >
+                            <Plus className="size-6" />
+                            Nuevo departamento
+                        </Button>
+                    </div>
+                )}
                 <DataTable
                     columns={columns}
                     data={data?.data ?? []}
