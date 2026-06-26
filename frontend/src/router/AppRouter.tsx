@@ -7,15 +7,21 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
+import { departmentsRoutes } from '@features/admin';
 import { periodsRoutes } from '@features/academic/periods/routes';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
+import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
-import { dashboardRoutes } from '@features/dashboard';
-import { departmentsRoutes } from '@features/admin';
+import {
+	DashboardAuthorities,
+	DashboardCoordinator,
+	DashboardTeacher,
+	RedirectToDefaultDepartment,
+} from '@features/dashboard';
 
 const router = createBrowserRouter(
 	[
@@ -46,52 +52,74 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'dashboard/*',
-			element: <PrivateRoute />,
-			children: dashboardRoutes,
+			path: 'dashboard/authorities',
+			element: <ProtectedRoute action="read" subject="dashboard-authorities" />,
+			children: [{ index: true, element: <DashboardAuthorities /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/coordinator',
+			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
+			children: [{ index: true, element: <RedirectToDefaultDepartment /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/coordinator/:centerDepartmentId',
+			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
+			children: [{ index: true, element: <DashboardCoordinator /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/teacher',
+			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
+			children: [{ index: true, element: <DashboardTeacher /> }],
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/courses/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/periods',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: periodsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/planifications/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: planificationsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/reports/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: reportsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'admin/users/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="users" />,
 			children: usersRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'admin/departments/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="departments" />,
 			children: departmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'infrastructure/centers',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
 			errorElement: <div>404</div>,
+		},
+		{
+			path: '*',
+			element: <Navigate to="/home" replace />,
 		},
 	],
 	{

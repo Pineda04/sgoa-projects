@@ -42,7 +42,11 @@ export type Subjects =
 	| 'user-status'
 	| 'home'
 	| 'help'
-	| 'profile';
+	| 'profile'
+	| 'academic-module'
+	| 'dashboard-authorities'
+	| 'dashboard-coordinator'
+	| 'dashboard-teacher';
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
@@ -56,6 +60,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	if (roles.includes(EUserRole.ADMIN)) {
 		can('manage', 'all');
+		cannot('read', 'dashboard-coordinator');
+		cannot('read', 'dashboard-teacher');
 		return build();
 	}
 
@@ -73,6 +79,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'periods');
 		can('read', 'faculties');
 		can('read', 'positions');
+		can('read', 'academic-module');
+		can('read', 'dashboard-authorities');
 	}
 
 	// ==================== RRHH ====================
@@ -91,6 +99,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'periods');
 		can('read', 'faculties');
 		can('read', 'positions');
+		can('read', 'academic-module');
+		can('read', 'dashboard-authorities');
 	}
 
 	// ============== COORDINADOR_AREA ==============
@@ -109,6 +119,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'contract-types');
 		can('read', 'periods');
 		can('read', 'faculties');
+		can('read', 'academic-module');
+		can('read', 'dashboard-coordinator');
 	}
 
 	// =================== DOCENTE ==================
@@ -119,6 +131,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'shifts');
 		can('read', 'contract-types');
 		can('read', 'periods');
+		can('read', 'dashboard-teacher');
 	}
 
 	return build();
