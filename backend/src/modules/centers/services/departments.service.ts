@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDepartmentDto } from '../dto/create-department.dto';
 import { UpdateDepartmentDto } from '../dto/update-department.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,10 +7,11 @@ import { TUser } from 'src/modules/users/types';
 import { TCustomPick } from 'src/common/types';
 import { EPosition } from 'src/modules/teachers-config/enums';
 import { TPosition } from 'src/modules/teachers-config/types';
+import { normalizeText } from 'src/common/utils';
 
 @Injectable()
 export class DepartmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<TDepartment> {
     // Pueden crear pero no necesariamente agregar de primeras a un departamento
@@ -92,7 +93,7 @@ export class DepartmentsService {
         name: dept.name,
         uvs: dept.uvs,
         facultyId: dept.facultyId,
-        // facultyName: dept.faculty?.name,
+        facultyName: dept.faculty?.name ?? null,
         coordinations,
       };
     });
@@ -144,13 +145,32 @@ export class DepartmentsService {
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<TDepartment> {
+    // Verificar que el departamento existe
+    const existing = await this.prisma.department.findUnique({ where: { id } });
+    if (!existing)
+      throw new NotFoundException(`El departamento con id <${id}> no fue encontrado.`);
+
+    // Validar unicidad del nombre excluyendo el propio registro
+    if (updateDepartmentDto.name !== undefined) {
+      const nameConflict = await this.prisma.department.findFirst({
+        where: {
+          name: {
+            equals: updateDepartmentDto.name,
+            mode: 'insensitive',
+          },
+          id: { not: id },
+        },
+      });
+
+      if (nameConflict)
+        throw new BadRequestException(
+          `El departamento <${updateDepartmentDto.name}> ya se encuentra registrado.`,
+        );
+    }
+
     const departmentUpdate = await this.prisma.department.update({
-      where: {
-        id,
-      },
-      data: {
-        ...updateDepartmentDto,
-      },
+      where: { id },
+      data: { ...updateDepartmentDto },
     });
 
     return departmentUpdate;

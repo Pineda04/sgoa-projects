@@ -7,6 +7,7 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
+import { departmentsRoutes } from '@features/admin';
 import { periodsRoutes } from '@features/academic/periods/routes';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
@@ -102,6 +103,12 @@ const router = createBrowserRouter(
 			path: 'admin/users/*',
 			element: <ProtectedRoute action="read" subject="users" />,
 			children: usersRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/departments/*',
+			element: <ProtectedRoute action="read" subject="departments" />,
+			children: departmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
