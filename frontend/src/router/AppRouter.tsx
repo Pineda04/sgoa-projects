@@ -15,7 +15,12 @@ import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
-import { dashboardRoutes } from '@features/dashboard';
+import {
+	DashboardAuthorities,
+	DashboardCoordinator,
+	DashboardTeacher,
+	RedirectToDefaultDepartment,
+} from '@features/dashboard';
 
 const router = createBrowserRouter(
 	[
@@ -46,9 +51,27 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'dashboard/*',
-			element: <PrivateRoute />,
-			children: dashboardRoutes,
+			path: 'dashboard/authorities',
+			element: <ProtectedRoute action="read" subject="dashboard-authorities" />,
+			children: [{ index: true, element: <DashboardAuthorities /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/coordinator',
+			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
+			children: [{ index: true, element: <RedirectToDefaultDepartment /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/coordinator/:centerDepartmentId',
+			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
+			children: [{ index: true, element: <DashboardCoordinator /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/teacher',
+			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
+			children: [{ index: true, element: <DashboardTeacher /> }],
 			errorElement: <div>404</div>,
 		},
 		{
@@ -86,6 +109,10 @@ const router = createBrowserRouter(
 			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
 			errorElement: <div>404</div>,
+		},
+		{
+			path: '*',
+			element: <Navigate to="/home" replace />,
 		},
 	],
 	{
