@@ -13,6 +13,7 @@ import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
+import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 import { dashboardRoutes } from '@features/dashboard';
 
@@ -52,37 +53,37 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/courses/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/periods',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: periodsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/planifications/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: planificationsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/reports/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: reportsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'admin/users/*',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="users" />,
 			children: usersRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'infrastructure/centers',
-			element: <PrivateRoute />,
+			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
 			errorElement: <div>404</div>,
 		},
