@@ -16,7 +16,7 @@ import {
 	useGetAllCourses,
 	useSearchCourses,
 } from '@api/courses';
-import { useAbility, useAuth } from '@config';
+import { useAbility } from '@config';
 import { useDebounce } from '@shared/hooks';
 
 interface CourseWithDepartment extends TCourse {
@@ -94,9 +94,6 @@ export const CourseList = ({
 }: ICoursesListProps) => {
 	const navigate = useNavigate();
 	const ability = useAbility();
-	const { authState: { user } } = useAuth();
-	const roles = user?.roles ?? [];
-	const isCoordinatorOnly = roles.includes('COORDINADOR_AREA') && !roles.some(r => ['ADMIN', 'DIRECCION', 'RRHH'].includes(r));
 	const canCreateCourse = ability.can('create', 'courses');
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
@@ -175,7 +172,7 @@ export const CourseList = ({
 					/>
         </div>
          <div className="w-full col-span-2">
-  				{showDepartmentFilter && !isCoordinatorOnly && (
+  				{showDepartmentFilter && ability.can('read', 'centers') && (
   					<CourseDepartmentFilter
   						value={selectedDepartment}
   						centerId={centerId}
@@ -184,7 +181,7 @@ export const CourseList = ({
   					/>
   				)}
          </div>
-         <div className={`w-full col-span-1 ${!showDepartmentFilter || isCoordinatorOnly ? 'md:col-start-4' : ''}`}>
+         <div className={`w-full col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}>
   				{canCreateCourse && (
   					<div className="flex sm:justify-end justify-start">
   						<Button

@@ -4,7 +4,7 @@ import { CourseDepartmentFilter } from './CourseDepartmentFilter';
 import { ICoursesListProps, TCourseClassroom, useGetCoursesByCenterDepartment } from '@api/courses';
 import { Error, IResponsiveColumn, Loading, ResponsiveTable } from '@shared/components';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
-import { useAuth } from '@config';
+import { useAbility } from '@config';
 
 interface CourseWithTeacher extends TCourseClassroom {
 	teacher?: {
@@ -84,9 +84,7 @@ export const CoursesList = ({
 	centerId: initialCenterId,
 	showDepartmentFilter = false,
 }: ICoursesListProps) => {
-	const { authState: { user } } = useAuth();
-	const roles = user?.roles ?? [];
-	const isCoordinatorOnly = roles.includes('COORDINADOR_AREA') && !roles.some(r => ['ADMIN', 'DIRECCION', 'RRHH'].includes(r));
+	const ability = useAbility();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const periodId = academicPeriodInfo.data?.id;
 
@@ -142,7 +140,7 @@ export const CoursesList = ({
 
 	return (
 		<div className="space-y-4">
-			{showDepartmentFilter && !isCoordinatorOnly && (
+			{showDepartmentFilter && ability.can('read', 'centers') && (
 				<CourseDepartmentFilter
 					value={selectedDepartment}
 					centerId={centerId}
