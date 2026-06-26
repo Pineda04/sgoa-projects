@@ -22,7 +22,7 @@ import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
 @Controller('departments')
 @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) {}
+  constructor(private readonly departmentsService: DepartmentsService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -60,7 +60,7 @@ export class DepartmentsController {
   }
 
   @Get(':id')
-  @Roles(EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE)
+  @Roles(EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE, EUserRole.RRHH)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del departamento.')
   @ApiParam({
