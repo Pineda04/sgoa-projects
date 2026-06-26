@@ -19,10 +19,10 @@ export const ListDepartments = () => {
     <div className="pb-8 sm:pb-12">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">
-          Gestión de departamentos
+          Gestión de Departamentos
         </h1>
         <p className="text-muted-foreground mt-1">
-          Ver todos los departamentos que ofrece la universidad
+          Visualice todos los departamentos disponibles.
         </p>
       </div>
       {

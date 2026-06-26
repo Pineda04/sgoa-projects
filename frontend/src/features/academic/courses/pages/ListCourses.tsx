@@ -12,7 +12,7 @@ export const ListCourses = () => {
 					Gestión de Asignaturas
 				</h1>
 				<p className="text-muted-foreground mt-1">
-					Ver todas las clases que ofrece la universidad
+					Ver todas las clases que ofrece la universidad.
 				</p>
 			</div>
 			<CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />
