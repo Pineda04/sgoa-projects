@@ -1,29 +1,19 @@
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { useUser } from '@config/providers';
 import { Loading } from '@shared/components';
-import { useEffect, useState } from 'react';
 
-export const InfoTeacher = () => {
+interface InfoTeacherProps {
+	selectedPosition: string;
+	onPositionChange: (value: string) => void;
+}
+
+export const InfoTeacher = ({
+	selectedPosition,
+	onPositionChange,
+}: InfoTeacherProps) => {
 	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
-	const [selectedPosition, setSelectedPosition] = useState('');
-
-	useEffect(() => {
-		if (
-			currentUser.user &&
-			currentUser.user.positions.length > 0 &&
-			!selectedPosition
-		) {
-			const defaultId = currentUser.user.positions[0].centerDepartmentId;
-
-			setSelectedPosition(defaultId);
-		}
-	}, [currentUser.user, selectedPosition]);
-
-	const handleChange = (value: string) => {
-		setSelectedPosition(value);
-	};
 
 	if (isLoading) return <Loading />;
 
@@ -48,7 +38,7 @@ export const InfoTeacher = () => {
 					<select
 						className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 shadow-sm outline-none cursor-pointer w-full sm:w-fit max-w-full"
 						value={selectedPosition}
-						onChange={e => handleChange(e.target.value)}
+						onChange={e => onPositionChange(e.target.value)}
 					>
 						{currentUser.user?.positions.map(p => (
 							<option

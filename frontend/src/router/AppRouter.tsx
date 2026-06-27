@@ -12,6 +12,7 @@ import { periodsRoutes } from '@features/academic/periods/routes';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
+import { AcademicAssignmentReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -91,6 +92,12 @@ const router = createBrowserRouter(
 			path: 'academic/planifications/*',
 			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: planificationsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'academic/reports/teacher/:id',
+			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
+			children: [{ index: true, element: <AcademicAssignmentReport /> }],
 			errorElement: <div>404</div>,
 		},
 		{
