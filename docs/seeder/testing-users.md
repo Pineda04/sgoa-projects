@@ -1,50 +1,21 @@
-# Credenciales de usuarios por rol para testing del sistema
+# Credenciales de Usuarios para Testing
 
-Documento de referencia con las credenciales temporales asignadas a cada rol existente del sistema.
+## Seed de Prisma
+Usuarios disponibles de forma inmediata al ejecutar el proyecto por primera vez.  
 
----
+| Correo | Contraseña | Rol |
+| --- | --- | --- |
+| `admin@me.com` | `12345` | `ADMIN` |
+| `direccion@me.com` | `12345` | `DIRECCION` |
+| `rrhh@me.com` | `12345` | `RRHH` |
+| `coordinator@me.com` | `12345` | `COORDINADOR_AREA` |
+| `teacher@me.com` | `12345` | `DOCENTE` |
 
-## Rol: ADMIN
+## Seed CUROC
+Estos usuarios solo estan disponibles al ejecutar el script `sql` con los datos institucionales de UNAH Campus Copán (CUROC).  
 
-| Campo | Valor |
-|---|---|
-| Correo | admin1@gmail.com |
-| Contraseña | 12345 |
-
----
-
-## Rol: DIRECCIÓN
-
-| Campo | Valor |
-|---|---|
-| Correo | reyna.vega@unah.edu.hn |
-| Contraseña | Temporal.12345 |
-
----
-
-## Rol: RRHH
-
-| Campo | Valor |
-|---|---|
-| Correo | rrhh2@gmail.com |
-| Contraseña | Temporal.12345 |
-
----
-
-## Roles: COORDINADOR_AREA y DOCENTE
-
-| Campo | Valor |
-|---|---|
-| Correo | psauceda@unah.edu.hn |
-| Contraseña | Temporal.12345 |
-
----
-
-## Rol: DOCENTE
-
-| Campo | Valor |
-|---|---|
-| Correo | thernandezh@unah.edu.hn |
-| Contraseña | Temporal.12345 |
-
----
+| Correo | Contraseña | Rol |
+| --- | --- | --- |
+| `reyna.vega@unah.edu.hn` | `Temporal.12345` | `DIRECCION` |
+| `psauceda@unah.edu.hn` | `Temporal.12345` | `COORDINADOR_AREA` & `DOCENTE` |
+| `jilopez@unah.edu.hn` | `Temporal.12345` | `DOCENTE` |
