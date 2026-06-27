@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { IAuthStateProps, IChildrenProps, ITokenPayload } from '@shared/interfaces';
 import { authApi, IAuthLogin, useLogin } from '@api/auth';
 import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
+import { queryClient } from '@config/lib';
 
 const initialState: IAuthStateProps = {
 	isAuthenticated: false,
@@ -87,6 +88,8 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 			}));
 
 			await authApi.logout();
+
+			queryClient.clear();
 
 			setAuthState({
 				...initialState,

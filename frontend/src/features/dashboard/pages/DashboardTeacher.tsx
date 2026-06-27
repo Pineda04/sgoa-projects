@@ -1,10 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IoAddSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, Users } from 'lucide-react';
 import { useTabWithReset } from '@shared/hooks';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { useGetCurrentUserCourses } from '@api/courses';
+import { TCourseClassroom } from '@api/courses';
 import { useGetAcademicAssignmentReportsPeriods } from '@api/assignment-reports';
 import {
 	Button,
@@ -15,32 +16,8 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@shared/components';
+import { useUser } from '@config/providers';
 import { InfoTeacher } from '../components';
-
-interface CourseData {
-	id: string;
-	course: {
-		code: string;
-		name: string;
-		uvs: number;
-		department: {
-			name: string;
-		};
-	};
-	section: string;
-	days: string;
-	studentCount: number;
-	classroom: {
-		name: string;
-		center: {
-			name: string;
-		};
-	};
-	coordinator: {
-		name: string;
-	};
-	observation?: string | null;
-}
 
 interface ReportPeriod {
 	id: string;
@@ -49,6 +26,7 @@ interface ReportPeriod {
 	year: number;
 	department: string;
 	center: string;
+	centerDepartmentId: string;
 	reportId: string;
 }
 
@@ -56,10 +34,43 @@ export const DashboardTeacher = () => {
 	const navigate = useNavigate();
 	const validTabs = ['0', '1'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
+	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const coursesInfo = useGetCurrentUserCourses();
 	const academicAssignmentReportsPeriodsInfo =
 		useGetAcademicAssignmentReportsPeriods();
+
+	const [selectedPosition, setSelectedPosition] = useState('');
+
+	useEffect(() => {
+		if (
+			currentUser.user &&
+			currentUser.user.positions.length > 0 &&
+			!selectedPosition
+		) {
+			setSelectedPosition(
+				currentUser.user.positions[0].centerDepartmentId
+			);
+		}
+	}, [currentUser.user, selectedPosition]);
+
+	const currentPosition = currentUser.user?.positions.find(
+		p => p.centerDepartmentId === selectedPosition
+	);
+
+	const filteredCourses =
+		coursesInfo.data?.filter(
+			c => c.classroom.center.id === currentPosition?.center.id
+		) ?? [];
+
+	const filteredReports =
+		academicAssignmentReportsPeriodsInfo.data?.filter(
+			r => r.centerDepartmentId === selectedPosition
+		) ?? [];
+
+	const currentPeriodReport = filteredReports.find(
+		r => r.id === academicPeriodInfo.data?.id
+	);
 
 	const handleView = useCallback(
 		(reportId: string, mode: 'edit' | 'view') => {
@@ -71,13 +82,13 @@ export const DashboardTeacher = () => {
 		[navigate]
 	);
 
-	const courseColumns: IResponsiveColumn<CourseData>[] = [
+	const courseColumns: IResponsiveColumn<TCourseClassroom>[] = [
 		{ key: 'course.code', header: 'Cod.', mobileLabel: 'Cod.' },
 		{
 			key: 'course.name',
 			header: 'Asignatura',
 			mobileLabel: 'Asig.',
-			render: (row: CourseData) => (
+			render: (row: TCourseClassroom) => (
 				<span className="font-medium max-w-50 truncate block">
 					{row.course.name}
 				</span>
@@ -87,7 +98,7 @@ export const DashboardTeacher = () => {
 			key: 'section',
 			header: 'Sec.',
 			mobileLabel: 'Sec.',
-			render: (row: CourseData) => (
+			render: (row: TCourseClassroom) => (
 				<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
 					{row.section}
 				</span>
@@ -104,7 +115,7 @@ export const DashboardTeacher = () => {
 			key: 'studentCount',
 			header: 'Alumnos',
 			mobileLabel: 'Alum.',
-			render: (row: CourseData) => (
+			render: (row: TCourseClassroom) => (
 				<span className="inline-flex items-center gap-1">
 					<Users className="w-3 h-3 text-muted-foreground" />
 					{row.studentCount}
@@ -178,6 +189,7 @@ export const DashboardTeacher = () => {
 			render: (row: ReportPeriod) => (
 				<Button
 					onClick={() => handleView(row.reportId, 'view')}
+					disabled={!row.reportId}
 					variant="ghost"
 					size="icon-sm"
 					className="hover:bg-primary/10 hover:text-primary"
@@ -190,7 +202,10 @@ export const DashboardTeacher = () => {
 
 	return (
 		<div className="pb-8 sm:pb-12">
-			<InfoTeacher />
+			<InfoTeacher
+				selectedPosition={selectedPosition}
+				onPositionChange={setSelectedPosition}
+			/>
 
 			<Tabs
 				value={currentTab}
@@ -214,11 +229,11 @@ export const DashboardTeacher = () => {
 				{/* Clases */}
 				<TabsContent value="0">
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">
-						<ResponsiveTable<CourseData>
+						<ResponsiveTable<TCourseClassroom>
 							columns={courseColumns}
-							data={coursesInfo.data || []}
+							data={filteredCourses}
 							getRowKey={c => c.id}
-							loading={coursesInfo.isLoading}
+							loading={coursesInfo.isLoading || currentUser.isLoading}
 							emptyMessage="No hay clases asignadas"
 						/>
 					</div>
@@ -230,20 +245,12 @@ export const DashboardTeacher = () => {
 						<Button
 							onClick={() =>
 								handleView(
-									academicAssignmentReportsPeriodsInfo.data?.find(
-										aar =>
-											aar.id ===
-											academicPeriodInfo.data?.id
-									)?.reportId ?? '',
+									currentPeriodReport?.reportId ?? '',
 									'edit'
 								)
 							}
 							disabled={
-								!academicPeriodInfo.data?.id ||
-								!academicAssignmentReportsPeriodsInfo.data?.find(
-									aar =>
-										aar.id === academicPeriodInfo.data?.id
-								)
+								!currentPeriodReport?.reportId
 							}
 							className="w-full md:w-auto text-xs sm:text-sm bg-[#C40C54] hover:bg-[#AC0647] hover:shadow-xl hover:shadow-[#C40C54]/20 hover:-translate-y-0.5"
 							variant="default"
@@ -261,10 +268,7 @@ export const DashboardTeacher = () => {
 						<div className="mt-4 sm:mt-6 bg-white">
 							<ResponsiveTable<ReportPeriod>
 								columns={reportColumns}
-								data={
-									academicAssignmentReportsPeriodsInfo.data ||
-									[]
-								}
+								data={filteredReports}
 								getRowKey={r => r.id}
 								loading={
 									academicAssignmentReportsPeriodsInfo.isLoading
