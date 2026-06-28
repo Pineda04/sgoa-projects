@@ -118,7 +118,7 @@ export const CoordinatorAssignmentReport = () => {
 					</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="0">
+				<TabsContent value="0" className='bg-white'>
 					<TeachingSession
 						reportId={id ?? ''}
 						data={assignmentReportInfo.data?.teachingSession}
@@ -126,7 +126,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="1">
+				<TabsContent value="1" className='bg-white'>
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.Research}
@@ -138,7 +138,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="2">
+				<TabsContent value="2" className='bg-white'>
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.Outreach}
@@ -150,7 +150,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="3">
+				<TabsContent value="3" className='bg-white'>
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.EducationalInnovation}
@@ -162,7 +162,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="4">
+				<TabsContent value="4" className='bg-white'>
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.CurriculumDesignOrRedesign}
@@ -174,7 +174,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="5">
+				<TabsContent value="5" className='bg-white'>
 					<AcademicPositionTeacher
 						positionTeacher={
 							(currentPosition &&
@@ -184,7 +184,7 @@ export const CoordinatorAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="6">
+				<TabsContent value="6" className='bg-white'>
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.OtherActivities}

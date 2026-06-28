@@ -70,8 +70,8 @@ const MODULES: ModuleConfig[] = [
 				path: '/academic/planifications',
 			},
 			{
-				label: 'Informes',
-				path: '/academic/reports',
+				label: 'Consolidado',
+				path: '/academic/reports/consolidated',
 			},
 		],
 	},
