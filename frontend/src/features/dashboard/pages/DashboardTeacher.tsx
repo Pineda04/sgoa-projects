@@ -242,13 +242,16 @@ export const DashboardTeacher = () => {
 				{/* Informes */}
 				<TabsContent value="1">
           <div>
-            {!currentPeriodReport?.reportId ? (
+            {academicPeriodInfo.isLoading ||
+             academicAssignmentReportsPeriodsInfo.isLoading ? null :
+             !currentPeriodReport?.reportId ?
+            (
               <div className='flex items-center justify-center'>
                 <div className='flex py-3 px-4 rounded-md bg-yellow-500'>
       						<span className='text-1xl font-semibold'>Sin asignación académica para el periodo actual</span>
                 </div>
               </div>
-            ): (
+            ) : (
             <div className='flex items-center justify-center'>
   						<Button
   							onClick={() =>

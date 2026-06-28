@@ -2,7 +2,7 @@ import { exportPlanification } from '../utils';
 import { CourseClassroomsTable } from '../components';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useUser } from '@config/providers';
 import { EPdfFont } from '@config/lib';
 import { useGetAllCoursesCoordinatorByPeriod } from '@api/courses';
@@ -12,13 +12,12 @@ import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
 
 // FIX: Segmentar segun el rol
 export const Planification = () => {
-	const location = useLocation();
+	const { periodId, centerDepartmentId, year, pac } = useParams();
 	const currentUser = useUser();
-	const { year, pac, periodId, centerDepartmentId } = location.state ?? {};
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
 	const coursesInfo = useGetAllCoursesCoordinatorByPeriod(
-		periodId,
+		periodId!,
 		centerDepartmentId
 	);
 
@@ -68,8 +67,8 @@ export const Planification = () => {
 
 							exportPlanification(
 								planificationData,
-								pac,
-								year,
+								Number(pac),
+								Number(year),
 								currentUser.user?.name ?? '',
 								userDepartment,
 								selectedFont

@@ -11,7 +11,7 @@ export const planificationsRoutes: RouteObject[] = [
 		element: <EditPlanification />,
 	},
 	{
-		path: 'details',
+		path: 'details/:periodId/:centerDepartmentId/:year/:pac',
 		element: <Planification />,
 	},
 ];

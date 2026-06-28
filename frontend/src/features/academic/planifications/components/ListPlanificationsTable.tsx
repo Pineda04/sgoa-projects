@@ -36,13 +36,7 @@ export const ListPlanificationsTable = ({
 			render: (row: TPlanificationRow) => (
 				<Link
 					className="flex justify-center items-center p-1 w-full"
-					to="/academic/planifications/details"
-					state={{
-						year: row.year,
-						pac: row.pac,
-						periodId: row.id,
-						centerDepartmentId: row.centerDepartmentId,
-					}}
+					to={`/academic/planifications/details/${row.id}/${row.centerDepartmentId}/${row.year}/${row.pac}`}
 				>
 					<EyeIcon className="size-5 text-[#1C64B4] hover:text-[#144C74]" />
 				</Link>
