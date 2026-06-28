@@ -59,7 +59,6 @@ export const ListPlanificationsTable = ({
 				loading={isLoading}
 				emptyMessage="No hay planificaciones registradas"
 				showRowNumber={false}
-				className="sm:w-[80%]"
 			/>
 			<Pagination totalPages={data?.meta?.lastPage} />
 		</div>

@@ -66,10 +66,6 @@ const MODULES: ModuleConfig[] = [
 				path: '/academic/courses',
 			},
 			{
-				label: 'Planificaciones',
-				path: '/academic/planifications',
-			},
-			{
 				label: 'Consolidado',
 				path: '/academic/reports/consolidated',
 			},

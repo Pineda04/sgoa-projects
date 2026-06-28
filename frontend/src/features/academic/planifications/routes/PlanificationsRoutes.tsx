@@ -1,5 +1,5 @@
 import { type RouteObject } from 'react-router-dom';
-import { CreatePlanification, EditPlanification, ListPlanifications, Planification } from '../pages';
+import { CreatePlanification, EditPlanification, Planification } from '../pages';
 
 export const planificationsRoutes: RouteObject[] = [
   {
@@ -14,8 +14,4 @@ export const planificationsRoutes: RouteObject[] = [
 		path: 'details',
 		element: <Planification />,
 	},
-  {
-    path: '',
-    element: <ListPlanifications />,
-  },
 ];

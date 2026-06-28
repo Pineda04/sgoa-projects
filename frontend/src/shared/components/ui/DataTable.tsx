@@ -50,7 +50,7 @@ export function DataTable<T>({
 					<SkeletonTable columns={columns.length} rows={5} />
 				</div>
 				<div className="md:hidden">
-					<SkeletonCard 
+					<SkeletonCard
 						fields={columns.filter(c => !c.hiddenOnMobile).length}
 						showNumber={showRowNumber}
 					/>
@@ -61,7 +61,7 @@ export function DataTable<T>({
 
 	return (
 		<div
-			className={`overflow-x-auto rounded-lg shadow-md ${className} mx-auto`}
+			className={`bg-white overflow-x-auto rounded-lg shadow-md ${className} mx-auto`}
 		>
 			<table className="w-full hidden md:table">
 				<thead className="bg-[#144C74] text-white">
@@ -139,7 +139,7 @@ export function DataTable<T>({
 						<div
 							key={getRowKey(row)}
 							className={`
-								bg-card border border-card-border rounded-xl p-4 
+								bg-card border border-card-border rounded-xl p-4
 								shadow-sm hover:shadow-md transition-all duration-200
 								${onRowClick ? 'cursor-pointer hover:border-primary/30' : ''}
 								${rowClassName ? rowClassName(row, index) : ''}

@@ -2,8 +2,19 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { DocumentPlusIcon } from '@heroicons/react/24/outline';
 import { CourseList } from '@features/academic/courses';
 import { useTabWithReset } from '@shared/hooks';
-import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
-import { InfoCoordinator, ListAcademicAssignmentReports, ListPlanificationsCoordinator, UsersCoordinator } from '../components';
+import {
+	Button,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@shared/components';
+import {
+	InfoCoordinator,
+	ListAcademicAssignmentReports,
+	ListPlanificationsCoordinator,
+	UsersCoordinator,
+} from '../components';
 
 export const DashboardCoordinator = () => {
 	const { centerDepartmentId } = useParams();
@@ -23,8 +34,8 @@ export const DashboardCoordinator = () => {
 			>
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
 					<TabsTrigger value="0">Planificaciones</TabsTrigger>
-					<TabsTrigger value="1">Usuarios</TabsTrigger>
-					<TabsTrigger value="2">Informes</TabsTrigger>
+					<TabsTrigger value="1">Informes</TabsTrigger>
+					<TabsTrigger value="2">Usuarios</TabsTrigger>
 					<TabsTrigger value="3">Clases</TabsTrigger>
 				</TabsList>
 
@@ -55,17 +66,17 @@ export const DashboardCoordinator = () => {
 					/>
 				</TabsContent>
 
-				{/* Usuarios */}
+				{/* Informes */}
 				<TabsContent value="1">
-					<UsersCoordinator
+					<ListAcademicAssignmentReports
 						key={centerDepartmentId}
 						centerDepartmentId={centerDepartmentId ?? ''}
 					/>
 				</TabsContent>
 
-				{/* Informes */}
+				{/* Usuarios */}
 				<TabsContent value="2">
-					<ListAcademicAssignmentReports
+					<UsersCoordinator
 						key={centerDepartmentId}
 						centerDepartmentId={centerDepartmentId ?? ''}
 					/>
