@@ -1,10 +1,10 @@
 export const Consolidated = () => {
 	return (
-		<div className="min-h-screen bg-white">
+		<div className="min-h-screen bg-transparent">
 			{/* Título */}
 			<div className="px-8 py-6">
 				<h2 className="text-2xl font-semibold">
-					Consolidado rendimiento académico
+					Consolidado de Rendimiento Académico
 				</h2>
 			</div>
 
@@ -35,7 +35,9 @@ export const Consolidated = () => {
 								<th className="px-4 py-2">Período</th>
 								<th className="px-4 py-2">Año</th>
 							</tr>
-						</thead>
+            </thead>
+						<tbody className="bg-white">
+						</tbody>
 					</table>
 				</div>
 			</div>

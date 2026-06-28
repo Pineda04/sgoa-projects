@@ -11,7 +11,7 @@ export const reportsRoutes: RouteObject[] = [
     element: <CoordinatorAssignmentReport />,
   },
   {
-    path: '',
+    path: 'consolidated',
     element: <Consolidated />,
   },
 ];

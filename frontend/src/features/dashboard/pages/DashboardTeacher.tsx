@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { IoAddSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, Users } from 'lucide-react';
 import { useTabWithReset } from '@shared/hooks';
@@ -18,6 +17,7 @@ import {
 } from '@shared/components';
 import { useUser } from '@config/providers';
 import { InfoTeacher } from '../components';
+import { DocumentPlusIcon } from '@heroicons/react/24/outline';
 
 interface ReportPeriod {
 	id: string;
@@ -241,29 +241,42 @@ export const DashboardTeacher = () => {
 
 				{/* Informes */}
 				<TabsContent value="1">
-					<div>
-						<Button
-							onClick={() =>
-								handleView(
-									currentPeriodReport?.reportId ?? '',
-									'edit'
-								)
-							}
-							disabled={
-								!currentPeriodReport?.reportId
-							}
-							className="w-full md:w-auto text-xs sm:text-sm bg-[#C40C54] hover:bg-[#AC0647] hover:shadow-xl hover:shadow-[#C40C54]/20 hover:-translate-y-0.5"
-							variant="default"
-						>
-							<IoAddSharp className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-							<span className="hidden sm:inline">
-								Ver informe de asignación académica del periodo
-								actual
-							</span>
-							<span className="sm:hidden">
-								Ver informe actual
-							</span>
-						</Button>
+          <div>
+            {academicPeriodInfo.isLoading ||
+             academicAssignmentReportsPeriodsInfo.isLoading ? null :
+             !currentPeriodReport?.reportId ?
+            (
+              <div className='flex items-center justify-center'>
+                <div className='flex py-3 px-4 rounded-md bg-yellow-500'>
+      						<span className='text-1xl font-semibold'>Sin asignación académica para el periodo actual</span>
+                </div>
+              </div>
+            ) : (
+            <div className='flex items-center justify-center'>
+  						<Button
+  							onClick={() =>
+  								handleView(
+  									currentPeriodReport?.reportId ?? '',
+  									'edit'
+  								)
+  							}
+  							disabled={
+  								!currentPeriodReport?.reportId
+  							}
+  							className="w-full cursor-pointer disabled:cursor-not-allowed md:w-auto text-xs sm:text-sm bg-[#C40C54] hover:bg-[#AC0647] hover:shadow-xl hover:shadow-[#C40C54]/20 hover:-translate-y-0.5"
+  							variant="default"
+  						>
+   							<DocumentPlusIcon className="size-3 sm:size-4.5" />
+  							<span className="hidden sm:inline">
+  								Informe de asignación académica del periodo
+  								actual
+  							</span>
+  							<span className="sm:hidden">
+  								Ver informe actual
+  							</span>
+  						</Button>
+            </div>
+            )}
 
 						<div className="mt-4 sm:mt-6 bg-white">
 							<ResponsiveTable<ReportPeriod>

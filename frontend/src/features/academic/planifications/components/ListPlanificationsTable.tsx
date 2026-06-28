@@ -36,13 +36,7 @@ export const ListPlanificationsTable = ({
 			render: (row: TPlanificationRow) => (
 				<Link
 					className="flex justify-center items-center p-1 w-full"
-					to="/academic/planifications"
-					state={{
-						year: row.year,
-						pac: row.pac,
-						periodId: row.id,
-						centerDepartmentId: row.centerDepartmentId,
-					}}
+					to={`/academic/planifications/details/${row.id}/${row.centerDepartmentId}/${row.year}/${row.pac}`}
 				>
 					<EyeIcon className="size-5 text-[#1C64B4] hover:text-[#144C74]" />
 				</Link>
@@ -59,7 +53,6 @@ export const ListPlanificationsTable = ({
 				loading={isLoading}
 				emptyMessage="No hay planificaciones registradas"
 				showRowNumber={false}
-				className="sm:w-[80%]"
 			/>
 			<Pagination totalPages={data?.meta?.lastPage} />
 		</div>

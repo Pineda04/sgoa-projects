@@ -10,6 +10,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@shared/components';
+import { ListPlanificationsTable } from '@features/academic';
 
 interface FileData {
 	id: string;
@@ -28,10 +29,14 @@ interface UserData {
 }
 
 export const DashboardAuthorities = () => {
+	const [searchPlanification, setSearchPlanification] = useState('');
 	const [searchReport, setSearchReport] = useState('');
 	const [searchUser, setSearchUser] = useState('');
-	const validTabs = ['0', '1'];
-	const { currentTab, setTab } = useTabWithReset(validTabs);
+	const validTabs = ['0', '1', '2'];
+  const { currentTab, setTab } = useTabWithReset(validTabs);
+
+  const [isLoadingPlanifications] = useState(false);
+  const [isErrorPlanifications] = useState(false);
 
 	const reportColumns: IResponsiveColumn<FileData>[] = [
 		{ key: 'name', header: 'Nombre del archivo', mobileLabel: 'Archivo' },
@@ -91,12 +96,32 @@ export const DashboardAuthorities = () => {
 
 			<Tabs value={currentTab} onValueChange={setTab} className="mt-5">
 				<TabsList variant="pills">
-					<TabsTrigger value="0">Informes</TabsTrigger>
-					<TabsTrigger value="1">Usuarios</TabsTrigger>
-				</TabsList>
+					<TabsTrigger value="0">Planificaciones</TabsTrigger>
+					<TabsTrigger value="1">Informes</TabsTrigger>
+					<TabsTrigger value="2">Usuarios</TabsTrigger>
+        </TabsList>
 
-				{/* Informes de docentes */}
-				<TabsContent value="0">
+        {/* Planificaciones */}
+        <TabsContent value="0">
+          <div className="flex justify-center my-4">
+						<input
+							type="text"
+							placeholder="Buscar planificación..."
+							value={searchPlanification}
+							onChange={e => setSearchPlanification(e.target.value)}
+							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						/>
+          </div>
+
+          <ListPlanificationsTable
+            isLoading={isLoadingPlanifications}
+            isError={isErrorPlanifications}
+            data={null}
+          />
+				</TabsContent>
+
+				{/* Informes */}
+				<TabsContent value="1">
 					<div className="flex justify-center my-4">
 						<input
 							type="text"
@@ -119,7 +144,7 @@ export const DashboardAuthorities = () => {
 				</TabsContent>
 
 				 {/* Usuarios */}
-				<TabsContent value="1" className="mt-4">
+				<TabsContent value="2" className="mt-4">
 					<div className="flex flex-col md:flex-row gap-4 justify-center mb-4">
 						<input
 							type="text"
