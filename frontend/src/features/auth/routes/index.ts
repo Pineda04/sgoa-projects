@@ -1,2 +1,2 @@
-export * from "./AuthRouter";
-export * from "./AuthRoutes";
+export { AuthRouter } from "./AuthRouter";
+export { authRoutes } from "./AuthRoutes";

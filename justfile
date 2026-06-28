@@ -58,6 +58,7 @@ db-setup: db-up
     @echo "Esperando que PostgreSQL este listo..."
     sleep 5
     npx prisma migrate deploy
+    pnpm tsx prisma/seed.ts
 
 [windows]
 [working-directory: 'backend']
@@ -65,11 +66,17 @@ db-setup: db-up
     Write-Host "Esperando que PostgreSQL este listo..."
     Start-Sleep 5
     npx prisma migrate deploy
+    pnpm tsx prisma/seed.ts
 
 # Levantar los contenedores de Docker (PostgreSQL + pgAdmin)
 [working-directory: 'backend']
 db-up:
     docker compose up -d postgres pgadmin
+
+# Ejecutar el seeder de Prisma
+[working-directory: 'backend']
+db-seed:
+    pnpm tsx prisma/seed.ts
 
 # Detener los contenedores de Docker
 [working-directory: 'backend']

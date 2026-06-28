@@ -112,6 +112,35 @@ SGOA es un sistema integral para la administración académica que permite gesti
 - Python 3.10+
 - Docker y Docker Compose
 - PostgreSQL (local o contenedor)
+- Just (task runner)
+
+## Comandos Just
+
+El proyecto usa just para simplificar las tareas comunes. Ejecuta `just` sin argumentos para ver todos los comandos disponibles.
+
+### Inicio rápido con just
+
+El proyecto tiene varios comandos de just, pero los más comunes que engloban varios comandos dentro de una sola tarea son:
+
+```bash
+just setup   # Primera vez: copia .env, instala dependencias, levanta la BD y activa hooks; también se puede usar para aplicar migraciones
+just install # Cuando se añaden nuevas dependencias: instala todas las dependencias (backend y frontend)
+just dev     # Inicia backend y frontend en modo desarrollo
+```
+
+### Referencia de comandos
+
+| Comando              | Descripción                                                        |
+| -------------------- | ------------------------------------------------------------------ |
+| `just setup`         | Configura el proyecto por primera vez (`.env`, deps, BD, migraciones, hooks) |
+| `just install`       | Instala todas las dependencias (backend y frontend)                |
+| `just install-backend` | Instala deps del backend y regenera el cliente de Prisma         |
+| `just install-frontend` | Instala deps del frontend                                       |
+| `just dev`           | Inicia backend y frontend en modo desarrollo (BD debe estar activa)|
+| `just db-setup`      | Levanta la BD y aplica las migraciones de Prisma                   |
+| `just db-up`         | Levanta los contenedores de Docker (PostgreSQL + pgAdmin)          |
+| `just db-down`       | Detiene los contenedores de Docker                                 |
+| `just hooks`         | Instala los git hooks con Lefthook                                 |
 
 ## Inicio Rápido
 

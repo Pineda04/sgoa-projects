@@ -1,15 +1,11 @@
-import { Button } from '@components/ui/button';
-import { errorsFormik } from '@utils';
 import { useFormik } from 'formik';
 import { EyeIcon, EyeOff } from 'lucide-react';
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useResetPassword } from '../hooks';
-import { TResetPassword, resetPasswordSchema } from '../schemas';
-import { Error } from '@components';
-import { useShowPassword } from '@hooks';
+import { resetPasswordSchema } from '../schemas';
+import { TResetPassword, useResetPassword } from '@api/auth';
+import { Button, Error, errorsFormik, useShowPassword } from '@shared';
 
-// src/pages/Auth/RecuperarContraseña.tsx
 export const ResetPassword = () => {
 	const { showPassword, handleShowPassword } = useShowPassword({
 		password: false,
@@ -23,7 +19,7 @@ export const ResetPassword = () => {
 	const token = params.get('token');
 
 	useEffect(() => {
-		//   if (!params.get("token")) navigate(`auth/login`);
+		// if (!params.get("token")) navigate(`auth/login`);
 		if (!token) navigate(`auth/login`);
 	}, [params]);
 
@@ -72,7 +68,7 @@ export const ResetPassword = () => {
 		<div className="flex h-screen">
 			<div className="w-1/2 flex items-center justify-center">
 				<img
-					src="/src/assets/logo-unah.png"
+					src="/logo-unah-1.web"
 					alt="Logo UNAH"
 					className="p-7 mb-16 object-cover"
 				/>
@@ -81,12 +77,6 @@ export const ResetPassword = () => {
 				onSubmit={handleSubmit}
 				className="w-1/2 bg-[#144C74] flex flex-col items-center justify-center text-white"
 			>
-				{/* <h1 className="text-2xl font-bold mb-4">Recuperación de contraseña</h1> */}
-				{/* <input */}
-				{/*   className="w-sm bg-white mb-2 p-2 rounded-md text-black" */}
-				{/*   placeholder="Código de verificación" */}
-				{/*   type="text" */}
-				{/* /> */}
 				<div className="relative w-full max-w-md text-black mb-2">
 					<input
 						id="password"
