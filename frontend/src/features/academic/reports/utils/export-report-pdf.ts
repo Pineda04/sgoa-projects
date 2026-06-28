@@ -1,5 +1,5 @@
-import logoUNAH from '/logo-unah-3.webp';
-import logoSEDP from '/sedp-logo.webp';
+import logoUNAH from '/logo-unah-3.png';
+import logoSEDP from '/sedp-logo.png';
 import { toBase64, formatHour } from './pdf-helpers';
 import { IReportData, ILastAutoTable } from './types';
 import { TOutputTeacher, TTeacherPosition } from '@api';
