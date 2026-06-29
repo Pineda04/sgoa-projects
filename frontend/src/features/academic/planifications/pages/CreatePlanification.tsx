@@ -128,7 +128,10 @@ export const CreatePlanification = () => {
 			},
 			{
 				onSuccess: () => {
-					navigate(`/academic/planifications`);
+					navigate(
+						`/dashboard/coordinator/${centerDepartmentId}`,
+						{ replace: true }
+					);
 				},
 				onError: (error: unknown) => {
 					const axiosError = error as AxiosError<{

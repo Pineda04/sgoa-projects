@@ -8,7 +8,6 @@ import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
 import { departmentsRoutes } from '@features/admin';
-import { periodsRoutes } from '@features/academic/periods/routes';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
@@ -80,12 +79,6 @@ const router = createBrowserRouter(
 			path: 'academic/courses/*',
 			element: <ProtectedRoute action="read" subject="academic-module" />,
 			children: coursesRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
-			path: 'academic/periods',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
-			children: periodsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

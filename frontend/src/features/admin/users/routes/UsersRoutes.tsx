@@ -1,6 +1,6 @@
 import React from 'react';
-import { Navigate, type RouteObject } from 'react-router-dom';
-import { ListUsers, UserProfile } from '../pages';
+import { type RouteObject } from 'react-router-dom';
+import { UserProfile } from '../pages';
 
 const CreateUserLazy = React.lazy(() =>
   import('../pages/CreateUser').then(module => ({
@@ -9,10 +9,6 @@ const CreateUserLazy = React.lazy(() =>
 );
 
 export const usersRoutes: RouteObject[] = [
-  {
-    path: '',
-    element: <ListUsers />,
-  },
   {
     path: 'new',
     element: (
@@ -24,9 +20,5 @@ export const usersRoutes: RouteObject[] = [
   {
     path: 'profile',
     element: <UserProfile />,
-  },
-  {
-    path: '*',
-    element: <Navigate to="/admin/users" replace />,
   },
 ];

@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
 import { useTabWithReset } from '@shared/hooks';
 import {
-	Button,
 	IResponsiveColumn,
 	ResponsiveTable,
 	Tabs,
@@ -10,78 +8,36 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@shared/components';
-import { ListPlanificationsTable } from '@features/academic';
+import { AcademicPeriodsList, Consolidated, CourseList, ListPlanificationsTable } from '@features/academic';
+import { useAbility } from '@config/lib';
+import { UsersTable } from '@features/admin';
+import { useGetTeachers } from '@api/teachers';
+import { useNavigate } from 'react-router-dom';
 
 interface FileData {
 	id: string;
 	name: string;
 }
 
-interface UserData {
-	id: string;
-	code: string;
-	name: string;
-	undergrad: string;
-	postgrad: string;
-	category: string;
-	contract: string;
-	otherData: string;
-}
-
 export const DashboardAuthorities = () => {
+	const navigate = useNavigate();
+  const ability = useAbility();
+	const showDepartment = ability.can('manage', 'departments');
 	const [searchPlanification, setSearchPlanification] = useState('');
 	const [searchReport, setSearchReport] = useState('');
-	const [searchUser, setSearchUser] = useState('');
-	const validTabs = ['0', '1', '2'];
+	const validTabs = ['0', '1', '2', '3', '4', '5'];
   const { currentTab, setTab } = useTabWithReset(validTabs);
 
-  const [isLoadingPlanifications] = useState(false);
-  const [isErrorPlanifications] = useState(false);
+  const { isLoading, isError, data } = useGetTeachers();
+	const [isLoadingPlanifications] = useState(false);
+	const [isErrorPlanifications] = useState(false);
 
 	const reportColumns: IResponsiveColumn<FileData>[] = [
 		{ key: 'name', header: 'Nombre del archivo', mobileLabel: 'Archivo' },
 		{ key: 'view', header: 'Ver contenido', mobileLabel: 'Ver' },
 		{ key: 'download', header: 'Descargar', mobileLabel: 'Descargar' },
 	];
-
-	const userColumns: IResponsiveColumn<UserData>[] = [
-		{ key: 'code', header: 'Código', mobileLabel: 'Cod.' },
-		{ key: 'name', header: 'Nombre', mobileLabel: 'Nombre' },
-		{
-			key: 'undergrad',
-			header: 'Pregrado',
-			mobileLabel: 'Pregrado',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'postgrad',
-			header: 'Posgrado',
-			mobileLabel: 'Posgrado',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'category',
-			header: 'Categoría',
-			mobileLabel: 'Categoría',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'contract',
-			header: 'Contratación',
-			mobileLabel: 'Contrato',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'otherData',
-			header: 'Otros datos',
-			mobileLabel: 'Otros',
-			hiddenOnMobile: true,
-		},
-		{ key: 'actions', header: 'Acciones', mobileLabel: 'Acciones' },
-	];
-
-	const emptyReports: FileData[] = [];
-	const emptyUsers: UserData[] = [];
+  const emptyReports: FileData[] = [];
 
 	return (
 		<>
@@ -94,30 +50,35 @@ export const DashboardAuthorities = () => {
 				<p className="text-sm">correo@unah.edu</p>
 			</div>
 
-			<Tabs value={currentTab} onValueChange={setTab} className="mt-5">
-				<TabsList variant="pills">
+			<Tabs value={currentTab} onValueChange={setTab} className="mt-4 sm:mt-8">
+				<TabsList variant="pills" className="mb-4 sm:mb-6">
 					<TabsTrigger value="0">Planificaciones</TabsTrigger>
 					<TabsTrigger value="1">Informes</TabsTrigger>
 					<TabsTrigger value="2">Usuarios</TabsTrigger>
-        </TabsList>
+					<TabsTrigger value="3">Clases</TabsTrigger>
+					<TabsTrigger value="4">Periodos</TabsTrigger>
+					<TabsTrigger value="5">Consolidado</TabsTrigger>
+				</TabsList>
 
-        {/* Planificaciones */}
-        <TabsContent value="0">
-          <div className="flex justify-center my-4">
+				{/* Planificaciones */}
+				<TabsContent value="0">
+					<div className="flex justify-center my-4">
 						<input
 							type="text"
 							placeholder="Buscar planificación..."
 							value={searchPlanification}
-							onChange={e => setSearchPlanification(e.target.value)}
+							onChange={e =>
+								setSearchPlanification(e.target.value)
+							}
 							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 						/>
-          </div>
+					</div>
 
-          <ListPlanificationsTable
-            isLoading={isLoadingPlanifications}
-            isError={isErrorPlanifications}
-            data={null}
-          />
+					<ListPlanificationsTable
+						isLoading={isLoadingPlanifications}
+						isError={isErrorPlanifications}
+						data={null}
+					/>
 				</TabsContent>
 
 				{/* Informes */}
@@ -143,35 +104,31 @@ export const DashboardAuthorities = () => {
 					</div>
 				</TabsContent>
 
-				 {/* Usuarios */}
-				<TabsContent value="2" className="mt-4">
-					<div className="flex flex-col md:flex-row gap-4 justify-center mb-4">
-						<input
-							type="text"
-							placeholder="Buscar usuario..."
-							value={searchUser}
-							onChange={e => setSearchUser(e.target.value)}
-							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-            />
-            <Button
-							type="button"
-							className="w-fit justify-center shadow-md bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500"
-              variant="unstyled"
-						>
-							<Plus className="size-6" />
-							Nuevo usuario
-						</Button>
-					</div>
+				{/* Usuarios */}
+				<TabsContent value="2">
+		      {data && (
+  					<UsersTable
+  						isLoading={isLoading}
+  						isError={isError}
+  						data={data}
+  						onNavigateToCreate={() => navigate('/admin/users/new')}
+  					/>
+  				)}
+        </TabsContent>
 
-					<div className="py-2 bg-white">
-						<ResponsiveTable<UserData>
-							columns={userColumns}
-							data={emptyUsers}
-							getRowKey={u => u.id}
-							emptyMessage="No hay usuarios disponibles"
-							showRowNumber={false}
-						/>
-					</div>
+				{/* Clases */}
+				<TabsContent value="3">
+				  <CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />
+				</TabsContent>
+
+        {/* Periodos */}
+				<TabsContent value="4">
+				  <AcademicPeriodsList />
+				</TabsContent>
+
+        {/* Consolidado */}
+				<TabsContent value="5">
+				  <Consolidated />
 				</TabsContent>
 			</Tabs>
 		</>

@@ -101,9 +101,8 @@ export const UsersTable = ({
 				<div className="flex justify-center mb-5">
 					<Button
 						type="button"
-						className="w-fit justify-start bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row duration-500"
+						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
 						onClick={onNavigateToCreate}
-						variant="unstyled"
 					>
 						<Plus className="size-6" />
 						Nuevo usuario
