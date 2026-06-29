@@ -15,10 +15,11 @@ import {
 	ListPlanificationsCoordinator,
 	UsersCoordinator,
 } from '../components';
+import { Consolidated } from '@features/academic';
 
 export const DashboardCoordinator = () => {
 	const { centerDepartmentId } = useParams();
-	const validTabs = ['0', '1', '2', '3'];
+	const validTabs = ['0', '1', '2', '3', '4'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
 
 	if (!centerDepartmentId) return <Navigate to="/" />;
@@ -37,6 +38,7 @@ export const DashboardCoordinator = () => {
 					<TabsTrigger value="1">Informes</TabsTrigger>
 					<TabsTrigger value="2">Usuarios</TabsTrigger>
 					<TabsTrigger value="3">Clases</TabsTrigger>
+					<TabsTrigger value="4">Consolidado</TabsTrigger>
 				</TabsList>
 
 				{/* Planificaciones */}
@@ -51,7 +53,7 @@ export const DashboardCoordinator = () => {
 							}}
 						>
 							<Button
-								className="bg-[#5BC85C] hover:bg-green-300 duration-500"
+								className="bg-green-500 hover:bg-green-600 duration-500"
 								disabled={!centerDepartmentId}
 							>
 								<DocumentPlusIcon className="size-6" />
@@ -88,6 +90,11 @@ export const DashboardCoordinator = () => {
 						centerDepartmentId={centerDepartmentId ?? ''}
 						// showDepartmentInTable
 					/>
+        </TabsContent>
+
+				{/* Consolidado */}
+				<TabsContent value="4">
+					<Consolidated />
 				</TabsContent>
 			</Tabs>
 		</div>

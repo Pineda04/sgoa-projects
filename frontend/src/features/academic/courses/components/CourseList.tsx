@@ -77,7 +77,7 @@ const createCourseColumns = (
 		mobileLabel: '',
 		render: (row: CourseWithDepartment) => (
 			<Link
-				to={`/academic/courses/${row.id}`}
+				to={`/academic/courses/edit/${row.id}`}
 				className="cursor-pointer text-primary hover:text-primary/80"
 			>
 				<EyeIcon className="size-5" />
@@ -186,7 +186,7 @@ export const CourseList = ({
   					<div className="flex sm:justify-end justify-start">
   						<Button
   							onClick={() => navigate('/academic/courses/new')}
-  							className="bg-green-600 hover:bg-green-700"
+                className="bg-green-500 text-white p-2 hover:bg-green-600 transition"
   						>
   							<Plus className="size-4 mr-1" />
   							Nueva Clase

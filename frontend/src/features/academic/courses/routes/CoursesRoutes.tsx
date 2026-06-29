@@ -1,6 +1,5 @@
 import React from 'react';
-import { Navigate, type RouteObject } from 'react-router-dom';
-import { ListCourses } from '../pages';
+import { type RouteObject } from 'react-router-dom';
 
 const CreateCourseLazy = React.lazy(() =>
   import('../pages/CreateCourse').then(module => ({
@@ -9,16 +8,12 @@ const CreateCourseLazy = React.lazy(() =>
 );
 
 const CourseEditLazy = React.lazy(() =>
-  import('../components/CourseEdit').then(module => ({
+  import('../pages/CourseEdit').then(module => ({
     default: module.CourseEdit,
   }))
 );
 
 export const coursesRoutes: RouteObject[] = [
-  {
-    path: '',
-    element: <ListCourses />,
-  },
   {
     path: 'new',
     element: (
@@ -28,15 +23,11 @@ export const coursesRoutes: RouteObject[] = [
     ),
   },
   {
-    path: ':id',
+    path: 'edit/:id',
     element: (
       <React.Suspense fallback={<div>Cargando...</div>}>
         <CourseEditLazy />
       </React.Suspense>
     ),
-  },
-  {
-    path: '*',
-    element: <Navigate to="/academic/courses" replace />,
   },
 ];
