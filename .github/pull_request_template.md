@@ -7,6 +7,9 @@
 ## **Ubicación (/ruta) de los cambios**
 /
 
+## **Usuario utilizado**
+...
+
 ## **Tipo de Cambio**
 - [ ] Corrección de errores
 - [ ] Nueva funcionalidad
