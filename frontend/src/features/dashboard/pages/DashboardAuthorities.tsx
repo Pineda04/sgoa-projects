@@ -39,10 +39,6 @@ export const DashboardAuthorities = () => {
 	];
   const emptyReports: FileData[] = [];
 
-  if (!data && !isLoading) {
-		return <p>No hay usuarios agregados...</p>;
-	}
-
 	return (
 		<>
 			<div className="mb-6">

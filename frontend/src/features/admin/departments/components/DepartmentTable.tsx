@@ -7,25 +7,20 @@ import {
 } from '@shared/components';
 import { TOutputDepartment } from '@api/departments';
 import { useModal } from '@shared/hooks';
-import { EyeIcon, Plus } from 'lucide-react';
+import { EyeIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { DepartmentView } from './DepartmentView';
-import { useAbility } from '@config';
 
 interface DepartmentTableProps {
 	isLoading: boolean;
 	isError: boolean;
 	data: IResponse<TOutputDepartment[]> | null;
-	onNavigateToCreate?: () => void;
 }
 
 export const DepartmentTable = ({
 	isLoading,
 	data,
-	onNavigateToCreate,
 }: DepartmentTableProps) => {
-	const ability = useAbility();
-	const canCreate = ability.can('create', 'departments');
 
 	const [
 		showModalUpdateDeparment,
@@ -84,26 +79,6 @@ export const DepartmentTable = ({
 	return (
 		<>
 			<div className="mt-5">
-				<div className="flex justify-between items-end mb-5">
-					<div>
-						<h1 className="text-2xl font-bold text-foreground">
-							Gestión de Departamentos
-						</h1>
-						<p className="text-muted-foreground mt-1">
-							Visualice todos los departamentos disponibles.
-						</p>
-					</div>
-					{canCreate && (
-						<Button
-							type="button"
-							className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-							onClick={onNavigateToCreate}
-						>
-							<Plus className="size-6" />
-							Nuevo departamento
-						</Button>
-					)}
-				</div>
 				<DataTable
 					columns={columns}
 					data={data?.data ?? []}
