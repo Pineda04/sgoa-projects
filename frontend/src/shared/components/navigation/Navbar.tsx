@@ -43,7 +43,11 @@ const MODULES: ModuleConfig[] = [
 		sections: [
 			{
 				label: 'Departamentos',
-				path: '/admin/departments'
+				path: '/admin/departments',
+			},
+			{
+				label: 'Títulos',
+				path: '/admin/degrees',
 			},
 		],
 	},
