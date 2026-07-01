@@ -1,11 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { alertSuccess, IResponse } from '@shared';
-import { TPostgrad, TUndergrad } from './degrees.types';
+import {
+	TCreateDegreeName,
+	TPostgrad,
+	TUndergrad,
+	TUpdateDegreeName,
+} from './degrees.types';
 import { degreesApi } from './degrees.api';
 import { queryClient } from '@config';
 import { usersKeys } from '../users';
 import { teachersKeys } from '../teachers';
+import { postgradKeys, undergradKeys } from './degrees.keys';
 
 type MutationBody<T> = { body: T };
 
@@ -73,4 +79,96 @@ export const useManageTeacherDegrees = <
 		executeAction: mutateAsync,
 		isPending,
 	};
+};
+
+// ───── Pregrados CRUD ─────
+
+export const useCreateUndergrad = () =>
+	useMutation({
+		mutationFn: (body: TCreateDegreeName) =>
+			degreesApi.createUndergrad(body),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await queryClient.invalidateQueries({
+				queryKey: undergradKeys.all,
+			});
+		},
+	});
+
+export const useUpdateUndergrad = (undergradId: string) => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: ({ id, body }: { id: string; body: TUpdateDegreeName }) =>
+			degreesApi.updateUndergrad({ id, body }),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: undergradKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: undergradKeys.detail(undergradId),
+				}),
+			]);
+		},
+	});
+	return { updateUndergrad: mutateAsync, isPendingUpdate: isPending };
+};
+
+export const useDeleteUndergrad = (undergradId: string) => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: (id: string) => degreesApi.deleteUndergrad(id),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: undergradKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: undergradKeys.detail(undergradId),
+				}),
+			]);
+		},
+	});
+	return { deleteUndergrad: mutateAsync, isPendingDelete: isPending };
+};
+
+// ───── Posgrados CRUD ─────
+
+export const useCreatePostgrad = () =>
+	useMutation({
+		mutationFn: (body: TCreateDegreeName) =>
+			degreesApi.createPostgrad(body),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await queryClient.invalidateQueries({ queryKey: postgradKeys.all });
+		},
+	});
+
+export const useUpdatePostgrad = (postgradId: string) => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: ({ id, body }: { id: string; body: TUpdateDegreeName }) =>
+			degreesApi.updatePostgrad({ id, body }),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: postgradKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: postgradKeys.detail(postgradId),
+				}),
+			]);
+		},
+	});
+	return { updatePostgrad: mutateAsync, isPendingUpdate: isPending };
+};
+
+export const useDeletePostgrad = (postgradId: string) => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: (id: string) => degreesApi.deletePostgrad(id),
+		onSuccess: async res => {
+			alertSuccess(res);
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: postgradKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: postgradKeys.detail(postgradId),
+				}),
+			]);
+		},
+	});
+	return { deletePostgrad: mutateAsync, isPendingDelete: isPending };
 };

@@ -1,7 +1,7 @@
 import { api } from '@config/lib';
 import { IResponse } from '@shared';
 import { TAcademicCommonProps } from "../periods/periods.types";
-import { TPostgrad, TUndergrad } from "./degrees.types";
+import { TCreateDegreeName, TPostgrad, TPostgradDegree, TUndergrad, TUndergradDegree, TUpdateDegreeName } from "./degrees.types";
 
 // Titulos (Abarca Pregrados y Posgrados)
 export const degreesApi = {
@@ -10,6 +10,24 @@ export const degreesApi = {
 
 	getAllPostgrads: () =>
 		api.get<IResponse<TAcademicCommonProps[]>>(`/postgrads`),
+
+	createUndergrad: (body: TCreateDegreeName) =>
+		api.post<IResponse<TUndergradDegree>>(`/undergrads`, body),
+
+	updateUndergrad: ({ id, body }: { id: string; body: TUpdateDegreeName }) =>
+		api.patch<IResponse<TUndergradDegree>>(`/undergrads/${id}`, body),
+
+	deleteUndergrad: (id: string) =>
+		api.delete<IResponse<TUndergradDegree>>(`/undergrads/${id}`),
+
+	createPostgrad: (body: TCreateDegreeName) =>
+		api.post<IResponse<TPostgradDegree>>(`/postgrads`, body),
+
+	updatePostgrad: ({ id, body }: { id: string; body: TUpdateDegreeName }) =>
+		api.patch<IResponse<TPostgradDegree>>(`/postgrads/${id}`, body),
+
+	deletePostgrad: (id: string) =>
+		api.delete<IResponse<TPostgradDegree>>(`/postgrads/${id}`),
 
 	addTeacherUndergrad: ({ body }: { body: TUndergrad }) =>
 		api.post<IResponse<{ teacherId: string; undergradId: string }>>(
