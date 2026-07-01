@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@config/providers';
 import { EUserRole } from '@shared/constants';
 import { useGetConsolidated, type TOutputConsolidated } from '@api/courses';
+import { useGetAllDepartments } from '@api/departments';
 import { useGetAllMyCoordinations } from '@api/teachers';
 import {
 	useGetAcademicPeriods,
@@ -65,7 +66,7 @@ const columns: IDataTableColumn<TOutputConsolidated>[] = [
 	},
 	{ key: 'teacherCode', header: 'Empleado', hiddenOnMobile: true },
 	{ key: 'teacherName', header: 'Nombre', hiddenOnMobile: true },
-	{ key: 'department', header: 'Carrera', hiddenOnMobile: true },
+	{ key: 'department', header: 'Departamento', hiddenOnMobile: true },
 	{ key: 'modality', header: 'Modalidad', hiddenOnMobile: true },
 	{
 		key: 'indexAPB',
@@ -103,10 +104,12 @@ const columns: IDataTableColumn<TOutputConsolidated>[] = [
 
 type Props = {
 	centerDepartmentId?: string;
+	showDepartmentFilter?: boolean;
 };
 
 export const Consolidated = ({
 	centerDepartmentId: propCenterDepartmentId,
+	showDepartmentFilter = false,
 }: Props = {}) => {
 	const { authState } = useAuth();
 	const roles = authState.user?.roles ?? [];
@@ -121,8 +124,11 @@ export const Consolidated = ({
 	const { data: coordinations, isLoading: isLoadingCoordinations } =
 		useGetAllMyCoordinations({ enabled: isCoord });
 
+	const { data: allDepartments } = useGetAllDepartments();
+
 	const [selectedYear, setSelectedYear] = useState('');
 	const [selectedPac, setSelectedPac] = useState('');
+	const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
 
 	useEffect(() => {
 		if (currentPeriod) {
@@ -137,8 +143,16 @@ export const Consolidated = ({
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
+	const departmentFilterId = useMemo(() => {
+		if (!showDepartmentFilter || !selectedDepartmentId || !allDepartments)
+			return undefined;
+		const dept = allDepartments.find(d => d.id === selectedDepartmentId);
+		return dept?.coordinations?.[0]?.centerDepartmentId ?? undefined;
+	}, [showDepartmentFilter, selectedDepartmentId, allDepartments]);
+
 	const centerDepartmentId =
 		propCenterDepartmentId ??
+		departmentFilterId ??
 		(isCoord ? (coordinations?.[0]?.centerDepartmentId ?? '') : undefined);
 
 	const shouldFetch = Boolean(
@@ -169,11 +183,30 @@ export const Consolidated = ({
 
 	return (
 		<div className="min-h-screen bg-transparent">
-			<div className="px-8 pb-4 flex items-center gap-4">
+			<div className="px-8 pb-4 flex items-center gap-4 flex-wrap">
+				{showDepartmentFilter && (
+					<div className="flex items-center gap-2">
+						<label className="block font-semibold text-sm text-foreground">
+							Departamento:
+						</label>
+						<select
+							value={selectedDepartmentId}
+							onChange={e =>
+								setSelectedDepartmentId(e.target.value)
+							}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos los departamentos</option>
+							{allDepartments?.map(d => (
+								<option key={d.id} value={d.id}>
+									{d.name}
+								</option>
+							))}
+						</select>
+					</div>
+				)}
 				<div className="flex items-center gap-2">
-					<label
-						className="block font-semibold text-sm text-foreground"
-					>
+					<label className="block font-semibold text-sm text-foreground">
 						Año:
 					</label>
 					<select
@@ -191,9 +224,7 @@ export const Consolidated = ({
 				</div>
 
 				<div className="flex items-center gap-2">
-					<label
-						className="block font-semibold text-sm text-foreground"
-					>
+					<label className="block font-semibold text-sm text-foreground">
 						PAC:
 					</label>
 					<select

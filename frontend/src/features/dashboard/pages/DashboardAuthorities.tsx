@@ -128,7 +128,7 @@ export const DashboardAuthorities = () => {
 
         {/* Consolidado */}
 				<TabsContent value="5">
-				  <Consolidated />
+				  <Consolidated showDepartmentFilter />
 				</TabsContent>
 			</Tabs>
 		</>
