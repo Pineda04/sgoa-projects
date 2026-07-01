@@ -30,7 +30,7 @@ export const ListAcademicAssignmentReports = ({
 		useGetAcademicAssignmentReportsCoordinatorByCenter(centerDepartmentId);
 
 	if (isLoading) return <Loading />;
-	if (isError) return <TagError text="Error al cargar los reportes" />;
+	if (isError) return <TagError text="No se encontraron datos disponibles." />;
 
 	const reports = (data?.data ?? []) as ReportData[];
 

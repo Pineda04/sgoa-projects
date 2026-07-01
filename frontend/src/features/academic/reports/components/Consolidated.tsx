@@ -15,6 +15,7 @@ import { Pagination } from '@shared/components/ui/Pagination';
 import { SkeletonTable } from '@shared/components/ui/Skeleton';
 import { usePaginationParams } from '@shared/hooks';
 import { cn } from '@config/lib';
+import { TagError } from '@shared/components/ui/TagError';
 
 function formatPercent(value: number): string {
 	return `${(value ?? 0).toFixed(2)}%`;
@@ -212,29 +213,15 @@ export const Consolidated = ({
 
 			<div className="w-full overflow-x-auto px-4 pb-10">
 				{isCoordWithoutCoordination ? (
-					<div className="rounded-xl bg-white px-6 py-12 text-center shadow-md">
-						<p className="text-muted-foreground">
-							No tiene coordinaciones asignadas.
-						</p>
-					</div>
+					<TagError text="No tiene coordinaciones asignadas." />
 				) : consolidatedQuery.isLoading ? (
 					<div className="rounded-xl bg-white p-6 shadow-md">
 						<SkeletonTable columns={20} rows={5} />
 					</div>
 				) : consolidatedQuery.isError ? (
-					<div className="rounded-xl bg-white px-6 py-12 text-center shadow-md">
-						<p className="text-red-500">
-							Error al cargar los datos. Intente de nuevo más
-							tarde.
-						</p>
-					</div>
+					<TagError text="No se encontraron datos disponibles." />
 				) : !data || data.length === 0 ? (
-					<div className="rounded-xl bg-white px-6 py-12 text-center shadow-md">
-						<p className="text-muted-foreground">
-							No hay datos de rendimiento académico para los
-							filtros seleccionados
-						</p>
-					</div>
+					<TagError text="No hay datos de rendimiento académico para los filtros seleccionados" />
 				) : (
 					<>
 						<DataTable
