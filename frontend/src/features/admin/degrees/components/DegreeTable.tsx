@@ -75,13 +75,15 @@ export const DegreeTable = ({
         handleCloseDelete();
     };
 
+    const hasActions = canUpdate || canDelete;
+
     const columns: IDataTableColumn<TAcademicCommonProps>[] = [
         {
             key: 'name',
             header: 'Nombre',
             mobileLabel: 'Nombre',
         },
-        {
+        ...(hasActions ? [{
             key: 'actions',
             header: 'Acciones',
             mobileLabel: 'Acciones',
@@ -105,17 +107,14 @@ export const DegreeTable = ({
                             <TrashIcon className="size-5" />
                         </button>
                     )}
-                    {!canUpdate && !canDelete && (
-                        <span className="text-xs text-gray-400">—</span>
-                    )}
                 </div>
             ),
-        },
+        }] as IDataTableColumn<TAcademicCommonProps>[] : []),
     ];
 
     return (
         <>
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-center mb-4">
                 {canCreate && (
                     <Button
                         type="button"
