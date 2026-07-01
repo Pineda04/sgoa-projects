@@ -11,6 +11,7 @@ import {
 } from './courses.types';
 import { TCenterDepartment } from '../centers';
 import { TAcademicCommonProps } from '../periods/periods.types';
+import { TOutputConsolidated } from './courses.types';
 
 // Clases
 export const coursesApi = {
@@ -132,6 +133,25 @@ export const courseClassroomsApi = {
 
 // Estadisticas
 export const courseStadisticsApi = {
+	getConsolidated: (params: {
+		year?: string;
+		pac?: string;
+		centerDepartmentId?: string;
+		page?: number;
+		size?: number;
+	}) => {
+		const searchParams = new URLSearchParams();
+		if (params.year) searchParams.set('year', params.year);
+		if (params.pac) searchParams.set('pac', params.pac);
+		if (params.centerDepartmentId)
+			searchParams.set('centerDepartmentId', params.centerDepartmentId);
+		if (params.page) searchParams.set('page', String(params.page));
+		if (params.size) searchParams.set('size', String(params.size));
+		return api.get<IResponse<TOutputConsolidated[]>>(
+			`/course-stadistics/consolidated?${searchParams}`
+		);
+	},
+
 	updateCourseStadistic: (
 		courseClassroomId: string,
 		body: TCourseStadisticOmit

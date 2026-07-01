@@ -66,3 +66,28 @@ export type TCourseBasicInfo = Omit<TCourse, 'departmentId' | 'facultyId'> & {
 export type TCourseWithDepartment = TCourse & {
 	department: Pick<TDepartment, 'id' | 'name'>;
 };
+
+export type TOutputConsolidated = {
+	courseCode: string;
+	courseName: string;
+	section: string;
+	initial: number;
+	final: number;
+	APB: number;
+	RPB: number;
+	NSP: number;
+	ABD: number;
+	teacherCode: string;
+	teacherName: string;
+	department: string;
+	modality: string;
+	indexAPB: number;
+	indexRPB: number;
+	indexNSP: number;
+	indexABD: number;
+	finalSummatoryInconsistency: 'Error' | 'Correcto';
+	initialSummatoryInconsistency: 'Correcto' | 'Incorrecto';
+	terminalEfficiency: number;
+	pac: number;
+	year: number;
+};
