@@ -98,10 +98,11 @@ export const useGetTeachersCoordinator = (centerDepartmentId: string) => {
 	});
 };
 
-export const useGetAllMyCoordinations = () =>
+export const useGetAllMyCoordinations = (options?: { enabled?: boolean }) =>
 	useQuery({
 		queryKey: coordinatorsKeys.my,
 		queryFn: teacherDepartmentPositionApi.getAllMyCoordinations,
 		staleTime: STALE_TIME.LONG,
 		select: res => res.data.data,
+		enabled: options?.enabled ?? true,
 	});

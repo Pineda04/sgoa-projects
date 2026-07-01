@@ -119,7 +119,7 @@ export const Consolidated = ({
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();
 	const { data: periods } = useGetAcademicPeriods();
 	const { data: coordinations, isLoading: isLoadingCoordinations } =
-		useGetAllMyCoordinations();
+		useGetAllMyCoordinations({ enabled: isCoord });
 
 	const [selectedYear, setSelectedYear] = useState('');
 	const [selectedPac, setSelectedPac] = useState('');
