@@ -94,7 +94,7 @@ export const DashboardCoordinator = () => {
 
 				{/* Consolidado */}
 				<TabsContent value="4">
-					<Consolidated />
+					<Consolidated centerDepartmentId={centerDepartmentId} />
 				</TabsContent>
 			</Tabs>
 		</div>
