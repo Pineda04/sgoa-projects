@@ -392,7 +392,7 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 								>
 									<option value="select" disabled>
 										Seleccione...
@@ -417,7 +417,7 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 								>
 									<option value="">
 										Seleccione una hora
@@ -436,9 +436,9 @@ export const PlanificationForm = ({
 										}
 										onChange={handleChange}
 										onBlur={formik.handleBlur}
-										className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
+										className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
 									/>
-									<span>{checkboxLabel}</span>
+									<span className="cursor-default">{checkboxLabel}</span>
 								</div>
 							) : (
 								<input
@@ -455,7 +455,7 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className={`${readOnly ? 'cursor-not-allowed' : 'cursor-text'} w-full ${readOnly ? 'bg-gray-100 shadow-md' : 'bg-white border hover:border-gray-400 transition'} rounded px-2 py-1.5 outline-none`}
 									readOnly={readOnly}
 								/>
 							)}
@@ -484,7 +484,7 @@ export const PlanificationForm = ({
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
 						rows={3}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none resize-none"
+						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5 resize-none"
 					/>
 					{formik.touched.observation &&
 						formik.errors.observation && (
