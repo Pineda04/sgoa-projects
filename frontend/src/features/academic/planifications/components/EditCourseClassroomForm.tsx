@@ -169,14 +169,14 @@ export const EditCourseClassroomForm = ({
 	const teacher = courseClassroom.teachingSession.assignmentReport.teacher.user;
 
 	return (
-		<>
-			<h1 className="text-xl font-bold mb-5">Editar fila</h1>
-			<hr className="h-px my-2 bg-gray-200 border-0" />
+		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
+			<h1 className="text-xl font-bold mb-5 shrink-0">Editar fila</h1>
+			<hr className="h-px my-2 bg-gray-200 border-0 shrink-0" />
 
 			<form
 				id="form-editar-planificacion"
 				onSubmit={formik.handleSubmit}
-				className="h-[70vh] overflow-auto grid grid-cols-1 md:grid-cols-2 gap-4"
+				className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4"
 			>
 				<div>
 					<label className="block mb-2 font-bold">No. Empleado</label>
@@ -209,7 +209,7 @@ export const EditCourseClassroomForm = ({
 						defaultOption={courseDefaultOption}
 					/>
 					{formik.touched.courseId && formik.errors.courseId && (
-						<Error error={formik.errors.courseId} />
+						<Error error={formik.errors.courseId} breakLine={false} />
 					)}
 				</div>
 
@@ -294,7 +294,7 @@ export const EditCourseClassroomForm = ({
 						defaultOption={classroomDefaultOption}
 					/>
 					{formik.touched.classroomId && formik.errors.classroomId && (
-						<Error error={formik.errors.classroomId} />
+						<Error error={formik.errors.classroomId} breakLine={false} />
 					)}
 				</div>
 
@@ -326,7 +326,7 @@ export const EditCourseClassroomForm = ({
 				</div>
 			</form>
 
-			<div className="md:col-span-2 flex justify-end gap-2 mt-2">
+			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
 					type="submit"
 					form="form-editar-planificacion"
@@ -346,6 +346,6 @@ export const EditCourseClassroomForm = ({
 					Cancelar
 				</Button>
 			</div>
-		</>
+		</div>
 	);
 };

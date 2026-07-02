@@ -219,16 +219,16 @@ export const PlanificationForm = ({
 		});
 
 	return (
-		<>
-			<h1 className="text-xl font-bold mb-5">
+		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
+			<h1 className="text-xl font-bold mb-5 shrink-0">
 				{initialData ? 'Editar fila' : 'Nueva fila'}
 			</h1>
-			<hr className="h-px my-2 bg-gray-200 border-0" />
+			<hr className="h-px my-2 bg-gray-200 border-0 shrink-0" />
 
 			<form
 				id="form-planificacion"
 				onSubmit={formik.handleSubmit}
-				className="h-[70vh] overflow-auto grid grid-cols-1 md:grid-cols-2 gap-4"
+				className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4"
 			>
 				{(
 					[
@@ -468,6 +468,7 @@ export const PlanificationForm = ({
 												name as keyof TPlanification
 											] as string
 										}
+										breakLine={fieldType !== FIELD_TYPE_TAG.CUSTOM_SELECT}
 									/>
 								)}
 						</div>
@@ -494,25 +495,26 @@ export const PlanificationForm = ({
 						)}
 				</div>
 
-				<div className="md:col-span-2 flex justify-end gap-2 mt-2">
-					<Button
-						type="submit"
-						className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-						form="form-planificacion"
-						variant="unstyled"
-					>
-						Guardar
-					</Button>
-					<Button
-						type="button"
-						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-						onClick={onCancel}
-						variant="unstyled"
-					>
-						Cancelar
-					</Button>
-				</div>
 			</form>
-		</>
+
+			<div className="flex justify-end gap-2 mt-2 shrink-0">
+				<Button
+					type="submit"
+					className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
+					form="form-planificacion"
+					variant="unstyled"
+				>
+					Guardar
+				</Button>
+				<Button
+					type="button"
+					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
+					onClick={onCancel}
+					variant="unstyled"
+				>
+					Cancelar
+				</Button>
+			</div>
+		</div>
 	);
 };
