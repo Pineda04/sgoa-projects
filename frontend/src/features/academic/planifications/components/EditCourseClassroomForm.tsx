@@ -183,7 +183,7 @@ export const EditCourseClassroomForm = ({
 					<input
 						value={teacher.code}
 						readOnly
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-not-allowed w-full bg-gray-100 shadow-md rounded px-2 py-1.5 outline-none"
 					/>
 				</div>
 
@@ -192,7 +192,7 @@ export const EditCourseClassroomForm = ({
 					<input
 						value={teacher.name}
 						readOnly
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-not-allowed w-full bg-gray-100 shadow-md rounded px-2 py-1.5 outline-none"
 					/>
 				</div>
 
@@ -218,7 +218,7 @@ export const EditCourseClassroomForm = ({
 					<input
 						value={formik.values.courseName}
 						readOnly
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-not-allowed w-full bg-gray-100 shadow-md rounded px-2 py-1.5 outline-none"
 					/>
 				</div>
 
@@ -229,7 +229,7 @@ export const EditCourseClassroomForm = ({
 						value={formik.values.section}
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 					>
 						<option value="">Seleccione una hora</option>
 						{generateTimeOptions()}
@@ -246,7 +246,7 @@ export const EditCourseClassroomForm = ({
 						value={formik.values.days}
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 					>
 						<option value="" disabled>
 							Seleccione...
@@ -270,7 +270,7 @@ export const EditCourseClassroomForm = ({
 						value={formik.values.studentCount}
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 					/>
 					{formik.touched.studentCount && formik.errors.studentCount && (
 						<Error error={formik.errors.studentCount} />
@@ -305,9 +305,9 @@ export const EditCourseClassroomForm = ({
 						checked={formik.values.nearGraduation}
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
-						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
+						className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
 					/>
-					<span>Sección con estudiantes por egresar</span>
+					<span className='cursor-default font-bold'>Sección con estudiantes por egresar</span>
 				</div>
 
 				<div className="md:col-span-2">
@@ -318,7 +318,7 @@ export const EditCourseClassroomForm = ({
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
 						rows={3}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none resize-none"
+						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 					/>
 					{formik.touched.observation && formik.errors.observation && (
 						<Error error={formik.errors.observation} />

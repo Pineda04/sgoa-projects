@@ -84,7 +84,10 @@ export const SearchAsyncSelect = <T,>({
 	};
 
 	return (
-		<Select
+    <Select
+      styles={{
+        control: (baseStyles) => ({ ...baseStyles, cursor: 'text' }),
+      }}
 			isLoading={isLoading}
 			options={options}
 			value={selected}
