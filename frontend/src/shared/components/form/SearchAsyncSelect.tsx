@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Select, { FormatOptionLabelMeta, SingleValue } from 'react-select';
 import { useDebounce } from '@shared/hooks';
 import { IOptions } from '@shared/interfaces';
+import { IoSearch } from 'react-icons/io5';
 
 interface IProps<T> {
 	hook: (
@@ -86,8 +87,14 @@ export const SearchAsyncSelect = <T,>({
 	return (
     <Select
       styles={{
-        control: (baseStyles) => ({ ...baseStyles, cursor: 'text' }),
+        control: (baseStyles) => ({ ...baseStyles, cursor: 'text', outline: 'none', boxShadow: 'none' }),
       }}
+			components={{
+				DropdownIndicator: () => (
+					<IoSearch className="size-5 mx-2 text-gray-400 shrink-0" />
+				),
+				IndicatorSeparator: () => null,
+			}}
 			isLoading={isLoading}
 			options={options}
 			value={selected}
