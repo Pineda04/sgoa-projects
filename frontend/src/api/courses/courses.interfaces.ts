@@ -14,6 +14,16 @@ export interface IUpdateCourse {
 	departmentId?: string;
 }
 
+export interface IUpdateCourseClassroom {
+	courseId?: string;
+	classroomId?: string;
+	section?: string;
+	days?: string;
+	studentCount?: number;
+	nearGraduation?: boolean;
+	observation?: string;
+}
+
 export interface ICoursesListProps {
 	centerDepartmentId?: string;
 	centerId?: string;

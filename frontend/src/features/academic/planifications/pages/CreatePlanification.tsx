@@ -275,7 +275,7 @@ export const CreatePlanification = () => {
 										<td className="py-2 px-2 border">
 											{r.nearGraduation ? 'Sí' : 'No'}
 										</td>
-										<td className="py-2 px-2 border">
+										<td className="py-2 px-2 border max-w-[50ch] whitespace-normal break-words text-left align-top">
 											{r.observation}
 										</td>
 										<td className="py-2 px-2 border">

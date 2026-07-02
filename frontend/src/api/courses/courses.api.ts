@@ -1,10 +1,11 @@
 import { api } from '@config';
-import { ICreateCourse, IUpdateCourse } from './courses.interfaces';
+import { ICreateCourse, IUpdateCourse, IUpdateCourseClassroom } from './courses.interfaces';
 import { IResponse } from '@shared';
 import {
 	TCourse,
 	TCourseBasicInfo,
 	TCourseClassroom,
+	TCourseClassroomDetail,
 	TCourseStadistic,
 	TCourseStadisticOmit,
 	TCourseWithDepartment,
@@ -113,6 +114,12 @@ export const courseClassroomsApi = {
 		api.get<IResponse<TCourseClassroom[]>>(
 			`/course-classrooms/teacher/${teacherId}`
 		),
+
+	getCourseClassroomById: (id: string) =>
+		api.get<IResponse<TCourseClassroomDetail>>(`/course-classrooms/${id}`),
+
+	updateCourseClassroom: (id: string, data: IUpdateCourseClassroom) =>
+		api.patch<IResponse<TCourseClassroom>>(`/course-classrooms/${id}`, data),
 
 	changeTeacherCourseClassroom: (
 		courseClassroomId: string,

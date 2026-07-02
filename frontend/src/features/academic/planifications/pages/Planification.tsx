@@ -16,6 +16,12 @@ export const Planification = () => {
 	const currentUser = useUser();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
+	const isCoordinatorHere = Boolean(
+		currentUser.headPositions.find(
+			p => p.centerDepartmentId === centerDepartmentId
+		)
+	);
+
 	const coursesInfo = useGetAllCoursesCoordinatorByPeriod(
 		periodId!,
 		centerDepartmentId
@@ -88,7 +94,10 @@ export const Planification = () => {
 					/>
 			</div>
 
-			<CourseClassroomsTable coursesInfo={coursesInfo.data ?? []} />
+			<CourseClassroomsTable
+				coursesInfo={coursesInfo.data ?? []}
+				isWhithActions={isCoordinatorHere}
+			/>
 		</>
 	);
 };
