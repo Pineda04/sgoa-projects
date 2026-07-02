@@ -155,9 +155,15 @@ export const Consolidated = ({
 		departmentFilterId ??
 		(isCoord ? (coordinations?.[0]?.centerDepartmentId ?? '') : undefined);
 
+	const hasUnresolvedDepartmentFilter =
+		showDepartmentFilter &&
+		Boolean(selectedDepartmentId) &&
+		!departmentFilterId;
+
 	const shouldFetch = Boolean(
 		selectedYear &&
 		selectedPac &&
+		!hasUnresolvedDepartmentFilter &&
 		(isAdminOrDireccion || (isCoord && Boolean(centerDepartmentId)))
 	);
 
@@ -214,7 +220,6 @@ export const Consolidated = ({
 						onChange={e => setSelectedYear(e.target.value)}
 						className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 					>
-						<option value="">Seleccionar</option>
 						{years.map(y => (
 							<option key={y} value={y}>
 								{y}
@@ -232,7 +237,6 @@ export const Consolidated = ({
 						onChange={e => setSelectedPac(e.target.value)}
 						className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 					>
-						<option value="">Seleccionar</option>
 						{[1, 2, 3].map(p => (
 							<option key={p} value={p}>
 								{p}
@@ -259,7 +263,7 @@ export const Consolidated = ({
 							columns={columns}
 							data={data}
 							getRowKey={row =>
-								`${row.courseCode}-${row.section}`
+							  `${row.year}-${row.pac}-${row.department}-${row.teacherCode}-${row.courseCode}-${row.section}-${row.modality}`
 							}
 							showRowNumber
 						/>
