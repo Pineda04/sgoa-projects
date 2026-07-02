@@ -50,6 +50,17 @@ export const useGetCoursesByTeacher = (teacherId: string) =>
 		select: res => res.data.data,
 	});
 
+export const useGetCourseClassroomById = (id?: string) =>
+	useQuery({
+		queryKey: ['courseClassrooms', 'detail', id ?? ''],
+		queryFn: () => courseClassroomsApi.getCourseClassroomById(id!),
+		enabled: Boolean(id),
+		retry: false,
+		refetchOnWindowFocus: false,
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
 export const useGetAllCourses = (
 	isActive: boolean = false,
 	searchTerm: string

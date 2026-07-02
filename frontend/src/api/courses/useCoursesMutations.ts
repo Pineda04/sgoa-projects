@@ -2,11 +2,14 @@ import { useMutation } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { courseClassroomsApi, coursesApi, courseStadisticsApi } from './courses.api';
 import { alertSuccess } from '@shared';
-import { ICreateCourse, IUpdateCourse } from './courses.interfaces';
+import { ICreateCourse, IUpdateCourse, IUpdateCourseClassroom } from './courses.interfaces';
 import { queryClient } from '@config';
 import { coursesKeys } from './courses.keys';
 import { TCourseStadisticOmit } from './courses.types';
-import { academicAssignmentReportsKeys } from '../assignment-reports';
+import {
+	academicAssignmentCoordinatorKeys,
+	academicAssignmentReportsKeys,
+} from '../assignment-reports';
 
 // Actualiza una clase
 export const useUpdateCourse = () => {
@@ -48,10 +51,15 @@ export const useDeleteCourseClassroom = () => {
 				// Ignore alert errors
 			}
 
-			queryClient.setQueryData(['courses'], () => []);
-		},
-		onSettled: () => {
-			queryClient.invalidateQueries({ queryKey: ['courses'] });
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: coursesKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: academicAssignmentReportsKeys.all,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: academicAssignmentCoordinatorKeys.all,
+				}),
+			]);
 		},
 	});
 
@@ -59,6 +67,37 @@ export const useDeleteCourseClassroom = () => {
 		deleteCourseClassroom: mutateAsync,
 		isPendingDeleteCourseClassroom: isPending,
 	};
+};
+
+// Actualiza los datos de una sección de clase (fila de planificación)
+export const useUpdateCourseClassroom = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			id,
+			data,
+		}: {
+			id: string;
+			data: IUpdateCourseClassroom;
+		}) => courseClassroomsApi.updateCourseClassroom(id, data),
+		onSuccess: async (res, { id }) => {
+			await alertSuccess(res);
+
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: coursesKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: ['courseClassrooms', 'detail', id],
+				}),
+				queryClient.invalidateQueries({
+					queryKey: academicAssignmentReportsKeys.all,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: academicAssignmentCoordinatorKeys.all,
+				}),
+			]);
+		},
+	});
 };
 
 // Cambiar el profesor de una sección de clase
@@ -88,6 +127,9 @@ export const useChangeTeacherCourseClassroom = () => {
 				}),
 				queryClient.invalidateQueries({
 					queryKey: academicAssignmentReportsKeys.all,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: academicAssignmentCoordinatorKeys.all,
 				}),
 			]);
 		},

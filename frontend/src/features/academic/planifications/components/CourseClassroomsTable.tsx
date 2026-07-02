@@ -1,7 +1,11 @@
-import { askDel } from '@shared/utils/delete-action';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import {
+	ArrowPathIcon,
+	PencilSquareIcon,
+	TrashIcon,
+} from '@heroicons/react/24/outline';
 import { useFormik } from 'formik';
-import { TrashIcon, UserCog } from 'lucide-react';
+import { UserCog } from 'lucide-react';
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { TCenterDepartment } from '@api/centers';
 import { TAcademicCommonProps } from '@api/periods';
@@ -18,11 +22,12 @@ import {
 	Button,
 	Error,
 	IResponsiveColumn,
-	Loading,
 	ModalBase,
 	ResponsiveTable,
 	SearchAsyncSelect,
 } from '@shared/components';
+import { DeleteCourseClassroomModal } from './DeleteCourseClassroomModal';
+import { EditCourseClassroomForm } from './EditCourseClassroomForm';
 
 const useTeachersSearch = (st: string) => useGetTeachersBySearchTerm(st);
 
@@ -52,6 +57,17 @@ export const CourseClassroomsTable = ({
 		handleShowModalChangeTeacher,
 		handleCloseModalChangeTeacher,
 	] = useModal();
+
+	const [isShowModalEdit, handleShowModalEdit, handleCloseModalEdit] =
+		useModal();
+	const [editingCourseClassroomId, setEditingCourseClassroomId] = useState<
+		string | null
+	>(null);
+
+	const [isShowModalDelete, handleShowModalDelete, handleCloseModalDelete] =
+		useModal();
+	const [courseClassroomToDelete, setCourseClassroomToDelete] =
+		useState<CourseClassroomData | undefined>();
 
 	const { deleteCourseClassroom, isPendingDeleteCourseClassroom } =
 		useDeleteCourseClassroom();
@@ -86,8 +102,32 @@ export const CourseClassroomsTable = ({
 			},
 		});
 
-	const handleDelete = (id: string) =>
-		askDel(id, 'eliminar la asignatura', deleteCourseClassroom);
+	const handleOpenDelete = (row: CourseClassroomData) => {
+		setCourseClassroomToDelete(row);
+		handleShowModalDelete();
+	};
+
+	const handleCloseDelete = () => {
+		setCourseClassroomToDelete(undefined);
+		handleCloseModalDelete();
+	};
+
+	const handleConfirmDelete = async () => {
+		if (!courseClassroomToDelete) return;
+
+		await deleteCourseClassroom(courseClassroomToDelete.id);
+		handleCloseDelete();
+	};
+
+	const handleEdit = (id: string) => {
+		setEditingCourseClassroomId(id);
+		handleShowModalEdit();
+	};
+
+	const handleEditSuccess = () => {
+		setEditingCourseClassroomId(null);
+		handleCloseModalEdit();
+	};
 
 	const handleSelectChangeTeacher = (
 		courseClassroomId: string,
@@ -107,9 +147,6 @@ export const CourseClassroomsTable = ({
 			...values,
 			teacherId: data.id,
 		});
-
-	if (isPendingDeleteCourseClassroom || isPendingChangeTeacherCourseClassroom)
-		return <Loading />;
 
 	const columns: IResponsiveColumn<CourseClassroomData>[] = [
 		{
@@ -187,6 +224,7 @@ export const CourseClassroomsTable = ({
 			header: 'Observación',
 			mobileLabel: 'Obs.',
 			hiddenOnMobile: true,
+			className: 'max-w-[50ch] whitespace-normal break-words text-left align-top',
 		},
 	];
 
@@ -196,26 +234,32 @@ export const CourseClassroomsTable = ({
 			header: 'Acciones',
 			mobileLabel: 'Acciones',
 			render: (row: CourseClassroomData) => (
-				<div className="flex gap-2 justify-center">
-					<Button
+				<div className="flex items-center justify-center gap-3">
+					<button
 						onClick={() =>
 							handleSelectChangeTeacher(row.id, row.teacher.name)
 						}
-						className="p-1.5 bg-blue-500 text-white hover:bg-blue-600 transition duration-200"
+						className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
 						title="Cambiar docente"
-						variant="unstyled"
 					>
-						<UserCog className="h-3.5 w-3.5" />
-					</Button>
+						<UserCog className="size-5" />
+					</button>
 
-					<Button
-						onClick={() => handleDelete(row.id)}
-						className="p-1.5 bg-red-500 text-white hover:bg-red-600 transition duration-200"
-						title="Eliminar"
-						variant="unstyled"
+					<button
+						onClick={() => handleEdit(row.id)}
+						className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-full transition-colors cursor-pointer"
+						title="Editar"
 					>
-						<TrashIcon className="h-3.5 w-3.5" />
-					</Button>
+						<PencilSquareIcon className="size-5" />
+					</button>
+
+					<button
+						onClick={() => handleOpenDelete(row)}
+						className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+						title="Eliminar"
+					>
+						<TrashIcon className="size-5" />
+					</button>
 				</div>
 			),
 		});
@@ -265,11 +309,11 @@ export const CourseClassroomsTable = ({
 								hook={useTeachersSearch}
 								handleChange={handleTeacherInfo}
 								getOptionValue={t => t.id}
-								getOptionLabel={t => t.code}
+								getOptionLabel={t => t.name}
 								formatOptionLabel={(data, { context }) => {
 									return customOptionsReactSelect(
 										data.label,
-										data.data.name,
+										data.data.code,
 										context
 									);
 								}}
@@ -283,16 +327,19 @@ export const CourseClassroomsTable = ({
 						<Button
 							type="submit"
 							form="change-teacher"
-							className="w-50 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500 cursor-pointer mr-2"
-							disabled={!errors}
+							className="w-50 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500 cursor-pointer mr-2 disabled:opacity-60 disabled:cursor-not-allowed"
+							disabled={isPendingChangeTeacherCourseClassroom}
 							variant="unstyled"
 						>
-							Realizar el cambio
+							{isPendingChangeTeacherCourseClassroom
+								? 'Guardando...'
+								: 'Realizar el cambio'}
 						</Button>
 						<Button
 							type="button"
 							className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition flex flex-row gap-2 duration-500 cursor-pointer"
 							onClick={handleCloseModalChangeTeacher}
+							disabled={isPendingChangeTeacherCourseClassroom}
 							variant="unstyled"
 						>
 							Cancelar
@@ -300,6 +347,37 @@ export const CourseClassroomsTable = ({
 					</div>
 				</div>
 			</ModalBase>
+
+			<ModalBase
+				isOpen={isShowModalEdit}
+				onClose={() => {
+					setEditingCourseClassroomId(null);
+					handleCloseModalEdit();
+				}}
+			>
+				{editingCourseClassroomId && (
+					<EditCourseClassroomForm
+						courseClassroomId={editingCourseClassroomId}
+						onCancel={() => {
+							setEditingCourseClassroomId(null);
+							handleCloseModalEdit();
+						}}
+						onSuccess={handleEditSuccess}
+					/>
+				)}
+			</ModalBase>
+
+			<DeleteCourseClassroomModal
+				isOpen={isShowModalDelete}
+				onClose={handleCloseDelete}
+				onConfirm={handleConfirmDelete}
+				courseLabel={
+					courseClassroomToDelete
+						? `${courseClassroomToDelete.course.code} - ${courseClassroomToDelete.course.name}`
+						: undefined
+				}
+				isPending={isPendingDeleteCourseClassroom}
+			/>
 		</>
 	);
 };

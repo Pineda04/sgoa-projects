@@ -4,6 +4,7 @@ import { TCourseBasicInfo, useGetCoursesCenterDepartmentBySearchTerm } from '@ap
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
+import { DAY_OPTIONS, generateTimeOptions } from '@features/academic/planifications/utils';
 import { Button, Error, SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
@@ -34,26 +35,6 @@ interface IFieldTag {
 	element?: React.ReactNode;
 	checkboxLabel?: string;
 }
-
-const generateTimeOptions = () => {
-	const options = [];
-
-	for (let hour = 6; hour <= 20; hour++) {
-		let hour12 = hour % 12;
-		if (hour12 === 0) hour12 = 12;
-
-		const period = hour < 12 ? 'AM' : 'PM';
-		const timeString = `${hour12}:00 ${period}`;
-
-		options.push(
-			<option key={hour} value={timeString}>
-				{timeString}
-			</option>
-		);
-	}
-
-	return options;
-};
 
 const numericFields: (keyof TPlanification)[] = ['uv', 'studentCount'];
 
@@ -416,39 +397,11 @@ export const PlanificationForm = ({
 									<option value="select" disabled>
 										Seleccione...
 									</option>
-									<option value="Lu">Lu</option>
-									<option value="Ma">Ma</option>
-									<option value="Mi">Mi</option>
-									<option value="Ju">Ju</option>
-									<option value="Vi">Vi</option>
-									<option value="LuMa">LuMa</option>
-									<option value="LuMi">LuMi</option>
-									<option value="LuJu">LuJu</option>
-									<option value="LuVi">LuVi</option>
-									<option value="MaMi">MaMi</option>
-									<option value="MaJu">MaJu</option>
-									<option value="MaVi">MaVi</option>
-									<option value="MiJu">MiJu</option>
-									<option value="MiVi">MiVi</option>
-									<option value="JuVi">JuVi</option>
-									<option value="LuMaMi">LuMaMi</option>
-									<option value="LuMaJu">LuMaJu</option>
-									<option value="LuMaVi">LuMaVi</option>
-									<option value="LuMiJu">LuMiJu</option>
-									<option value="LuMiVi">LuMiVi</option>
-									<option value="LuJuVi">LuJuVi</option>
-									<option value="MaMiJu">MaMiJu</option>
-									<option value="MaMiVi">MaMiVi</option>
-									<option value="MaJuVi">MaJuVi</option>
-									<option value="MiJuVi">MiJuVi</option>
-									<option value="LuMaMiJu">LuMaMiJu</option>
-									<option value="LuMaMiVi">LuMaMiVi</option>
-									<option value="LuMaJuVi">LuMaJuVi</option>
-									<option value="LuMiJuVi">LuMiJuVi</option>
-									<option value="MaMiJuVi">MaMiJuVi</option>
-									<option value="LuMaMiJuVi">
-										LuMaMiJuVi
-									</option>
+									{DAY_OPTIONS.map(day => (
+										<option key={day} value={day}>
+											{day}
+										</option>
+									))}
 								</select>
 							) : fieldType === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
 								// Render the provided custom element (SearchAsyncSelect). The select

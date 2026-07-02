@@ -1,7 +1,12 @@
 import { TDepartment } from '..';
 import { TCenter } from '../centers';
 import { TAcademicCommonProps } from '../periods/periods.types';
-import { courseClassroomSchema, courseCreateSchema, courseUpdateSchema } from '@features/academic';
+import {
+	courseClassroomSchema,
+	courseCreateSchema,
+	courseUpdateSchema,
+	editCourseClassroomSchema,
+} from '@features/academic';
 import z from 'zod';
 
 export type TCourse = {
@@ -44,6 +49,44 @@ export type TCourseClassroom = {
 };
 
 export type TUpdateCourseClassroom = z.infer<typeof courseClassroomSchema>;
+
+export type TCourseClassroomDetail = Pick<
+	TCourseClassroom,
+	| 'id'
+	| 'courseId'
+	| 'classroomId'
+	| 'teachingSessionId'
+	| 'section'
+	| 'days'
+	| 'studentCount'
+	| 'modalityId'
+	| 'nearGraduation'
+	| 'groupCode'
+	| 'observation'
+> & {
+	course: TCourse;
+	classroom: {
+		name: string;
+		building: {
+			name: string;
+			centerId: string;
+		};
+	};
+	teachingSession: {
+		assignmentReport: {
+			periodId: string;
+			centerDepartmentId: string;
+			teacher: {
+				user: {
+					name: string;
+					code: string;
+				};
+			};
+		};
+	};
+};
+
+export type TEditCourseClassroom = z.infer<typeof editCourseClassroomSchema>;
 
 export type TCourseStadistic = {
 	id: string;
