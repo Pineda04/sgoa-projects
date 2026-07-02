@@ -233,6 +233,7 @@ export const CourseClassroomsTable = ({
 			key: 'actions',
 			header: 'Acciones',
 			mobileLabel: 'Acciones',
+			sticky: 'right',
 			render: (row: CourseClassroomData) => (
 				<div className="flex items-center justify-center gap-3">
 					<button
