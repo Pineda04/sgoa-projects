@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi, courseClassroomsApi } from './courses.api';
+import { coursesApi, courseClassroomsApi, courseStadisticsApi } from './courses.api';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared';
 import { coursesKeys } from './courses.keys';
@@ -147,6 +147,24 @@ export const useGetCurrentUserCourses = () =>
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data.data,
+	});
+
+export const useGetConsolidated = (
+	params: {
+		year?: string;
+		pac?: string;
+		centerDepartmentId?: string;
+		page?: number;
+		size?: number;
+	},
+	enabled?: boolean
+) =>
+	useQuery({
+		queryKey: coursesKeys.consolidated(params),
+		queryFn: () => courseStadisticsApi.getConsolidated(params),
+		enabled: enabled ?? Boolean(params.year && params.pac),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data,
 	});
 
 export const useGetCoursesCenterDepartmentBySearchTerm = (
