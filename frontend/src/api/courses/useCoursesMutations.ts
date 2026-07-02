@@ -82,7 +82,11 @@ export const useUpdateCourseClassroom = () => {
 			data: IUpdateCourseClassroom;
 		}) => courseClassroomsApi.updateCourseClassroom(id, data),
 		onSuccess: async (res, { id }) => {
-			await alertSuccess(res);
+			try {
+				await alertSuccess(res);
+			} catch {
+				// Ignorar los errores
+			}
 
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: coursesKeys.all }),
