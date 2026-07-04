@@ -13,6 +13,7 @@ import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
+import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
@@ -121,6 +122,12 @@ const router = createBrowserRouter(
 			path: 'infrastructure/centers',
 			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'inventory/pc-equipments/*',
+			element: <ProtectedRoute action="read" subject="pcEquipments" />,
+			children: pcEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

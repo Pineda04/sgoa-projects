@@ -11,4 +11,7 @@ export const classroomsApi = {
 		api.get<IResponse<TClassroom[]>>(
 			`/classrooms/search?searchTerm=${searchTerm}&page=${page}&size=${size}`
 		),
+
+	getClassroomById: (id: string) =>
+		api.get<IResponse<Omit<TClassroom, 'building'>>>(`/classrooms/${id}`),
 };
