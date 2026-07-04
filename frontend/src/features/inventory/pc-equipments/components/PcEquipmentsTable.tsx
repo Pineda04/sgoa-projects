@@ -237,36 +237,24 @@ export const PcEquipmentsTable = ({
 				)}
 			</ModalBase>
 
-			<ViewPcEquipmentModal
-				isOpen={isViewOpen}
-				onClose={handleCloseView}
-				pcEquipment={viewingPcEquipment}
-				brandName={
-					viewingPcEquipment
-						? brandMap.get(viewingPcEquipment.brandId)
-						: undefined
-				}
-				conditionName={
-					viewingPcEquipment
-						? conditionMap.get(viewingPcEquipment.conditionId)
-						: undefined
-				}
-				pcTypeName={
-					viewingPcEquipment
-						? pcTypeMap.get(viewingPcEquipment.pcTypeId)
-						: undefined
-				}
-				monitorTypeName={
-					viewingPcEquipment
-						? monitorTypeMap.get(viewingPcEquipment.monitorTypeId)
-						: undefined
-				}
-				monitorSizeName={
-					viewingPcEquipment
-						? monitorSizeMap.get(viewingPcEquipment.monitorSizeId)
-						: undefined
-				}
-			/>
+			{viewingPcEquipment && (
+				<ViewPcEquipmentModal
+					isOpen={isViewOpen}
+					onClose={handleCloseView}
+					pcEquipment={viewingPcEquipment}
+					brandName={brandMap.get(viewingPcEquipment.brandId)}
+					conditionName={conditionMap.get(
+						viewingPcEquipment.conditionId
+					)}
+					pcTypeName={pcTypeMap.get(viewingPcEquipment.pcTypeId)}
+					monitorTypeName={monitorTypeMap.get(
+						viewingPcEquipment.monitorTypeId
+					)}
+					monitorSizeName={monitorSizeMap.get(
+						viewingPcEquipment.monitorSizeId
+					)}
+				/>
+			)}
 		</>
 	);
 };
