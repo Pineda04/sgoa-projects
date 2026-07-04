@@ -1,13 +1,11 @@
+import { useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
-import {
-	TUpdatePcEquipment,
-	useGetPcEquipment,
-	useUpdatePcEquipment,
-} from '@api/pc-equipments';
+import { useGetPcEquipment, useUpdatePcEquipment } from '@api/pc-equipments';
 import { useGetClassroomById } from '@api/classrooms';
 import { Button, Loading, TagError } from '@shared/components';
 import { errorsFormik } from '@shared/utils';
 import {
+	buildPcEquipmentBody,
 	initialPcEquipmentValues,
 	pcEquipmentSchema,
 	TPcEquipmentFormValues,
@@ -19,20 +17,6 @@ interface EditPcEquipmentFormProps {
 	onCancel: () => void;
 	onSuccess: () => void;
 }
-
-const buildBody = (values: TPcEquipmentFormValues): TUpdatePcEquipment => ({
-	inventoryNumber: values.inventoryNumber.trim(),
-	processor: values.processor.trim(),
-	ram: values.ram.trim(),
-	disk: values.disk.trim(),
-	brandId: values.brandId,
-	conditionId: values.conditionId,
-	monitorTypeId: values.monitorTypeId,
-	monitorSizeId: values.monitorSizeId,
-	pcTypeId: values.pcTypeId,
-	classroomId: values.classroomId || undefined,
-	departmentId: values.departmentId || undefined,
-});
 
 export const EditPcEquipmentForm = ({
 	pcEquipmentId,
@@ -49,28 +33,43 @@ export const EditPcEquipmentForm = ({
 
 	const { updatePcEquipment, isPendingUpdate } = useUpdatePcEquipment();
 
+	const [initialValues, setInitialValues] = useState<TPcEquipmentFormValues>(
+		initialPcEquipmentValues
+	);
+	const hasInitialized = useRef(false);
+
+	useEffect(() => {
+		if (!pcEquipment || hasInitialized.current) return;
+
+		hasInitialized.current = true;
+		setInitialValues({
+			inventoryNumber: pcEquipment.inventoryNumber,
+			processor: pcEquipment.processor,
+			ram: pcEquipment.ram,
+			disk: pcEquipment.disk,
+			brandId: pcEquipment.brandId,
+			conditionId: pcEquipment.conditionId,
+			monitorTypeId: pcEquipment.monitorTypeId,
+			monitorSizeId: pcEquipment.monitorSizeId,
+			pcTypeId: pcEquipment.pcTypeId,
+			classroomId: pcEquipment.classroomId ?? '',
+			departmentId: pcEquipment.departmentId ?? '',
+		});
+	}, [pcEquipment]);
+
 	const formik = useFormik<TPcEquipmentFormValues>({
 		enableReinitialize: true,
-		initialValues: pcEquipment
-			? {
-					inventoryNumber: pcEquipment.inventoryNumber,
-					processor: pcEquipment.processor,
-					ram: pcEquipment.ram,
-					disk: pcEquipment.disk,
-					brandId: pcEquipment.brandId,
-					conditionId: pcEquipment.conditionId,
-					monitorTypeId: pcEquipment.monitorTypeId,
-					monitorSizeId: pcEquipment.monitorSizeId,
-					pcTypeId: pcEquipment.pcTypeId,
-					classroomId: pcEquipment.classroomId ?? '',
-					departmentId: pcEquipment.departmentId ?? '',
-				}
-			: initialPcEquipmentValues,
+		initialValues,
 		onSubmit: async values => {
-			await updatePcEquipment(
-				{ id: pcEquipmentId, body: buildBody(values) },
-				{ onSuccess }
-			);
+			try {
+				await updatePcEquipment({
+					id: pcEquipmentId,
+					body: buildPcEquipmentBody(values),
+				});
+				onSuccess();
+			} catch {
+				// Error handling done en la mutation
+			}
 		},
 		validate: values => {
 			const result = pcEquipmentSchema.safeParse(values);

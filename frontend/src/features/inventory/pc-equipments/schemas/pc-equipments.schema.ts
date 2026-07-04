@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TCreatePcEquipment } from '@api/pc-equipments';
 
 export const pcEquipmentSchema = z.object({
 	inventoryNumber: z
@@ -45,3 +46,19 @@ export const initialPcEquipmentValues: TPcEquipmentFormValues = {
 	classroomId: '',
 	departmentId: '',
 };
+
+export const buildPcEquipmentBody = (
+	values: TPcEquipmentFormValues
+): TCreatePcEquipment => ({
+	inventoryNumber: values.inventoryNumber.trim(),
+	processor: values.processor.trim(),
+	ram: values.ram.trim(),
+	disk: values.disk.trim(),
+	brandId: values.brandId,
+	conditionId: values.conditionId,
+	monitorTypeId: values.monitorTypeId,
+	monitorSizeId: values.monitorSizeId,
+	pcTypeId: values.pcTypeId,
+	classroomId: values.classroomId || undefined,
+	departmentId: values.departmentId || undefined,
+});

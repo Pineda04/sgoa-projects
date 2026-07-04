@@ -1,8 +1,9 @@
 import { useFormik } from 'formik';
-import { TCreatePcEquipment, useCreatePcEquipment } from '@api/pc-equipments';
+import { useCreatePcEquipment } from '@api/pc-equipments';
 import { Button } from '@shared/components';
 import { errorsFormik } from '@shared/utils';
 import {
+	buildPcEquipmentBody,
 	initialPcEquipmentValues,
 	pcEquipmentSchema,
 	TPcEquipmentFormValues,
@@ -14,20 +15,6 @@ interface CreatePcEquipmentFormProps {
 	onSuccess: () => void;
 }
 
-const buildBody = (values: TPcEquipmentFormValues): TCreatePcEquipment => ({
-	inventoryNumber: values.inventoryNumber.trim(),
-	processor: values.processor.trim(),
-	ram: values.ram.trim(),
-	disk: values.disk.trim(),
-	brandId: values.brandId,
-	conditionId: values.conditionId,
-	monitorTypeId: values.monitorTypeId,
-	monitorSizeId: values.monitorSizeId,
-	pcTypeId: values.pcTypeId,
-	classroomId: values.classroomId || undefined,
-	departmentId: values.departmentId || undefined,
-});
-
 export const CreatePcEquipmentForm = ({
 	onCancel,
 	onSuccess,
@@ -37,12 +24,13 @@ export const CreatePcEquipmentForm = ({
 	const formik = useFormik<TPcEquipmentFormValues>({
 		initialValues: initialPcEquipmentValues,
 		onSubmit: async values => {
-			await createMutation.mutateAsync(buildBody(values), {
-				onSuccess: () => {
-					formik.resetForm();
-					onSuccess();
-				},
-			});
+			try {
+				await createMutation.mutateAsync(buildPcEquipmentBody(values));
+				formik.resetForm();
+				onSuccess();
+			} catch {
+				// Error handling done en la mutation
+			}
 		},
 		validate: values => {
 			const result = pcEquipmentSchema.safeParse(values);
