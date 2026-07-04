@@ -138,7 +138,7 @@ export class AcademicAssignmentReportsService {
     private readonly teachingSessionsService: TeachingSessionsService,
     private readonly courseClassroomsService: CourseClassroomsService,
     private readonly centerDepartmentsService: CenterDepartmentsService,
-  ) {}
+  ) { }
 
   async create(
     createAcademicAssignmentReportDto: CreateAcademicAssignmentReportDto,
@@ -395,6 +395,58 @@ export class AcademicAssignmentReportsService {
       ...period,
       title: `PAC No. ${period.pac}, ${period.pac_modality}, ${period.year}`,
       centerDepartmentId,
+    }));
+
+    return paginateOutput(mapped, count, query);
+  }
+
+  async findAllPeriodsForAuthorities(
+    query: QueryPaginationDto,
+  ): Promise<
+    IPaginateOutput<
+      TAcademicPeriod & {
+        title: string;
+        centerDepartmentId: string;
+        centerName: string;
+        departmentName: string;
+      }
+    >
+  > {
+    const [rows, count] = await Promise.all([
+      this.prisma.academicAssignmentReport.findMany({
+        ...paginate(query),
+        distinct: ['periodId', 'centerDepartmentId'],
+        relationLoadStrategy: 'join',
+        select: {
+          period: true,
+          centerDepartmentId: true,
+          centerDepartment: {
+            select: {
+              center: { select: { name: true } },
+              department: { select: { name: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.academicAssignmentReport
+        .findMany({
+          distinct: ['periodId', 'centerDepartmentId'],
+          select: { periodId: true, centerDepartmentId: true },
+        })
+        .then((results) => results.length),
+    ]);
+
+    if (count === 0)
+      throw new BadRequestException(
+        'No se encontraron periodos académicos con asignaciones académicas registradas.',
+      );
+
+    const mapped = rows.map(({ period, centerDepartmentId, centerDepartment }) => ({
+      ...period,
+      title: `PAC No. ${period.pac}, ${period.pac_modality}, ${period.year}`,
+      centerDepartmentId,
+      centerName: centerDepartment.center.name,
+      departmentName: centerDepartment.department.name,
     }));
 
     return paginateOutput(mapped, count, query);
@@ -947,7 +999,7 @@ export class AcademicAssignmentReportsService {
         classroom &&
         hasOverlap &&
         normalizeText(classroom.roomType.description) !==
-          normalizeText(EClassModality.VIRTUAL_SPACE)
+        normalizeText(EClassModality.VIRTUAL_SPACE)
       ) {
         const occupiedInfo = occupiedSchedules?.find((o) =>
           [...itemDaysSet].some((day) => o.daysSet.has(day)),
@@ -1405,9 +1457,9 @@ export class AcademicAssignmentReportsService {
     return classroom
       ? [classroom, '']
       : [
-          null,
-          `No se encontró el salón de clase con nombre <${classroomName}>.`,
-        ];
+        null,
+        `No se encontró el salón de clase con nombre <${classroomName}>.`,
+      ];
   }
 
   private validateCourseClassroom(
@@ -1422,11 +1474,11 @@ export class AcademicAssignmentReportsService {
 
     return existingCourseClassroom &&
       existingCourseClassroom.teachingSession.assignmentReport.periodId ===
-        periodId
+      periodId
       ? [
-          null,
-          `Ya existe una clase para el docente <${teacherCode} - ${teacherName}> con la asignatura <${courseCode}> en <${academicPeriodTitle}>.`,
-        ]
+        null,
+        `Ya existe una clase para el docente <${teacherCode} - ${teacherName}> con la asignatura <${courseCode}> en <${academicPeriodTitle}>.`,
+      ]
       : [existingCourseClassroom, ''];
   }
 

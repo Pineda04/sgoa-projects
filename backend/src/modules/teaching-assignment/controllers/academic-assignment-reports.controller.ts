@@ -402,6 +402,33 @@ export class AssignmentReportsController {
     );
   }
 
+  @Get('periods/all')
+  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage(
+    'Lista de periodos académicos con asignaciones académicas registradas para todos los centros y departamentos.',
+  )
+  @ApiPagination({
+    summary:
+      'Obtener periodos académicos con asignaciones registradas (todos los centros y departamentos)',
+    description:
+      'Retorna un listado paginado de los periodos académicos en los que existen asignaciones académicas, de todos los centros y departamentos. Cada objeto incluye el nombre del centro y del departamento correspondiente. Solo accesible para ADMIN, DIRECCION y RRHH.',
+  })
+  @ApiCommonResponses({
+    summary:
+      'Consulta de periodos académicos con asignaciones (global)',
+    okDescription: 'Listado de periodos obtenido correctamente.',
+    badRequestDescription: 'La solicitud contiene parámetros inválidos.',
+    internalErrorDescription: 'Error interno al procesar la solicitud.',
+    notFoundDescription:
+      'No se encontraron periodos con asignaciones académicas registradas.',
+  })
+  findAllPeriodsForAuthorities(@Query() query: QueryPaginationDto) {
+    return this.academicAssignmentReportsService.findAllPeriodsForAuthorities(
+      query,
+    );
+  }
+
   @Get(':id')
   @Roles(
     EUserRole.ADMIN,

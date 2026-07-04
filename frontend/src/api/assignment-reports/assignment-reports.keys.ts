@@ -76,3 +76,11 @@ export const academicAssignmentCoordinatorKeys = {
 			page,
 		] as const,
 };
+
+export const academicAssignmentAuthoritiesKeys = {
+	all: ['academic-assignment-authorities'] as const,
+	periods: (page: number) =>
+		[...academicAssignmentAuthoritiesKeys.all, 'periods', page] as const,
+	reports: (page: number) =>
+		[...academicAssignmentAuthoritiesKeys.all, 'reports', page] as const,
+};

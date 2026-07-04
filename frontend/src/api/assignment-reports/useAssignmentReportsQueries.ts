@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { academicAssignmentCoordinatorKeys, academicAssignmentReportsKeys } from './assignment-reports.keys';
+import { academicAssignmentAuthoritiesKeys, academicAssignmentCoordinatorKeys, academicAssignmentReportsKeys } from './assignment-reports.keys';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared';
 import { academicAssignmentReportsApi } from './assignment-reports.api';
@@ -121,6 +121,32 @@ export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 				size
 			),
 		enabled: Boolean(centerDepartmentId),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data,
+	});
+};
+
+// Hook para obtener todos los periodos con asignaciones (ADMIN, DIRECCION, RRHH)
+export const useGetAllPeriodsForAuthorities = () => {
+	const { page, size } = usePaginationParams();
+
+	return useQuery({
+		queryKey: academicAssignmentAuthoritiesKeys.periods(page),
+		queryFn: () =>
+			academicAssignmentReportsApi.getAllPeriodsForAuthorities(page, size),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data,
+	});
+};
+
+// Hook para obtener todos los informes de asignación (ADMIN, DIRECCION, RRHH)
+export const useGetAllAssignmentReportsForAuthorities = () => {
+	const { page, size } = usePaginationParams();
+
+	return useQuery({
+		queryKey: academicAssignmentAuthoritiesKeys.reports(page),
+		queryFn: () =>
+			academicAssignmentReportsApi.getAllAssignmentReports(page, size),
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data,
 	});

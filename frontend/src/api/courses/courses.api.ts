@@ -102,6 +102,30 @@ export const courseClassroomsApi = {
 			`/course-classrooms/coordinator/center-department/${centerDepartmentId}/periods/${periodId}`
 		),
 
+	getAllCoursesAuthorityByPeriod: (
+		periodId: string,
+		centerDepartmentId: string
+	) =>
+		api.get<
+			IResponse<
+				(TCourseClassroom & {
+					teacher: {
+						id: string;
+						userId: string;
+						name: string;
+						code: string;
+					};
+					centerDepartment: TCenterDepartment & {
+						center: Pick<TAcademicCommonProps, 'name'>;
+						department: Pick<TAcademicCommonProps, 'name'>;
+						coordinator: Pick<TAcademicCommonProps, 'name'>;
+					};
+				})[]
+			>
+		>(
+			`/course-classrooms/authority/center-department/${centerDepartmentId}/periods/${periodId}`
+		),
+
 	getAllByCenterDepartment: (centerDepartmentId: string, periodId: string) =>
 		api.get<IResponse<TCourseClassroom[]>>(
 			`/course-classrooms/coordinator/center-department/${centerDepartmentId}/periods/${periodId}`
