@@ -13,4 +13,6 @@ export const coursesKeys = {
 			'center',
 			centerDepartmentId,
 		] as const,
+	consolidated: (params: Record<string, unknown>) =>
+		['course-stadistics', 'consolidated', params] as const,
 };

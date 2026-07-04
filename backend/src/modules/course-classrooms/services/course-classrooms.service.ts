@@ -133,12 +133,23 @@ export class CourseClassroomsService {
     TCourseClassroom & {
       course: TCourse;
       classroom: {
+        name: string;
         building: {
+          name: string;
           centerId: string;
         };
       };
       teachingSession: TTeachingSession & {
-        assignmentReport: { periodId: string; centerDepartmentId: string };
+        assignmentReport: {
+          periodId: string;
+          centerDepartmentId: string;
+          teacher: {
+            user: {
+              name: string;
+              code: string;
+            };
+          };
+        };
       };
     }
   > {
@@ -150,8 +161,10 @@ export class CourseClassroomsService {
         course: true,
         classroom: {
           select: {
+            name: true,
             building: {
               select: {
+                name: true,
                 centerId: true,
               },
             },
@@ -163,6 +176,16 @@ export class CourseClassroomsService {
               select: {
                 periodId: true,
                 centerDepartmentId: true,
+                teacher: {
+                  select: {
+                    user: {
+                      select: {
+                        name: true,
+                        code: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },

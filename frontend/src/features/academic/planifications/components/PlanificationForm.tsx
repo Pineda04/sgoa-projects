@@ -4,6 +4,7 @@ import { TCourseBasicInfo, useGetCoursesCenterDepartmentBySearchTerm } from '@ap
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
+import { DAY_OPTIONS, generateTimeOptions } from '@features/academic/planifications/utils';
 import { Button, Error, SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
@@ -34,26 +35,6 @@ interface IFieldTag {
 	element?: React.ReactNode;
 	checkboxLabel?: string;
 }
-
-const generateTimeOptions = () => {
-	const options = [];
-
-	for (let hour = 6; hour <= 20; hour++) {
-		let hour12 = hour % 12;
-		if (hour12 === 0) hour12 = 12;
-
-		const period = hour < 12 ? 'AM' : 'PM';
-		const timeString = `${hour12}:00 ${period}`;
-
-		options.push(
-			<option key={hour} value={timeString}>
-				{timeString}
-			</option>
-		);
-	}
-
-	return options;
-};
 
 const numericFields: (keyof TPlanification)[] = ['uv', 'studentCount'];
 
@@ -238,16 +219,16 @@ export const PlanificationForm = ({
 		});
 
 	return (
-		<>
-			<h1 className="text-xl font-bold mb-5">
+		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
+			<h1 className="text-xl font-bold mb-5 shrink-0">
 				{initialData ? 'Editar fila' : 'Nueva fila'}
 			</h1>
-			<hr className="h-px my-2 bg-gray-200 border-0" />
+			<hr className="h-px my-2 bg-gray-200 border-0 shrink-0" />
 
 			<form
 				id="form-planificacion"
 				onSubmit={formik.handleSubmit}
-				className="h-[70vh] overflow-auto grid grid-cols-1 md:grid-cols-2 gap-4"
+				className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4"
 			>
 				{(
 					[
@@ -411,44 +392,16 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 								>
 									<option value="select" disabled>
 										Seleccione...
 									</option>
-									<option value="Lu">Lu</option>
-									<option value="Ma">Ma</option>
-									<option value="Mi">Mi</option>
-									<option value="Ju">Ju</option>
-									<option value="Vi">Vi</option>
-									<option value="LuMa">LuMa</option>
-									<option value="LuMi">LuMi</option>
-									<option value="LuJu">LuJu</option>
-									<option value="LuVi">LuVi</option>
-									<option value="MaMi">MaMi</option>
-									<option value="MaJu">MaJu</option>
-									<option value="MaVi">MaVi</option>
-									<option value="MiJu">MiJu</option>
-									<option value="MiVi">MiVi</option>
-									<option value="JuVi">JuVi</option>
-									<option value="LuMaMi">LuMaMi</option>
-									<option value="LuMaJu">LuMaJu</option>
-									<option value="LuMaVi">LuMaVi</option>
-									<option value="LuMiJu">LuMiJu</option>
-									<option value="LuMiVi">LuMiVi</option>
-									<option value="LuJuVi">LuJuVi</option>
-									<option value="MaMiJu">MaMiJu</option>
-									<option value="MaMiVi">MaMiVi</option>
-									<option value="MaJuVi">MaJuVi</option>
-									<option value="MiJuVi">MiJuVi</option>
-									<option value="LuMaMiJu">LuMaMiJu</option>
-									<option value="LuMaMiVi">LuMaMiVi</option>
-									<option value="LuMaJuVi">LuMaJuVi</option>
-									<option value="LuMiJuVi">LuMiJuVi</option>
-									<option value="MaMiJuVi">MaMiJuVi</option>
-									<option value="LuMaMiJuVi">
-										LuMaMiJuVi
-									</option>
+									{DAY_OPTIONS.map(day => (
+										<option key={day} value={day}>
+											{day}
+										</option>
+									))}
 								</select>
 							) : fieldType === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
 								// Render the provided custom element (SearchAsyncSelect). The select
@@ -464,7 +417,7 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
 								>
 									<option value="">
 										Seleccione una hora
@@ -483,9 +436,9 @@ export const PlanificationForm = ({
 										}
 										onChange={handleChange}
 										onBlur={formik.handleBlur}
-										className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
+										className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
 									/>
-									<span>{checkboxLabel}</span>
+									<span className="cursor-default">{checkboxLabel}</span>
 								</div>
 							) : (
 								<input
@@ -502,7 +455,7 @@ export const PlanificationForm = ({
 									}
 									onChange={handleChange}
 									onBlur={formik.handleBlur}
-									className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none"
+									className={`${readOnly ? 'cursor-not-allowed' : 'cursor-text'} w-full ${readOnly ? 'bg-gray-100 shadow-md' : 'bg-white border hover:border-gray-400 transition'} rounded px-2 py-1.5 outline-none`}
 									readOnly={readOnly}
 								/>
 							)}
@@ -515,6 +468,7 @@ export const PlanificationForm = ({
 												name as keyof TPlanification
 											] as string
 										}
+										breakLine={fieldType !== FIELD_TYPE_TAG.CUSTOM_SELECT}
 									/>
 								)}
 						</div>
@@ -531,7 +485,7 @@ export const PlanificationForm = ({
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
 						rows={3}
-						className="w-full bg-gray-100 shadow-md rounded px-2 py-2 outline-none resize-none"
+						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5 resize-none"
 					/>
 					{formik.touched.observation &&
 						formik.errors.observation && (
@@ -541,25 +495,26 @@ export const PlanificationForm = ({
 						)}
 				</div>
 
-				<div className="md:col-span-2 flex justify-end gap-2 mt-2">
-					<Button
-						type="submit"
-						className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-						form="form-planificacion"
-						variant="unstyled"
-					>
-						Guardar
-					</Button>
-					<Button
-						type="button"
-						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-						onClick={onCancel}
-						variant="unstyled"
-					>
-						Cancelar
-					</Button>
-				</div>
 			</form>
-		</>
+
+			<div className="flex justify-end gap-2 mt-2 shrink-0">
+				<Button
+					type="submit"
+					className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
+					form="form-planificacion"
+					variant="unstyled"
+				>
+					Guardar
+				</Button>
+				<Button
+					type="button"
+					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
+					onClick={onCancel}
+					variant="unstyled"
+				>
+					Cancelar
+				</Button>
+			</div>
+		</div>
 	);
 };

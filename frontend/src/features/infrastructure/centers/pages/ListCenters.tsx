@@ -24,10 +24,11 @@ export const ListCenters = () => {
 	const [isModalOpen, openModal, closeModal] = useModal();
 	const [isCreateModalOpen, openCreateModal, closeCreateModal] = useModal();
 	const [isEditModalOpen, openEditModal, closeEditModal] = useModal();
-  const [selectedCenter, setSelectedCenter] = useState<TCenter | null>(null);
+	const [selectedCenter, setSelectedCenter] = useState<TCenter | null>(null);
 
 	const { data: centers, isLoading } = useGetAllCenters();
-	const { mutate: deleteCenter, isPending: isDeleting } = useDeleteCenterMutation();
+	const { mutate: deleteCenter, isPending: isDeleting } =
+		useDeleteCenterMutation();
 
 	if (isLoading) return <Loading />;
 
@@ -100,19 +101,18 @@ export const ListCenters = () => {
 
 	return (
 		<div className="p-6 w-full max-w-7xl mx-auto">
-			<div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+			<div className="flex flex-col sm:flex-row justify-between items-end mb-6">
 				<div>
-					<h1 className="text-2xl font-bold text-slate-800">
+					<h1 className="text-2xl font-bold text-foreground">
 						Gestión de Centros
 					</h1>
-					<p className="text-sm text-gray-500 mt-2">
+					<p className="text-muted-foreground mt-1">
 						Administración de centros operativos de la institución.
 					</p>
 				</div>
 				<Button
 					onClick={openCreateModal}
-					className="mt-4 sm:mt-0 bg-[oklch(0.627_0.194_149.214)] hover:bg-[oklch(0.55_0.194_149.214)] text-white flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
-					variant="unstyled"
+					className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
 				>
 					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
 					<span>Nuevo Centro</span>

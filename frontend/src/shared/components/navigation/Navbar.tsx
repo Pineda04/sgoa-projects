@@ -6,7 +6,6 @@ import {
 	XMarkIcon,
 	ChevronDownIcon,
 	ShieldCheckIcon,
-	BookOpenIcon,
 	WrenchScrewdriverIcon,
 	CubeIcon,
 	ChartBarSquareIcon,
@@ -43,31 +42,12 @@ const MODULES: ModuleConfig[] = [
 		icon: ShieldCheckIcon,
 		sections: [
 			{
-				label: 'Usuarios',
-				path: '/admin/users',
-			},
-			{
 				label: 'Departamentos',
-				path: '/admin/departments'
-			},
-		],
-	},
-	{
-		id: 'academic',
-		label: 'Gestión Académica',
-		icon: BookOpenIcon,
-		sections: [
-			{
-				label: 'Periodos',
-				path: '/academic/periods',
+				path: '/admin/departments',
 			},
 			{
-				label: 'Asignaturas',
-				path: '/academic/courses',
-			},
-			{
-				label: 'Consolidado',
-				path: '/academic/reports/consolidated',
+				label: 'Títulos',
+				path: '/admin/degrees',
 			},
 		],
 	},
