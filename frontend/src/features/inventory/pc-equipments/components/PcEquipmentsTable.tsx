@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
+	EyeIcon,
 	PencilSquareIcon,
 	TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -15,6 +16,7 @@ import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
 import { DeletePcEquipmentModal } from './DeletePcEquipmentModal';
 import { EditPcEquipmentForm } from './EditPcEquipmentForm';
+import { ViewPcEquipmentModal } from './ViewPcEquipmentModal';
 
 interface PcEquipmentsTableProps {
 	data: TPcEquipment[];
@@ -38,6 +40,11 @@ export const PcEquipmentsTable = ({
 	const [editingPcEquipmentId, setEditingPcEquipmentId] = useState<
 		string | null
 	>(null);
+
+	const [isViewOpen, openView, closeView] = useModal();
+	const [viewingPcEquipment, setViewingPcEquipment] = useState<
+		TPcEquipment | undefined
+	>();
 
 	const { deletePcEquipment, isPendingDelete } = useDeletePcEquipment();
 
@@ -100,7 +107,18 @@ export const PcEquipmentsTable = ({
 		setEditingPcEquipmentId(null);
 	};
 
-	const hasActions = canUpdate || canDelete;
+	const handleOpenView = useCallback(
+		(pcEquipment: TPcEquipment) => {
+			setViewingPcEquipment(pcEquipment);
+			openView();
+		},
+		[openView]
+	);
+
+	const handleCloseView = () => {
+		closeView();
+		setViewingPcEquipment(undefined);
+	};
 
 	const columns: IDataTableColumn<TPcEquipment>[] = [
 		{
@@ -154,37 +172,40 @@ export const PcEquipmentsTable = ({
 			mobileLabel: 'Condición',
 			render: row => conditionMap.get(row.conditionId) ?? '—',
 		},
-		...(hasActions
-			? ([
-					{
-						key: 'actions',
-						header: 'Acciones',
-						mobileLabel: 'Acciones',
-						render: (row: TPcEquipment) => (
-							<div className="flex items-center justify-center gap-3">
-								{canUpdate && (
-									<button
-										onClick={() => handleOpenEdit(row)}
-										className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-										title="Editar equipo"
-									>
-										<PencilSquareIcon className="size-5" />
-									</button>
-								)}
-								{canDelete && (
-									<button
-										onClick={() => handleOpenDelete(row)}
-										className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-										title="Eliminar equipo"
-									>
-										<TrashIcon className="size-5" />
-									</button>
-								)}
-							</div>
-						),
-					},
-				] as IDataTableColumn<TPcEquipment>[])
-			: []),
+		{
+			key: 'actions',
+			header: 'Acciones',
+			mobileLabel: 'Acciones',
+			render: (row: TPcEquipment) => (
+				<div className="flex items-center justify-center gap-3">
+					<button
+						onClick={() => handleOpenView(row)}
+						className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+						title="Ver equipo"
+					>
+						<EyeIcon className="size-5" />
+					</button>
+					{canUpdate && (
+						<button
+							onClick={() => handleOpenEdit(row)}
+							className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+							title="Editar equipo"
+						>
+							<PencilSquareIcon className="size-5" />
+						</button>
+					)}
+					{canDelete && (
+						<button
+							onClick={() => handleOpenDelete(row)}
+							className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+							title="Eliminar equipo"
+						>
+							<TrashIcon className="size-5" />
+						</button>
+					)}
+				</div>
+			),
+		},
 	];
 
 	return (
@@ -215,6 +236,37 @@ export const PcEquipmentsTable = ({
 					/>
 				)}
 			</ModalBase>
+
+			<ViewPcEquipmentModal
+				isOpen={isViewOpen}
+				onClose={handleCloseView}
+				pcEquipment={viewingPcEquipment}
+				brandName={
+					viewingPcEquipment
+						? brandMap.get(viewingPcEquipment.brandId)
+						: undefined
+				}
+				conditionName={
+					viewingPcEquipment
+						? conditionMap.get(viewingPcEquipment.conditionId)
+						: undefined
+				}
+				pcTypeName={
+					viewingPcEquipment
+						? pcTypeMap.get(viewingPcEquipment.pcTypeId)
+						: undefined
+				}
+				monitorTypeName={
+					viewingPcEquipment
+						? monitorTypeMap.get(viewingPcEquipment.monitorTypeId)
+						: undefined
+				}
+				monitorSizeName={
+					viewingPcEquipment
+						? monitorSizeMap.get(viewingPcEquipment.monitorSizeId)
+						: undefined
+				}
+			/>
 		</>
 	);
 };
