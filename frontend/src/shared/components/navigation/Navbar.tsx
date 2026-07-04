@@ -60,6 +60,10 @@ const MODULES: ModuleConfig[] = [
 				label: 'Centros',
 				path: '/infrastructure/centers',
 			},
+			{
+				label: 'Edificios',
+				path: '/infrastructure/buildings',
+			},
 		],
 	},
 	{
