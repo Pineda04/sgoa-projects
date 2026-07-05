@@ -50,7 +50,7 @@ export const DashboardAuthorities = () => {
 		<>
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold">
-					PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
+					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
 				</h2>
 				<p className="text-sm">{currentUser.user?.name}</p>
 				<p className="text-sm">{currentUser.user?.code}</p>
@@ -69,12 +69,12 @@ export const DashboardAuthorities = () => {
 
 				{/* Planificaciones — todos los centros y departamentos */}
 				<TabsContent value="0">
-					<ListPlanificationsAuthorities />
+					{currentTab === '0' && <ListPlanificationsAuthorities />}
 				</TabsContent>
 
 				{/* Informes — todos los centros y departamentos */}
 				<TabsContent value="1">
-					<ListAssignmentReportsAuthorities />
+					{currentTab === '1' && <ListAssignmentReportsAuthorities />}
 				</TabsContent>
 
 				{/* Usuarios */}
@@ -84,17 +84,17 @@ export const DashboardAuthorities = () => {
 
 				{/* Clases */}
 				<TabsContent value="3">
-					<CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />
+					{currentTab === '3' && <CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />}
 				</TabsContent>
 
 				{/* Periodos */}
 				<TabsContent value="4">
-					<AcademicPeriodsList />
+					{currentTab === '4' && <AcademicPeriodsList />}
 				</TabsContent>
 
 				{/* Consolidado */}
 				<TabsContent value="5">
-					<Consolidated showDepartmentFilter />
+					{currentTab === '5' && <Consolidated showDepartmentFilter />}
 				</TabsContent>
 			</Tabs>
 		</>

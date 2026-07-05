@@ -400,6 +400,9 @@ export class AcademicAssignmentReportsService {
     return paginateOutput(mapped, count, query);
   }
 
+  // por el momento se recorre la tabla academicAssignmentReport no contiene una clausula where
+  // TODO: agregar filtros / criterio (ejemplo por año, por centro y/o departamento)
+  // en el esquema de la DB crear un indice compuesto por 'periodId', 'centerDepartmentId para optimizacion
   async findAllPeriodsForAuthorities(
     query: QueryPaginationDto,
   ): Promise<
@@ -417,6 +420,7 @@ export class AcademicAssignmentReportsService {
         ...paginate(query),
         distinct: ['periodId', 'centerDepartmentId'],
         relationLoadStrategy: 'join',
+        orderBy: [{ periodId: 'asc' }, { centerDepartmentId: 'asc' }],
         select: {
           period: true,
           centerDepartmentId: true,

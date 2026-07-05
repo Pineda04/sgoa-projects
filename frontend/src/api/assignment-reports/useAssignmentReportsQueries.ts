@@ -131,7 +131,7 @@ export const useGetAllPeriodsForAuthorities = () => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: academicAssignmentAuthoritiesKeys.periods(page),
+		queryKey: academicAssignmentAuthoritiesKeys.periods(page, size),
 		queryFn: () =>
 			academicAssignmentReportsApi.getAllPeriodsForAuthorities(page, size),
 		staleTime: STALE_TIME.MEDIUM,
@@ -144,7 +144,7 @@ export const useGetAllAssignmentReportsForAuthorities = () => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: academicAssignmentAuthoritiesKeys.reports(page),
+		queryKey: academicAssignmentAuthoritiesKeys.reports(page, size),
 		queryFn: () =>
 			academicAssignmentReportsApi.getAllAssignmentReports(page, size),
 		staleTime: STALE_TIME.MEDIUM,

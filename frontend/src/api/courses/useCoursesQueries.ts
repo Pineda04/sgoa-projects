@@ -88,7 +88,8 @@ export const useGetAllCoursesCoordinatorByPeriod = (
 			centerDepartmentId ?? ''
 		),
 		queryFn: () =>
-			courseClassroomsApi.getAllCoursesByPeriodIdAndCenter(
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'coordinator',
 				periodId!,
 				centerDepartmentId!
 			),
@@ -110,7 +111,8 @@ export const useGetAllCoursesAuthorityByPeriod = (
 			centerDepartmentId ?? ''
 		), 'authority'],
 		queryFn: () =>
-			courseClassroomsApi.getAllCoursesAuthorityByPeriod(
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'authority',
 				periodId!,
 				centerDepartmentId!
 			),
