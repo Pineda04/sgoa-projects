@@ -60,13 +60,22 @@ const MODULES: ModuleConfig[] = [
 				label: 'Centros',
 				path: '/infrastructure/centers',
 			},
+			{
+				label: 'Edificios',
+				path: '/infrastructure/buildings',
+			},
 		],
 	},
 	{
 		id: 'inventory',
 		label: 'Inventario',
 		icon: CubeIcon,
-		sections: [],
+		sections: [
+			{
+				label: 'Computadoras',
+				path: '/inventory/pc-equipments',
+			},
+		],
 	},
 ];
 
