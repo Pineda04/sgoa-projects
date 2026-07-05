@@ -1,3 +1,3 @@
-export * from '../components/CreateBuildingModal';
-export * from '../components/EditBuildingModal';
-export * from '../components/DeleteBuildingModal';
+export * from './CreateBuildingModal';
+export * from './EditBuildingModal';
+export * from './DeleteBuildingModal';

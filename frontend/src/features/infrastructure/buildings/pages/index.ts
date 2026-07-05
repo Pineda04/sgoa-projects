@@ -1,1 +1,1 @@
-export * from '../pages/ListBuildings';
+export * from './ListBuildings';

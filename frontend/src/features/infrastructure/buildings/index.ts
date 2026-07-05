@@ -1,5 +1,4 @@
 
-export * from './routes/BuildingsRouter';
-export * from './components/CreateBuildingModal';
-export * from './components/EditBuildingModal';
-export * from './components/DeleteBuildingModal';
+export * from './routes';
+export * from './components';
+export * from './pages';

@@ -1,2 +1,2 @@
-export * from '../routes/BuildingsRouter';
-export * from '../routes/BuildingsRoutes';
+export { BuildingsRouter } from './BuildingsRouter';
+export { buildingsRoutes } from './BuildingsRoutes';
