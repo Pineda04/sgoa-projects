@@ -91,7 +91,7 @@ export const CreateBuildingModal = ({
 						/>
 					</div>
 
-					{/* Campo: Color Picker Nativo */}
+					{/* Campo: Color Distintivo */}
 					<div>
 						<label className="block text-sm font-semibold text-gray-700 mb-2">
 							Color Distintivo
@@ -99,14 +99,23 @@ export const CreateBuildingModal = ({
 						<div className="flex items-center gap-3">
 							<input
 								type="color"
-								value={color}
+								value={
+									/^#[0-9a-fA-F]{6}$/.test(color)
+										? color
+										: ''
+								}
 								onChange={e => setColor(e.target.value)}
-								className="w-12 h-10 p-0 border border-gray-300 rounded-md cursor-pointer"
+								className="w-12 h-10 p-0 cursor-pointer shrink-0"
 								disabled={isPending}
 							/>
-							<span className="text-xs text-gray-500 font-mono">
-								{color}
-							</span>
+							<input
+								type="text"
+								value={color}
+								onChange={e => setColor(e.target.value)}
+								placeholder='Ej. #ff5733 o Celeste y azul'
+								className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-green-200 focus:border-transparent text-sm"
+								disabled={isPending}
+							/>
 						</div>
 					</div>
 
@@ -116,10 +125,17 @@ export const CreateBuildingModal = ({
 							Número de Pisos
 						</label>
 						<input
-							type="text"
+							type="number"
 							value={floors}
-							onChange={e => setFloors(e.target.value)}
-							placeholder="Ej. 4 pisos o Planta Única"
+							onChange={e => {
+								const val = e.target.value;
+								if (val === '' || (Number(val) >= 0 && Number.isInteger(Number(val)))) {
+									setFloors(val);
+								}
+							}}
+							min="0"
+							step="1"
+							placeholder="Ej. 0, 1, 2, 3..."
 							className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-green-200 focus:border-transparent text-sm"
 							disabled={isPending}
 						/>
