@@ -17,7 +17,7 @@ export const ListPcEquipments = () => {
 
 	return (
 		<div className="pb-8 sm:pb-12">
-			<div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
 				<div>
 					<h1 className="text-2xl font-bold text-foreground">
 						Gestión de Computadoras
@@ -30,7 +30,7 @@ export const ListPcEquipments = () => {
 				{canCreate && (
 					<Button
 						type="button"
-						className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group shrink-0"
+						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
 						onClick={openCreate}
 					>
 						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />

@@ -17,3 +17,4 @@ export * from './positions';
 export * from './shifts';
 export * from './teachers';
 export * from './users';
+export * from './buildings';
