@@ -70,7 +70,12 @@ const MODULES: ModuleConfig[] = [
 		id: 'inventory',
 		label: 'Inventario',
 		icon: CubeIcon,
-		sections: [],
+		sections: [
+			{
+				label: 'Computadoras',
+				path: '/inventory/pc-equipments',
+			},
+		],
 	},
 ];
 
