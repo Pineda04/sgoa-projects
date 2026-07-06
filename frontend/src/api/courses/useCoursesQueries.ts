@@ -88,7 +88,31 @@ export const useGetAllCoursesCoordinatorByPeriod = (
 			centerDepartmentId ?? ''
 		),
 		queryFn: () =>
-			courseClassroomsApi.getAllCoursesByPeriodIdAndCenter(
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'coordinator',
+				periodId!,
+				centerDepartmentId!
+			),
+		enabled: Boolean(periodId && centerDepartmentId),
+		retry: false,
+		refetchOnWindowFocus: false,
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
+export const useGetAllCoursesAuthorityByPeriod = (
+	periodId?: string,
+	centerDepartmentId?: string
+) =>
+	useQuery({
+		// Se podria usar las misma key si no hay choque pero para evitar de problemas de cache se modificará la key
+		queryKey: [...coursesKeys.periodCenter(
+			periodId ?? '',
+			centerDepartmentId ?? ''
+		), 'authority'],
+		queryFn: () =>
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'authority',
 				periodId!,
 				centerDepartmentId!
 			),

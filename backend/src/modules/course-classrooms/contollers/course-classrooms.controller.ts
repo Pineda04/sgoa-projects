@@ -29,7 +29,7 @@ import { QueryPaginationDto } from 'src/common/dto';
 export class CourseClassroomsController {
   constructor(
     private readonly courseClassroomsService: CourseClassroomsService,
-  ) {}
+  ) { }
 
   @Post()
   @Roles(
@@ -152,6 +152,42 @@ export class CourseClassroomsController {
   ) {
     return this.courseClassroomsService.findAllByCoordinatorAndPeriodId(
       userId,
+      centerDepartmentId,
+      periodId,
+    );
+  }
+
+  @Get('authority/center-department/:centerDepartmentId/periods/:periodId')
+  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage(
+    'Detalle de asignaturas para el periodo especificado en un center-department',
+  )
+  @ApiCommonResponses({
+    summary: 'Consulta de asignaturas por periodo y center-department para autoridades',
+    okDescription: 'Detalle de asignaturas obtenido correctamente.',
+    badRequestDescription: 'La solicitud contiene parámetros inválidos.',
+    internalErrorDescription: 'Error interno al procesar la solicitud.',
+    notFoundDescription:
+      'No se encontraron asignaturas para el periodo y center-department especificados.',
+  })
+  @ApiParam({
+    name: 'centerDepartmentId',
+    description: 'ID de la relación centro-departamento.',
+    type: String,
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'periodId',
+    description: 'ID del periodo académico.',
+    type: String,
+    format: 'uuid',
+  })
+  findOneByAuthorityAndPeriodId(
+    @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
+    @Param('periodId', ValidateIdPipe) periodId: string,
+  ) {
+    return this.courseClassroomsService.findAllByAuthorityAndPeriodId(
       centerDepartmentId,
       periodId,
     );
