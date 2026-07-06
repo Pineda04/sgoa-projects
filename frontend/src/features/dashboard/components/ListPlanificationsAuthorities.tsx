@@ -21,17 +21,25 @@ export const ListPlanificationsAuthorities = () => {
 			header: 'Planificación',
 			mobileLabel: 'Planificación',
 			render: (row: TPlanificationAuthorityRow) => (
-				<div className="flex flex-col gap-0.5">
-					<span className="font-medium text-[#144C74]">
-						PAC No. {row.pac}, {row.pac_modality}, {row.year}
-					</span>
-					<span className="text-sm text-gray-600">
-						{row.departmentName}
-					</span>
-					<span className="text-xs text-gray-400">
-						{row.centerName}
-					</span>
-				</div>
+				<span className="font-medium text-[#144C74]">
+					PAC No. {row.pac}, {row.pac_modality}, {row.year}
+				</span>
+			),
+		},
+		{
+			key: 'departmentName',
+			header: 'Departamento',
+			mobileLabel: 'Departamento',
+			render: (row: TPlanificationAuthorityRow) => (
+				<span>{row.departmentName}</span>
+			),
+		},
+		{
+			key: 'centerName',
+			header: 'Centro',
+			mobileLabel: 'Centro',
+			render: (row: TPlanificationAuthorityRow) => (
+				<span>{row.centerName}</span>
 			),
 		},
 		{

@@ -67,12 +67,12 @@ export const DashboardAuthorities = () => {
 					<TabsTrigger value="5">Consolidado</TabsTrigger>
 				</TabsList>
 
-				{/* Planificaciones — todos los centros y departamentos */}
+				{/* Planificaciones */}
 				<TabsContent value="0">
 					{currentTab === '0' && <ListPlanificationsAuthorities />}
 				</TabsContent>
 
-				{/* Informes — todos los centros y departamentos */}
+				{/* Informes */}
 				<TabsContent value="1">
 					{currentTab === '1' && <ListAssignmentReportsAuthorities />}
 				</TabsContent>
