@@ -204,6 +204,7 @@ model Department {
   faculty Faculty            @relation(fields: [facultyId], references: [id])
   courses Course[]
   centers CenterDepartment[]
+  departmentClassrooms ClassroomDepartment[]
 
   @@map("departments")
   @@schema("academic")
@@ -290,6 +291,39 @@ model Building {
   @@schema("infraestructure")
 }
 
+model DigitalWhiteboard {
+  id             String @id @default(uuid()) @db.Uuid
+  description    String?
+  brandId        String @db.Uuid
+  monitorTypeId  String @db.Uuid
+  monitorSizeId  String @db.Uuid
+  conditionId    String @db.Uuid
+
+  // Relationssss
+  brand       Brand        @relation(fields: [brandId], references: [id])
+  monitorType MonitorType  @relation(fields: [monitorTypeId], references: [id])
+  monitorSize MonitorSize  @relation(fields: [monitorSizeId], references: [id])
+  condition   Condition    @relation(fields: [conditionId], references: [id])
+  classrooms  Classroom[]
+
+  @@map("digital_whiteboards")
+  @@schema("inventory")
+}
+
+model ClassroomDepartment{
+  id       String  @id @default(uuid()) @db.Uuid
+  classroomId String  @db.Uuid
+  departmentId String  @db.Uuid
+  createdAt DateTime
+
+  // Relationsss
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  @@map("classrooms_departments")
+  @@schema("infraestructure")
+}
+
 model Classroom {
   id               String  @id @default(uuid()) @db.Uuid
   name             String
@@ -301,6 +335,8 @@ model Classroom {
   blackboards      Int
   lecterns         Int
   windows          Int
+  activeStatus    Boolean @default(true)
+  digitalWhiteboardId String? @db.Uuid
   buildingId       String  @db.Uuid
   roomTypeId       String  @db.Uuid
   connectivityId   String? @db.Uuid
@@ -312,11 +348,13 @@ model Classroom {
   building          Building           @relation(fields: [buildingId], references: [id])
   roomType          RoomType           @relation(fields: [roomTypeId], references: [id])
   connectivity      Connectivity?      @relation(fields: [connectivityId], references: [id])
+  digitalWhiteboard DigitalWhiteboard? @relation(fields: [digitalWhiteboardId], references: [id])
   audioEquipment    AudioEquipment?    @relation(fields: [audioEquipmentId], references: [id])
   condition         Condition?         @relation(fields: [conditionId], references: [id])
   airConditioners   AirConditioner[]
   courseClassrooms  CourseClassroom[]
   pcEquipments      PcEquipment[]
+  classroomDepartments ClassroomDepartment[]
   classroomInfoView ClassroomInfoView?
 
   @@map("classrooms")
@@ -363,6 +401,7 @@ model Brand {
   // Relations
   pcEquipments    PcEquipment[]
   airConditioners AirConditioner[]
+  digitalWhiteboards DigitalWhiteboard[]
 
   @@map("brands")
   @@schema("inventory")
@@ -376,6 +415,7 @@ model Condition {
   pcEquipments    PcEquipment[]
   airConditioners AirConditioner[]
   Classroom       Classroom[]
+  digitalWhiteboards DigitalWhiteboard[]
 
   @@map("conditions")
   @@schema("inventory")
@@ -429,6 +469,7 @@ model MonitorType {
 
   // Relations
   pcEquipments PcEquipment[]
+  digitalWhiteboards DigitalWhiteboard[]
 
   @@map("monitor_types")
   @@schema("inventory")
@@ -440,6 +481,7 @@ model MonitorSize {
 
   // Relations
   pcEquipments PcEquipment[]
+  digitalWhiteboards DigitalWhiteboard[]
 
   @@map("monitor_sizes")
   @@schema("inventory")

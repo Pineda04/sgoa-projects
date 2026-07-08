@@ -2,6 +2,7 @@ import {
   IsNotEmpty,
   IsString,
   IsInt,
+  IsBoolean,
   IsOptional,
   IsUUID,
   Length,
@@ -73,6 +74,14 @@ export class CreateClassroomDto {
   @IsNotEmpty({ message: 'La propiedad <lights> no debe estar vacía.' })
   lights: number;
 
+  @ApiPropertyOptional({
+    description: 'Indica si el aula está activa.',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean({message: 'La propiedad <activeStatus> debe ser un valor booleano.'})
+  activeStatus?: boolean;
+
   @ApiProperty({
     description: 'Cantidad de pizarras.',
     example: 1,
@@ -99,6 +108,21 @@ export class CreateClassroomDto {
   @IsInt({ message: 'La propiedad <windows> debe ser un número entero.' })
   @IsNotEmpty({ message: 'La propiedad <windows> no debe estar vacía.' })
   windows: number;
+
+  @ApiPropertyOptional({
+    description: 'ID de la pizarra electrónica asignada al aula.',
+    example: '65039ef6-1fc5-474c-b4e3-27239c200138',
+  })
+  @IsUUID('all', {
+    message:
+      'La propiedad <digitalWhiteboardId> debe ser un UUID válido.',
+  })
+  @IsOptional()
+  @ValidatorConstraintDecorator(
+    EClassroomConfig.DIGITAL_WHITEBOARD,
+    IsValidIdsClassroomConfigConstraint,
+  )
+  digitalWhiteboardId?: string;
 
   @ApiProperty({
     description: 'ID del edificio al que pertenece el aula.',
