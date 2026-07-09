@@ -38,6 +38,20 @@ export class CourseClassroomsService {
   async create(
     createCourseClassroomDto: CreateCourseClassroomDto,
   ): Promise<TCreateCourseClassroom> {
+
+    //Quitae la opcion de subir los horarios como números ya que no se para que o como serviria la distinción
+    if (!/^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/.test(createCourseClassroomDto.days)) {
+      throw new BadRequestException(
+        'La propiedad <days> debe ser una combinación válida de días (ej. LuMaMi).',
+      );
+    }
+
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d - (?:[01]\d|2[0-3]):[0-5]\d$/.test(createCourseClassroomDto.section)) {
+      throw new BadRequestException(
+        'La propiedad "section" debe tener el formato HH:mm - HH:mm (ej. 10:00 - 12:00).',
+      );
+    }
+
     const newCourseClassroom = await this.prisma.courseClassroom.create({
       data: {
         ...createCourseClassroomDto,

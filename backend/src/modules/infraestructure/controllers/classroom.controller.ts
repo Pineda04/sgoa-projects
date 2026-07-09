@@ -49,6 +49,24 @@ export class ClassroomController {
     return this.classroomService.create(createClassroomDto);
   }
 
+  @Get('availability/:id')  
+  @HttpCode(HttpStatus.OK)
+  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH, EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE)
+  @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
+  @ApiCommonResponses({
+    summary: 'Obtener disponibilidad de un aula',
+    okDescription: 'Horario de disponibilidad obtenido correctamente.',
+    notFoundDescription: 'El aula no existe.',
+    badRequestDescription: 'El periodo proporcionado no es válido.',
+  })
+  getAvailability(
+    @Param('id', ValidateIdPipe) id: string,
+    @Query('periodId') periodId: string,
+    @Query('dayOfWeek') dayOfWeek?: string,
+  ) {
+    return this.classroomService.getAvailability(id, periodId, dayOfWeek);
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
