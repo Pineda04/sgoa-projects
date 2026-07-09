@@ -64,8 +64,8 @@ export type TUpdateClassroom = Partial<TCreateClassroom>;
 type Occupied = {
   startTime: string;
   endTime: string;
-  courseId: number;
-  teacherId: number;
+  courseId: string;
+  teacherId: string;
 };
 
 type Available = {
@@ -76,34 +76,19 @@ type Available = {
 export type ClassroomScheduleDto = {
   classroomId: string;
   periodId: string;
-  schedule: {
-    MONDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    TUESDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    WEDNESDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    THURSDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    FRIDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    SATURDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-    SUNDAY: {
-      occupied: Occupied[];
-      available: Available[];
-    };
-  };
+  schedule: Partial<Record<DayOfWeek, DaySchedule>>;
 };
+
+type DaySchedule = {
+  occupied: Occupied[];
+  available: Available[];
+};
+
+type DayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';

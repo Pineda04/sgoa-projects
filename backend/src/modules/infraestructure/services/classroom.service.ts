@@ -168,6 +168,14 @@ export class ClassroomService {
         throw new BadRequestException('periodId es obligatorio y debe ser válido');
       }
 
+      const validDays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+
+      if (dayOfWeek && !validDays.includes(dayOfWeek)) {
+        throw new BadRequestException(
+          'El parámetro dayOfWeek debe ser uno de: Lu, Ma, Mi, Ju, Vi, Sa o Do.',
+        );
+      }
+
       const classroom = await this.prisma.classroom.findUnique({
        where: { id },
       });

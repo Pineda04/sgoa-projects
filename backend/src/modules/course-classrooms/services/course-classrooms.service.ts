@@ -39,6 +39,7 @@ export class CourseClassroomsService {
     createCourseClassroomDto: CreateCourseClassroomDto,
   ): Promise<TCreateCourseClassroom> {
 
+    //Quitae la opcion de subir los horarios como números ya que no se para que o como serviria la distinción
     if (!/^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/.test(createCourseClassroomDto.days)) {
       throw new BadRequestException(
         'La propiedad <days> debe ser una combinación válida de días (ej. LuMaMi).',
