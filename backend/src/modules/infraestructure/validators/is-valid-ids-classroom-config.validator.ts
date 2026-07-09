@@ -46,8 +46,8 @@ export class IsValidIdsClassroomConfigConstraint
       case EClassroomConfig.AUDIO_EQUIPMENT:
         return !!(await this.audioEquipmentService.findOne(id));
 
-      case EClassroomConfig.DIGITAL_WHITEBOARD:
-        return !!(await this.classroomService.findOneWhiteBoard(id)); //Temporalmente usa classroomService
+      case EClassroomConfig.DIGITAL_BLACKBOARD:
+        return !!(await this.classroomService.findOneDigitalBlackboard(id));
 
       default:
         return false;
@@ -75,9 +75,9 @@ export class IsValidIdsClassroomConfigConstraint
         name: 'equipo de audio',
         endpoint: '/audio-equipments',
       },
-      [EClassroomConfig.DIGITAL_WHITEBOARD]: { //Parte del fix temporal para crear classrooms, cambiará 
-        name: 'Pizarra electrónica',
-        endpoint: '/digital_whiteboards',
+      [EClassroomConfig.DIGITAL_BLACKBOARD]: {
+        name: 'Pizarra digital',
+        endpoint: '/digital_blackboards',
       },
     };
 

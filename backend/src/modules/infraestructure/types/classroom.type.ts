@@ -15,7 +15,7 @@ export type TClassroom = {
   connectivityId?: string | null;
   audioEquipmentId?: string | null;
   conditionId?: string | null;
-  digitalWhiteboardId?: string | null;
+  digitalBlackboardId?: string | null;
   activeStatus?: boolean;
   // building?: TBuilding;
   // roomType?: TRoomType;
@@ -37,7 +37,7 @@ export type TClassroomDepartmentInfo = {
   facultyId: string;
 };
 
-export type TDigitalWhiteBoardType = {
+export type TDigitalBlackboardType = {
   id: string;
   description: string | null;
   brandId: string;

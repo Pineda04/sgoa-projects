@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { UpdateClassroomDto } from '../dto/update-classroom.dto';
-import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto, TDigitalWhiteBoardType } from '../types';
+import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto, TDigitalBlackboardType } from '../types';
 import { QueryPaginationDto } from 'src/common/dto';
 import { isUUID } from 'class-validator';
 import { IPaginateOutput } from 'src/common/interfaces';
@@ -42,20 +42,19 @@ export class ClassroomService {
     return paginateOutput<TClassroom>(classrooms, count, query);
   }
 
-  //Solucion temporal para no crear un CRUD entero de digital whiteboard, para validacion de dto de crear classroom, se puede mover junto a su TDigitalWhiteBoardType despues
-  async findOneWhiteBoard(id: string): Promise<TDigitalWhiteBoardType> {
-    const whiteBoard = await this.prisma.digitalWhiteboard.findUnique({
+  async findOneDigitalBlackboard(id: string): Promise<TDigitalBlackboardType> {
+    const digitalBlackboard = await this.prisma.digitalBlackboard.findUnique({
       where: {
         id,
       },
     });
 
-    if (!whiteBoard)
+    if (!digitalBlackboard)
       throw new NotFoundException(
-        `La pizarra con id <${id}> no fue encontrada.`,
+        `La pizarra digital con id <${id}> no fue encontrada.`,
       );
 
-    return whiteBoard;
+    return digitalBlackboard;
   }
 
 

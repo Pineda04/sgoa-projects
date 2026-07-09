@@ -115,14 +115,14 @@ export class CreateClassroomDto {
   })
   @IsUUID('all', {
     message:
-      'La propiedad <digitalWhiteboardId> debe ser un UUID válido.',
+      'La propiedad <digitalBlackboardId> debe ser un UUID válido.',
   })
   @IsOptional()
   @ValidatorConstraintDecorator(
-    EClassroomConfig.DIGITAL_WHITEBOARD,
+    EClassroomConfig.DIGITAL_BLACKBOARD,
     IsValidIdsClassroomConfigConstraint,
   )
-  digitalWhiteboardId?: string;
+  digitalBlackboardId?: string;
 
   @ApiProperty({
     description: 'ID del edificio al que pertenece el aula.',

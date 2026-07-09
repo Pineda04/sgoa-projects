@@ -239,7 +239,7 @@ model Building {
   @@schema("infraestructure")
 }
 
-model DigitalWhiteboard {
+model DigitalBlackboard {
   id            String      @id @default(uuid()) @db.Uuid
   description   String?
   brandId       String      @db.Uuid
@@ -252,7 +252,7 @@ model DigitalWhiteboard {
   monitorSize   MonitorSize @relation(fields: [monitorSizeId], references: [id])
   monitorType   MonitorType @relation(fields: [monitorTypeId], references: [id])
 
-  @@map("digital_whiteboards")
+  @@map("digital_blackboards")
   @@schema("inventory")
 }
 
@@ -287,13 +287,13 @@ model Classroom {
   conditionId          String?               @db.Uuid
   maxCapacity          Int?
   activeStatus         Boolean               @default(true)
-  digitalWhiteboardId  String?               @db.Uuid
+  digitalBlackboardId  String?               @db.Uuid
   courseClassrooms     CourseClassroom[]
   audioEquipment       AudioEquipment?       @relation(fields: [audioEquipmentId], references: [id])
   building             Building              @relation(fields: [buildingId], references: [id])
   condition            Condition?            @relation(fields: [conditionId], references: [id])
   connectivity         Connectivity?         @relation(fields: [connectivityId], references: [id])
-  digitalWhiteboard    DigitalWhiteboard?    @relation(fields: [digitalWhiteboardId], references: [id])
+  digitalBlackboard    DigitalBlackboard?    @relation(fields: [digitalBlackboardId], references: [id])
   roomType             RoomType              @relation(fields: [roomTypeId], references: [id])
   classroomDepartments ClassroomDepartment[]
   airConditioners      AirConditioner[]
@@ -335,7 +335,7 @@ model Brand {
   id                 String              @id @default(uuid()) @db.Uuid
   name               String
   airConditioners    AirConditioner[]
-  digitalWhiteboards DigitalWhiteboard[]
+  digitalBlackboards DigitalBlackboard[]
   pcEquipments       PcEquipment[]
 
   @@map("brands")
@@ -347,7 +347,7 @@ model Condition {
   status             String
   Classroom          Classroom[]
   airConditioners    AirConditioner[]
-  digitalWhiteboards DigitalWhiteboard[]
+  digitalBlackboards DigitalBlackboard[]
   pcEquipments       PcEquipment[]
 
   @@map("conditions")
@@ -395,7 +395,7 @@ model PcEquipment {
 model MonitorType {
   id                 String              @id @default(uuid()) @db.Uuid
   description        String
-  digitalWhiteboards DigitalWhiteboard[]
+  digitalBlackboards DigitalBlackboard[]
   pcEquipments       PcEquipment[]
 
   @@map("monitor_types")
@@ -405,7 +405,7 @@ model MonitorType {
 model MonitorSize {
   id                 String              @id @default(uuid()) @db.Uuid
   description        String
-  digitalWhiteboards DigitalWhiteboard[]
+  digitalBlackboards DigitalBlackboard[]
   pcEquipments       PcEquipment[]
 
   @@map("monitor_sizes")
