@@ -34,11 +34,12 @@ export const UsersTable = ({
 		contractTypeId: contractTypeFilter || undefined,
 	};
 
-	const teachersQuery = centerDepartmentId
-		? useGetTeachersCoordinator(centerDepartmentId, filterParams)
-		: useGetTeachers(filterParams);
+	const teachersQuery = useGetTeachers(filterParams, { enabled: !centerDepartmentId });
+	const teachersCoordinatorQuery = useGetTeachersCoordinator(centerDepartmentId ?? '', filterParams);
 
-	const { data, isLoading, isError } = teachersQuery;
+	const { data, isLoading, isError } = centerDepartmentId
+		? teachersCoordinatorQuery
+		: teachersQuery;
 
 	const categories = useGetAllTeacherCategories();
 	const contractTypes = useGetAllContractTypes();

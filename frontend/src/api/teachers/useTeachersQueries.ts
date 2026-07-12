@@ -7,13 +7,15 @@ import { STALE_TIME } from '@config/lib';
 import { useAuth } from '@config/providers';
 
 export const useGetTeachers = (
-	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string },
+	options?: { enabled?: boolean }
 ) => {
 	const { page, size } = usePaginationParams();
 	return useQuery({
 		queryKey: usersKeys.list(page, size, filters),
 		queryFn: () => teachersApi.getAllTeachers(page, size, filters),
 		staleTime: STALE_TIME.MEDIUM,
+		enabled: options?.enabled,
 		select: res => res.data,
 	});
 };
