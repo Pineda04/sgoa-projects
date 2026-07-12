@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import { useFormik } from 'formik';
-import { TClassroom, useUpdateClassroomMutation } from '@api/classrooms';
-import { Button, ModalBase } from '@shared/components';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+	useGetClassroomById,
+	useUpdateClassroomMutation,
+} from '@api/classrooms';
+import { Button, Loading, TagError } from '@shared/components';
 import { errorsFormik } from '@shared/utils';
 import {
 	buildClassroomBody,
@@ -9,19 +13,13 @@ import {
 	initialClassroomValues,
 	TClassroomFormValues,
 } from '../schemas';
-import { ClassroomFormInputs } from './ClassroomFormInputs';
+import { ClassroomFormInputs } from '../components';
 
-interface EditClassroomModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	classroom: TClassroom | null;
-}
+export const EditClassroom = () => {
+	const { id = '' } = useParams();
+	const navigate = useNavigate();
 
-export const EditClassroomModal = ({
-	isOpen,
-	onClose,
-	classroom,
-}: EditClassroomModalProps) => {
+	const { data: classroom, isLoading, isError } = useGetClassroomById(id);
 	const { updateClassroom, isPendingUpdate } = useUpdateClassroomMutation();
 
 	const initialValues = useMemo<TClassroomFormValues>(() => {
@@ -55,13 +53,12 @@ export const EditClassroomModal = ({
 		enableReinitialize: true,
 		initialValues,
 		onSubmit: async values => {
-			if (!classroom) return;
 			try {
 				await updateClassroom({
-					id: classroom.id,
+					id,
 					body: buildClassroomBody(values),
 				});
-				onClose();
+				navigate('/infrastructure/classrooms');
 			} catch {
 				// Error handling done en la mutation
 			}
@@ -73,37 +70,26 @@ export const EditClassroomModal = ({
 		},
 	});
 
-	const handleClose = () => {
-		formik.resetForm();
-		onClose();
-	};
+	if (isLoading) return <Loading />;
+	if (isError || !classroom) return <TagError />;
 
 	return (
-		<ModalBase isOpen={isOpen} onClose={handleClose}>
-			<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
-				<h1 className="text-xl font-bold mb-1 shrink-0">
-					Editar Aula
-				</h1>
-				<p className="text-sm text-gray-500 mb-3 shrink-0">
-					{classroom?.name}
-				</p>
-				<hr className="h-px my-2 bg-gray-200 border-0 shrink-0" />
+		<div className="p-10 rounded shadow-md w-full max-w-4xl h-fit bg-white m-auto mb-8">
+			<h1 className="text-2xl font-bold text-foreground">Editar Aula</h1>
+			<p className="text-muted-foreground mt-1 mb-6">{classroom.name}</p>
 
-				<form
-					id="edit-classroom-form"
-					onSubmit={formik.handleSubmit}
-					className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4 py-2"
-				>
-					<ClassroomFormInputs
-						formik={formik}
-						disabled={isPendingUpdate}
-					/>
-				</form>
+			<form
+				onSubmit={formik.handleSubmit}
+				className="grid grid-cols-1 md:grid-cols-2 gap-4"
+			>
+				<ClassroomFormInputs
+					formik={formik}
+					disabled={isPendingUpdate}
+				/>
 
-				<div className="flex justify-end gap-2 mt-2 shrink-0">
+				<div className="flex justify-end gap-2 mt-4 md:col-span-2">
 					<Button
 						type="submit"
-						form="edit-classroom-form"
 						disabled={isPendingUpdate}
 						className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
 						variant="unstyled"
@@ -112,7 +98,7 @@ export const EditClassroomModal = ({
 					</Button>
 					<Button
 						type="button"
-						onClick={handleClose}
+						onClick={() => navigate(-1)}
 						disabled={isPendingUpdate}
 						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
 						variant="unstyled"
@@ -120,7 +106,7 @@ export const EditClassroomModal = ({
 						Cancelar
 					</Button>
 				</div>
-			</div>
-		</ModalBase>
+			</form>
+		</div>
 	);
 };

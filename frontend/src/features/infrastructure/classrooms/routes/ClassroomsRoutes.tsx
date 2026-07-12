@@ -9,6 +9,18 @@ const ListClassroomsLazy = React.lazy(() =>
 	}))
 );
 
+const CreateClassroomLazy = React.lazy(() =>
+	import('../pages/CreateClassroom').then(module => ({
+		default: module.CreateClassroom,
+	}))
+);
+
+const EditClassroomLazy = React.lazy(() =>
+	import('../pages/EditClassroom').then(module => ({
+		default: module.EditClassroom,
+	}))
+);
+
 export const classroomsRoutes: RouteObject[] = [
 	{
 		path: '',
@@ -19,6 +31,22 @@ export const classroomsRoutes: RouteObject[] = [
 				element: (
 					<React.Suspense fallback={<Loading />}>
 						<ListClassroomsLazy />
+					</React.Suspense>
+				),
+			},
+			{
+				path: 'new',
+				element: (
+					<React.Suspense fallback={<Loading />}>
+						<CreateClassroomLazy />
+					</React.Suspense>
+				),
+			},
+			{
+				path: 'edit/:id',
+				element: (
+					<React.Suspense fallback={<Loading />}>
+						<EditClassroomLazy />
 					</React.Suspense>
 				),
 			},

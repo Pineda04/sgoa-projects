@@ -1,4 +1,3 @@
 export * from './ClassroomFormInputs';
-export * from './CreateClassroomModal';
-export * from './EditClassroomModal';
 export * from './DeleteClassroomModal';
+export * from './ViewClassroomModal';

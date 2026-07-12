@@ -1,6 +1,7 @@
 import { useFormik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 import { useCreateClassroomMutation } from '@api/classrooms';
-import { Button, ModalBase } from '@shared/components';
+import { Button } from '@shared/components';
 import { errorsFormik } from '@shared/utils';
 import {
 	buildClassroomBody,
@@ -8,17 +9,10 @@ import {
 	initialClassroomValues,
 	TClassroomFormValues,
 } from '../schemas';
-import { ClassroomFormInputs } from './ClassroomFormInputs';
+import { ClassroomFormInputs } from '../components';
 
-interface CreateClassroomModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-}
-
-export const CreateClassroomModal = ({
-	isOpen,
-	onClose,
-}: CreateClassroomModalProps) => {
+export const CreateClassroom = () => {
+	const navigate = useNavigate();
 	const { createClassroom, isPendingCreate } = useCreateClassroomMutation();
 
 	const formik = useFormik<TClassroomFormValues>({
@@ -26,8 +20,7 @@ export const CreateClassroomModal = ({
 		onSubmit: async values => {
 			try {
 				await createClassroom(buildClassroomBody(values));
-				formik.resetForm();
-				onClose();
+				navigate('/infrastructure/classrooms');
 			} catch {
 				// Error handling done en la mutation
 			}
@@ -39,35 +32,25 @@ export const CreateClassroomModal = ({
 		},
 	});
 
-	const handleClose = () => {
-		formik.resetForm();
-		onClose();
-	};
-
 	return (
-		<ModalBase isOpen={isOpen} onClose={handleClose}>
-			<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
-				<h1 className="text-xl font-bold mb-1 shrink-0">Nueva Aula</h1>
-				<p className="text-sm text-gray-500 mb-3 shrink-0">
-					Registrar una nueva aula en la infraestructura
-				</p>
-				<hr className="h-px my-2 bg-gray-200 border-0 shrink-0" />
+		<div className="p-10 rounded shadow-md w-full max-w-4xl h-fit bg-white m-auto mb-8">
+			<h1 className="text-2xl font-bold text-foreground">Nueva Aula</h1>
+			<p className="text-muted-foreground mt-1 mb-6">
+				Registrar una nueva aula en la infraestructura.
+			</p>
 
-				<form
-					id="create-classroom-form"
-					onSubmit={formik.handleSubmit}
-					className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4 py-2"
-				>
-					<ClassroomFormInputs
-						formik={formik}
-						disabled={isPendingCreate}
-					/>
-				</form>
+			<form
+				onSubmit={formik.handleSubmit}
+				className="grid grid-cols-1 md:grid-cols-2 gap-4"
+			>
+				<ClassroomFormInputs
+					formik={formik}
+					disabled={isPendingCreate}
+				/>
 
-				<div className="flex justify-end gap-2 mt-2 shrink-0">
+				<div className="flex justify-end gap-2 mt-4 md:col-span-2">
 					<Button
 						type="submit"
-						form="create-classroom-form"
 						disabled={isPendingCreate}
 						className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
 						variant="unstyled"
@@ -76,7 +59,7 @@ export const CreateClassroomModal = ({
 					</Button>
 					<Button
 						type="button"
-						onClick={handleClose}
+						onClick={() => navigate(-1)}
 						disabled={isPendingCreate}
 						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
 						variant="unstyled"
@@ -84,7 +67,7 @@ export const CreateClassroomModal = ({
 						Cancelar
 					</Button>
 				</div>
-			</div>
-		</ModalBase>
+			</form>
+		</div>
 	);
 };

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
+	EyeIcon,
 	PencilSquareIcon,
 	PlusIcon,
 	TrashIcon,
@@ -19,13 +21,10 @@ import {
 	Pagination,
 } from '@shared/components';
 import { useModal } from '@shared/hooks';
-import {
-	CreateClassroomModal,
-	DeleteClassroomModal,
-	EditClassroomModal,
-} from '../components';
+import { DeleteClassroomModal, ViewClassroomModal } from '../components';
 
 export const ListClassrooms = () => {
+	const navigate = useNavigate();
 	const ability = useAbility();
 	const canCreate = ability.can('create', 'classrooms');
 	const canUpdate = ability.can('update', 'classrooms');
@@ -35,9 +34,8 @@ export const ListClassrooms = () => {
 	const buildings = useGetAllBuildings();
 	const roomTypes = useGetAllRoomTypes();
 
-	const [isCreateOpen, openCreate, closeCreate] = useModal();
-	const [isEditOpen, openEdit, closeEdit] = useModal();
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
+	const [isViewOpen, openView, closeView] = useModal();
 	const [selectedClassroom, setSelectedClassroom] =
 		useState<TClassroom | null>(null);
 
@@ -52,13 +50,13 @@ export const ListClassrooms = () => {
 		[roomTypes.data]
 	);
 
-	const handleOpenEdit = (classroom: TClassroom) => {
+	const handleOpenView = (classroom: TClassroom) => {
 		setSelectedClassroom(classroom);
-		openEdit();
+		openView();
 	};
 
-	const handleCloseEdit = () => {
-		closeEdit();
+	const handleCloseView = () => {
+		closeView();
 		setSelectedClassroom(null);
 	};
 
@@ -136,9 +134,20 @@ export const ListClassrooms = () => {
 			mobileLabel: 'Acciones',
 			render: row => (
 				<div className="flex items-center justify-center gap-3">
+					<button
+						onClick={() => handleOpenView(row)}
+						className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+						title="Ver aula"
+					>
+						<EyeIcon className="size-5" />
+					</button>
 					{canUpdate && (
 						<button
-							onClick={() => handleOpenEdit(row)}
+							onClick={() =>
+								navigate(
+									`/infrastructure/classrooms/edit/${row.id}`
+								)
+							}
 							className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
 							title="Editar aula"
 						>
@@ -175,7 +184,9 @@ export const ListClassrooms = () => {
 					<Button
 						type="button"
 						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-						onClick={openCreate}
+						onClick={() =>
+							navigate('/infrastructure/classrooms/new')
+						}
 					>
 						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
 						<span>Nueva aula</span>
@@ -201,13 +212,13 @@ export const ListClassrooms = () => {
 				</>
 			)}
 
-			<CreateClassroomModal isOpen={isCreateOpen} onClose={closeCreate} />
-
-			<EditClassroomModal
-				isOpen={isEditOpen}
-				onClose={handleCloseEdit}
-				classroom={selectedClassroom}
-			/>
+			{selectedClassroom && (
+				<ViewClassroomModal
+					isOpen={isViewOpen}
+					onClose={handleCloseView}
+					classroom={selectedClassroom}
+				/>
+			)}
 
 			<DeleteClassroomModal
 				isOpen={isDeleteOpen}
