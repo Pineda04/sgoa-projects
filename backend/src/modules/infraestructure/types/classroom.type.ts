@@ -16,6 +16,7 @@ export type TClassroom = {
   audioEquipmentId?: string | null;
   conditionId?: string | null;
   digitalBlackboardId?: string | null;
+  maxCapacity?: number | null;
   activeStatus?: boolean;
   // building?: TBuilding;
   // roomType?: TRoomType;

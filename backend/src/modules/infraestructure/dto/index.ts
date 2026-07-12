@@ -6,3 +6,4 @@ export * from './create-room-type.dto';
 export * from './update-room-type.dto';
 export * from './create-audio-equipment.dto';
 export * from './update-audio-equipment.dto';
+export * from './query-classroom.dto';
