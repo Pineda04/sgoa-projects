@@ -81,6 +81,10 @@ export const ViewClassroomModal = ({
 					`Pizarra digital (${digitalBlackboard.id.slice(0, 8)})`
 				: undefined;
 
+	const isVirtual = roomTypeName?.toLowerCase() === 'espacio virtual';
+	const isInactive = !classroom.activeStatus;
+	const disableAvailability = isVirtual || isInactive;
+
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-2 max-h-[calc(90vh-6rem)] overflow-auto">
@@ -142,6 +146,8 @@ export const ViewClassroomModal = ({
 						type="button"
 						variant="outline"
 						onClick={openAvail}
+						disabled={disableAvailability}
+						className={disableAvailability ? 'opacity-50 cursor-not-allowed' : ''}
 					>
 						Ver disponibilidad
 					</Button>
