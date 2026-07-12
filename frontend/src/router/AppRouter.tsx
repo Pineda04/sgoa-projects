@@ -24,6 +24,7 @@ import {
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
+import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 
 const router = createBrowserRouter(
 	[
@@ -130,6 +131,12 @@ const router = createBrowserRouter(
 			element: <ProtectedRoute action="read" subject="buildings" />,
 			children: buildingsRoutes,
       errorElement: <div>404</div>,
+		},
+		{
+			path: 'infrastructure/classrooms/*',
+			element: <ProtectedRoute action="read" subject="classrooms" />,
+			children: classroomsRoutes,
+			errorElement: <div>404</div>,
 		},
     {
 			path: 'inventory/pc-equipments/*',

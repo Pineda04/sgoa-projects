@@ -35,7 +35,9 @@ export class ClassroomService {
     query: QueryPaginationDto,
   ): Promise<IPaginateOutput<TClassroom>> {
     const [classrooms, count] = await Promise.all([
-      this.prisma.classroom.findMany(),
+      this.prisma.classroom.findMany({
+        ...paginate(query),
+      }),
       this.prisma.classroom.count(),
     ]);
 

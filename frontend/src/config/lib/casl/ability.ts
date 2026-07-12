@@ -82,6 +82,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'academic-module');
 		can('read', 'dashboard-authorities');
 		can('manage', 'buildings');
+		can('manage', 'classrooms');
 	}
 
 	// ==================== RRHH ====================
@@ -103,6 +104,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'academic-module');
 		can('read', 'dashboard-authorities');
 		can('manage', 'buildings');
+		can('manage', 'classrooms');
 	}
 
 	// ============== COORDINADOR_AREA ==============
@@ -124,6 +126,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'academic-module');
 		can('read', 'dashboard-coordinator');
 		can('read', 'buildings');
+		can('read', 'classrooms');
 	}
 
 	// =================== DOCENTE ==================
@@ -135,6 +138,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'contract-types');
 		can('read', 'periods');
 		can('read', 'dashboard-teacher');
+		can('read', 'classrooms');
 	}
 
 	return build();
