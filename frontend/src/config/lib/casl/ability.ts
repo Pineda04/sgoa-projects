@@ -72,7 +72,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'departments');
 		can('read', 'centers');
 		can('manage', 'pcEquipments');
-		can('read', 'audioEquipments');
+		can('manage', 'audioEquipments');
 		can('read', 'degrees');
 		can('read', 'shifts');
 		can('read', 'contract-types');
@@ -93,7 +93,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'departments');
 		can('read', 'centers');
 		can('manage', 'pcEquipments');
-		can('read', 'audioEquipments');
+		can('manage', 'audioEquipments');
 		can('read', 'degrees');
 		can('read', 'shifts');
 		can('read', 'contract-types');

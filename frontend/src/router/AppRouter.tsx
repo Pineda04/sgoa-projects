@@ -24,6 +24,7 @@ import {
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
+import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 
 const router = createBrowserRouter(
 	[
@@ -129,12 +130,18 @@ const router = createBrowserRouter(
 			path: 'infrastructure/buildings',
 			element: <ProtectedRoute action="read" subject="buildings" />,
 			children: buildingsRoutes,
-      errorElement: <div>404</div>,
+			errorElement: <div>404</div>,
 		},
-    {
+		{
 			path: 'inventory/pc-equipments/*',
 			element: <ProtectedRoute action="read" subject="pcEquipments" />,
 			children: pcEquipmentsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'inventory/audio-equipments',
+			element: <ProtectedRoute action="read" subject="audioEquipments" />,
+			children: audioEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
