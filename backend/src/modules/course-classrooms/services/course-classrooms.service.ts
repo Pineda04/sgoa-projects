@@ -33,11 +33,25 @@ export class CourseClassroomsService {
     private readonly teacherDepartmentPositionService: TeacherDepartmentPositionService,
     private readonly positionsService: PositionsService,
     private readonly centerDepartmentsService: CenterDepartmentsService,
-  ) {}
+  ) { }
 
   async create(
     createCourseClassroomDto: CreateCourseClassroomDto,
   ): Promise<TCreateCourseClassroom> {
+
+    //Quitae la opcion de subir los horarios como números ya que no se para que o como serviria la distinción
+    if (!/^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/.test(createCourseClassroomDto.days)) {
+      throw new BadRequestException(
+        'La propiedad <days> debe ser una combinación válida de días (ej. LuMaMi).',
+      );
+    }
+
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d - (?:[01]\d|2[0-3]):[0-5]\d$/.test(createCourseClassroomDto.section)) {
+      throw new BadRequestException(
+        'La propiedad "section" debe tener el formato HH:mm - HH:mm (ej. 10:00 - 12:00).',
+      );
+    }
+
     const newCourseClassroom = await this.prisma.courseClassroom.create({
       data: {
         ...createCourseClassroomDto,
@@ -401,6 +415,110 @@ export class CourseClassroomsService {
         ...coordinator.centerDepartment,
         coordinator: {
           name: coordinator.teacher.user.name,
+        },
+      },
+    }));
+
+    return mapped;
+  }
+
+  async findAllByAuthorityAndPeriodId(
+    centerDepartmentId: string,
+    periodId: string,
+  ): Promise<
+    (TCourseClassroom & {
+      teacher: { id: string; userId: string; name: string; code: string };
+      centerDepartment: TCenterDepartment & {
+        department: { name: string };
+        center: { name: string };
+        coordinator: { name: string };
+      };
+    })[]
+  > {
+    const courseClassrooms = await this.prisma.courseClassroom.findMany({
+      where: {
+        teachingSession: {
+          assignmentReport: {
+            periodId,
+            centerDepartmentId,
+          },
+        },
+      },
+      relationLoadStrategy: 'join',
+      include: {
+        course: {
+          select: {
+            name: true,
+            code: true,
+            uvs: true,
+            department: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        classroom: {
+          select: {
+            name: true,
+          },
+        },
+        teachingSession: {
+          select: {
+            assignmentReport: {
+              select: {
+                centerDepartment: {
+                  select: {
+                    id: true,
+                    centerId: true,
+                    departmentId: true,
+                    center: { select: { name: true } },
+                    department: { select: { name: true } },
+                  },
+                },
+                teacher: {
+                  select: {
+                    id: true,
+                    userId: true,
+                    user: {
+                      select: {
+                        code: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (courseClassrooms.length === 0)
+      throw new NotFoundException(
+        'No se encontraron asignaturas para el periodo seleccionado.',
+      );
+
+    const mapped: (TCourseClassroom & {
+      teacher: { id: string; userId: string; name: string; code: string };
+      centerDepartment: TCenterDepartment & {
+        department: { name: string };
+        center: { name: string };
+        coordinator: { name: string };
+      };
+    })[] = courseClassrooms.map(({ teachingSession, ...cc }) => ({
+      ...cc,
+      teacher: {
+        id: teachingSession.assignmentReport.teacher.id,
+        userId: teachingSession.assignmentReport.teacher.userId,
+        name: teachingSession.assignmentReport.teacher.user.name,
+        code: teachingSession.assignmentReport.teacher.user.code,
+      },
+      centerDepartment: {
+        ...teachingSession.assignmentReport.centerDepartment,
+        coordinator: {
+          name: 'N/A',
         },
       },
     }));

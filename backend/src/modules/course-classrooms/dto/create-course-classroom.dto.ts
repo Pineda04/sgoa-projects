@@ -69,7 +69,7 @@ export class CreateCourseClassroomDto {
 
   @ApiProperty({
     description: 'Nombre de la sección.',
-    example: 'A',
+    example: '10:00 - 12:00',
     required: true,
   })
   @IsString({
@@ -83,13 +83,13 @@ export class CreateCourseClassroomDto {
 
   @ApiProperty({
     description:
-      'Días de clase, puede ser un número o abreviaturas, ej: 3 o LuMaMi, 4 o LuMaMiJu.',
+      'Días de clase, es una abreviatura, ej: LuMaMi, LuMaMiJu.',
     example: 'LuMaMi',
     required: true,
   })
   @IsString({
     message:
-      'La propiedad <days> debe ser una cadena de texto, por ejemplo: 3 o LuMaMi, 4 o LuMaMiJu.',
+      'La propiedad <days> debe ser una cadena de texto, por ejemplo: LuMaMi o LuMaMiJu.',
   })
   @IsNotEmpty({ message: 'La propiedad <days> no debe estar vacía.' })
   @Length(1, 20, {

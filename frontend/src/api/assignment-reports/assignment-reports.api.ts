@@ -80,35 +80,51 @@ export const academicAssignmentReportsApi = {
 		size: number = 25
 	) =>
 		api.get<IResponse<TAssignmentReport[]>>(
-			`/academic-assignment-reports/departments/${centerDepartmentId}?${
-				periodId ? 'periodId=' + periodId : ''
-			}${
-				teacherId ? '&teacherId=' + teacherId : ''
+			`/academic-assignment-reports/departments/${centerDepartmentId}?${periodId ? 'periodId=' + periodId : ''
+			}${teacherId ? '&teacherId=' + teacherId : ''
 			}&page=${page}&size=${size}`
-    ),
+		),
 
-		getAllAcademicAssignmentReportsOnlyPeriods: () =>
-			api.get<
-				IResponse<
-					(TPacData & {
-						centerDepartmentId: string;
-						center: string;
-						department: string;
-						reportId: string; // academicAssignmentReportId
-					})[]
-				>
-			>(`/academic-assignment-reports/periods`),
+	// Todos los periodos con asignaciones (todos los centros y departamentos)
+	getAllPeriodsForAuthorities: (page: number = 1, size: number = 10) =>
+		api.get<
+			IResponse<
+				(TCurrentAcademicPeriod & {
+					centerDepartmentId: string;
+					centerName: string;
+					departmentName: string;
+				})[]
+			>
+		>(`/academic-assignment-reports/periods/all?page=${page}&size=${size}`),
 
-		getAcademicAssignmentReportById: (reportId: string) =>
-			api.get<IResponse<TAssignmentReport>>(
-				`/academic-assignment-reports/${reportId}`
-			),
+	// Todos los informes de asignación académica — para ADMIN, DIRECCION, RRHH
+	getAllAssignmentReports: (page: number = 1, size: number = 25) =>
+		api.get<IResponse<TAssignmentReport[]>>(
+			`/academic-assignment-reports?page=${page}&size=${size}`
+		),
 
-		getAcademicAssignmentWithPeriodIdAndCenterDepartment: (
-			periodId: string,
-			centerDepartmentId: string
-		) =>
-			api.get<IResponse<TAssignmentReport>>(
-				`/academic-assignment-reports/my/period/${periodId}/center-department/${centerDepartmentId}`
-			),
+	getAllAcademicAssignmentReportsOnlyPeriods: () =>
+		api.get<
+			IResponse<
+				(TPacData & {
+					centerDepartmentId: string;
+					center: string;
+					department: string;
+					reportId: string; // academicAssignmentReportId
+				})[]
+			>
+		>(`/academic-assignment-reports/periods`),
+
+	getAcademicAssignmentReportById: (reportId: string) =>
+		api.get<IResponse<TAssignmentReport>>(
+			`/academic-assignment-reports/${reportId}`
+		),
+
+	getAcademicAssignmentWithPeriodIdAndCenterDepartment: (
+		periodId: string,
+		centerDepartmentId: string
+	) =>
+		api.get<IResponse<TAssignmentReport>>(
+			`/academic-assignment-reports/my/period/${periodId}/center-department/${centerDepartmentId}`
+		),
 };

@@ -78,19 +78,16 @@ export const coursesApi = {
 
 // Secciones
 export const courseClassroomsApi = {
-	getAllCoursesByPeriodIdAndCenter: (
+
+	getAllCoursesByRoleAndPeriod: (
+		role: 'coordinator' | 'authority',
 		periodId: string,
 		centerDepartmentId: string
 	) =>
 		api.get<
 			IResponse<
 				(TCourseClassroom & {
-					teacher: {
-						id: string;
-						userId: string;
-						name: string;
-						code: string;
-					};
+					teacher: { id: string; userId: string; name: string; code: string };
 					centerDepartment: TCenterDepartment & {
 						center: Pick<TAcademicCommonProps, 'name'>;
 						department: Pick<TAcademicCommonProps, 'name'>;
@@ -99,7 +96,11 @@ export const courseClassroomsApi = {
 				})[]
 			>
 		>(
-			`/course-classrooms/coordinator/center-department/${centerDepartmentId}/periods/${periodId}`
+			`/course-classrooms/${role}/center-department/${centerDepartmentId}/periods/${periodId}`
+			/* Esta URL podria llegar a tener los siguientes valores de URL:
+				/course-classrooms/coordinator/center-department/${centerDepartmentId}/periods/${periodId}
+				/course-classrooms/authority/center-department/${centerDepartmentId}/periods/${periodId}
+			*/
 		),
 
 	getAllByCenterDepartment: (centerDepartmentId: string, periodId: string) =>

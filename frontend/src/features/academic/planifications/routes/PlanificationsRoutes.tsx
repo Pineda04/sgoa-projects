@@ -1,5 +1,5 @@
 import { type RouteObject } from 'react-router-dom';
-import { CreatePlanification, Planification } from '../pages';
+import { CreatePlanification, Planification, PlanificationAuthority } from '../pages';
 
 export const planificationsRoutes: RouteObject[] = [
   {
@@ -9,5 +9,9 @@ export const planificationsRoutes: RouteObject[] = [
 	{
 		path: 'details/:periodId/:centerDepartmentId/:year/:pac',
 		element: <Planification />,
+	},
+	{
+		path: 'authority/:periodId/:centerDepartmentId/:year/:pac',
+		element: <PlanificationAuthority />,
 	},
 ];

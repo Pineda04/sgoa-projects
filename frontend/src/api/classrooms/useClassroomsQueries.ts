@@ -15,3 +15,12 @@ export const useGetClassroomsBySearchTerm = (
 		staleTime: STALE_TIME.SHORT,
 		select: res => res.data,
 	});
+
+export const useGetClassroomById = (id: string) =>
+	useQuery({
+		queryKey: classroomsKeys.detail(id),
+		queryFn: () => classroomsApi.getClassroomById(id),
+		enabled: Boolean(id),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});

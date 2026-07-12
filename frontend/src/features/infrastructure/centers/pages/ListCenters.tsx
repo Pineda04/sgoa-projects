@@ -100,19 +100,19 @@ export const ListCenters = () => {
 	];
 
 	return (
-		<div className="p-6 w-full max-w-7xl mx-auto">
-			<div className="flex flex-col sm:flex-row justify-between items-end mb-6">
-				<div>
-					<h1 className="text-2xl font-bold text-foreground">
-						Gestión de Centros
-					</h1>
-					<p className="text-muted-foreground mt-1">
-						Administración de centros operativos de la institución.
-					</p>
-				</div>
+	<div className="pb-8 sm:pb-12">
+      <div className="flex justify-between items-end mb-5">
+        <div>
+				<h1 className="text-2xl font-bold text-foreground">
+				Gestión de Centros
+				</h1>
+				<p className="text-muted-foreground mt-1">
+				Administración de centros operativos de la institución.
+				</p>
+			</div>
 				<Button
 					onClick={openCreateModal}
-					className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
+					className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
 				>
 					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
 					<span>Nuevo Centro</span>
