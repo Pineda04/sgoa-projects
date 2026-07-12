@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+	CalendarDaysIcon,
 	EyeIcon,
 	PencilSquareIcon,
 	PlusIcon,
@@ -21,7 +22,11 @@ import {
 	Pagination,
 } from '@shared/components';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
-import { DeleteClassroomModal, ViewClassroomModal } from '../components';
+import {
+	ClassroomAvailabilityModal,
+	DeleteClassroomModal,
+	ViewClassroomModal,
+} from '../components';
 
 export const ListClassrooms = () => {
 	const navigate = useNavigate();
@@ -35,6 +40,7 @@ export const ListClassrooms = () => {
 
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
 	const [isViewOpen, openView, closeView] = useModal();
+	const [isAvailOpen, openAvail, closeAvail] = useModal();
 	const [selectedClassroom, setSelectedClassroom] =
 		useState<TClassroom | null>(null);
 
@@ -151,6 +157,16 @@ export const ListClassrooms = () => {
 						title="Ver aula"
 					>
 						<EyeIcon className="size-5" />
+					</button>
+					<button
+						onClick={() => {
+							setSelectedClassroom(row);
+							openAvail();
+						}}
+						className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors cursor-pointer"
+						title="Ver disponibilidad"
+					>
+						<CalendarDaysIcon className="size-5" />
 					</button>
 					{canUpdate && (
 						<button
@@ -303,6 +319,18 @@ export const ListClassrooms = () => {
 					isOpen={isViewOpen}
 					onClose={handleCloseView}
 					classroom={selectedClassroom}
+				/>
+			)}
+
+			{selectedClassroom && (
+				<ClassroomAvailabilityModal
+					isOpen={isAvailOpen}
+					onClose={() => {
+						closeAvail();
+						setSelectedClassroom(null);
+					}}
+					classroomId={selectedClassroom.id}
+					classroomName={selectedClassroom.name}
 				/>
 			)}
 
