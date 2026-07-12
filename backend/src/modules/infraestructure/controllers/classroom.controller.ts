@@ -22,6 +22,7 @@ import { ValidateIdPipe } from 'src/common/pipes';
 import { ClassroomService } from '../services/classroom.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { QueryPaginationDto } from 'src/common/dto';
+import { QueryClassroomDto } from '../dto';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('classrooms')
@@ -78,7 +79,7 @@ export class ClassroomController {
     summary: 'Obtener todas las aulas',
     okDescription: 'Listado de aulas obtenido correctamente.',
   })
-  findAll(@Query() query: QueryPaginationDto) {
+  findAll(@Query() query: QueryClassroomDto) {
     return this.classroomService.findAllWithPagination(query);
   }
 

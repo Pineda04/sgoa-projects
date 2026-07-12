@@ -20,7 +20,7 @@ import {
 	IDataTableColumn,
 	Pagination,
 } from '@shared/components';
-import { useModal } from '@shared/hooks';
+import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 import { DeleteClassroomModal, ViewClassroomModal } from '../components';
 
 export const ListClassrooms = () => {
@@ -30,7 +30,6 @@ export const ListClassrooms = () => {
 	const canUpdate = ability.can('update', 'classrooms');
 	const canDelete = ability.can('delete', 'classrooms');
 
-	const classrooms = useGetAllClassrooms();
 	const buildings = useGetAllBuildings();
 	const roomTypes = useGetAllRoomTypes();
 
@@ -40,6 +39,21 @@ export const ListClassrooms = () => {
 		useState<TClassroom | null>(null);
 
 	const { deleteClassroom, isPendingDelete } = useDeleteClassroomMutation();
+
+	const { setPage } = usePaginationParams();
+
+	const [searchTerm, setSearchTerm] = useState('');
+	const { debouncedValue: debouncedSearch } = useDebounce(searchTerm, 500);
+	const [buildingFilter, setBuildingFilter] = useState('');
+	const [roomTypeFilter, setRoomTypeFilter] = useState('');
+	const [statusFilter, setStatusFilter] = useState('');
+
+	const classrooms = useGetAllClassrooms({
+		name: debouncedSearch || undefined,
+		buildingId: buildingFilter || undefined,
+		roomTypeId: roomTypeFilter || undefined,
+		activeStatus: statusFilter || undefined,
+	});
 
 	const buildingMap = useMemo(
 		() => new Map(buildings.data?.map(b => [b.id, b.name])),
@@ -189,6 +203,81 @@ export const ListClassrooms = () => {
 						<span>Nueva aula</span>
 					</Button>
 				)}
+			</div>
+
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+				<div>
+					<label className="block mb-2 font-semibold text-sm text-foreground">
+						Búsqueda por nombre
+					</label>
+					<input
+						type="text"
+						placeholder="Buscar aula..."
+						value={searchTerm}
+						onChange={e => {
+							setSearchTerm(e.target.value);
+							setPage(1);
+						}}
+						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+					/>
+				</div>
+				<div>
+					<label className="block mb-2 font-semibold text-sm text-foreground">
+						Edificio
+					</label>
+					<select
+						value={buildingFilter}
+						onChange={e => {
+							setBuildingFilter(e.target.value);
+							setPage(1);
+						}}
+						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+					>
+						<option value="">Todos los edificios</option>
+						{buildings.data?.map(b => (
+							<option key={b.id} value={b.id}>
+								{b.name}
+							</option>
+						))}
+					</select>
+				</div>
+				<div>
+					<label className="block mb-2 font-semibold text-sm text-foreground">
+						Tipo de aula
+					</label>
+					<select
+						value={roomTypeFilter}
+						onChange={e => {
+							setRoomTypeFilter(e.target.value);
+							setPage(1);
+						}}
+						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+					>
+						<option value="">Todos los tipos</option>
+						{roomTypes.data?.map(t => (
+							<option key={t.id} value={t.id}>
+								{t.description}
+							</option>
+						))}
+					</select>
+				</div>
+				<div>
+					<label className="block mb-2 font-semibold text-sm text-foreground">
+						Estado
+					</label>
+					<select
+						value={statusFilter}
+						onChange={e => {
+							setStatusFilter(e.target.value);
+							setPage(1);
+						}}
+						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+					>
+						<option value="">Todos</option>
+						<option value="true">Activa</option>
+						<option value="false">Inactiva</option>
+					</select>
+				</div>
 			</div>
 
 			{classrooms.isError ? (

@@ -8,8 +8,18 @@ import {
 } from './classrooms.types';
 
 export const classroomsApi = {
-	getAllClassrooms: (page: number, size: number) =>
-		api.get<IResponse<TClassroom[]>>(`/classrooms?page=${page}&size=${size}`),
+	getAllClassrooms: (
+		page: number,
+		size: number,
+		filters?: { name?: string; buildingId?: string; roomTypeId?: string; activeStatus?: string }
+	) => {
+		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		if (filters?.name) params.set('name', filters.name);
+		if (filters?.buildingId) params.set('buildingId', filters.buildingId);
+		if (filters?.roomTypeId) params.set('roomTypeId', filters.roomTypeId);
+		if (filters?.activeStatus) params.set('activeStatus', filters.activeStatus);
+		return api.get<IResponse<TClassroom[]>>(`/classrooms?${params.toString()}`);
+	},
 
 	getClassroomsBySearchTerm: (
 		searchTerm: string,
