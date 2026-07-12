@@ -69,6 +69,13 @@ export class ClassroomController {
   }
 
   @Get()
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
   @ApiPagination({
@@ -110,6 +117,13 @@ export class ClassroomController {
   }
 
   @Get(':id')
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el aula.')
   @ApiCommonResponses({

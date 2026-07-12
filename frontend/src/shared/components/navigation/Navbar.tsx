@@ -19,6 +19,7 @@ import { Button } from '../ui';
 interface SectionConfig {
 	label: string;
 	path: string;
+	subject?: Subjects;
 }
 
 interface ModuleConfig {
@@ -44,10 +45,12 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Departamentos',
 				path: '/admin/departments',
+				subject: 'departments',
 			},
 			{
 				label: 'Títulos',
 				path: '/admin/degrees',
+				subject: 'degrees',
 			},
 		],
 	},
@@ -59,14 +62,17 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Centros',
 				path: '/infrastructure/centers',
+				subject: 'centers',
 			},
 			{
 				label: 'Edificios',
 				path: '/infrastructure/buildings',
+				subject: 'buildings',
 			},
 			{
 				label: 'Aulas',
 				path: '/infrastructure/classrooms',
+				subject: 'classrooms',
 			},
 		],
 	},
@@ -78,19 +84,11 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Computadoras',
 				path: '/inventory/pc-equipments',
+				subject: 'pcEquipments',
 			},
 		],
 	},
 ];
-
-const moduleSubjectMap: Record<string, Subjects> = {
-	home: 'home',
-	admin: 'users',
-	academic: 'courses',
-	infrastructure: 'centers',
-	inventory: 'pcEquipments',
-	help: 'help',
-};
 
 const DASHBOARD_CONFIG = [
 	{
@@ -144,23 +142,18 @@ export const Navbar = () => {
 	);
 
 	const visibleModules = useMemo(() => {
-		const mods = modulesWithSections.filter(mod => {
-			if (!isAuthenticated) return false;
-			if (mod.id === 'home' || mod.id === 'dashboard') return true;
-			if (
-				mod.id === 'academic' &&
-				!ability.can('read', 'academic-module')
-			)
-				return false;
-			const subject = moduleSubjectMap[mod.id];
-			if (!subject) return false;
-			return ability.can('read', subject);
-		});
-		if (availableDashboards.length === 0) {
-			return mods.filter(m => m.id !== 'dashboard');
-		}
-		return mods;
-	}, [isAuthenticated, ability, availableDashboards, modulesWithSections]);
+		if (!isAuthenticated) return [];
+
+		return modulesWithSections
+			.map(mod => ({
+				...mod,
+				sections: mod.sections.filter(s => {
+					if (!s.subject) return true;
+					return ability.can('read', s.subject);
+				}),
+			}))
+			.filter(mod => mod.sections.length > 0);
+	}, [isAuthenticated, ability, modulesWithSections]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {

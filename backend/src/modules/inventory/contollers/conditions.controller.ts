@@ -45,6 +45,13 @@ export class ConditionsController {
   }
 
   @Get()
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de condiciones.')
   @ApiCommonResponses({
@@ -56,6 +63,13 @@ export class ConditionsController {
   }
 
   @Get(':id')
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición obtenida.')
   @ApiCommonResponses({

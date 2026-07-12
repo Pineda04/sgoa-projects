@@ -43,7 +43,6 @@ export type Subjects =
 	| 'home'
 	| 'help'
 	| 'profile'
-	| 'academic-module'
 	| 'dashboard-authorities'
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher';
@@ -67,77 +66,50 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
-		can('read', 'users');
+		can('manage', 'dashboard-authorities');
 		can('manage', 'courses');
 		can('manage', 'departments');
-		can('read', 'centers');
 		can('manage', 'pcEquipments');
-		can('read', 'audioEquipments');
-		can('read', 'degrees');
-		can('read', 'shifts');
-		can('read', 'contract-types');
-		can('read', 'periods');
-		can('read', 'faculties');
-		can('read', 'positions');
-		can('read', 'academic-module');
-		can('read', 'dashboard-authorities');
+		can('manage', 'centers');
 		can('manage', 'buildings');
 		can('manage', 'classrooms');
+		can('manage', 'audioEquipments');
+		can('manage', 'degrees');
+		can('manage', 'faculties');
+		can('manage', 'positions');
 	}
 
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
+		can('manage', 'dashboard-authorities');
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
 		can('manage', 'courses');
 		can('manage', 'departments');
-		can('read', 'centers');
-		can('manage', 'pcEquipments');
-		can('read', 'audioEquipments');
-		can('read', 'degrees');
-		can('read', 'shifts');
-		can('read', 'contract-types');
-		can('read', 'periods');
-		can('read', 'faculties');
-		can('read', 'positions');
-		can('read', 'academic-module');
-		can('read', 'dashboard-authorities');
 		can('manage', 'buildings');
 		can('manage', 'classrooms');
+		can('manage', 'degrees');
+		can('manage', 'audioEquipments');
+		can('manage', 'faculties');
+		can('manage', 'positions');
 	}
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('create', 'users');
-		can('read', 'users');
-		can('update', 'users');
+		can('manage', 'dashboard-coordinator');
+		can('manage', 'users');
 		can('manage', 'user-departments');
 		can('manage', 'user-status');
 		can('manage', 'courses');
-		can('read', 'departments');
 		can('read', 'pcEquipments');
 		can('read', 'audioEquipments');
-		can('read', 'degrees');
-		can('read', 'shifts');
-		can('read', 'contract-types');
-		can('read', 'periods');
-		can('read', 'faculties');
-		can('read', 'academic-module');
-		can('read', 'dashboard-coordinator');
-		can('read', 'buildings');
 		can('read', 'classrooms');
 	}
 
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
-		can('read', 'courses');
-		can('read', 'departments');
-		can('read', 'degrees');
-		can('read', 'shifts');
-		can('read', 'contract-types');
-		can('read', 'periods');
-		can('read', 'dashboard-teacher');
+		can('manage', 'dashboard-teacher');
 		can('read', 'classrooms');
 	}
 

@@ -21,6 +21,13 @@ export class DigitalBlackboardController {
   ) {}
 
   @Get()
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pizarras digitales.')
   @ApiCommonResponses({

@@ -46,6 +46,13 @@ export class BuildingController {
   }
 
   @Get()
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de edificios.')
   @ApiCommonResponses({
