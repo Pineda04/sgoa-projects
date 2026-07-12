@@ -17,7 +17,7 @@ export const classroomsApi = {
 		size: number = 50
 	) =>
 		api.get<IResponse<TClassroomSearch[]>>(
-			`/classrooms/search?searchTerm=${searchTerm}&page=${page}&size=${size}`
+			`/classrooms/search?searchTerm=${encodeURIComponent(searchTerm)}&page=${page}&size=${size}`
 		),
 
 	getClassroomById: (id: string) =>
