@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-	CalendarDaysIcon,
 	EyeIcon,
 	PencilSquareIcon,
 	PlusIcon,
@@ -122,14 +121,6 @@ export const ListClassrooms = () => {
 			render: row => row.maxCapacity ?? '—',
 		},
 		{
-			key: 'furniture',
-			header: 'Inmobiliario',
-			mobileLabel: 'Inmobiliario',
-			hiddenOnMobile: true,
-			render: row =>
-				`${row.desks} escritorios · ${row.tables} mesas · ${row.blackboards} pizarras`,
-		},
-		{
 			key: 'activeStatus',
 			header: 'Estado',
 			mobileLabel: 'Estado',
@@ -146,6 +137,29 @@ export const ListClassrooms = () => {
 			),
 		},
 		{
+			key: 'disponibilidad',
+			header: 'Disponibilidad',
+			mobileLabel: 'Disponibilidad',
+			render: row => (
+				<div className="flex justify-center">
+					<button
+						onClick={() => {
+							setSelectedClassroom(row);
+							openAvail();
+						}}
+						className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 rounded-lg transition-all duration-200 cursor-pointer shadow-sm hover:shadow"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+							<line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+							<line x1="3" y1="10" x2="21" y2="10"/>
+						</svg>
+						Consultar
+					</button>
+				</div>
+			),
+		},
+		{
 			key: 'actions',
 			header: 'Acciones',
 			mobileLabel: 'Acciones',
@@ -157,16 +171,6 @@ export const ListClassrooms = () => {
 						title="Ver aula"
 					>
 						<EyeIcon className="size-5" />
-					</button>
-					<button
-						onClick={() => {
-							setSelectedClassroom(row);
-							openAvail();
-						}}
-						className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors cursor-pointer"
-						title="Ver disponibilidad"
-					>
-						<CalendarDaysIcon className="size-5" />
 					</button>
 					{canUpdate && (
 						<button
