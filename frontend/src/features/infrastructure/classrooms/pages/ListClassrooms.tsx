@@ -55,10 +55,7 @@ export const ListClassrooms = () => {
 		openView();
 	};
 
-	const handleCloseView = () => {
-		closeView();
-		setSelectedClassroom(null);
-	};
+	const handleCloseView = () => closeView();
 
 	const handleOpenDelete = (classroom: TClassroom) => {
 		setSelectedClassroom(classroom);

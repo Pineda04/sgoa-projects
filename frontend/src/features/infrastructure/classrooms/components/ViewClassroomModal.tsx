@@ -38,33 +38,45 @@ export const ViewClassroomModal = ({
 	const conditions = useGetAllConditions();
 	const digitalBlackboards = useGetAllDigitalBlackboards();
 
-	const buildingName = buildings.data?.find(
-		b => b.id === classroom.buildingId
-	)?.name;
-	const roomTypeName = roomTypes.data?.find(
-		t => t.id === classroom.roomTypeId
-	)?.description;
-	const connectivityName = classroom.connectivityId
-		? connectivities.data?.find(c => c.id === classroom.connectivityId)
-				?.description
-		: 'Sin conectividad asignada';
-	const audioEquipmentName = classroom.audioEquipmentId
-		? audioEquipments.data?.find(a => a.id === classroom.audioEquipmentId)
-				?.description
-		: 'Sin equipo de audio asignado';
-	const conditionName = classroom.conditionId
-		? conditions.data?.find(c => c.id === classroom.conditionId)?.status
-		: 'Sin condición asignada';
+	const buildingName = buildings.isLoading
+		? 'Cargando...'
+		: buildings.data?.find(b => b.id === classroom.buildingId)?.name;
+	const roomTypeName = roomTypes.isLoading
+		? 'Cargando...'
+		: roomTypes.data?.find(t => t.id === classroom.roomTypeId)
+				?.description;
+	const connectivityName = !classroom.connectivityId
+		? 'Sin conectividad asignada'
+		: connectivities.isLoading
+			? 'Cargando...'
+			: connectivities.data?.find(
+					c => c.id === classroom.connectivityId
+				)?.description;
+	const audioEquipmentName = !classroom.audioEquipmentId
+		? 'Sin equipo de audio asignado'
+		: audioEquipments.isLoading
+			? 'Cargando...'
+			: audioEquipments.data?.find(
+					a => a.id === classroom.audioEquipmentId
+				)?.description;
+	const conditionName = !classroom.conditionId
+		? 'Sin condición asignada'
+		: conditions.isLoading
+			? 'Cargando...'
+			: conditions.data?.find(c => c.id === classroom.conditionId)
+					?.status;
 
 	const digitalBlackboard = digitalBlackboards.data?.find(
 		d => d.id === classroom.digitalBlackboardId
 	);
 	const digitalBlackboardName = !classroom.digitalBlackboardId
 		? 'Sin pizarra digital asignada'
-		: digitalBlackboard
-			? digitalBlackboard.description?.trim() ||
-				`Pizarra digital (${digitalBlackboard.id.slice(0, 8)})`
-			: undefined;
+		: digitalBlackboards.isLoading
+			? 'Cargando...'
+			: digitalBlackboard
+				? digitalBlackboard.description?.trim() ||
+					`Pizarra digital (${digitalBlackboard.id.slice(0, 8)})`
+				: undefined;
 
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>

@@ -59,7 +59,9 @@ export const CreateClassroom = () => {
 					</Button>
 					<Button
 						type="button"
-						onClick={() => navigate(-1)}
+						onClick={() =>
+							navigate('/infrastructure/classrooms')
+						}
 						disabled={isPendingCreate}
 						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
 						variant="unstyled"
