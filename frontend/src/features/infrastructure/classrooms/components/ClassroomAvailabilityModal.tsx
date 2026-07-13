@@ -4,7 +4,10 @@ import {
 	TDayOfWeek,
 	TOccupiedSlot,
 } from '@api/classrooms';
-import { useGetCurrentAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
+import {
+	useGetCurrentAcademicPeriod,
+	useGetAcademicPeriods,
+} from '@api/periods';
 import { Button, ModalBase } from '@shared/components';
 
 interface ClassroomAvailabilityModalProps {
@@ -25,8 +28,20 @@ const DAYS: { key: TDayOfWeek; label: string; shortLabel: string }[] = [
 ];
 
 const TIME_SLOTS = [
-	'07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-	'13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
+	'07:00',
+	'08:00',
+	'09:00',
+	'10:00',
+	'11:00',
+	'12:00',
+	'13:00',
+	'14:00',
+	'15:00',
+	'16:00',
+	'17:00',
+	'18:00',
+	'19:00',
+	'20:00',
 ];
 
 function getSlotLabel(time: string) {
@@ -71,7 +86,8 @@ export const ClassroomAvailabilityModal = ({
 	const effectivePeriodId = useMemo(() => {
 		if (!selectedYear || !selectedPac) return currentPeriod?.id ?? '';
 		const match = allPeriods?.find(
-			p => p.year === Number(selectedYear) && p.pac === Number(selectedPac)
+			p =>
+				p.year === Number(selectedYear) && p.pac === Number(selectedPac)
 		);
 		return match?.id ?? '';
 	}, [allPeriods, selectedYear, selectedPac, currentPeriod]);
@@ -112,7 +128,10 @@ export const ClassroomAvailabilityModal = ({
 		return set;
 	}, [schedule]);
 
-	function getOccupiedAtSlot(dayKey: string, time: string): TOccupiedSlot | undefined {
+	function getOccupiedAtSlot(
+		dayKey: string,
+		time: string
+	): TOccupiedSlot | undefined {
 		return occupiedMap.get(dayKey)?.find(o => o.startTime === time);
 	}
 
@@ -125,7 +144,9 @@ export const ClassroomAvailabilityModal = ({
 			<div className="p-2 max-h-[calc(90vh-6rem)] overflow-auto">
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 					<div>
-						<h1 className="text-xl font-bold">Disponibilidad de Aula</h1>
+						<h1 className="text-xl font-bold">
+							Disponibilidad de Aula
+						</h1>
 						<p className="text-sm text-gray-500">{classroomName}</p>
 					</div>
 					<div className="flex items-center gap-4 flex-wrap">
@@ -181,7 +202,8 @@ export const ClassroomAvailabilityModal = ({
 					</div>
 				) : !schedule ? (
 					<div className="text-center py-16 text-gray-500 text-sm">
-						No se pudo cargar la disponibilidad. Selecciona un periodo válido.
+						No se pudo cargar la disponibilidad. Selecciona un
+						periodo válido.
 					</div>
 				) : (
 					<div className="overflow-x-auto">
@@ -191,13 +213,19 @@ export const ClassroomAvailabilityModal = ({
 									<th className="sticky left-0 bg-white z-10 p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border border-gray-200 w-20 min-w-[80px]">
 										Horario
 									</th>
-									{DAYS.filter(d => schedule.schedule[d.key]).map(day => (
+									{DAYS.filter(
+										d => schedule.schedule[d.key]
+									).map(day => (
 										<th
 											key={day.key}
 											className="p-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider border border-gray-200"
 										>
-											<span className="hidden sm:inline">{day.label}</span>
-											<span className="sm:hidden">{day.shortLabel}</span>
+											<span className="hidden sm:inline">
+												{day.label}
+											</span>
+											<span className="sm:hidden">
+												{day.shortLabel}
+											</span>
 										</th>
 									))}
 								</tr>
@@ -208,9 +236,17 @@ export const ClassroomAvailabilityModal = ({
 										<td className="sticky left-0 bg-white z-10 p-2 text-xs font-medium text-gray-600 border border-gray-200 whitespace-nowrap">
 											{getSlotLabel(time)}
 										</td>
-										{DAYS.filter(d => schedule.schedule[d.key]).map(day => {
-											const occupied = getOccupiedAtSlot(day.key, time);
-											const available = isAvailable(day.key, time);
+										{DAYS.filter(
+											d => schedule.schedule[d.key]
+										).map(day => {
+											const occupied = getOccupiedAtSlot(
+												day.key,
+												time
+											);
+											const available = isAvailable(
+												day.key,
+												time
+											);
 
 											if (occupied) {
 												return (
@@ -221,8 +257,16 @@ export const ClassroomAvailabilityModal = ({
 														<div className="bg-red-400 size-full min-h-[36px] cursor-default" />
 														<div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block z-20">
 															<div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap max-w-[220px]">
-																<p className="font-semibold truncate">{occupied.courseName}</p>
-																<p className="text-gray-300 truncate">{occupied.teacherName}</p>
+																<p className="font-semibold truncate">
+																	{
+																		occupied.courseName
+																	}
+																</p>
+																<p className="text-gray-300 truncate">
+																	{
+																		occupied.teacherName
+																	}
+																</p>
 																<div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
 															</div>
 														</div>

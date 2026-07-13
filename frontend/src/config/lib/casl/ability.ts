@@ -68,6 +68,9 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
 		can('manage', 'dashboard-authorities');
+		can('manage', 'users');
+		can('manage', 'user-roles');
+		can('manage', 'user-status');
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'pcEquipments');
@@ -105,10 +108,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
     can('manage', 'dashboard-coordinator');
     can('manage', 'reports');
 		can('manage', 'planifications');
-		can('manage', 'users');
-		can('manage', 'user-departments');
-		can('manage', 'user-status');
 		can('manage', 'courses');
+		can('manage', 'users');
 		can('read', 'pcEquipments');
 		can('read', 'audioEquipments');
 		can('read', 'classrooms');
