@@ -1,14 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import { audioEquipmentsApi } from './audio-equipments.api';
 import { audioEquipmentsKeys } from './audio-equipments.keys';
-import { STALE_TIME } from '@config/lib';
+import { audioEquipmentsApi } from './audio-equipments.api';
 
-export const useGetAllAudioEquipments = () =>
-	useQuery({
-		queryKey: audioEquipmentsKeys.all,
-		queryFn: audioEquipmentsApi.getAllAudioEquipments,
-		retry: false,
-		refetchOnWindowFocus: false,
-		staleTime: STALE_TIME.VERY_LONG,
-		select: res => res.data.data,
-	});
+export const useGetAllAudioEquipments = () => {
+  return useQuery({
+    queryKey: audioEquipmentsKeys.lists(),
+    queryFn: async () => {
+      const response = await audioEquipmentsApi.getAllAudioEquipments();
+      return response.data.data; 
+    },
+  });
+};
+
+export const useGetAudioEquipmentById = (id: string) => {
+  return useQuery({
+    queryKey: audioEquipmentsKeys.detail(id),
+    queryFn: async () => {
+      const response = await audioEquipmentsApi.getAudioEquipmentById(id);
+      return response.data.data; 
+    },
+    enabled: !!id,
+  });
+};
+ 

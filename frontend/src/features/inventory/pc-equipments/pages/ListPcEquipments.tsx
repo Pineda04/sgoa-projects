@@ -7,9 +7,9 @@ import { CreatePcEquipmentForm, PcEquipmentsTable } from '../components';
 
 export const ListPcEquipments = () => {
 	const ability = useAbility();
-	const canCreate = ability.can('create', 'pcEquipments');
-	const canUpdate = ability.can('update', 'pcEquipments');
-	const canDelete = ability.can('delete', 'pcEquipments');
+	const canCreate = ability.can('create', 'pc-equipments');
+	const canUpdate = ability.can('update', 'pc-equipments');
+	const canDelete = ability.can('delete', 'pc-equipments');
 
 	const pcEquipments = useGetPcEquipments();
 
