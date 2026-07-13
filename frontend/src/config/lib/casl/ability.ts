@@ -33,6 +33,7 @@ export type Subjects =
 	| 'periods'
 	| 'positions'
 	| 'planifications'
+	| 'reports'
 	| 'shifts'
 	| 'pcEquipments'
 	| 'audioEquipments'
@@ -77,6 +78,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
+		can('read', 'reports');
+		can('read', 'planifications');
 	}
 
 	// ==================== RRHH ====================
@@ -92,12 +95,16 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'audioEquipments');
 		can('manage', 'faculties');
-		can('manage', 'positions');
+    can('manage', 'positions');
+    can('read', 'reports');
+		can('read', 'planifications');
 	}
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('manage', 'dashboard-coordinator');
+    can('manage', 'dashboard-coordinator');
+    can('manage', 'reports');
+		can('manage', 'planifications');
 		can('manage', 'users');
 		can('manage', 'user-departments');
 		can('manage', 'user-status');
@@ -109,7 +116,10 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
-		can('manage', 'dashboard-teacher');
+    can('manage', 'dashboard-teacher');
+    can('read', 'courses');
+    can('read', 'reports');
+		can('read', 'planifications');
 		can('read', 'classrooms');
 	}
 
