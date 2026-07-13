@@ -27,6 +27,17 @@ const DAYS: { key: TDayOfWeek; label: string; shortLabel: string }[] = [
 	{ key: 'SUNDAY', label: 'Domingo', shortLabel: 'Dom' },
 ];
 
+// Índice de JS Date.getDay() (0 = domingo) mapeado al key de cada día
+const JS_DAY_TO_KEY: TDayOfWeek[] = [
+	'SUNDAY',
+	'MONDAY',
+	'TUESDAY',
+	'WEDNESDAY',
+	'THURSDAY',
+	'FRIDAY',
+	'SATURDAY',
+];
+
 const TIME_SLOTS = [
 	'07:00',
 	'08:00',
@@ -69,6 +80,9 @@ export const ClassroomAvailabilityModal = ({
 	const { data: allPeriods } = useGetAcademicPeriods();
 	const [selectedYear, setSelectedYear] = useState('');
 	const [selectedPac, setSelectedPac] = useState('');
+	const [expandedDay, setExpandedDay] = useState<TDayOfWeek | null>(null);
+
+	const todayKey = useMemo(() => JS_DAY_TO_KEY[new Date().getDay()], []);
 
 	useEffect(() => {
 		if (currentPeriod) {
@@ -97,6 +111,21 @@ export const ClassroomAvailabilityModal = ({
 		effectivePeriodId,
 		undefined
 	);
+
+	const activeDays = useMemo(
+		() => DAYS.filter(d => schedule?.schedule?.[d.key]),
+		[schedule]
+	);
+
+	// Al cargar el horario, abre por defecto el día de hoy (o el primero disponible) en la vista móvil
+	useEffect(() => {
+		if (activeDays.length === 0) {
+			setExpandedDay(null);
+			return;
+		}
+		const hasToday = activeDays.some(d => d.key === todayKey);
+		setExpandedDay(hasToday ? todayKey : activeDays[0].key);
+	}, [activeDays, todayKey]);
 
 	const occupiedMap = useMemo(() => {
 		const map = new Map<string, TOccupiedSlot[]>();
@@ -128,11 +157,31 @@ export const ClassroomAvailabilityModal = ({
 		return set;
 	}, [schedule]);
 
+	const stats = useMemo(() => {
+		let available = 0;
+		let occupied = 0;
+		for (const day of activeDays) {
+			for (const time of TIME_SLOTS) {
+				if (getOccupiedAtSlotFrom(occupiedMap, day.key, time)) occupied += 1;
+				else if (availableSet.has(`${day.key}-${time}`)) available += 1;
+			}
+		}
+		return { available, occupied };
+	}, [activeDays, occupiedMap, availableSet]);
+
+	function getOccupiedAtSlotFrom(
+		map: Map<string, TOccupiedSlot[]>,
+		dayKey: string,
+		time: string
+	): TOccupiedSlot | undefined {
+		return map.get(dayKey)?.find(o => o.startTime === time);
+	}
+
 	function getOccupiedAtSlot(
 		dayKey: string,
 		time: string
 	): TOccupiedSlot | undefined {
-		return occupiedMap.get(dayKey)?.find(o => o.startTime === time);
+		return getOccupiedAtSlotFrom(occupiedMap, dayKey, time);
 	}
 
 	function isAvailable(dayKey: string, time: string): boolean {
@@ -141,7 +190,8 @@ export const ClassroomAvailabilityModal = ({
 
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
-			<div className="p-2 max-h-[calc(90vh-6rem)] overflow-auto">
+			<div className="flex max-h-[calc(90vh-6rem)] flex-col p-2">
+				{/* Encabezado */}
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 					<div>
 						<h1 className="text-xl font-bold">
@@ -185,123 +235,222 @@ export const ClassroomAvailabilityModal = ({
 					</div>
 				</div>
 
-				<div className="flex items-center gap-4 mb-4 text-xs">
-					<div className="flex items-center gap-1.5">
-						<div className="size-3.5 rounded-sm bg-green-400" />
-						<span className="text-gray-600">Disponible</span>
-					</div>
-					<div className="flex items-center gap-1.5">
-						<div className="size-3.5 rounded-sm bg-red-400" />
-						<span className="text-gray-600">Ocupado</span>
-					</div>
-				</div>
-
-				{isLoading ? (
-					<div className="flex items-center justify-center py-16">
-						<div className="size-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-					</div>
-				) : !schedule ? (
-					<div className="text-center py-16 text-gray-500 text-sm">
-						No se pudo cargar la disponibilidad. Selecciona un
-						periodo válido.
-					</div>
-				) : (
-					<div className="overflow-x-auto">
-						<table className="w-full min-w-[640px] border-collapse">
-							<thead>
-								<tr>
-									<th className="sticky left-0 bg-white z-10 p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border border-gray-200 w-20 min-w-[80px]">
-										Horario
-									</th>
-									{DAYS.filter(
-										d => schedule.schedule[d.key]
-									).map(day => (
-										<th
-											key={day.key}
-											className="p-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider border border-gray-200"
-										>
-											<span className="hidden sm:inline">
-												{day.label}
-											</span>
-											<span className="sm:hidden">
-												{day.shortLabel}
-											</span>
-										</th>
-									))}
-								</tr>
-							</thead>
-							<tbody>
-								{TIME_SLOTS.map(time => (
-									<tr key={time}>
-										<td className="sticky left-0 bg-white z-10 p-2 text-xs font-medium text-gray-600 border border-gray-200 whitespace-nowrap">
-											{getSlotLabel(time)}
-										</td>
-										{DAYS.filter(
-											d => schedule.schedule[d.key]
-										).map(day => {
-											const occupied = getOccupiedAtSlot(
-												day.key,
-												time
-											);
-											const available = isAvailable(
-												day.key,
-												time
-											);
-
-											if (occupied) {
-												return (
-													<td
-														key={`${day.key}-${time}`}
-														className="group relative p-0 border border-gray-200"
-													>
-														<div className="bg-red-400 size-full min-h-[36px] cursor-default" />
-														<div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block z-20">
-															<div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap max-w-[220px]">
-																<p className="font-semibold truncate">
-																	{
-																		occupied.courseName
-																	}
-																</p>
-																<p className="text-gray-300 truncate">
-																	{
-																		occupied.teacherName
-																	}
-																</p>
-																<div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-															</div>
-														</div>
-													</td>
-												);
-											}
-
-											if (available) {
-												return (
-													<td
-														key={`${day.key}-${time}`}
-														className="p-0 border border-gray-200"
-													>
-														<div className="bg-green-400 size-full min-h-[36px]" />
-													</td>
-												);
-											}
-
-											return (
-												<td
-													key={`${day.key}-${time}`}
-													className="p-0 border border-gray-200"
-												>
-													<div className="bg-gray-100 size-full min-h-[36px]" />
-												</td>
-											);
-										})}
-									</tr>
-								))}
-							</tbody>
-						</table>
+				{!isLoading && schedule && (
+					<div className="mb-4 flex flex-wrap items-center gap-2">
+						<div className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+							<div className="size-2 rounded-full bg-green-400" />
+							{stats.available} horas libres
+						</div>
+						<div className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+							<div className="size-2 rounded-full bg-red-400" />
+							{stats.occupied} horas ocupadas
+						</div>
 					</div>
 				)}
 
-				<div className="flex justify-end pt-4 mt-4 border-t border-gray-100">
+				<div className="min-h-0 flex-1 overflow-auto">
+					{isLoading ? (
+						<AvailabilitySkeleton />
+					) : !schedule || activeDays.length === 0 ? (
+						<div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth={1.5}
+								className="size-10 text-gray-300"
+							>
+								<circle cx="12" cy="12" r="9" />
+								<path d="M9.5 9.5l5 5M14.5 9.5l-5 5" />
+							</svg>
+							<p className="text-sm font-medium text-gray-600">
+								No se pudo cargar la disponibilidad
+							</p>
+							<p className="text-xs text-gray-400">
+								Selecciona un periodo válido para continuar
+							</p>
+						</div>
+					) : (
+						<>
+							{/* Vista móvil: acordeón por día */}
+							<div className="flex flex-col gap-2 sm:hidden">
+								{activeDays.map(day => {
+									const isOpen = expandedDay === day.key;
+									const isToday = day.key === todayKey;
+									return (
+										<div
+											key={day.key}
+											className="overflow-hidden rounded-lg border border-gray-200"
+										>
+											<button
+												type="button"
+												onClick={() =>
+													setExpandedDay(isOpen ? null : day.key)
+												}
+												className="flex w-full items-center justify-between px-3 py-2.5 text-left"
+											>
+												<span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+													{day.label}
+													{isToday && (
+														<span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-600">
+															Hoy
+														</span>
+													)}
+												</span>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth={2}
+													className={`size-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+												>
+													<path d="M6 9l6 6 6-6" />
+												</svg>
+											</button>
+											{isOpen && (
+												<div className="flex flex-col divide-y divide-gray-100 border-t border-gray-100">
+													{TIME_SLOTS.map(time => {
+														const occupied = getOccupiedAtSlot(
+															day.key,
+															time
+														);
+														const available = isAvailable(day.key, time);
+														return (
+															<div
+																key={time}
+																className="flex items-center gap-3 px-3 py-2"
+															>
+																<span className="w-24 shrink-0 text-xs font-medium text-gray-500">
+																	{getSlotLabel(time)}
+																</span>
+																{occupied ? (
+																	<div className="min-w-0 flex-1 rounded-md bg-red-50 px-2 py-1">
+																		<p className="truncate text-xs font-semibold text-red-700">
+																			{occupied.courseName}
+																		</p>
+																		<p className="truncate text-[11px] text-red-500">
+																			{occupied.teacherName}
+																		</p>
+																	</div>
+																) : available ? (
+																	<div className="flex-1 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+																		Disponible
+																	</div>
+																) : (
+																	<div className="flex-1 rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-400">
+																		No aplica
+																	</div>
+																)}
+															</div>
+														);
+													})}
+												</div>
+											)}
+										</div>
+									);
+								})}
+							</div>
+
+							{/* Vista desktop: tabla */}
+							<div className="hidden overflow-x-auto rounded-lg border border-gray-200 sm:block">
+								<table className="w-full min-w-[640px] border-collapse">
+									<thead>
+										<tr>
+											<th className="sticky left-0 top-0 z-20 w-20 min-w-[80px] border-b border-r border-gray-200 bg-gray-50 p-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+												Horario
+											</th>
+											{activeDays.map(day => (
+												<th
+													key={day.key}
+													className={`sticky top-0 z-10 border-b border-gray-200 p-2 text-center text-xs font-semibold uppercase tracking-wider ${
+														day.key === todayKey
+															? 'bg-indigo-50 text-indigo-700'
+															: 'bg-gray-50 text-gray-500'
+													}`}
+												>
+													{day.label}
+													{day.key === todayKey && (
+														<span className="ml-1.5 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium normal-case text-indigo-600">
+															hoy
+														</span>
+													)}
+												</th>
+											))}
+										</tr>
+									</thead>
+									<tbody>
+										{TIME_SLOTS.map((time, rowIdx) => (
+											<tr key={time}>
+												<td
+													className={`sticky left-0 z-10 border-r border-gray-200 p-2 text-xs font-medium text-gray-600 ${
+														rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'
+													}`}
+												>
+													{getSlotLabel(time)}
+												</td>
+												{activeDays.map(day => {
+													const occupied = getOccupiedAtSlot(day.key, time);
+													const available = isAvailable(day.key, time);
+													const isToday = day.key === todayKey;
+
+													if (occupied) {
+														return (
+															<td
+																key={`${day.key}-${time}`}
+																className="group relative border border-gray-100 p-0"
+															>
+																<div className="size-full min-h-[34px] cursor-default bg-red-400/90 transition-colors hover:bg-red-500" />
+																<div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 group-hover:block">
+																	<div className="max-w-[220px] whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
+																		<p className="truncate font-semibold">
+																			{occupied.courseName}
+																		</p>
+																		<p className="truncate text-gray-300">
+																			{occupied.teacherName}
+																		</p>
+																		<div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+																	</div>
+																</div>
+															</td>
+														);
+													}
+
+													if (available) {
+														return (
+															<td
+																key={`${day.key}-${time}`}
+																className="border border-gray-100 p-0"
+															>
+																<div className="size-full min-h-[34px] bg-green-400/80 transition-colors hover:bg-green-500" />
+															</td>
+														);
+													}
+
+													return (
+														<td
+															key={`${day.key}-${time}`}
+															className="border border-gray-100 p-0"
+														>
+															<div
+																className={`size-full min-h-[34px] ${
+																	isToday ? 'bg-indigo-50/40' : 'bg-gray-50'
+																}`}
+															/>
+														</td>
+													);
+												})}
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						</>
+					)}
+				</div>
+
+				<div className="mt-4 flex justify-end border-t border-gray-100 pt-4">
 					<Button type="button" variant="outline" onClick={onClose}>
 						Cerrar
 					</Button>
@@ -310,3 +459,26 @@ export const ClassroomAvailabilityModal = ({
 		</ModalBase>
 	);
 };
+
+function AvailabilitySkeleton() {
+	return (
+		<div className="animate-pulse">
+			<div className="hidden gap-1 sm:flex">
+				<div className="h-8 w-20 shrink-0 rounded bg-gray-100" />
+				{Array.from({ length: 5 }).map((_, i) => (
+					<div key={i} className="h-8 flex-1 rounded bg-gray-100" />
+				))}
+			</div>
+			<div className="mt-1 flex flex-col gap-1">
+				{Array.from({ length: 8 }).map((_, r) => (
+					<div key={r} className="flex gap-1">
+						<div className="h-9 w-20 shrink-0 rounded bg-gray-100 sm:w-20" />
+						{Array.from({ length: 5 }).map((_, c) => (
+							<div key={c} className="h-9 flex-1 rounded bg-gray-100" />
+						))}
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
