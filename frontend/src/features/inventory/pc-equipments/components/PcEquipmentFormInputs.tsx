@@ -7,7 +7,7 @@ import {
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
 import { useGetAllDepartments } from '@api/departments';
-import { TClassroom, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
 import { SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
 import { TPcEquipmentFormValues } from '../schemas';
@@ -18,7 +18,7 @@ export interface PcEquipmentFormInputsProps {
 	classroomDefaultOption?: {
 		value: string;
 		label: string;
-		data?: TClassroom;
+		data?: TClassroomSearch;
 	} | null;
 }
 
@@ -120,7 +120,7 @@ export const PcEquipmentFormInputs = ({
 		size?: number
 	) => useGetClassroomsBySearchTerm(searchTerm, page, size);
 
-	const handleClassroomInfo = (classroom: TClassroom) =>
+	const handleClassroomInfo = (classroom: TClassroomSearch) =>
 		formik.setFieldValue('classroomId', classroom.id);
 
 	const selectFields: SelectFieldProps[] = [
@@ -237,7 +237,7 @@ export const PcEquipmentFormInputs = ({
 				<label className="text-sm font-medium text-foreground">
 					Aula (opcional)
 				</label>
-				<SearchAsyncSelect<TClassroom>
+				<SearchAsyncSelect<TClassroomSearch>
 					hook={useClassroomsSearch}
 					handleChange={handleClassroomInfo}
 					getOptionValue={c => c.id}

@@ -8,7 +8,9 @@ import { ConnectivityController } from './controllers/connectivity.controller';
 import { AudioEquipmentService } from './services/audio-equipment.service';
 import { ConnectivityService } from './services/connectivity.service';
 import { ClassroomController } from './controllers/classroom.controller';
+import { DigitalBlackboardController } from './controllers/digital-blackboard.controller';
 import { ClassroomService } from './services/classroom.service';
+import { DigitalBlackboardService } from './services/digital-blackboard.service';
 import { IsValidIdsClassroomConfigConstraint } from './validators';
 import { PrismaModule } from 'src/prisma/prisma.module';
 
@@ -20,6 +22,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     RoomTypeController,
     ConnectivityController,
     AudioEquipmentController,
+    DigitalBlackboardController,
   ],
   providers: [
     BuildingService,
@@ -27,6 +30,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     RoomTypeService,
     ConnectivityService,
     AudioEquipmentService,
+    DigitalBlackboardService,
     IsValidIdsClassroomConfigConstraint,
   ],
   exports: [
@@ -35,6 +39,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     RoomTypeService,
     ConnectivityService,
     AudioEquipmentService,
+    DigitalBlackboardService,
   ],
 })
 export class InfraestructureModule {}

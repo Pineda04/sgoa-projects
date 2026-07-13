@@ -6,12 +6,16 @@ import { usePaginationParams } from '@shared/hooks';
 import { STALE_TIME } from '@config/lib';
 import { useAuth } from '@config/providers';
 
-export const useGetTeachers = () => {
+export const useGetTeachers = (
+	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string },
+	options?: { enabled?: boolean }
+) => {
 	const { page, size } = usePaginationParams();
 	return useQuery({
-		queryKey: usersKeys.list(page, size),
-		queryFn: () => teachersApi.getAllTeachers(page, size),
+		queryKey: usersKeys.list(page, size, filters),
+		queryFn: () => teachersApi.getAllTeachers(page, size, filters),
 		staleTime: STALE_TIME.MEDIUM,
+		enabled: options?.enabled,
 		select: res => res.data,
 	});
 };
@@ -80,16 +84,20 @@ export const useGetAllTeacherCategories = () =>
 		select: res => res.data.data,
 	});
 
-export const useGetTeachersCoordinator = (centerDepartmentId: string) => {
+export const useGetTeachersCoordinator = (
+	centerDepartmentId: string,
+	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: teachersKeys.coordinator(page, size, centerDepartmentId),
+		queryKey: teachersKeys.coordinator(page, size, centerDepartmentId, filters),
 		queryFn: () =>
 			teachersApi.getAllTeachersCoordinator(
 				page,
 				size,
-				centerDepartmentId
+				centerDepartmentId,
+				filters
 			),
 		enabled: Boolean(centerDepartmentId),
 		staleTime: STALE_TIME.MEDIUM,

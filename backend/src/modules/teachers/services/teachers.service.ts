@@ -11,6 +11,7 @@ import { UsersService } from 'src/modules/users/services/users.service';
 import { TOutputTeacher, TOutputTeacherCustom, TTeacherJoin } from '../types';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { QueryPaginationDto } from 'src/common/dto';
+import { QueryTeacherDto } from '../dto/query-teacher.dto';
 import {
   dateToHHMM,
   hourToDateUTC,
@@ -184,19 +185,18 @@ export class TeachersService {
   }
 
   async findAllWithPagination(
-    query: QueryPaginationDto,
+    query: QueryTeacherDto,
   ): Promise<IPaginateOutput<TOutputTeacher>> {
+    const where: Prisma.TeacherWhereInput = this.buildTeacherFilters(query);
+
     const [teachers, count] = await Promise.all([
       this.prisma.teacher.findMany({
+        where,
         ...paginate(query),
         ...this.selectOptionsTeacher,
       }),
-      this.prisma.teacher.count(),
+      this.prisma.teacher.count({ where }),
     ]);
-
-    // const mappedTeachers = teachers.map((teacher) => ({
-    // id: teacher.id,
-    // })
 
     const mappedTeachers: TOutputTeacher[] = teachers.map((teacher) =>
       this.mapTeacher(teacher as TTeacherJoin),
@@ -206,11 +206,13 @@ export class TeachersService {
   }
 
   async findAllByDepartmentIdWithPagination(
-    query: QueryPaginationDto,
+    query: QueryTeacherDto,
     departmentId: string,
-    omitTeacherId?: string, // Opcional para omitir un docente específico, en este caso el que esta haciendo la consulta
+    omitTeacherId?: string,
   ): Promise<IPaginateOutput<TOutputTeacher>> {
+    const filters = this.buildTeacherFilters(query);
     const where: Prisma.TeacherWhereInput = {
+      ...filters,
       positionHeld: {
         some: {
           centerDepartment: {
@@ -414,6 +416,27 @@ export class TeachersService {
     });
 
     return !!deleteTeacher;
+  }
+
+  private buildTeacherFilters(query: QueryTeacherDto): Prisma.TeacherWhereInput {
+    const where: Prisma.TeacherWhereInput = {};
+
+    if (query.searchTerm) {
+      where.user = {
+        OR: [
+          { code: { contains: query.searchTerm, mode: 'insensitive' } },
+          { name: { contains: query.searchTerm, mode: 'insensitive' } },
+        ],
+      };
+    }
+    if (query.categoryId) {
+      where.categoryId = query.categoryId;
+    }
+    if (query.contractTypeId) {
+      where.contractTypeId = query.contractTypeId;
+    }
+
+    return where;
   }
 
   private mapTeacher(teacher: TTeacherJoin):

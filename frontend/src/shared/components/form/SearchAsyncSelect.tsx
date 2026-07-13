@@ -57,15 +57,24 @@ export const SearchAsyncSelect = <T,>({
 			? []
 			: promiseOptions(data?.data, getOptionValue, getOptionLabel);
 
-	const options = defaultOption
-		? [defaultOption, ...fetchedOptions.filter(o => o.value !== defaultOption.value)]
+	const defaultSelectOption = defaultOption
+		? { ...defaultOption, data: defaultOption.data as T }
+		: null;
+
+	const options = defaultSelectOption
+		? [
+				defaultSelectOption,
+				...fetchedOptions.filter(
+					o => o.value !== defaultSelectOption.value
+				),
+			]
 		: fetchedOptions;
 
 	const [selected, setSelected] = useState<{
 		value: string;
 		label: string;
 		data: T;
-	} | null>(defaultOption ? (defaultOption as any) : null);
+	} | null>(defaultSelectOption);
 
 	const handleSelect = (
 		e: SingleValue<{
@@ -76,7 +85,7 @@ export const SearchAsyncSelect = <T,>({
 	) => {
 		if (!e) return;
 		handleChange(e.data);
-		setSelected(e as any);
+		setSelected(e);
 	};
 
 	const handleInputChange = (inputValue: string) => {

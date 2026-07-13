@@ -9,7 +9,6 @@ import {
 import { AcademicPeriodsList, Consolidated, CourseList } from '@features/academic';
 import { useAbility } from '@config/lib';
 import { UsersTable } from '@features/admin';
-import { useGetTeachers } from '@api/teachers';
 import { useNavigate } from 'react-router-dom';
 import {
 	ListAssignmentReportsAuthorities,
@@ -21,13 +20,9 @@ import { useUser } from '@config/providers';
 // Subcomponente que encapsula la petición de usuarios, se monta solo al activar la pestaña
 const UsersTab = () => {
 	const navigate = useNavigate();
-	const { isLoading, isError, data } = useGetTeachers();
 
 	return (
 		<UsersTable
-			isLoading={isLoading}
-			isError={isError}
-			data={data ?? null}
 			onNavigateToCreate={() => navigate('/admin/users/new')}
 		/>
 	);

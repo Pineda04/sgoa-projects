@@ -4,6 +4,7 @@ import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { UpdateClassroomDto } from '../dto/update-classroom.dto';
 import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto, TDigitalBlackboardType } from '../types';
 import { QueryPaginationDto } from 'src/common/dto';
+import { QueryClassroomDto } from '../dto';
 import { isUUID } from 'class-validator';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { normalizeText, paginate, paginateOutput } from 'src/common/utils';
@@ -32,13 +33,30 @@ export class ClassroomService {
   }
 
   async findAllWithPagination(
-    query: QueryPaginationDto,
+    query: QueryClassroomDto,
   ): Promise<IPaginateOutput<TClassroom>> {
-    const [classrooms, count] = await Promise.all([
-      this.prisma.classroom.findMany(),
-      this.prisma.classroom.count(),
-    ]);
+    const where: Prisma.ClassroomWhereInput = {};
 
+    if (query.name) {
+      where.name = { contains: query.name, mode: 'insensitive' };
+    }
+    if (query.buildingId) {
+      where.buildingId = query.buildingId;
+    }
+    if (query.roomTypeId) {
+      where.roomTypeId = query.roomTypeId;
+    }
+    if (query.activeStatus !== undefined) {
+      where.activeStatus = query.activeStatus === 'true';
+    }
+
+    const [classrooms, count] = await Promise.all([
+      this.prisma.classroom.findMany({
+        where,
+        ...paginate(query),
+      }),
+      this.prisma.classroom.count({ where }),
+    ]);
     return paginateOutput<TClassroom>(classrooms, count, query);
   }
 
