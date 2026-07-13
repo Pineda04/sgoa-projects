@@ -1,5 +1,5 @@
 import { TPlanification } from '@api/assignment-reports';
-import { TClassroom, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
 import { TCourseBasicInfo, useGetCoursesCenterDepartmentBySearchTerm } from '@api/courses';
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { useUser } from '@config/providers';
@@ -327,9 +327,9 @@ export const PlanificationForm = ({
 							type: 'custom-select',
 							readOnly: false,
 							element: (
-								<SearchAsyncSelect<TClassroom>
+								<SearchAsyncSelect<TClassroomSearch>
 									hook={useClassroomsSearch}
-									handleChange={(data: TClassroom) => {
+									handleChange={(data: TClassroomSearch) => {
 										formik.setValues({
 											...formik.values,
 											classroomName: data.name,

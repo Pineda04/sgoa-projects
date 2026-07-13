@@ -72,7 +72,7 @@ export async function exportPlanification(
 		info.coordinator,
 		info.center,
 		info.nearGraduation,
-		info.observation,
+		info.observation ?? '',
 	]);
 
 	autoTable(doc, {

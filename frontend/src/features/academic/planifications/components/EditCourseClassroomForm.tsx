@@ -7,7 +7,7 @@ import {
 	useGetCoursesCenterDepartmentBySearchTerm,
 	useUpdateCourseClassroom,
 } from '@api/courses';
-import { TClassroom, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
 import { editCourseClassroomSchema } from '../schemas';
 import { DAY_OPTIONS, generateTimeOptions } from '../utils';
 import { Button, Error, Loading, SearchAsyncSelect, TagError } from '@shared/components';
@@ -130,7 +130,7 @@ export const EditCourseClassroomForm = ({
 			courseName: data.name,
 		});
 
-	const handleClassroomInfo = (data: TClassroom) =>
+	const handleClassroomInfo = (data: TClassroomSearch) =>
 		formik.setValues({
 			...formik.values,
 			classroomId: data.id,
@@ -279,7 +279,7 @@ export const EditCourseClassroomForm = ({
 
 				<div>
 					<label className="block mb-2 font-bold">Aula</label>
-					<SearchAsyncSelect<TClassroom>
+					<SearchAsyncSelect<TClassroomSearch>
 						hook={useClassroomsSearch}
 						handleChange={handleClassroomInfo}
 						getOptionValue={t => t.id}

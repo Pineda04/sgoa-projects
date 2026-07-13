@@ -22,3 +22,4 @@ export const useGetAudioEquipmentById = (id: string) => {
     enabled: !!id,
   });
 };
+ 

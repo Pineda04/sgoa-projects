@@ -75,6 +75,14 @@ export class CreateClassroomDto {
   lights: number;
 
   @ApiPropertyOptional({
+    description: 'Capacidad máxima de personas del aula.',
+    example: 40,
+  })
+  @IsOptional()
+  @IsInt({ message: 'La propiedad <maxCapacity> debe ser un número entero.' })
+  maxCapacity?: number;
+
+  @ApiPropertyOptional({
     description: 'Indica si el aula está activa.',
     example: true,
   })
