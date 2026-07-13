@@ -21,7 +21,11 @@ import {
 	Pagination,
 } from '@shared/components';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
-import { DeleteClassroomModal, ViewClassroomModal } from '../components';
+import {
+	ClassroomAvailabilityModal,
+	DeleteClassroomModal,
+	ViewClassroomModal,
+} from '../components';
 
 export const ListClassrooms = () => {
 	const navigate = useNavigate();
@@ -35,6 +39,7 @@ export const ListClassrooms = () => {
 
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
 	const [isViewOpen, openView, closeView] = useModal();
+	const [isAvailOpen, openAvail, closeAvail] = useModal();
 	const [selectedClassroom, setSelectedClassroom] =
 		useState<TClassroom | null>(null);
 
@@ -116,14 +121,6 @@ export const ListClassrooms = () => {
 			render: row => row.maxCapacity ?? '—',
 		},
 		{
-			key: 'furniture',
-			header: 'Inmobiliario',
-			mobileLabel: 'Inmobiliario',
-			hiddenOnMobile: true,
-			render: row =>
-				`${row.desks} escritorios · ${row.tables} mesas · ${row.blackboards} pizarras`,
-		},
-		{
 			key: 'activeStatus',
 			header: 'Estado',
 			mobileLabel: 'Estado',
@@ -138,6 +135,41 @@ export const ListClassrooms = () => {
 					{row.activeStatus ? 'Activa' : 'Inactiva'}
 				</span>
 			),
+		},
+		{
+			key: 'disponibilidad',
+			header: 'Disponibilidad',
+			mobileLabel: 'Disponibilidad',
+			render: row => {
+				const roomTypeDesc = roomTypeMap.get(row.roomTypeId) ?? '';
+				const isVirtual = roomTypeDesc.toLowerCase() === 'espacio virtual';
+				const isInactive = !row.activeStatus;
+				const disabled = isVirtual || isInactive;
+
+				return (
+					<div className="flex justify-center">
+						<button
+							disabled={disabled}
+							onClick={() => {
+								setSelectedClassroom(row);
+								openAvail();
+							}}
+							className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 shadow-sm ${
+								disabled
+									? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+									: 'text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 cursor-pointer hover:shadow'
+							}`}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+								<line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+								<line x1="3" y1="10" x2="21" y2="10"/>
+							</svg>
+							Consultar
+						</button>
+					</div>
+				);
+			},
 		},
 		{
 			key: 'actions',
@@ -303,6 +335,18 @@ export const ListClassrooms = () => {
 					isOpen={isViewOpen}
 					onClose={handleCloseView}
 					classroom={selectedClassroom}
+				/>
+			)}
+
+			{selectedClassroom && (
+				<ClassroomAvailabilityModal
+					isOpen={isAvailOpen}
+					onClose={() => {
+						closeAvail();
+						setSelectedClassroom(null);
+					}}
+					classroomId={selectedClassroom.id}
+					classroomName={selectedClassroom.name}
 				/>
 			)}
 

@@ -82,13 +82,13 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/courses/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="courses" />,
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/planifications/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="planifications" />,
 			children: planificationsRoutes,
 			errorElement: <div>404</div>,
 		},
@@ -100,7 +100,7 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/reports/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="reports" />,
 			children: reportsRoutes,
 			errorElement: <div>404</div>,
 		},
@@ -141,15 +141,14 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
     {
-
 			path: 'inventory/pc-equipments/*',
-			element: <ProtectedRoute action="read" subject="pcEquipments" />,
+			element: <ProtectedRoute action="read" subject="pc-equipments" />,
 			children: pcEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'inventory/audio-equipments',
-			element: <ProtectedRoute action="read" subject="audioEquipments" />,
+			element: <ProtectedRoute action="read" subject="audio-equipments" />,
 			children: audioEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},

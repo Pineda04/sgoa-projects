@@ -84,11 +84,12 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Computadoras',
 				path: '/inventory/pc-equipments',
-				subject: 'pcEquipments',
+				subject: 'pc-equipments',
 			},
 			{
 				label: 'Audio',
-				path: '/inventory/audio-equipments'
+        path: '/inventory/audio-equipments',
+				subject: 'audio-equipments',
 			},
 		],
 	},

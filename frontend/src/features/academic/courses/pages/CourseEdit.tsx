@@ -6,12 +6,16 @@ import { TCourseWithDepartment, TUpdateCourse, useGetCourseById, useUpdateCourse
 import { courseUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
 import { Button, Error, Loading } from '@shared/components';
+import { useAbility } from '@config';
 
 export const CourseEdit = () => {
 	const navigate = useNavigate();
 	const { id } = useParams<{ id: string }>();
 	const courseId = id ?? '';
 	const [isEditing, setIsEditing] = useState(false);
+	const ability = useAbility();
+	const canUpdate = ability.can('update', 'courses');
+
 	const courseQuery = useGetCourseById(courseId);
 	const updateMutation = useUpdateCourse();
 	const course = courseQuery.data as TCourseWithDepartment | undefined;
@@ -149,7 +153,7 @@ export const CourseEdit = () => {
 												: 'Guardar'}
 										</Button>
 									</>
-								) : (
+								) : canUpdate ? (
 									<Button
 										type="button"
 										size="sm"
@@ -158,7 +162,7 @@ export const CourseEdit = () => {
 										<Pencil className="size-4 mr-1" />
 										Editar
 									</Button>
-								)}
+								) : null}
 							</div>
 						</div>
 					</header>
