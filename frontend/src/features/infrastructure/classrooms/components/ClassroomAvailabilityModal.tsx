@@ -70,6 +70,14 @@ function convertTo24h(time: string): string {
 	return `${String(h).padStart(2, '0')}:${minutes}`;
 }
 
+function to12h(time: string): string {
+	const [hStr, m] = time.split(':');
+	const h = Number(hStr);
+	const ampm = h >= 12 ? 'PM' : 'AM';
+	const h12 = h % 12 || 12;
+	return `${h12}:${m} ${ampm}`;
+}
+
 export const ClassroomAvailabilityModal = ({
 	isOpen,
 	onClose,
@@ -355,10 +363,10 @@ export const ClassroomAvailabilityModal = ({
 
 							{/* Vista desktop: tabla */}
 							<div className="hidden overflow-x-auto rounded-lg border border-gray-200 sm:block">
-								<table className="w-full min-w-[640px] border-collapse">
+								<table className="w-full min-w-160 table-fixed border-collapse">
 									<thead>
 										<tr>
-											<th className="sticky left-0 top-0 z-20 w-20 min-w-[80px] border-b border-r border-gray-200 bg-gray-50 p-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+											<th className="sticky left-0 top-0 z-20 w-25 min-w-20 border-b border-r border-gray-200 bg-gray-50 p-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
 												Horario
 											</th>
 											{activeDays.map(day => (
@@ -401,9 +409,9 @@ export const ClassroomAvailabilityModal = ({
 																key={`${day.key}-${time}`}
 																className="group relative border border-gray-100 p-0"
 															>
-																<div className="size-full min-h-[34px] cursor-default bg-red-400/90 transition-colors hover:bg-red-500" />
+																<div className="size-full min-h-8.5 cursor-default bg-red-400/90 transition-colors hover:bg-red-500" />
 																<div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 group-hover:block">
-																	<div className="max-w-[220px] whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
+																	<div className="max-w-55 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
 																		<p className="truncate font-semibold">
 																			{occupied.courseName}
 																		</p>
@@ -421,9 +429,15 @@ export const ClassroomAvailabilityModal = ({
 														return (
 															<td
 																key={`${day.key}-${time}`}
-																className="border border-gray-100 p-0"
+																className="group relative border border-gray-100 p-0"
 															>
-																<div className="size-full min-h-[34px] bg-green-400/80 transition-colors hover:bg-green-500" />
+																<div className="size-full min-h-8.5 bg-green-400/80 transition-colors hover:bg-green-500" />
+																<div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 group-hover:block">
+																	<div className="whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
+																		{day.label} {to12h(time)} - {to12h(String(Number(time.split(':')[0]) + 1).padStart(2, '0') + ':00')}
+																		<div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+																	</div>
+																</div>
 															</td>
 														);
 													}
@@ -434,7 +448,7 @@ export const ClassroomAvailabilityModal = ({
 															className="border border-gray-100 p-0"
 														>
 															<div
-																className={`size-full min-h-[34px] ${
+																className={`size-full min-h-8.5 ${
 																	isToday ? 'bg-indigo-50/40' : 'bg-gray-50'
 																}`}
 															/>
