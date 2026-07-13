@@ -17,16 +17,10 @@ export type Actions = 'manage' | 'read' | 'create' | 'update' | 'delete';
 export type Subjects =
 	| 'all'
 	| 'activities'
-	| 'activityTypes'
-	| 'assignment-reports'
-	| 'brands'
 	| 'buildings'
 	| 'centers'
 	| 'classrooms'
-	| 'classroomTypes'
-	| 'contract-types'
 	| 'courses'
-	| 'courseClassrooms'
 	| 'degrees'
 	| 'departments'
 	| 'faculties'
@@ -34,7 +28,6 @@ export type Subjects =
 	| 'positions'
 	| 'planifications'
 	| 'reports'
-	| 'shifts'
 	| 'pcEquipments'
 	| 'audioEquipments'
 	| 'users'
@@ -71,6 +64,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
+		can('manage', 'user-departments');
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'pcEquipments');
@@ -81,6 +75,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
+		can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
 	}
@@ -90,7 +85,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'dashboard-authorities');
 		can('manage', 'users');
 		can('manage', 'user-roles');
-		can('manage', 'user-status');
+    can('manage', 'user-status');
+    can('manage', 'user-departments');
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'buildings');
@@ -99,6 +95,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'audioEquipments');
 		can('manage', 'faculties');
     can('manage', 'positions');
+		can('manage', 'periods');
     can('read', 'reports');
 		can('read', 'planifications');
 	}

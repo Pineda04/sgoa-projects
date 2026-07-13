@@ -27,7 +27,8 @@ interface CourseWithDepartment extends TCourse {
 }
 
 const createCourseColumns = (
-	showDepartmentInTable: boolean
+	showDepartmentInTable: boolean,
+	canUpdate: boolean
 ): IResponsiveColumn<CourseWithDepartment>[] => [
 	{ key: 'code', header: 'Código', mobileLabel: 'Cod.' },
 	{
@@ -56,7 +57,7 @@ const createCourseColumns = (
 				</span>
 			),
 	},
-	...(showDepartmentInTable
+		...(showDepartmentInTable
 		? [
 				{
 					key: 'departmentName',
@@ -71,19 +72,23 @@ const createCourseColumns = (
 				},
 			]
 		: []),
-	{
-		key: 'actions',
-		header: '',
-		mobileLabel: '',
-		render: (row: CourseWithDepartment) => (
-			<Link
-				to={`/academic/courses/edit/${row.id}`}
-				className="cursor-pointer text-primary hover:text-primary/80"
-			>
-				<EyeIcon className="size-5" />
-			</Link>
-		),
-	},
+		...(canUpdate
+			? [
+					{
+						key: 'actions' as const,
+						header: 'Acciones',
+						mobileLabel: 'Acciones',
+						render: (row: CourseWithDepartment) => (
+							<Link
+								to={`/academic/courses/edit/${row.id}`}
+								className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
+							>
+								<EyeIcon className="size-5" />
+							</Link>
+						),
+					},
+				]
+			: []),
 ];
 
 export const CourseList = ({
@@ -95,6 +100,7 @@ export const CourseList = ({
 	const navigate = useNavigate();
 	const ability = useAbility();
 	const canCreateCourse = ability.can('create', 'courses');
+	const canUpdate = ability.can('update', 'courses');
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
 		centerDepartmentId ?? ''
@@ -139,8 +145,8 @@ export const CourseList = ({
 		: allCoursesInfo.data?.meta;
 
 	const columns = useMemo(
-		() => createCourseColumns(!!showDepartmentInTable),
-		[showDepartmentInTable]
+		() => createCourseColumns(!!showDepartmentInTable, canUpdate),
+		[showDepartmentInTable, canUpdate]
 	);
 
 	if (isLoading) return <Loading />;
