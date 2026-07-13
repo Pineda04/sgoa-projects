@@ -105,8 +105,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
     can('manage', 'dashboard-coordinator');
     can('manage', 'reports');
 		can('manage', 'planifications');
-		can('manage', 'courses');
 		can('manage', 'users');
+		can('read', 'courses');
 		can('read', 'pcEquipments');
 		can('read', 'audioEquipments');
 		can('read', 'classrooms');
