@@ -37,3 +37,16 @@ export const useGetClassroomById = (id: string) =>
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data.data,
 	});
+
+export const useGetClassroomAvailability = (
+	id: string,
+	periodId: string,
+	dayOfWeek?: string
+) =>
+	useQuery({
+		queryKey: classroomsKeys.availability(id, periodId, dayOfWeek),
+		queryFn: () => classroomsApi.getClassroomAvailability(id, periodId, dayOfWeek),
+		enabled: Boolean(id) && Boolean(periodId),
+		staleTime: STALE_TIME.SHORT,
+		select: res => res.data.data,
+	});

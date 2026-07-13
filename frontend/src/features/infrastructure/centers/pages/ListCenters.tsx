@@ -19,12 +19,18 @@ import {
 	Loading,
 	useModal,
 } from '@shared';
+import { useAbility } from '@config';
 
 export const ListCenters = () => {
 	const [isModalOpen, openModal, closeModal] = useModal();
 	const [isCreateModalOpen, openCreateModal, closeCreateModal] = useModal();
 	const [isEditModalOpen, openEditModal, closeEditModal] = useModal();
 	const [selectedCenter, setSelectedCenter] = useState<TCenter | null>(null);
+
+	const ability = useAbility();
+	const canCreate = ability.can('create', 'centers');
+	const canUpdate = ability.can('update', 'centers');
+	const canDelete = ability.can('delete', 'centers');
 
 	const { data: centers, isLoading } = useGetAllCenters();
 	const { mutate: deleteCenter, isPending: isDeleting } =
@@ -74,29 +80,37 @@ export const ListCenters = () => {
 			header: 'Nombre del Centro',
 			className: 'text-gray-800 font-normal p-4',
 		},
-		{
-			key: 'actions',
-			header: 'Acciones',
-			className: 'text-center w-32 p-4',
-			render: (center: TCenter) => (
-				<div className="flex items-center justify-center gap-3">
-					<button
-						onClick={() => handleOpenEditModal(center)}
-						className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-						title="Editar centro"
-					>
-						<PencilSquareIcon className="size-5" />
-					</button>
-					<button
-						onClick={() => openDeleteModal(center)}
-						className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-						title="Eliminar centro"
-					>
-						<TrashIcon className="size-5" />
-					</button>
-				</div>
-			),
-		},
+		...(canUpdate || canDelete
+			? [
+					{
+						key: 'actions' as const,
+						header: 'Acciones',
+						className: 'text-center w-32 p-4',
+						render: (center: TCenter) => (
+							<div className="flex items-center justify-center gap-3">
+								{canUpdate && (
+									<button
+										onClick={() => handleOpenEditModal(center)}
+										className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+										title="Editar centro"
+									>
+										<PencilSquareIcon className="size-5" />
+									</button>
+								)}
+								{canDelete && (
+									<button
+										onClick={() => openDeleteModal(center)}
+										className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+										title="Eliminar centro"
+									>
+										<TrashIcon className="size-5" />
+									</button>
+								)}
+							</div>
+						),
+					},
+				]
+			: []),
 	];
 
 	return (
@@ -110,6 +124,7 @@ export const ListCenters = () => {
 				Administración de centros operativos de la institución.
 				</p>
 			</div>
+				{canCreate && (
 				<Button
 					onClick={openCreateModal}
 					className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
@@ -117,6 +132,7 @@ export const ListCenters = () => {
 					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
 					<span>Nuevo Centro</span>
 				</Button>
+			)}
 			</div>
 
 			<DataTable<TCenter>

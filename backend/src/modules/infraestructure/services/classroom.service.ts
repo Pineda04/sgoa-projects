@@ -213,10 +213,22 @@ export class ClassroomService {
             },
           },
           include: {
-           course: true,
+            course: {
+              select: { name: true },
+            },
             teachingSession: {
-             include: {
-                assignmentReport: true,
+              include: {
+                assignmentReport: {
+                  include: {
+                    teacher: {
+                      include: {
+                        user: {
+                          select: { name: true },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -247,7 +259,9 @@ export class ClassroomService {
             startTime,
             endTime,
             courseId: cc.courseId,
+            courseName: cc.course.name,
             teacherId: cc.teachingSession.assignmentReport.teacherId,
+            teacherName: cc.teachingSession.assignmentReport.teacher.user.name,
           });
         }
       }

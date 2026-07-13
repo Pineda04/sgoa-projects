@@ -66,7 +66,9 @@ type Occupied = {
   startTime: string;
   endTime: string;
   courseId: string;
+  courseName: string;
   teacherId: string;
+  teacherName: string;
 };
 
 type Available = {

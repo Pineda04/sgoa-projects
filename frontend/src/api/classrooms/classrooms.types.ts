@@ -32,3 +32,37 @@ export type TClassroomSearch = {
 export type TCreateClassroom = Omit<TClassroom, 'id'>;
 
 export type TUpdateClassroom = Partial<TCreateClassroom>;
+
+export type TOccupiedSlot = {
+	startTime: string;
+	endTime: string;
+	courseId: string;
+	courseName: string;
+	teacherId: string;
+	teacherName: string;
+};
+
+export type TAvailableSlot = {
+	startTime: string;
+	endTime: string;
+};
+
+export type TDaySchedule = {
+	occupied: TOccupiedSlot[];
+	available: TAvailableSlot[];
+};
+
+export type TDayOfWeek =
+	| 'MONDAY'
+	| 'TUESDAY'
+	| 'WEDNESDAY'
+	| 'THURSDAY'
+	| 'FRIDAY'
+	| 'SATURDAY'
+	| 'SUNDAY';
+
+export type TClassroomSchedule = {
+	classroomId: string;
+	periodId: string;
+	schedule: Partial<Record<TDayOfWeek, TDaySchedule>>;
+};

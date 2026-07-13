@@ -188,6 +188,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		authState: { user },
 	} = useAuth();
 	const ability = useAbility();
+	const canUpdate = ability.can('update', 'users');
 
 	const { updateUser, isPendingUpdate } = useUpdateUser(initialData.userId);
 	const { changeStatusActiveUser, isPendingChangeStatusActive } =
@@ -555,7 +556,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						<Button
 							type="button"
 							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
-							hidden={isEdit}
+							hidden={isEdit || !canUpdate}
 							onClick={handleEdit}
 							variant="unstyled"
 						>

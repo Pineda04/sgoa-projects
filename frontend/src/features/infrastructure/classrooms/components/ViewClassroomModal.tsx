@@ -6,6 +6,8 @@ import { useGetAllAudioEquipments } from '@api/audio-equipments';
 import { useGetAllConditions } from '@api/conditions';
 import { useGetAllDigitalBlackboards } from '@api/digital-blackboards';
 import { Button, ModalBase } from '@shared/components';
+import { useModal } from '@shared/hooks';
+import { ClassroomAvailabilityModal } from './ClassroomAvailabilityModal';
 
 interface ViewClassroomModalProps {
 	isOpen: boolean;
@@ -31,6 +33,7 @@ export const ViewClassroomModal = ({
 	onClose,
 	classroom,
 }: ViewClassroomModalProps) => {
+	const [isAvailOpen, openAvail, closeAvail] = useModal();
 	const buildings = useGetAllBuildings();
 	const roomTypes = useGetAllRoomTypes();
 	const connectivities = useGetAllConnectivities();
@@ -77,6 +80,10 @@ export const ViewClassroomModal = ({
 				? digitalBlackboard.description?.trim() ||
 					`Pizarra digital (${digitalBlackboard.id.slice(0, 8)})`
 				: undefined;
+
+	const isVirtual = roomTypeName?.toLowerCase() === 'espacio virtual';
+	const isInactive = !classroom.activeStatus;
+	const disableAvailability = isVirtual || isInactive;
 
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
@@ -134,12 +141,28 @@ export const ViewClassroomModal = ({
 					<DetailField label="Ventanas" value={classroom.windows} />
 				</div>
 
-				<div className="flex justify-end pt-4 mt-4 border-t border-gray-100">
+				<div className="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={openAvail}
+						disabled={disableAvailability}
+						className={disableAvailability ? 'opacity-50 cursor-not-allowed' : ''}
+					>
+						Ver disponibilidad
+					</Button>
 					<Button type="button" variant="outline" onClick={onClose}>
 						Cerrar
 					</Button>
 				</div>
 			</div>
+
+			<ClassroomAvailabilityModal
+				isOpen={isAvailOpen}
+				onClose={closeAvail}
+				classroomId={classroom.id}
+				classroomName={classroom.name}
+			/>
 		</ModalBase>
 	);
 };
