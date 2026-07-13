@@ -45,6 +45,10 @@ const MODULES: ModuleConfig[] = [
 				label: 'Departamentos',
 				path: '/admin/departments'
 			},
+			{
+				label: 'Cargos Académicos',
+				path: '/admin/positions'
+			},
 		],
 	},
 	{

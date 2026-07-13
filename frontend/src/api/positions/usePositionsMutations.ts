@@ -7,6 +7,9 @@ import { positionsApi, positionsKeys, TOutputPosition } from './';
 export const useCreatePosition = () =>
     useMutation({
         mutationFn: (body: TCreatePosition) => positionsApi.createPosition(body),
+        onError: (error) => {
+            alertError(error);
+        },
         onSuccess: async res => {
             alertSuccess(res);
             const created: TOutputPosition | undefined = res?.data?.data;
@@ -31,8 +34,11 @@ export const useCreatePosition = () =>
 
 export const useUpdatePosition = (positionId: string) => {
     const { mutateAsync, isPending } = useMutation({
-        mutationFn: ({ id, body }: { id: string; body: TUpdatePosition }) =>
-            positionsApi.updatePosition({ id, body }),
+        mutationFn: (body: TUpdatePosition) => 
+            positionsApi.updatePosition({ id: positionId, body }),
+        onError: (error) => {
+            alertError(error);
+        },
         onSuccess: async res => {
             alertSuccess(res);
                 await Promise.all([
