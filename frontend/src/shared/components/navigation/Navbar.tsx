@@ -78,7 +78,7 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Audio',
 				path: '/inventory/audio-equipments'
-			}
+			},
 		],
 	},
 ];

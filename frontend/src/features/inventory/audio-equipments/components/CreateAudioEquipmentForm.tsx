@@ -6,9 +6,10 @@ import { z } from 'zod';
 
 const audioEquipmentSchema = z.object({
     description: z.string()
+        .trim()
         .min(1, 'La descripción es requerida')
+        .trim()
         .max(100, 'La descripción no debe exceder los 100 caracteres')
-        .trim(),
 });
 
 type TAudioEquipmentFormValues = z.infer<typeof audioEquipmentSchema>;
@@ -28,27 +29,27 @@ export const CreateAudioEquipmentForm = ({
         initialValues: {
             description: '',
         },
-       onSubmit: async values => {
-    try {
-        await createMutation.mutateAsync(values, {
-            onSuccess: () => {
-                genericAlert(
-                    'Se ha registrado el equipo de audio con éxito.',
-                    ESwalIcons.SUCCESS
-                );
-                formik.resetForm();
-                onSuccess(); 
-            },
-            onError: () => {
-                genericAlert(
-                    'No se pudo registrar el equipo de audio.',
-                    ESwalIcons.ERROR
-                );
+        onSubmit: async values => {
+            try {
+                await createMutation.mutateAsync(values, {
+                    onSuccess: () => {
+                        genericAlert(
+                            'Se ha registrado el equipo de audio con éxito.',
+                            ESwalIcons.SUCCESS
+                        );
+                        formik.resetForm();
+                        onSuccess();
+                    },
+                    onError: () => {
+                        genericAlert(
+                            'No se pudo registrar el equipo de audio.',
+                            ESwalIcons.ERROR
+                        );
+                    }
+                });
+            } catch {
             }
-        });
-    } catch {
-    }
-},
+        },
         validate: values => {
             const result = audioEquipmentSchema.safeParse(values);
             if (result.success) return;
@@ -82,11 +83,10 @@ export const CreateAudioEquipmentForm = ({
                         value={formik.values.description}
                         disabled={createMutation.isPending}
                         placeholder="Ej. Consola de audio de 12 canales"
-                        className={`w-full p-2 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 ${
-                            formik.touched.description && formik.errors.description
+                        className={`w-full p-2 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 ${formik.touched.description && formik.errors.description
                                 ? 'border-red-500 focus:ring-red-200'
                                 : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
-                        }`}
+                            }`}
                     />
                     {formik.touched.description && formik.errors.description && (
                         <span className="text-xs text-red-500 font-medium">

@@ -20,6 +20,7 @@ import {
     ModalBase,
     useModal,
 } from '@shared';
+import { useAbility } from '@config/lib';
 
 export const ListAudioEquipments = () => {
     // 1. Control de modales y estado del equipo seleccionado
@@ -27,6 +28,11 @@ export const ListAudioEquipments = () => {
     const [isCreateOpen, openCreateModal, closeCreateModal] = useModal();
     const [isEditOpen, openEditModal, closeEditOpen] = useModal();
     const [selectedEquipment, setSelectedEquipment] = useState<TAudioEquipment | null>(null);
+
+    const ability = useAbility();
+    const canCreate = ability.can('create', 'audioEquipments');
+    const canUpdate = ability.can('update', 'audioEquipments');
+    const canDelete = ability.can('delete', 'audioEquipments');
 
     // 2. Consumo de Queries y Mutaciones 
     const { data: audioResponse, isLoading } = useGetAllAudioEquipments();
@@ -88,20 +94,24 @@ export const ListAudioEquipments = () => {
             render: (equipment: TAudioEquipment) => (
                 <div className="flex items-center justify-center gap-3">
 
-                    <button
-                        onClick={() => handleOpenEdit(equipment)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-                        title="Editar equipo"
-                    >
-                        <PencilSquareIcon className="size-5" />
-                    </button>
-                    <button
-                        onClick={() => handleOpenDelete(equipment)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-                        title="Eliminar equipo"
-                    >
-                        <TrashIcon className="size-5" />
-                    </button>
+                    {canUpdate && (
+                        <button
+                            onClick={() => handleOpenEdit(equipment)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+                            title="Editar equipo"
+                        >
+                            <PencilSquareIcon className="size-5" />
+                        </button>
+                    )}
+                    {canDelete && (
+                        <button
+                            onClick={() => handleOpenDelete(equipment)}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+                            title="Eliminar equipo"
+                        >
+                            <TrashIcon className="size-5" />
+                        </button>
+                    )}
                 </div>
             ),
         },
@@ -119,13 +129,15 @@ export const ListAudioEquipments = () => {
                         Administración del inventario de dispositivos y sistemas de audio de la institución.
                     </p>
                 </div>
-                <Button
-                    onClick={openCreateModal}
-                    className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-                >
-                    <PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-                    <span>Nuevo Equipo</span>
-                </Button>
+                {canCreate && (
+                    <Button
+                        onClick={openCreateModal}
+                        className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+                    >
+                        <PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+                        <span>Nuevo Equipo</span>
+                    </Button>
+                )}
             </div>
 
             {/* TABLA DE COMPONENTE DINÁMICO */}

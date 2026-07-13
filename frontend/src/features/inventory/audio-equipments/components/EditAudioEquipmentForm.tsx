@@ -7,9 +7,10 @@ import { z } from 'zod';
 
 const audioEquipmentSchema = z.object({
     description: z.string()
-        .min(1, 'La descripción es requerida')
+        .trim()
+        .min(1, 'La descripción es requerida')  
+        .trim()
         .max(100, 'La descripción no debe exceder los 100 caracteres')
-        .trim(),
 });
 
 type TAudioEquipmentFormValues = z.infer<typeof audioEquipmentSchema>;

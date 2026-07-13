@@ -23,7 +23,7 @@ export const AudioEquipmentsTable = ({
     const [selectedAudioEquipment, setSelectedAudioEquipment] = useState<TAudioEquipment | undefined>();
 
     const [isEditOpen, openEdit, closeEdit] = useModal();
-    const [editingAudioEquipmentId, setEditingPcEquipmentId] = useState<string | null>(null);
+    const [editingAudioEquipmentId, setEditingAudioEquipmentId] = useState<string | null>(null);
     
     // Mutación de eliminación
     const deleteAudioEquipmentMutation = useDeleteAudioEquipmentMutation();
@@ -49,7 +49,7 @@ export const AudioEquipmentsTable = ({
 
     const handleOpenEdit = useCallback(
         (equipment: TAudioEquipment) => {
-            setEditingPcEquipmentId(equipment.id);
+            setEditingAudioEquipmentId(equipment.id);
             openEdit();
         },
         [openEdit]
@@ -57,7 +57,7 @@ export const AudioEquipmentsTable = ({
 
     const handleCloseEdit = () => {
         closeEdit();
-        setEditingPcEquipmentId(null);
+        setEditingAudioEquipmentId(null);
     };
 
 
