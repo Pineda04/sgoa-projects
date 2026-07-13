@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TPlanification } from '@api/assignment-reports';
 import {
 	TClassroomSearch,
@@ -68,6 +68,7 @@ export const PlanificationForm = ({
 	const [selectedClassroomId, setSelectedClassroomId] = useState<
 		string | null
 	>(null);
+
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
 
 	const useCoursesSearch = (st: string) =>
@@ -88,6 +89,12 @@ export const PlanificationForm = ({
 		1,
 		50
 	);
+
+	useEffect(() => {
+		if (classroomInitQuery.data?.data?.length) {
+			setSelectedClassroomId(classroomInitQuery.data.data[0].id);
+		}
+	}, [classroomInitQuery.data]);
 
 	const teacherDefaultOption =
 		teacherInitQuery.data?.data && teacherInitQuery.data.data.length

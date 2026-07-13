@@ -114,7 +114,7 @@ export const ClassroomAvailabilityModal = ({
 		return match?.id ?? '';
 	}, [allPeriods, selectedYear, selectedPac, currentPeriod]);
 
-	const { data: schedule, isLoading } = useGetClassroomAvailability(
+	const { data: schedule, isLoading, isError } = useGetClassroomAvailability(
 		classroomId,
 		effectivePeriodId,
 		undefined
@@ -259,7 +259,7 @@ export const ClassroomAvailabilityModal = ({
 				<div className="min-h-0 flex-1 overflow-auto">
 					{isLoading ? (
 						<AvailabilitySkeleton />
-					) : !schedule || activeDays.length === 0 ? (
+					) : isError ? (
 						<div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -277,6 +277,26 @@ export const ClassroomAvailabilityModal = ({
 							</p>
 							<p className="text-xs text-gray-400">
 								Selecciona un periodo válido para continuar
+							</p>
+						</div>
+					) : !schedule || activeDays.length === 0 ? (
+						<div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth={1.5}
+								className="size-10 text-gray-300"
+							>
+								<rect x="3" y="4" width="18" height="18" rx="2" />
+								<path d="M16 2v4M8 2v4M3 10h18" />
+							</svg>
+							<p className="text-sm font-medium text-gray-600">
+								Sin horario asignado
+							</p>
+							<p className="text-xs text-gray-400">
+								Este periodo no tiene horarios registrados para el aula
 							</p>
 						</div>
 					) : (
