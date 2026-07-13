@@ -1,13 +1,25 @@
+import { useState } from 'react';
 import { TPlanification } from '@api/assignment-reports';
-import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
-import { TCourseBasicInfo, useGetCoursesCenterDepartmentBySearchTerm } from '@api/courses';
+import {
+	TClassroomSearch,
+	useGetClassroomsBySearchTerm,
+} from '@api/classrooms';
+import {
+	TCourseBasicInfo,
+	useGetCoursesCenterDepartmentBySearchTerm,
+} from '@api/courses';
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
-import { DAY_OPTIONS, generateTimeOptions } from '@features/academic/planifications/utils';
+import {
+	DAY_OPTIONS,
+	generateTimeOptions,
+} from '@features/academic/planifications/utils';
 import { Button, Error, SearchAsyncSelect } from '@shared/components';
+import { useModal } from '@shared/hooks';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
+import { ClassroomAvailabilityModal } from '@features/infrastructure/classrooms/components/ClassroomAvailabilityModal';
 
 interface IPlanificationFormProps {
 	centerDepartmentId: string;
@@ -38,8 +50,7 @@ interface IFieldTag {
 
 const numericFields: (keyof TPlanification)[] = ['uv', 'studentCount'];
 
-const useTeachersSearch = (st: string) =>
-	useGetTeachersBySearchTerm(st);
+const useTeachersSearch = (st: string) => useGetTeachersBySearchTerm(st);
 
 const useClassroomsSearch = (st: string, page?: number, size?: number) =>
 	useGetClassroomsBySearchTerm(st, page, size);
@@ -54,6 +65,10 @@ export const PlanificationForm = ({
 	const currentCenter = currentUser.headPositions.find(
 		p => p.centerDepartmentId === centerDepartmentId
 	);
+	const [selectedClassroomId, setSelectedClassroomId] = useState<
+		string | null
+	>(null);
+	const [isAvailOpen, openAvail, closeAvail] = useModal();
 
 	const useCoursesSearch = (st: string) =>
 		useGetCoursesCenterDepartmentBySearchTerm(centerDepartmentId, st);
@@ -77,85 +92,85 @@ export const PlanificationForm = ({
 	const teacherDefaultOption =
 		teacherInitQuery.data?.data && teacherInitQuery.data.data.length
 			? {
-				value: teacherInitQuery.data.data[0].id,
- 				label: teacherInitQuery.data.data[0].code,
- 				data: teacherInitQuery.data.data[0],
- 			}
- 			: null;
+					value: teacherInitQuery.data.data[0].id,
+					label: teacherInitQuery.data.data[0].code,
+					data: teacherInitQuery.data.data[0],
+				}
+			: null;
 
- 	const finalTeacherDefaultOption =
- 		teacherDefaultOption ??
- 		(initialData?.teacherCode
- 			? {
- 				value: initialData.teacherCode,
- 				label: initialData.teacherCode,
- 				data: {
- 					id: initialData.teacherCode,
- 					userId: initialData.teacherCode,
- 					code: initialData.teacherCode,
- 					name: initialData.teacherName ?? '',
- 					email: null,
- 				},
- 			}
- 			: null);
+	const finalTeacherDefaultOption =
+		teacherDefaultOption ??
+		(initialData?.teacherCode
+			? {
+					value: initialData.teacherCode,
+					label: initialData.teacherCode,
+					data: {
+						id: initialData.teacherCode,
+						userId: initialData.teacherCode,
+						code: initialData.teacherCode,
+						name: initialData.teacherName ?? '',
+						email: null,
+					},
+				}
+			: null);
 
- 	const courseDefaultOption =
- 		courseInitQuery.data?.data && courseInitQuery.data.data.length
- 			? {
- 				value: courseInitQuery.data.data[0].id,
- 				label: courseInitQuery.data.data[0].code,
- 				data: courseInitQuery.data.data[0],
- 			}
- 			: null;
+	const courseDefaultOption =
+		courseInitQuery.data?.data && courseInitQuery.data.data.length
+			? {
+					value: courseInitQuery.data.data[0].id,
+					label: courseInitQuery.data.data[0].code,
+					data: courseInitQuery.data.data[0],
+				}
+			: null;
 
- 	const finalCourseDefaultOption =
- 		courseDefaultOption ??
- 		(initialData?.courseCode
- 			? {
- 				value: initialData.courseCode,
- 				label: initialData.courseCode,
- 				data: {
- 					id: initialData.courseCode,
- 					code: initialData.courseCode,
- 					name: initialData.courseName ?? '',
- 					uvs: initialData.uv ?? 1,
- 					activeStatus: true,
- 					department: {
- 						id: initialData.departmentName ?? '',
- 						name: initialData.departmentName ?? '',
- 					},
- 				},
- 			}
- 			: null);
+	const finalCourseDefaultOption =
+		courseDefaultOption ??
+		(initialData?.courseCode
+			? {
+					value: initialData.courseCode,
+					label: initialData.courseCode,
+					data: {
+						id: initialData.courseCode,
+						code: initialData.courseCode,
+						name: initialData.courseName ?? '',
+						uvs: initialData.uv ?? 1,
+						activeStatus: true,
+						department: {
+							id: initialData.departmentName ?? '',
+							name: initialData.departmentName ?? '',
+						},
+					},
+				}
+			: null);
 
- 	const classroomDefaultOption =
- 		classroomInitQuery.data?.data && classroomInitQuery.data.data.length
- 			? {
- 				value: classroomInitQuery.data.data[0].id,
- 				label: classroomInitQuery.data.data[0].name,
- 				data: classroomInitQuery.data.data[0],
- 			}
- 			: null;
+	const classroomDefaultOption =
+		classroomInitQuery.data?.data && classroomInitQuery.data.data.length
+			? {
+					value: classroomInitQuery.data.data[0].id,
+					label: classroomInitQuery.data.data[0].name,
+					data: classroomInitQuery.data.data[0],
+				}
+			: null;
 
- 	const finalClassroomDefaultOption =
- 		classroomDefaultOption ??
- 		(initialData?.classroomName
- 			? {
- 				value: initialData.classroomName,
- 				label: initialData.classroomName,
- 				data: {
- 					id: initialData.classroomName,
- 					name: initialData.classroomName,
- 					building: {
- 						id: initialData.center ?? initialData.classroomName,
- 						name: initialData.center ?? '',
- 					},
- 				},
- 			}
- 			: null);
+	const finalClassroomDefaultOption =
+		classroomDefaultOption ??
+		(initialData?.classroomName
+			? {
+					value: initialData.classroomName,
+					label: initialData.classroomName,
+					data: {
+						id: initialData.classroomName,
+						name: initialData.classroomName,
+						building: {
+							id: initialData.center ?? initialData.classroomName,
+							name: initialData.center ?? '',
+						},
+					},
+				}
+			: null);
 
- 	const formik = useFormik<TPlanification>({
- 		enableReinitialize: true,
+	const formik = useFormik<TPlanification>({
+		enableReinitialize: true,
 		initialValues: initialData ?? {
 			teacherCode: '',
 			teacherName: '',
@@ -250,7 +265,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
-										defaultOption={finalTeacherDefaultOption}
+									defaultOption={finalTeacherDefaultOption}
 								/>
 							),
 						},
@@ -278,7 +293,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
-										defaultOption={finalCourseDefaultOption}
+									defaultOption={finalCourseDefaultOption}
 								/>
 							),
 						},
@@ -330,6 +345,7 @@ export const PlanificationForm = ({
 								<SearchAsyncSelect<TClassroomSearch>
 									hook={useClassroomsSearch}
 									handleChange={(data: TClassroomSearch) => {
+										setSelectedClassroomId(data.id);
 										formik.setValues({
 											...formik.values,
 											classroomName: data.name,
@@ -345,7 +361,7 @@ export const PlanificationForm = ({
 											context
 										);
 									}}
-										defaultOption={finalClassroomDefaultOption}
+									defaultOption={finalClassroomDefaultOption}
 								/>
 							),
 						},
@@ -368,15 +384,15 @@ export const PlanificationForm = ({
 							readOnly: true,
 						},
 					] as IFieldTag[]
-					).map(
-						({
-							label,
-							name,
-							type: fieldType,
-							readOnly,
-							element,
-							checkboxLabel,
-						}) => (
+				).map(
+					({
+						label,
+						name,
+						type: fieldType,
+						readOnly,
+						element,
+						checkboxLabel,
+					}) => (
 						<div key={name}>
 							<label className="block mb-2 font-bold">
 								{label}
@@ -406,8 +422,63 @@ export const PlanificationForm = ({
 							) : fieldType === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
 								// Render the provided custom element (SearchAsyncSelect). The select
 								// receives `defaultOption` so it will show the code when editing.
-								element ?? null
-											) : fieldType === FIELD_TYPE_TAG.TIME_SELECT ? (
+								<div className="flex items-center gap-2">
+									<div className="flex-1">
+										{element ?? null}
+									</div>
+									{name === 'classroomName' && (
+										<button
+											type="button"
+											onClick={() => {
+												if (!selectedClassroomId)
+													return;
+												openAvail();
+											}}
+											disabled={!selectedClassroomId}
+											className="size-10 inline-flex items-center justify-center p-1.5 text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 rounded-sm transition-all duration-200 cursor-pointer shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+											title="Ver disponibilidad"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												className="size-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<rect
+													x="3"
+													y="4"
+													width="18"
+													height="18"
+													rx="2"
+													ry="2"
+												/>
+												<line
+													x1="16"
+													y1="2"
+													x2="16"
+													y2="6"
+												/>
+												<line
+													x1="8"
+													y1="2"
+													x2="8"
+													y2="6"
+												/>
+												<line
+													x1="3"
+													y1="10"
+													x2="21"
+													y2="10"
+												/>
+											</svg>
+										</button>
+									)}
+								</div>
+							) : fieldType === FIELD_TYPE_TAG.TIME_SELECT ? (
 								<select
 									name={name}
 									value={
@@ -438,7 +509,9 @@ export const PlanificationForm = ({
 										onBlur={formik.handleBlur}
 										className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
 									/>
-									<span className="cursor-default">{checkboxLabel}</span>
+									<span className="cursor-default">
+										{checkboxLabel}
+									</span>
 								</div>
 							) : (
 								<input
@@ -468,7 +541,10 @@ export const PlanificationForm = ({
 												name as keyof TPlanification
 											] as string
 										}
-										breakLine={fieldType !== FIELD_TYPE_TAG.CUSTOM_SELECT}
+										breakLine={
+											fieldType !==
+											FIELD_TYPE_TAG.CUSTOM_SELECT
+										}
 									/>
 								)}
 						</div>
@@ -494,8 +570,16 @@ export const PlanificationForm = ({
 							/>
 						)}
 				</div>
-
 			</form>
+
+			{selectedClassroomId && (
+				<ClassroomAvailabilityModal
+					isOpen={isAvailOpen}
+					onClose={closeAvail}
+					classroomId={selectedClassroomId}
+					classroomName={formik.values.classroomName}
+				/>
+			)}
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
