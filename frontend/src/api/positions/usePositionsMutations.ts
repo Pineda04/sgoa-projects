@@ -8,7 +8,7 @@ export const useCreatePosition = () =>
     useMutation({
         mutationFn: (body: TCreatePosition) => positionsApi.createPosition(body),
         onError: (error) => {
-            alertError(error);
+            console.error(error);
         },
         onSuccess: async res => {
             alertSuccess(res);
@@ -37,7 +37,7 @@ export const useUpdatePosition = (positionId: string) => {
         mutationFn: (body: TUpdatePosition) => 
             positionsApi.updatePosition({ id: positionId, body }),
         onError: (error) => {
-            alertError(error);
+            console.error(error);
         },
         onSuccess: async res => {
             alertSuccess(res);
