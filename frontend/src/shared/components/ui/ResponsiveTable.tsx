@@ -9,6 +9,7 @@ export interface IResponsiveColumn<T> {
 	className?: string;
 	headerClassName?: string;
 	hiddenOnMobile?: boolean;
+	sticky?: 'left' | 'right';
 }
 
 export interface IResponsiveTableProps<T> {
@@ -40,7 +41,7 @@ export function ResponsiveTable<T>({
 	emptyMessage = 'No hay datos disponibles',
 	onRowClick,
 	className = 'w-full',
-	showRowNumber = true,
+	showRowNumber = false,
 	rowClassName,
 }: IResponsiveTableProps<T>) {
 	if (loading) {
@@ -50,7 +51,7 @@ export function ResponsiveTable<T>({
 					<SkeletonTable columns={columns.length} rows={5} />
 				</div>
 				<div className="md:hidden">
-					<SkeletonCard 
+					<SkeletonCard
 						fields={columns.filter(c => !c.hiddenOnMobile).length}
 						showNumber={showRowNumber}
 					/>
@@ -72,7 +73,7 @@ export function ResponsiveTable<T>({
 						{columns.map((col, i) => (
 							<th
 								key={col.key}
-								className={`py-3 px-4 text-center font-semibold text-sm ${col.headerClassName || ''} ${i === columns.length - 1 && showRowNumber ? 'last:rounded-tr-lg' : ''} ${i === columns.length - 1 && !showRowNumber ? 'last:rounded-tr-lg' : ''}`}
+								className={`py-3 px-4 text-center font-semibold text-sm ${col.headerClassName || ''} ${i === columns.length - 1 && showRowNumber ? 'last:rounded-tr-lg' : ''} ${i === columns.length - 1 && !showRowNumber ? 'last:rounded-tr-lg' : ''} ${col.sticky === 'right' ? 'sticky right-0 z-20 bg-[#144C74]' : ''} ${col.sticky === 'left' ? 'sticky left-0 z-20 bg-[#144C74]' : ''}`}
 							>
 								{col.header}
 							</th>
@@ -109,7 +110,7 @@ export function ResponsiveTable<T>({
 								{columns.map(col => (
 									<td
 										key={col.key}
-										className={`py-3 px-4 border-t border-gray-200 ${col.className || ''}`}
+										className={`py-3 px-4 border-t border-gray-200 ${col.className || ''} ${col.sticky === 'right' ? 'sticky right-0 z-10 ' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-100') : ''} ${col.sticky === 'left' ? 'sticky left-0 z-10 ' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-100') : ''}`}
 									>
 										{col.render
 											? col.render(row, index)
@@ -132,7 +133,7 @@ export function ResponsiveTable<T>({
 						<div
 							key={getRowKey(row)}
 							className={`
-								bg-card border border-card-border rounded-xl p-4 
+								bg-card border border-card-border rounded-xl p-4
 								shadow-sm hover:shadow-md transition-all duration-200
 								${onRowClick ? 'cursor-pointer hover:border-primary/30' : ''}
 								${rowClassName ? rowClassName(row, index) : ''}

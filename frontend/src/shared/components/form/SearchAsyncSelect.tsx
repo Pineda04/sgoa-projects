@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Select, { FormatOptionLabelMeta, SingleValue } from 'react-select';
 import { useDebounce } from '@shared/hooks';
 import { IOptions } from '@shared/interfaces';
+import { IoSearch } from 'react-icons/io5';
 
 interface IProps<T> {
 	hook: (
@@ -56,15 +57,24 @@ export const SearchAsyncSelect = <T,>({
 			? []
 			: promiseOptions(data?.data, getOptionValue, getOptionLabel);
 
-	const options = defaultOption
-		? [defaultOption, ...fetchedOptions.filter(o => o.value !== defaultOption.value)]
+	const defaultSelectOption = defaultOption
+		? { ...defaultOption, data: defaultOption.data as T }
+		: null;
+
+	const options = defaultSelectOption
+		? [
+				defaultSelectOption,
+				...fetchedOptions.filter(
+					o => o.value !== defaultSelectOption.value
+				),
+			]
 		: fetchedOptions;
 
 	const [selected, setSelected] = useState<{
 		value: string;
 		label: string;
 		data: T;
-	} | null>(defaultOption ? (defaultOption as any) : null);
+	} | null>(defaultSelectOption);
 
 	const handleSelect = (
 		e: SingleValue<{
@@ -75,7 +85,7 @@ export const SearchAsyncSelect = <T,>({
 	) => {
 		if (!e) return;
 		handleChange(e.data);
-		setSelected(e as any);
+		setSelected(e);
 	};
 
 	const handleInputChange = (inputValue: string) => {
@@ -84,7 +94,16 @@ export const SearchAsyncSelect = <T,>({
 	};
 
 	return (
-		<Select
+    <Select
+      styles={{
+        control: (baseStyles) => ({ ...baseStyles, cursor: 'text', outline: 'none', boxShadow: 'none' }),
+      }}
+			components={{
+				DropdownIndicator: () => (
+					<IoSearch className="size-5 mx-2 text-gray-400 shrink-0" />
+				),
+				IndicatorSeparator: () => null,
+			}}
 			isLoading={isLoading}
 			options={options}
 			value={selected}

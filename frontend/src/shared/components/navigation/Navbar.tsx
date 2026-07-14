@@ -5,10 +5,10 @@ import {
 	Bars3Icon,
 	XMarkIcon,
 	ChevronDownIcon,
-	ShieldCheckIcon,
-	WrenchScrewdriverIcon,
 	CubeIcon,
-	ChartBarSquareIcon,
+	BuildingLibraryIcon,
+	UsersIcon,
+	ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
@@ -19,6 +19,7 @@ import { Button } from '../ui';
 interface SectionConfig {
 	label: string;
 	path: string;
+	subject?: Subjects;
 }
 
 interface ModuleConfig {
@@ -32,18 +33,24 @@ interface ModuleConfig {
 const MODULES: ModuleConfig[] = [
 	{
 		id: 'dashboard',
-		label: 'Panel de Control',
-		icon: ChartBarSquareIcon,
+		label: 'Control Académico',
+		icon: ClipboardDocumentListIcon,
 		sections: [],
 	},
 	{
 		id: 'admin',
 		label: 'Administración',
-		icon: ShieldCheckIcon,
+		icon: UsersIcon,
 		sections: [
 			{
 				label: 'Departamentos',
-				path: '/admin/departments'
+				path: '/admin/departments',
+				subject: 'departments',
+			},
+			{
+				label: 'Títulos',
+				path: '/admin/degrees',
+				subject: 'degrees',
 			},
 			{
 				label: 'Cargos Académicos',
@@ -54,11 +61,22 @@ const MODULES: ModuleConfig[] = [
 	{
 		id: 'infrastructure',
 		label: 'Infraestructura',
-		icon: WrenchScrewdriverIcon,
+		icon: BuildingLibraryIcon,
 		sections: [
 			{
 				label: 'Centros',
 				path: '/infrastructure/centers',
+				subject: 'centers',
+			},
+			{
+				label: 'Edificios',
+				path: '/infrastructure/buildings',
+				subject: 'buildings',
+			},
+			{
+				label: 'Aulas',
+				path: '/infrastructure/classrooms',
+				subject: 'classrooms',
 			},
 		],
 	},
@@ -66,18 +84,20 @@ const MODULES: ModuleConfig[] = [
 		id: 'inventory',
 		label: 'Inventario',
 		icon: CubeIcon,
-		sections: [],
+		sections: [
+			{
+				label: 'Computadoras',
+				path: '/inventory/pc-equipments',
+				subject: 'pc-equipments',
+			},
+			{
+				label: 'Audio',
+        path: '/inventory/audio-equipments',
+				subject: 'audio-equipments',
+			},
+		],
 	},
 ];
-
-const moduleSubjectMap: Record<string, Subjects> = {
-	home: 'home',
-	admin: 'users',
-	academic: 'courses',
-	infrastructure: 'centers',
-	inventory: 'pcEquipments',
-	help: 'help',
-};
 
 const DASHBOARD_CONFIG = [
 	{
@@ -131,19 +151,18 @@ export const Navbar = () => {
 	);
 
 	const visibleModules = useMemo(() => {
-		const mods = modulesWithSections.filter(mod => {
-			if (!isAuthenticated) return false;
-			if (mod.id === 'home' || mod.id === 'dashboard') return true;
-			if (mod.id === 'academic' && !ability.can('read', 'academic-module')) return false;
-			const subject = moduleSubjectMap[mod.id];
-			if (!subject) return false;
-			return ability.can('read', subject);
-		});
-		if (availableDashboards.length === 0) {
-			return mods.filter(m => m.id !== 'dashboard');
-		}
-		return mods;
-	}, [isAuthenticated, ability, availableDashboards, modulesWithSections]);
+		if (!isAuthenticated) return [];
+
+		return modulesWithSections
+			.map(mod => ({
+				...mod,
+				sections: mod.sections.filter(s => {
+					if (!s.subject) return true;
+					return ability.can('read', s.subject);
+				}),
+			}))
+			.filter(mod => mod.sections.length > 0);
+	}, [isAuthenticated, ability, modulesWithSections]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {

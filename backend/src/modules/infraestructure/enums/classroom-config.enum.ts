@@ -3,4 +3,5 @@ export enum EClassroomConfig {
   ROOM_TYPE = 'roomType',
   CONNECTIVITY = 'connectivity',
   AUDIO_EQUIPMENT = 'audioEquipment',
+  DIGITAL_BLACKBOARD = 'digitalBlackboard',
 }

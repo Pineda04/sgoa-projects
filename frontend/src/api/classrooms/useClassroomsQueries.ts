@@ -2,6 +2,19 @@ import { useQuery } from '@tanstack/react-query';
 import { classroomsApi } from './classrooms.api';
 import { classroomsKeys } from './classrooms.keys';
 import { STALE_TIME } from '@config';
+import { usePaginationParams } from '@shared/hooks';
+
+export const useGetAllClassrooms = (
+	filters?: { name?: string; buildingId?: string; roomTypeId?: string; activeStatus?: string }
+) => {
+	const { page, size } = usePaginationParams();
+	return useQuery({
+		queryKey: classroomsKeys.list(page, size, filters),
+		queryFn: () => classroomsApi.getAllClassrooms(page, size, filters),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data,
+	});
+};
 
 export const useGetClassroomsBySearchTerm = (
 	searchTerm: string,
@@ -14,4 +27,26 @@ export const useGetClassroomsBySearchTerm = (
 		enabled: searchTerm.length >= 2,
 		staleTime: STALE_TIME.SHORT,
 		select: res => res.data,
+	});
+
+export const useGetClassroomById = (id: string) =>
+	useQuery({
+		queryKey: classroomsKeys.detail(id),
+		queryFn: () => classroomsApi.getClassroomById(id),
+		enabled: Boolean(id),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
+export const useGetClassroomAvailability = (
+	id: string,
+	periodId: string,
+	dayOfWeek?: string
+) =>
+	useQuery({
+		queryKey: classroomsKeys.availability(id, periodId, dayOfWeek),
+		queryFn: () => classroomsApi.getClassroomAvailability(id, periodId, dayOfWeek),
+		enabled: Boolean(id) && Boolean(periodId),
+		staleTime: STALE_TIME.SHORT,
+		select: res => res.data.data,
 	});

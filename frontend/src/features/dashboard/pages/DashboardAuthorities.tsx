@@ -1,53 +1,55 @@
-import { useState } from 'react';
 import { useTabWithReset } from '@shared/hooks';
 import {
-	IResponsiveColumn,
-	ResponsiveTable,
+	Loading,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '@shared/components';
-import { AcademicPeriodsList, Consolidated, CourseList, ListPlanificationsTable } from '@features/academic';
+import { AcademicPeriodsList, Consolidated, CourseList } from '@features/academic';
 import { useAbility } from '@config/lib';
 import { UsersTable } from '@features/admin';
-import { useGetTeachers } from '@api/teachers';
 import { useNavigate } from 'react-router-dom';
+import {
+	ListAssignmentReportsAuthorities,
+	ListPlanificationsAuthorities,
+} from '../components';
+import { useGetCurrentAcademicPeriod } from '@api/periods';
+import { useUser } from '@config/providers';
 
-interface FileData {
-	id: string;
-	name: string;
-}
+// Subcomponente que encapsula la petición de usuarios, se monta solo al activar la pestaña
+const UsersTab = () => {
+	const navigate = useNavigate();
+
+	return (
+		<UsersTable
+			onNavigateToCreate={() => navigate('/admin/users/new')}
+		/>
+	);
+};
 
 export const DashboardAuthorities = () => {
-	const navigate = useNavigate();
-  const ability = useAbility();
+
+	const currentUser = useUser();
+	const academicPeriodInfo = useGetCurrentAcademicPeriod();
+	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
+
+	const ability = useAbility();
 	const showDepartment = ability.can('manage', 'departments');
-	const [searchPlanification, setSearchPlanification] = useState('');
-	const [searchReport, setSearchReport] = useState('');
 	const validTabs = ['0', '1', '2', '3', '4', '5'];
-  const { currentTab, setTab } = useTabWithReset(validTabs);
+	const { currentTab, setTab } = useTabWithReset(validTabs);
 
-  const { isLoading, isError, data } = useGetTeachers();
-	const [isLoadingPlanifications] = useState(false);
-	const [isErrorPlanifications] = useState(false);
-
-	const reportColumns: IResponsiveColumn<FileData>[] = [
-		{ key: 'name', header: 'Nombre del archivo', mobileLabel: 'Archivo' },
-		{ key: 'view', header: 'Ver contenido', mobileLabel: 'Ver' },
-		{ key: 'download', header: 'Descargar', mobileLabel: 'Descargar' },
-	];
-  const emptyReports: FileData[] = [];
+	if (isLoading) return <Loading />;
 
 	return (
 		<>
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold">
-					UNAH - Campus Copán III PAC 2025
+					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
 				</h2>
-				<p className="text-sm">Nombre de Autoridad</p>
-				<p className="text-sm">10355</p>
-				<p className="text-sm">correo@unah.edu</p>
+				<p className="text-sm">{currentUser.user?.name}</p>
+				<p className="text-sm">{currentUser.user?.code}</p>
+				<p className="text-sm">{currentUser.user?.email}</p>
 			</div>
 
 			<Tabs value={currentTab} onValueChange={setTab} className="mt-4 sm:mt-8">
@@ -62,73 +64,32 @@ export const DashboardAuthorities = () => {
 
 				{/* Planificaciones */}
 				<TabsContent value="0">
-					<div className="flex justify-center my-4">
-						<input
-							type="text"
-							placeholder="Buscar planificación..."
-							value={searchPlanification}
-							onChange={e =>
-								setSearchPlanification(e.target.value)
-							}
-							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-						/>
-					</div>
-
-					<ListPlanificationsTable
-						isLoading={isLoadingPlanifications}
-						isError={isErrorPlanifications}
-						data={null}
-					/>
+					{currentTab === '0' && <ListPlanificationsAuthorities />}
 				</TabsContent>
 
 				{/* Informes */}
 				<TabsContent value="1">
-					<div className="flex justify-center my-4">
-						<input
-							type="text"
-							placeholder="Buscar informe..."
-							value={searchReport}
-							onChange={e => setSearchReport(e.target.value)}
-							className="w-full bg-white shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-						/>
-					</div>
-
-					<div className="py-2 bg-white">
-						<ResponsiveTable<FileData>
-							columns={reportColumns}
-							data={emptyReports}
-							getRowKey={f => f.id}
-							emptyMessage="No hay informes disponibles"
-							showRowNumber={false}
-						/>
-					</div>
+					{currentTab === '1' && <ListAssignmentReportsAuthorities />}
 				</TabsContent>
 
 				{/* Usuarios */}
 				<TabsContent value="2">
-		      {data && (
-  					<UsersTable
-  						isLoading={isLoading}
-  						isError={isError}
-  						data={data}
-  						onNavigateToCreate={() => navigate('/admin/users/new')}
-  					/>
-  				)}
-        </TabsContent>
+					{currentTab === '2' && <UsersTab />}
+				</TabsContent>
 
 				{/* Clases */}
 				<TabsContent value="3">
-				  <CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />
+					{currentTab === '3' && <CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />}
 				</TabsContent>
 
-        {/* Periodos */}
+				{/* Periodos */}
 				<TabsContent value="4">
-				  <AcademicPeriodsList />
+					{currentTab === '4' && <AcademicPeriodsList />}
 				</TabsContent>
 
-        {/* Consolidado */}
+				{/* Consolidado */}
 				<TabsContent value="5">
-				  <Consolidated />
+					{currentTab === '5' && <Consolidated showDepartmentFilter />}
 				</TabsContent>
 			</Tabs>
 		</>

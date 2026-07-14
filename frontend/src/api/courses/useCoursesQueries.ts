@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi, courseClassroomsApi } from './courses.api';
+import { coursesApi, courseClassroomsApi, courseStadisticsApi } from './courses.api';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared';
 import { coursesKeys } from './courses.keys';
@@ -50,6 +50,17 @@ export const useGetCoursesByTeacher = (teacherId: string) =>
 		select: res => res.data.data,
 	});
 
+export const useGetCourseClassroomById = (id?: string) =>
+	useQuery({
+		queryKey: ['courseClassrooms', 'detail', id ?? ''],
+		queryFn: () => courseClassroomsApi.getCourseClassroomById(id!),
+		enabled: Boolean(id),
+		retry: false,
+		refetchOnWindowFocus: false,
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
 export const useGetAllCourses = (
 	isActive: boolean = false,
 	searchTerm: string
@@ -77,7 +88,31 @@ export const useGetAllCoursesCoordinatorByPeriod = (
 			centerDepartmentId ?? ''
 		),
 		queryFn: () =>
-			courseClassroomsApi.getAllCoursesByPeriodIdAndCenter(
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'coordinator',
+				periodId!,
+				centerDepartmentId!
+			),
+		enabled: Boolean(periodId && centerDepartmentId),
+		retry: false,
+		refetchOnWindowFocus: false,
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
+export const useGetAllCoursesAuthorityByPeriod = (
+	periodId?: string,
+	centerDepartmentId?: string
+) =>
+	useQuery({
+		// Se podria usar las misma key si no hay choque pero para evitar de problemas de cache se modificará la key
+		queryKey: [...coursesKeys.periodCenter(
+			periodId ?? '',
+			centerDepartmentId ?? ''
+		), 'authority'],
+		queryFn: () =>
+			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
+				'authority',
 				periodId!,
 				centerDepartmentId!
 			),
@@ -136,6 +171,24 @@ export const useGetCurrentUserCourses = () =>
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data.data,
+	});
+
+export const useGetConsolidated = (
+	params: {
+		year?: string;
+		pac?: string;
+		centerDepartmentId?: string;
+		page?: number;
+		size?: number;
+	},
+	enabled?: boolean
+) =>
+	useQuery({
+		queryKey: coursesKeys.consolidated(params),
+		queryFn: () => courseStadisticsApi.getConsolidated(params),
+		enabled: enabled ?? Boolean(params.year && params.pac),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data,
 	});
 
 export const useGetCoursesCenterDepartmentBySearchTerm = (

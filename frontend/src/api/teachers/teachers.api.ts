@@ -12,10 +12,17 @@ import { IResponse } from '@shared/interfaces';
 import { api } from '@config/lib';
 
 export const teachersApi = {
-	getAllTeachers: (page: number, size: number) =>
-		api.get<IResponse<TOutputTeacherPosition[]>>(
-			`/teachers?page=${page}&size=${size}`
-		),
+	getAllTeachers: (
+		page: number,
+		size: number,
+		filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+	) => {
+		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		if (filters?.searchTerm) params.set('searchTerm', filters.searchTerm);
+		if (filters?.categoryId) params.set('categoryId', filters.categoryId);
+		if (filters?.contractTypeId) params.set('contractTypeId', filters.contractTypeId);
+		return api.get<IResponse<TOutputTeacherPosition[]>>(`/teachers?${params.toString()}`);
+	},
 
 	getOneTeacher: (id: string) =>
 		api.get<IResponse<TOutputTeacherPosition>>(`/teachers/${id}`),
@@ -38,11 +45,17 @@ export const teachersApi = {
 	getAllTeachersCoordinator: (
 		page: number,
 		size: number,
-		centerDepartmentId: string
-	) =>
-		api.get<IResponse<TOutputTeacher[]>>(
-			`/teachers/coordinator/center-department/${centerDepartmentId}?page=${page}&size=${size}`
-		),
+		centerDepartmentId: string,
+		filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+	) => {
+		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		if (filters?.searchTerm) params.set('searchTerm', filters.searchTerm);
+		if (filters?.categoryId) params.set('categoryId', filters.categoryId);
+		if (filters?.contractTypeId) params.set('contractTypeId', filters.contractTypeId);
+		return api.get<IResponse<TOutputTeacher[]>>(
+			`/teachers/coordinator/center-department/${centerDepartmentId}?${params.toString()}`
+		);
+	},
 
 	changeStatusActiveTeacherUser: (teacherId: string) =>
 		api.delete(`/teachers/${teacherId}`),

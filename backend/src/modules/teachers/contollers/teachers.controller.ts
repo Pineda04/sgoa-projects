@@ -25,6 +25,7 @@ import { EUserRole } from 'src/common/enums';
 import { ExtractIdInterceptor } from 'src/common/interceptors';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { QueryPaginationDto } from 'src/common/dto';
+import { QueryTeacherDto } from '../dto/query-teacher.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { TeacherDepartmentPositionService } from '../services/teacher-department-position.service';
 
@@ -87,7 +88,7 @@ export class TeachersController {
     summary: 'Obtener todos los docentes',
     okDescription: 'Listado de docentes.',
   })
-  findAll(@Query() query: QueryPaginationDto) {
+  findAll(@Query() query: QueryTeacherDto) {
     return this.teachersService.findAllWithPagination(query);
   }
 
@@ -119,7 +120,7 @@ export class TeachersController {
       'Obtiene un listado paginado de docentes con su centro-departamento y cargo asociados al center-department especificado para coordinadores de área.',
   })
   async findAllByCoordinator(
-    @Query() query: QueryPaginationDto,
+    @Query() query: QueryTeacherDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
     @GetCurrentUserId() userId: string,
   ) {

@@ -7,12 +7,13 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes } from '@features/admin';
+import { departmentsRoutes, degreesRoutes } from '@features/admin';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
+import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
@@ -22,6 +23,10 @@ import {
 	DashboardTeacher,
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
+import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
+import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
+import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
+
 
 const router = createBrowserRouter(
 	[
@@ -77,13 +82,13 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/courses/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="courses" />,
 			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'academic/planifications/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="planifications" />,
 			children: planificationsRoutes,
 			errorElement: <div>404</div>,
 		},
@@ -95,7 +100,7 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/reports/*',
-			element: <ProtectedRoute action="read" subject="academic-module" />,
+			element: <ProtectedRoute action="read" subject="reports" />,
 			children: reportsRoutes,
 			errorElement: <div>404</div>,
 		},
@@ -112,9 +117,39 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'admin/degrees/*',
+			element: <ProtectedRoute action="read" subject="degrees" />,
+			children: degreesRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'infrastructure/centers',
 			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'infrastructure/buildings',
+			element: <ProtectedRoute action="read" subject="buildings" />,
+			children: buildingsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'infrastructure/classrooms/*',
+			element: <ProtectedRoute action="read" subject="classrooms" />,
+			children: classroomsRoutes,
+			errorElement: <div>404</div>,
+		},
+    {
+			path: 'inventory/pc-equipments/*',
+			element: <ProtectedRoute action="read" subject="pc-equipments" />,
+			children: pcEquipmentsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'inventory/audio-equipments',
+			element: <ProtectedRoute action="read" subject="audio-equipments" />,
+			children: audioEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

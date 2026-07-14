@@ -7,6 +7,7 @@ import { useModal } from '@shared/hooks';
 import { TCurrentAcademicPeriod, useDeleteAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
 import { Button, DataTable, IDataTableColumn, Loading } from '@shared/components';
 import { ESwalIcons, genericAlert } from '@shared/utils';
+import { useAbility } from '@config/lib';
 
 const formatDate = (dateStr: string | undefined) => {
 	if (!dateStr) return '—';
@@ -23,6 +24,11 @@ export const AcademicPeriodsList = () => {
 	const [isEditOpen, openEdit, closeEdit] = useModal();
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
 	const [selected, setSelected] = useState<TCurrentAcademicPeriod | null>(null);
+
+	const ability = useAbility();
+	const canCreate = ability.can('create', 'periods');
+	const canUpdate = ability.can('update', 'periods');
+	const canDelete = ability.can('delete', 'periods');
 
 	const { data: periods, isLoading } = useGetAcademicPeriods();
 	const { mutate: deletePeriod, isPending: isDeleting } = useDeleteAcademicPeriod();
@@ -92,41 +98,51 @@ export const AcademicPeriodsList = () => {
 			className: 'text-gray-800 font-normal p-4',
 			render: (period: TCurrentAcademicPeriod) => formatDate(period.endDate),
 		},
-		{
-			key: 'actions',
-			header: 'Acciones',
-			className: 'text-center w-32 p-4',
-			render: (period: TCurrentAcademicPeriod) => (
-				<div className="flex items-center justify-center gap-3">
-					<button
-						onClick={() => handleOpenEdit(period)}
-						className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-						title="Editar periodo"
-					>
-						<PencilSquareIcon className="size-5" />
-					</button>
-					<button
-						onClick={() => handleOpenDelete(period)}
-						className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-						title="Eliminar periodo"
-					>
-						<TrashIcon className="size-5" />
-					</button>
-				</div>
-			),
-		},
+		...(canUpdate || canDelete
+			? [
+					{
+						key: 'actions' as const,
+						header: 'Acciones',
+						className: 'text-center w-32 p-4',
+						render: (period: TCurrentAcademicPeriod) => (
+							<div className="flex items-center justify-center gap-3">
+								{canUpdate && (
+									<button
+										onClick={() => handleOpenEdit(period)}
+										className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+										title="Editar periodo"
+									>
+										<PencilSquareIcon className="size-5" />
+									</button>
+								)}
+								{canDelete && (
+									<button
+										onClick={() => handleOpenDelete(period)}
+										className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+										title="Eliminar periodo"
+									>
+										<TrashIcon className="size-5" />
+									</button>
+								)}
+							</div>
+						),
+					},
+				]
+			: []),
 	];
 
 	return (
 		<div className="py-6 w-full max-w-7xl mx-auto">
 			<div className="flex flex-col sm:flex-row justify-center items-center mb-6">
-				<Button
-					onClick={openCreate}
-					className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
-				>
-					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-					<span>Nuevo Periodo</span>
-				</Button>
+				{canCreate && (
+					<Button
+						onClick={openCreate}
+						className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
+					>
+						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+						<span>Nuevo Periodo</span>
+					</Button>
+				)}
 			</div>
 
 			<DataTable<TCurrentAcademicPeriod>

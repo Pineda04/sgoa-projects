@@ -9,12 +9,13 @@ export const teachersKeys = {
 	coordinator: (
 		page: number = 1,
 		size: number,
-		centerDepartmentId?: string
+		centerDepartmentId?: string,
+		filters?: Record<string, string | undefined>
 	) =>
 		[
 			...teachersKeys.all,
 			'coordinator',
-			{ page, size, centerDepartmentId },
+			{ page, size, centerDepartmentId, ...filters },
 		] as const,
 };
 

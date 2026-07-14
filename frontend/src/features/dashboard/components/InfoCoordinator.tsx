@@ -47,13 +47,11 @@ export const InfoCoordinator = ({
 	);
 
 	const currentCenter = currentPosition?.center.name ?? '---';
-	const currentDepartment = currentPosition?.department.name ?? '';
 
 	return (
 		<div className="mb-6">
 			<h2 className="text-2xl font-semibold mb-2">
-				{currentCenter}{' '}
-				{currentDepartment ? `| ${currentDepartment}` : ''} - PAC{' '}
+				{currentCenter}{' '}PAC{' '}
 				{academicPeriodInfo.data?.title ?? '...'}
 			</h2>
 			<p className="text-sm">{currentUser.user?.name}</p>
@@ -63,7 +61,7 @@ export const InfoCoordinator = ({
 			{currentUser.headPositions.length > 0 && (
 				<div className="mt-4">
 					<label className="block text-sm font-semibold text-gray-600 mb-2">
-						Cargos de Jefe de Departamento
+						Cargos de jefe de departamento
 					</label>
 					<select
 						className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 shadow-sm outline-none cursor-pointer w-full sm:w-fit max-w-full"

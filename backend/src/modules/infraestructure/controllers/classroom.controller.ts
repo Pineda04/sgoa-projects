@@ -22,6 +22,7 @@ import { ValidateIdPipe } from 'src/common/pipes';
 import { ClassroomService } from '../services/classroom.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { QueryPaginationDto } from 'src/common/dto';
+import { QueryClassroomDto } from '../dto';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('classrooms')
@@ -49,7 +50,32 @@ export class ClassroomController {
     return this.classroomService.create(createClassroomDto);
   }
 
+  @Get('availability/:id')  
+  @HttpCode(HttpStatus.OK)
+  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH, EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE)
+  @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
+  @ApiCommonResponses({
+    summary: 'Obtener disponibilidad de un aula',
+    okDescription: 'Horario de disponibilidad obtenido correctamente.',
+    notFoundDescription: 'El aula no existe.',
+    badRequestDescription: 'El periodo proporcionado no es válido.',
+  })
+  getAvailability(
+    @Param('id', ValidateIdPipe) id: string,
+    @Query('periodId') periodId: string,
+    @Query('dayOfWeek') dayOfWeek?: string,
+  ) {
+    return this.classroomService.getAvailability(id, periodId, dayOfWeek);
+  }
+
   @Get()
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
   @ApiPagination({
@@ -60,7 +86,7 @@ export class ClassroomController {
     summary: 'Obtener todas las aulas',
     okDescription: 'Listado de aulas obtenido correctamente.',
   })
-  findAll(@Query() query: QueryPaginationDto) {
+  findAll(@Query() query: QueryClassroomDto) {
     return this.classroomService.findAllWithPagination(query);
   }
 
@@ -91,6 +117,13 @@ export class ClassroomController {
   }
 
   @Get(':id')
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el aula.')
   @ApiCommonResponses({
