@@ -4,7 +4,6 @@ import { TOutputPosition } from '@api/positions';
 import { useAbility } from '@config';
 import { Button, useModal } from '@shared';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Navigate } from 'react-router-dom';
 import {
 	CreatePositionModal,
 	EditPositionModal,
