@@ -1,4 +1,5 @@
 export * from './activities';
+export * from './air-conditioners';
 export * from './assignment-reports';
 export * from './auth';
 export * from './brands';
@@ -18,3 +19,4 @@ export * from './shifts';
 export * from './teachers';
 export * from './users';
 export * from './buildings';
+
