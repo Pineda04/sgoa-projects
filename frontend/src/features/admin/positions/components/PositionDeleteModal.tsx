@@ -1,34 +1,47 @@
 import { Button, ModalBase } from '@shared';
-import { TOutputPosition } from '@api/positions';
 
 interface PositionDeleteModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	position?: TOutputPosition;
-	onConfirm: () => Promise<void> | void;
+	onConfirm: () => void;
+	positionName: string | undefined;
 	isPending?: boolean;
 }
 
 export const PositionDeleteModal = ({
 	isOpen,
 	onClose,
-	position,
 	onConfirm,
+	positionName,
 	isPending = false,
 }: PositionDeleteModalProps) => {
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
-			<div className="p-6 w-full max-w-md">
-				<h2 className="text-xl font-semibold mb-4">Eliminar posición</h2>
-				<p className="text-sm text-gray-600">
-					¿Desea eliminar la posición <strong>{position?.name}</strong>?
+			<div className="p-4">
+				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
+					¿Está seguro que desea eliminar la posición{' '}
+					<span className="font-medium text-gray-800">
+						&lt;{positionName}&gt;
+					</span>
+					?
 				</p>
-				<div className="flex justify-end gap-3 mt-6">
-					<Button type="button" onClick={onClose} className="bg-gray-300 text-gray-700">
-						Cancelar
+
+				<div className="flex flex-row justify-center items-center gap-4 mt-6">
+					<Button
+						onClick={onConfirm}
+						disabled={isPending}
+						className="bg-[#d93843] hover:bg-red-600 text-white font-medium px-6 py-2 rounded-lg min-w-20 transition-all cursor-pointer disabled:bg-gray-400"
+						variant="unstyled"
+					>
+						{isPending ? '...' : 'Sí'}
 					</Button>
-					<Button type="button" onClick={onConfirm} className="bg-[#DC3545] text-white">
-						{isPending ? 'Eliminando...' : 'Eliminar'}
+					<Button
+						onClick={onClose}
+						disabled={isPending}
+						className="bg-[#6b7280] hover:bg-slate-600 text-white font-medium px-6 py-2 rounded-lg min-w-20 transition-all cursor-pointer"
+						variant="unstyled"
+					>
+						No
 					</Button>
 				</div>
 			</div>
