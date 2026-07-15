@@ -52,6 +52,11 @@ const MODULES: ModuleConfig[] = [
 				path: '/admin/degrees',
 				subject: 'degrees',
 			},
+			{
+				label: 'Cargos',
+        path: '/admin/positions',
+				subject: 'positions',
+			},
 		],
 	},
 	{
