@@ -19,4 +19,4 @@ export * from './shifts';
 export * from './teachers';
 export * from './users';
 export * from './buildings';
-
+export * from './audio-equipments';

@@ -5,6 +5,7 @@ import {
 	TClassroomSearch,
 	TCreateClassroom,
 	TUpdateClassroom,
+	TClassroomSchedule,
 } from './classrooms.types';
 
 export const classroomsApi = {
@@ -41,4 +42,12 @@ export const classroomsApi = {
 
 	deleteClassroom: (id: string) =>
 		api.delete<IResponse<TClassroom>>(`/classrooms/${id}`),
+
+	getClassroomAvailability: (id: string, periodId: string, dayOfWeek?: string) => {
+		const params = new URLSearchParams({ periodId });
+		if (dayOfWeek) params.set('dayOfWeek', dayOfWeek);
+		return api.get<IResponse<TClassroomSchedule>>(
+			`/classrooms/availability/${id}?${params.toString()}`
+		);
+	},
 };

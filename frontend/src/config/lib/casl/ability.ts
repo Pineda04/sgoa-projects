@@ -1,7 +1,4 @@
-import {
-	Ability,
-	AbilityBuilder,
-} from '@casl/ability';
+import { Ability, AbilityBuilder } from '@casl/ability';
 import { EUserRole } from '@shared/constants';
 import { createContext, useContext } from 'react';
 
@@ -9,7 +6,8 @@ export const AbilityContext = createContext<AppAbility>(new Ability());
 
 export const useAbility = () => {
 	const context = useContext(AbilityContext);
-	if (!context) throw new Error('useAbility must be used within a AbilityProvider');
+	if (!context)
+		throw new Error('useAbility must be used within a AbilityProvider');
 	return context;
 };
 
@@ -17,25 +15,19 @@ export type Actions = 'manage' | 'read' | 'create' | 'update' | 'delete';
 export type Subjects =
 	| 'all'
 	| 'activities'
-	| 'activityTypes'
-	| 'assignment-reports'
-	| 'brands'
 	| 'buildings'
 	| 'centers'
 	| 'classrooms'
-	| 'classroomTypes'
-	| 'contract-types'
 	| 'courses'
-	| 'courseClassrooms'
 	| 'degrees'
 	| 'departments'
 	| 'faculties'
 	| 'periods'
 	| 'positions'
 	| 'planifications'
-	| 'shifts'
-	| 'pcEquipments'
-	| 'audioEquipments'
+	| 'reports'
+	| 'pc-equipments'
+	| 'audio-equipments'
 	| 'users'
 	| 'user-roles'
 	| 'user-departments'
@@ -68,17 +60,24 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
 		can('manage', 'dashboard-authorities');
+		can('manage', 'users');
+		can('manage', 'user-roles');
+		can('manage', 'user-status');
+		can('manage', 'user-departments');
 		can('manage', 'courses');
 		can('manage', 'departments');
-		can('manage', 'pcEquipments');
+		can('manage', 'pc-equipments');
+		can('manage', 'audio-equipments');
 		can('manage', 'centers');
 		can('manage', 'buildings');
 		can('manage', 'classrooms');
-		can('manage', 'audioEquipments');
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
 		can('manage', 'airConditioners')
+		can('manage', 'periods');
+		can('read', 'reports');
+		can('read', 'planifications');
 	}
 
 	// ==================== RRHH ====================
@@ -87,26 +86,29 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
+		can('manage', 'user-departments');
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'buildings');
 		can('manage', 'classrooms');
 		can('manage', 'degrees');
-		can('manage', 'audioEquipments');
 		can('manage', 'faculties');
 		can('manage', 'positions');
 		can('manage', 'airConditioners')
+		can('manage', 'periods');
+		can('read', 'reports');
+		can('read', 'planifications');
 	}
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
 		can('manage', 'dashboard-coordinator');
+		can('manage', 'reports');
+		can('manage', 'planifications');
 		can('manage', 'users');
-		can('manage', 'user-departments');
-		can('manage', 'user-status');
-		can('manage', 'courses');
-		can('read', 'pcEquipments');
-		can('read', 'audioEquipments');
+		can('read', 'courses');
+		can('read', 'pc-equipments');
+		can('read', 'audio-equipments');
 		can('read', 'classrooms');
 		can('read', 'airConditioners');
 	}
@@ -114,6 +116,9 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
 		can('manage', 'dashboard-teacher');
+		can('read', 'courses');
+		can('read', 'reports');
+		can('read', 'planifications');
 		can('read', 'classrooms');
 	}
 

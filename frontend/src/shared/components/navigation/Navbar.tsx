@@ -52,6 +52,11 @@ const MODULES: ModuleConfig[] = [
 				path: '/admin/degrees',
 				subject: 'degrees',
 			},
+			{
+				label: 'Cargos',
+        path: '/admin/positions',
+				subject: 'positions',
+			},
 		],
 	},
 	{
@@ -84,7 +89,12 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Computadoras',
 				path: '/inventory/pc-equipments',
-				subject: 'pcEquipments',
+				subject: 'pc-equipments',
+			},
+			{
+				label: 'Audio',
+        path: '/inventory/audio-equipments',
+				subject: 'audio-equipments',
 			},
 			{
 				label: 'Aires Acondicionados',
@@ -271,8 +281,8 @@ export const Navbar = () => {
 									{mod.sections.length > 0 && (
 										<ChevronDownIcon
 											className={`size-3.5 transition-transform duration-200 ${openDropdownId === mod.id
-												? 'rotate-180'
-												: ''
+													? 'rotate-180'
+													: ''
 												}`}
 										/>
 									)}
@@ -304,8 +314,8 @@ export const Navbar = () => {
 															className={`w-1 h-1 rounded-full ${isSectionActive(
 																section.path
 															)
-																? 'bg-primary'
-																: 'bg-gray-300'
+																	? 'bg-primary'
+																	: 'bg-gray-300'
 																}`}
 														/>
 														{section.label}
@@ -375,8 +385,8 @@ export const Navbar = () => {
 										{mod.sections.length > 1 && (
 											<ChevronDownIcon
 												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${mobileExpandedId === mod.id
-													? 'rotate-180'
-													: ''
+														? 'rotate-180'
+														: ''
 													}`}
 											/>
 										)}

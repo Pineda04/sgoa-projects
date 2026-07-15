@@ -40,7 +40,7 @@ export function DataTable<T>({
 	emptyMessage = 'No hay datos disponibles',
 	onRowClick,
 	className = 'w-full',
-	showRowNumber = true,
+	showRowNumber = false,
 	rowClassName,
 }: IDataTableProps<T>) {
 	if (loading) {

@@ -11,6 +11,7 @@ import {
 	ModalBase,
 	Pagination,
 } from '@shared/components';
+import { useAbility } from '@config';
 
 interface UsersTableProps {
 	onNavigateToCreate?: () => void;
@@ -21,6 +22,10 @@ export const UsersTable = ({
 	onNavigateToCreate,
 	centerDepartmentId,
 }: UsersTableProps) => {
+	const ability = useAbility();
+	const canCreate = ability.can('create', 'users');
+	const canRead = ability.can('read', 'users');
+
 	const { setPage } = usePaginationParams();
 
 	const [searchTerm, setSearchTerm] = useState('');
@@ -99,20 +104,24 @@ export const UsersTable = ({
 			mobileLabel: 'Contrato',
 			hiddenOnMobile: true,
 		},
-		{
-			key: 'actions',
-			header: 'Acciones',
-			mobileLabel: 'Acciones',
-			render: (row: TOutputTeacherPosition) => (
-				<Button
-					onClick={() => handleSelectedUser(row)}
-					className="cursor-pointer"
-					variant="unstyled"
-				>
-					<EyeIcon className="size-5 text-[#1C64B4] hover:text-[#144C74]" />
-				</Button>
-			),
-		},
+		...(canRead
+			? [
+					{
+						key: 'actions' as const,
+						header: 'Acciones',
+						mobileLabel: 'Acciones',
+						render: (row: TOutputTeacherPosition) => (
+							<Button
+								onClick={() => handleSelectedUser(row)}
+								className="cursor-pointer"
+								variant="unstyled"
+							>
+								<EyeIcon className="size-5 text-[#1C64B4] hover:text-[#144C74]" />
+							</Button>
+						),
+					},
+				]
+			: []),
 	];
 
 	return (
@@ -177,14 +186,16 @@ export const UsersTable = ({
 						</div>
 					</div>
 					<div className="flex justify-center md:justify-end">
-						<Button
-							type="button"
-							className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-							onClick={onNavigateToCreate}
-						>
-							<Plus className="size-6" />
-							Nuevo usuario
-						</Button>
+						{canCreate && (
+							<Button
+								type="button"
+								className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+								onClick={onNavigateToCreate}
+							>
+								<Plus className="size-6" />
+								Nuevo usuario
+							</Button>
+						)}
 					</div>
 				</div>
 				{isError ? (

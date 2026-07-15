@@ -7,4 +7,6 @@ export const classroomsKeys = {
 	detail: (id: string) => [...classroomsKeys.details(), id] as const,
 	search: (searchTerm: string, page: number) =>
 		[...classroomsKeys.all, 'search', searchTerm, page] as const,
+	availability: (id: string, periodId: string, dayOfWeek?: string) =>
+		[...classroomsKeys.all, 'availability', id, periodId, dayOfWeek] as const,
 };
