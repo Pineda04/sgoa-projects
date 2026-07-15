@@ -55,6 +55,8 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
+					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
 				isLoading: false,
@@ -125,6 +127,8 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
+					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
 				isLoading: false,

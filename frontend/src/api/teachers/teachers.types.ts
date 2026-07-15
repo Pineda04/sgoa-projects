@@ -40,6 +40,11 @@ export type TOutputTeacher = {
 		id: string;
 		name: string;
 	}[];
+	roles: {
+		id: string;
+		name: string;
+		isSuperAdmin: boolean;
+	}[];
 	activeStatus: boolean;
 };
 

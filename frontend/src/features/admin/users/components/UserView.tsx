@@ -28,6 +28,7 @@ import {
 } from '@api/degrees';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useGetAllShifts } from '@api/shifts';
+import { useGetAllRoles } from '@api/roles';
 import { useMemo, useState } from 'react';
 import { userUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
@@ -219,6 +220,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 	const contractTypes = useGetAllContractTypes();
 	const categories = useGetAllTeacherCategories();
 	const shifts = useGetAllShifts();
+	const roles = useGetAllRoles();
 
 	const isLoading = [
 		undergrads,
@@ -226,7 +228,14 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		contractTypes,
 		categories,
 		shifts,
+		roles,
 	].some(q => q.isLoading);
+
+	// Solo el super admin puede modificar los roles de un usuario existente.
+	const canUpdateRoles = !!user?.isSuperAdmin;
+	const assignableRoles = (roles.data ?? []).filter(
+		role => !role.isSuperAdmin || user?.isSuperAdmin
+	);
 
 	const [isEdit, setIsEdit] = useState(false);
 
@@ -241,6 +250,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				shiftId: initialData.shiftId,
 				shiftStart: initialData.shiftStart,
 				shiftEnd: initialData.shiftEnd,
+				roles: initialData.roles.map(r => r.name),
 			}) as TUpdateUser,
 		[initialData]
 	);
@@ -292,6 +302,29 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				handleBlur: formik.handleBlur,
 				handleChange: formik.handleChange,
 				readOnly: !isEdit,
+			},
+			{
+				label: 'Roles de acceso',
+				name: 'roles',
+				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+				defaultValue: (formik.values.roles ?? []).map(name => ({
+					label: name,
+					value: name,
+				})),
+				options: assignableRoles.map(role => ({
+					label: role.name,
+					value: role.name,
+				})),
+				isMulti: true,
+				handleBlur: formik.handleBlur,
+				handleChange: newValue => {
+					const selected = newValue as MultiValue<TCustomSelectOption>;
+					formik.setFieldValue(
+						'roles',
+						selected.map(option => option.value)
+					);
+				},
+				readOnly: !isEdit || !canUpdateRoles,
 			},
 			{
 				label: 'Categoría',
@@ -492,6 +525,8 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 			shifts.data,
 			undergrads.data,
 			postgrads.data,
+			assignableRoles,
+			canUpdateRoles,
 			formik,
 			isEdit,
 			addUserTeacherUndergrad,

@@ -16,16 +16,15 @@ import { ApiOperation } from '@nestjs/swagger';
 import { CreateCenterDto } from '../dto/create-center.dto';
 import { UpdateCenterDto } from '../dto/update-center.dto';
 import { CentersService } from '../services/centers.service';
-import { EUserRole } from 'src/common/enums';
-import { Roles } from 'src/common/decorators';
+import { RequirePermission } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('centers')
-@Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
 export class CentersController {
   constructor(private readonly centersService: CentersService) {}
 
   @Post()
+  @RequirePermission('create', 'centers')
   @ResponseMessage('Centro creado exitosamente. Devuelve el centro creado.')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({
@@ -46,6 +45,7 @@ export class CentersController {
   }
 
   @Get()
+  @RequirePermission('read', 'centers')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar centros',
@@ -63,6 +63,7 @@ export class CentersController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'centers')
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener centro por ID',
@@ -77,6 +78,7 @@ export class CentersController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'centers')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Centro actualizado exitosamente. Devuelve el centro actualizado.',
@@ -102,6 +104,7 @@ export class CentersController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'centers')
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Eliminar centro',

@@ -10,25 +10,21 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiCommonResponses,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateBrandDto, UpdateBrandDto } from '../dto';
 import { BrandsService } from '../services/brands.service';
 
 @Controller('brands')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'pc-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Marca creada exitosamente.')
   @ApiBody({
@@ -45,6 +41,7 @@ export class BrandsController {
   }
 
   @Get()
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de marcas.')
   @ApiCommonResponses({
@@ -56,6 +53,7 @@ export class BrandsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Marca obtenida.')
   @ApiCommonResponses({
@@ -68,7 +66,7 @@ export class BrandsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Marca actualizada.')
   @ApiBody({
@@ -89,7 +87,7 @@ export class BrandsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Marca eliminada.')
   @ApiCommonResponses({

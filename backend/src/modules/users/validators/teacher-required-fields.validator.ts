@@ -4,7 +4,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import { TTeacher } from 'src/modules/teachers/types';
 
 @ValidatorConstraint({ name: 'TeacherFieldsRequiredForRole', async: false })
@@ -13,10 +13,14 @@ export class TeacherRequiredFieldsForRoleConstraint
   implements ValidatorConstraintInterface
 {
   validate(obj: any, args: ValidationArguments): Promise<boolean> | boolean {
-    const object = args.object as { role: EUserRole } & TTeacher;
+    const object = args.object as { role: string } & TTeacher;
 
-    if (![EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE].includes(object.role))
-      return true;
+    const teacherRoleNames: string[] = [
+      ROLE_NAMES.COORDINADOR_AREA,
+      ROLE_NAMES.DOCENTE,
+    ];
+
+    if (!teacherRoleNames.includes(object.role)) return true;
 
     return (
       !!object.undergradId &&
@@ -27,6 +31,6 @@ export class TeacherRequiredFieldsForRoleConstraint
   }
 
   defaultMessage(args?: ValidationArguments): string {
-    return `Los campos <undergradId, categoryId, contractTypeId, shiftId> son obligatorios si el rol es uno de los siguientes: ${EUserRole.COORDINADOR_AREA} y ${EUserRole.DOCENTE}.`;
+    return `Los campos <undergradId, categoryId, contractTypeId, shiftId> son obligatorios si el rol es uno de los siguientes: ${ROLE_NAMES.COORDINADOR_AREA} y ${ROLE_NAMES.DOCENTE}.`;
   }
 }

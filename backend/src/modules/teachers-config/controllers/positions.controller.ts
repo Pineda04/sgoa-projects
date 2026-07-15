@@ -13,17 +13,16 @@ import {
 import { CreatePositionDto } from '../dto/create-position.dto';
 import { UpdatePositionDto } from '../dto/update-position.dto';
 import { PositionsService } from '../services/positions.service';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { RequirePermission } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('positions')
-@Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}
 
   @Post()
+  @RequirePermission('create', 'positions')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Cargo creado exitosamente.')
   @ApiBody({
@@ -41,6 +40,7 @@ export class PositionsController {
   }
 
   @Get()
+  @RequirePermission('read', 'positions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de cargos obtenido correctamente.')
   @ApiCommonResponses({
@@ -53,6 +53,7 @@ export class PositionsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'positions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Cargo obtenido correctamente.')
   @ApiCommonResponses({
@@ -65,6 +66,7 @@ export class PositionsController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'positions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Cargo actualizado correctamente.')
   @ApiBody({
@@ -85,6 +87,7 @@ export class PositionsController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'positions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Cargo eliminado correctamente.')
   @ApiCommonResponses({

@@ -1,5 +1,9 @@
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
+import {
+  ApiCommonResponses,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import {
   Body,
   Controller,
@@ -11,24 +15,16 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { PcTypesService } from '../services/pc-types.service';
 import { CreatePcTypeDto, UpdatePcTypeDto } from '../dto';
 
 @Controller('pc-types')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class PcTypesController {
   constructor(private readonly pcTypesService: PcTypesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'pc-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tipo de PC creado exitosamente.')
   @ApiBody({
@@ -45,6 +41,7 @@ export class PcTypesController {
   }
 
   @Get()
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de PC obtenido correctamente.')
   @ApiCommonResponses({
@@ -57,6 +54,7 @@ export class PcTypesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC obtenido correctamente.')
   @ApiCommonResponses({
@@ -69,7 +67,7 @@ export class PcTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC actualizado correctamente.')
   @ApiBody({
@@ -90,7 +88,7 @@ export class PcTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC eliminado correctamente.')
   @ApiCommonResponses({

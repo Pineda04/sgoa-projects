@@ -14,10 +14,10 @@ import {
   ApiCommonResponses,
   ApiPagination,
   GetCurrentUser,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiBody } from '@nestjs/swagger';
 import { TeachersPostgradService } from '../services/teachers-postgrad.service';
@@ -26,19 +26,13 @@ import { QueryPaginationDto } from 'src/common/dto';
 import { TJwtPayload } from 'src/modules/auth/types';
 
 @Controller('teachers-postgrad')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.RRHH,
-  EUserRole.DIRECCION,
-  EUserRole.DOCENTE,
-  EUserRole.COORDINADOR_AREA,
-)
 export class TeachersPostgradController {
   constructor(
     private readonly teachersPostgradService: TeachersPostgradService,
   ) {}
 
   @Post()
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado la relación docente-postgrado.')
   @ApiBody({
@@ -57,7 +51,7 @@ export class TeachersPostgradController {
   ) {
     if (
       currentUser.roles.length === 1 &&
-      currentUser.roles.includes(EUserRole.DOCENTE) &&
+      currentUser.roles.includes(ROLE_NAMES.DOCENTE) &&
       currentUser.sub !== createTeachersPostgradDto.userId
     )
       throw new ForbiddenException(
@@ -68,6 +62,7 @@ export class TeachersPostgradController {
   }
 
   @Get()
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de relaciones docente-postgrado obtenidas correctamente.',
@@ -109,7 +104,6 @@ export class TeachersPostgradController {
   // }
 
   // @Patch(':id')
-  // @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   // @HttpCode(HttpStatus.OK)
   // @ResponseMessage('Relación docente-postgrado actualizada correctamente.')
   // @ApiBody({
@@ -132,6 +126,7 @@ export class TeachersPostgradController {
   // }
 
   @Delete('user/:userId/postgrad/:postgradId')
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Relación docente-postgrado eliminada correctamente.')
   @ApiCommonResponses({
@@ -148,7 +143,7 @@ export class TeachersPostgradController {
   ) {
     if (
       currentUser.roles.length === 1 &&
-      currentUser.roles.includes(EUserRole.DOCENTE) &&
+      currentUser.roles.includes(ROLE_NAMES.DOCENTE) &&
       currentUser.sub !== userId
     )
       throw new ForbiddenException(

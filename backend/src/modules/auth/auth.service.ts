@@ -84,6 +84,12 @@ export class AuthService {
             role: {
               select: {
                 name: true,
+                isSuperAdmin: true,
+                rolePermissions: {
+                  select: {
+                    permission: { select: { action: true, subject: true } },
+                  },
+                },
               },
             },
           },
@@ -99,14 +105,46 @@ export class AuthService {
 
     if (!passwordMatches) throw new ForbiddenException('¡Acceso denegado!');
 
+    const { roles, permissions, isSuperAdmin } = this.resolveAuthorization(
+      user.userRoles,
+    );
+
     const tokens = await this.getTokens(
       user.id,
       user.email ?? user.code,
-      user.userRoles.map((ur) => ur.role.name),
+      roles,
+      permissions,
+      isSuperAdmin,
     );
     await this.updateRtHash(user.id, tokens.refresh_token);
 
     return tokens;
+  }
+
+  private resolveAuthorization(
+    userRoles: {
+      role: {
+        name: string;
+        isSuperAdmin: boolean;
+        rolePermissions: { permission: { action: string; subject: string } }[];
+      };
+    }[],
+  ) {
+    const roles = userRoles.map((ur) => ur.role.name);
+    const isSuperAdmin = userRoles.some((ur) => ur.role.isSuperAdmin);
+    const permissions = isSuperAdmin
+      ? []
+      : [
+          ...new Set(
+            userRoles.flatMap((ur) =>
+              ur.role.rolePermissions.map(
+                (rp) => `${rp.permission.action}:${rp.permission.subject}`,
+              ),
+            ),
+          ),
+        ];
+
+    return { roles, permissions, isSuperAdmin };
   }
 
   async logout(userId: string) {
@@ -235,6 +273,12 @@ export class AuthService {
             role: {
               select: {
                 name: true,
+                isSuperAdmin: true,
+                rolePermissions: {
+                  select: {
+                    permission: { select: { action: true, subject: true } },
+                  },
+                },
               },
             },
           },
@@ -249,10 +293,16 @@ export class AuthService {
 
     if (!rtMatches) throw new ForbiddenException('¡Acceso denegado!');
 
+    const { roles, permissions, isSuperAdmin } = this.resolveAuthorization(
+      user.userRoles,
+    );
+
     const tokens = await this.getTokens(
       user.id,
       user.email ?? user.code,
-      user.userRoles.map((userRole) => userRole.role.name),
+      roles,
+      permissions,
+      isSuperAdmin,
     );
     await this.updateRtHash(user.id, tokens.refresh_token);
 
@@ -281,11 +331,13 @@ export class AuthService {
     userId: string,
     email: string,
     roles: string[],
+    permissions: string[],
+    isSuperAdmin: boolean,
   ): Promise<TTokens> {
     const [at, rt] = await Promise.all([
       // access token
       this.jwtService.signAsync(
-        { sub: userId, email, roles },
+        { sub: userId, email, roles, permissions, isSuperAdmin },
         { secret: jwtConstants.atSecret, expiresIn: 60 * 15 }, // 15 minutes => '15m'
       ),
       // refresh token

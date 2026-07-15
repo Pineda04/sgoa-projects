@@ -10,25 +10,21 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiCommonResponses,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateMonitorTypeDto, UpdateMonitorTypeDto } from '../dto';
 import { MonitorTypesService } from '../services/monitor-types.service';
 
 @Controller('monitor-types')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class MonitorTypesController {
   constructor(private readonly monitorTypesService: MonitorTypesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'pc-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tipo de monitor creado exitosamente.')
   @ApiBody({
@@ -45,6 +41,7 @@ export class MonitorTypesController {
   }
 
   @Get()
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de monitor.')
   @ApiCommonResponses({
@@ -56,6 +53,7 @@ export class MonitorTypesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor obtenido.')
   @ApiCommonResponses({
@@ -68,7 +66,7 @@ export class MonitorTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor actualizado.')
   @ApiBody({
@@ -89,7 +87,7 @@ export class MonitorTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor eliminado.')
   @ApiCommonResponses({

@@ -1,6 +1,6 @@
 import { TCreateUser } from '@api/users';
 import { resetPasswordSchema } from '@features/auth';
-import { EPosition, EUserRole } from '@shared/constants';
+import { EPosition, ROLE_NAMES } from '@shared/constants';
 import { z } from 'zod';
 
 export const userCreateSchema = z
@@ -41,9 +41,7 @@ export const userCreateSchema = z
 			.or(z.literal(''))
 			.transform(val => (val === '' ? undefined : val)),
 		positionName: z.string().optional().nullable().or(z.literal('')),
-		roles: z
-			.array(z.enum(Object.values(EUserRole) as [string, ...string[]]))
-			.optional(),
+		roles: z.array(z.string()).optional(),
 
 		extraFieldsEnabled: z.boolean(),
 	})
@@ -67,7 +65,7 @@ export const userCreateSchema = z
 
 			if (data.roles && data.roles.length > 0 && data.positionName) {
 				if (
-					data.roles.includes(EUserRole.COORDINADOR_AREA) &&
+					data.roles.includes(ROLE_NAMES.COORDINADOR_AREA) &&
 					data.positionName !== EPosition.DEPARTMENT_HEAD
 				) {
 					ctx.addIssue({
@@ -80,7 +78,7 @@ export const userCreateSchema = z
 
 				if (
 					data.positionName === EPosition.DEPARTMENT_HEAD &&
-					!data.roles.includes(EUserRole.COORDINADOR_AREA)
+					!data.roles.includes(ROLE_NAMES.COORDINADOR_AREA)
 				) {
 					ctx.addIssue({
 						code: 'custom',

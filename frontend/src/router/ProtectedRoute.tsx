@@ -7,13 +7,18 @@ import { Loading } from '@shared/components';
 import type { Actions, Subjects } from '@config/lib/casl/ability';
 
 interface ProtectedRouteProps {
-	action: Actions;
-	subject: Subjects;
+	action?: Actions;
+	subject?: Subjects;
+	superAdminOnly?: boolean;
 }
 
-export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+	action,
+	subject,
+	superAdminOnly,
+}: ProtectedRouteProps) => {
 	const {
-		authState: { isAuthenticated, isLoading },
+		authState: { isAuthenticated, isLoading, user },
 	} = useContext(AuthContext);
 	const ability = useAbility();
 
@@ -21,7 +26,11 @@ export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
 
 	if (!isAuthenticated) return <Navigate to="/auth/login/" />;
 
-	if (!ability.can(action, subject)) return <Navigate to="/home" replace />;
+	if (superAdminOnly && !user?.isSuperAdmin)
+		return <Navigate to="/home" replace />;
+
+	if (action && subject && !ability.can(action, subject))
+		return <Navigate to="/home" replace />;
 
 	return <AppLayout />;
 };

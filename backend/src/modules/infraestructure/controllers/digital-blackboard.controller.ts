@@ -1,33 +1,20 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { DigitalBlackboardService } from '../services/digital-blackboard.service';
 
 @Controller('digital-blackboards')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class DigitalBlackboardController {
   constructor(
     private readonly digitalBlackboardService: DigitalBlackboardService,
   ) {}
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pizarras digitales.')
   @ApiCommonResponses({
@@ -39,6 +26,7 @@ export class DigitalBlackboardController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado la pizarra digital.')
   @ApiCommonResponses({

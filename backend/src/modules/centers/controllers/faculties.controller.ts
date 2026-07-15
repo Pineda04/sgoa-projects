@@ -15,23 +15,17 @@ import { UpdateFacultyDto } from '../dto/update-faculty.dto';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   ApiCommonResponses,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('faculties')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class FacultiesController {
   constructor(private readonly facultiesService: FacultiesService) {}
 
   @Post()
+  @RequirePermission('create', 'faculties')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una facultad.')
   @ApiBody({ type: CreateFacultyDto })
@@ -46,6 +40,7 @@ export class FacultiesController {
   }
 
   @Get()
+  @RequirePermission('read', 'faculties')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de facultades.')
   @ApiCommonResponses({
@@ -57,6 +52,7 @@ export class FacultiesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'faculties')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de la facultad.')
   @ApiCommonResponses({
@@ -69,6 +65,7 @@ export class FacultiesController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'faculties')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la facultad.')
   @ApiBody({ type: UpdateFacultyDto })
@@ -86,6 +83,7 @@ export class FacultiesController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'faculties')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la facultad.')
   @ApiCommonResponses({

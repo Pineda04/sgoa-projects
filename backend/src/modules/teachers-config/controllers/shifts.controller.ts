@@ -10,21 +10,22 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ResponseMessage, ApiCommonResponses } from 'src/common/decorators';
+import {
+  ResponseMessage,
+  ApiCommonResponses,
+  RequirePermission,
+} from 'src/common/decorators';
 import { CreateShiftDto } from '../dto/create-shift.dto';
 import { UpdateShiftDto } from '../dto/update-shift.dto';
 import { ShiftsService } from '../services/shifts.service';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('shifts')
-@Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
 export class ShiftsController {
   constructor(private readonly shiftsService: ShiftsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un turno.')
   @ApiBody({ type: CreateShiftDto, description: 'Datos para crear un turno.' })
@@ -39,13 +40,7 @@ export class ShiftsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de turnos.')
   @ApiCommonResponses({
@@ -60,6 +55,7 @@ export class ShiftsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de un turno.')
   @ApiCommonResponses({
@@ -74,7 +70,7 @@ export class ShiftsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('update', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el turno.')
   @ApiBody({
@@ -96,7 +92,7 @@ export class ShiftsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el turno.')
   @ApiCommonResponses({

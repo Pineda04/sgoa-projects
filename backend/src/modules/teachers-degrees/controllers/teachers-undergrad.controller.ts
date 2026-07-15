@@ -14,10 +14,10 @@ import {
   ApiCommonResponses,
   ApiPagination,
   GetCurrentUser,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateTeacherUndergradDto } from '../dto';
@@ -26,19 +26,13 @@ import { QueryPaginationDto } from 'src/common/dto';
 import { TJwtPayload } from 'src/modules/auth/types';
 
 @Controller('teachers-undergrad')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.RRHH,
-  EUserRole.DIRECCION,
-  EUserRole.DOCENTE,
-  EUserRole.COORDINADOR_AREA,
-)
 export class TeachersUndergradController {
   constructor(
     private readonly teachersUndergradService: TeachersUndergradService,
   ) {}
 
   @Post()
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado la relación docente-pregrado.')
   @ApiBody({
@@ -57,7 +51,7 @@ export class TeachersUndergradController {
   ) {
     if (
       currentUser.roles.length === 1 &&
-      currentUser.roles.includes(EUserRole.DOCENTE) &&
+      currentUser.roles.includes(ROLE_NAMES.DOCENTE) &&
       currentUser.sub !== createTeachersUndergradDto.userId
     )
       throw new ForbiddenException(
@@ -68,6 +62,7 @@ export class TeachersUndergradController {
   }
 
   @Get()
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de relaciones docente-pregrado obtenidas correctamente.',
@@ -109,7 +104,6 @@ export class TeachersUndergradController {
   // }
   //
   // @Patch(':id')
-  // @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   // @HttpCode(HttpStatus.OK)
   // @ResponseMessage('Relación docente-pregrado actualizada correctamente.')
   // @ApiBody({
@@ -131,6 +125,7 @@ export class TeachersUndergradController {
   // }
 
   @Delete('user/:userId/undergrad/:undergradId')
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Relación docente-pregrado eliminada correctamente.')
   @ApiCommonResponses({
@@ -147,7 +142,7 @@ export class TeachersUndergradController {
   ) {
     if (
       currentUser.roles.length === 1 &&
-      currentUser.roles.includes(EUserRole.DOCENTE) &&
+      currentUser.roles.includes(ROLE_NAMES.DOCENTE) &&
       currentUser.sub !== userId
     )
       throw new ForbiddenException(

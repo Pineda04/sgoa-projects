@@ -10,25 +10,21 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiCommonResponses,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateMonitorSizeDto, UpdateMonitorSizeDto } from '../dto';
 import { MonitorSizesService } from '../services/monitor-sizes.service';
 
 @Controller('monitor-sizes')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class MonitorSizesController {
   constructor(private readonly monitorSizesService: MonitorSizesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'pc-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tamaño de monitor creado exitosamente.')
   @ApiBody({
@@ -45,6 +41,7 @@ export class MonitorSizesController {
   }
 
   @Get()
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tamaños de monitor.')
   @ApiCommonResponses({
@@ -56,6 +53,7 @@ export class MonitorSizesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor obtenido.')
   @ApiCommonResponses({
@@ -68,7 +66,7 @@ export class MonitorSizesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor actualizado.')
   @ApiBody({
@@ -89,7 +87,7 @@ export class MonitorSizesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor eliminado.')
   @ApiCommonResponses({

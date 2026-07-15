@@ -10,27 +10,23 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiCommonResponses,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { AirConditionersService } from '../services/air-conditioners.service';
 import { CreateAirConditionerDto, UpdateAirConditionerDto } from '../dto';
 
 @Controller('air-conditioners')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class AirConditionersController {
   constructor(
     private readonly airConditionersService: AirConditionersService,
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'classrooms')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un aire acondicionado.')
   @ApiBody({
@@ -47,6 +43,7 @@ export class AirConditionersController {
   }
 
   @Get()
+  @RequirePermission('read', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aires acondicionados.')
   @ApiCommonResponses({
@@ -58,6 +55,7 @@ export class AirConditionersController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado obtenido.')
   @ApiCommonResponses({
@@ -70,7 +68,7 @@ export class AirConditionersController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado actualizado.')
   @ApiBody({
@@ -91,7 +89,7 @@ export class AirConditionersController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado eliminado.')
   @ApiCommonResponses({

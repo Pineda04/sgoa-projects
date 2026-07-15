@@ -16,11 +16,10 @@ import { multerConfig } from '../configs/multer.config';
 import { CloudinaryService } from '../services/cloudinary.service';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { EUserRole } from 'src/common/enums';
-import { Roles } from 'src/common/decorators';
+import { SuperAdminOnly } from 'src/common/decorators';
 
 @Controller('cloudinary')
-@Roles(EUserRole.ADMIN)
+@SuperAdminOnly()
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 

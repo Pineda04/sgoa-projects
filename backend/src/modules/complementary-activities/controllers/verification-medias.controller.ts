@@ -14,13 +14,12 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import {
-  Roles,
+  RequirePermission,
   ResponseMessage,
   ApiPagination,
   GetCurrentUserId,
   ApiCommonResponses,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   CreateVerificationMediaDto,
@@ -33,13 +32,6 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/modules/cloudinary/configs/multer.config';
 
 @Controller('verification-medias')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-)
 export class VerificationMediasController {
   constructor(
     private readonly verificationMediasService: VerificationMediasService,
@@ -47,6 +39,7 @@ export class VerificationMediasController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('files', 5, multerConfig))
+  @RequirePermission('create', 'activities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un medio de verificación.')
   @ApiBody({
@@ -95,7 +88,7 @@ export class VerificationMediasController {
   }
 
   @Get()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de actividades.')
   @ApiPagination({
@@ -111,6 +104,7 @@ export class VerificationMediasController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información del medio de verificación.')
   @ApiParam({
@@ -129,6 +123,7 @@ export class VerificationMediasController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el medio de verificación.')
   @ApiParam({
@@ -156,13 +151,7 @@ export class VerificationMediasController {
 
   @Patch('files/:complementaryActivityId')
   @UseInterceptors(FilesInterceptor('files', 5, multerConfig))
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Se ha actualizado un medio de verificación con archivos adjuntos opcionales.',
@@ -200,7 +189,7 @@ export class VerificationMediasController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado un medio de verificación.')
   @ApiParam({
@@ -219,7 +208,7 @@ export class VerificationMediasController {
   }
 
   @Delete('file/:id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado un archivo de los medios de verificación.')
   @ApiParam({
@@ -238,6 +227,7 @@ export class VerificationMediasController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Se ha eliminado un medio de verificación (usuario autenticado).',
@@ -262,6 +252,7 @@ export class VerificationMediasController {
   }
 
   @Delete('file/personal/:id')
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Se ha eliminado un archivo de los medios de verificación (usuario autenticado).',

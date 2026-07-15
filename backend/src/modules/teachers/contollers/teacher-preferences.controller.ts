@@ -12,11 +12,10 @@ import {
 import {
   ApiPagination,
   GetCurrentUserId,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ApiBody } from '@nestjs/swagger';
@@ -30,7 +29,7 @@ export class TeacherPreferencesController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('')
   @ApiBody({
@@ -65,12 +64,7 @@ export class TeacherPreferencesController {
   // }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('')
   @ApiPagination({
@@ -86,12 +80,7 @@ export class TeacherPreferencesController {
   }
 
   @Get('user/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('')
   @ApiCommonResponses({
@@ -114,12 +103,7 @@ export class TeacherPreferencesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('')
   @ApiCommonResponses({
@@ -131,7 +115,6 @@ export class TeacherPreferencesController {
   }
 
   // @Patch(':id')
-  // @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
   // @HttpCode(HttpStatus.OK)
   // @ResponseMessage('')
   // @ApiBody({
@@ -153,7 +136,7 @@ export class TeacherPreferencesController {
   // }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('')
   @ApiCommonResponses({

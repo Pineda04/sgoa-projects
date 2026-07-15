@@ -7,7 +7,7 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes, degreesRoutes } from '@features/admin';
+import { departmentsRoutes, degreesRoutes, rolesRoutes } from '@features/admin';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
@@ -120,6 +120,12 @@ const router = createBrowserRouter(
 			path: 'admin/degrees/*',
 			element: <ProtectedRoute action="read" subject="degrees" />,
 			children: degreesRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/roles/*',
+			element: <ProtectedRoute superAdminOnly />,
+			children: rolesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

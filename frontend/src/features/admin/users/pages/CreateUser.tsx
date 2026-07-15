@@ -4,6 +4,7 @@ import { useGetAllShifts } from '@api/shifts';
 import { useGetAllTeacherCategories } from '@api/teachers';
 import { TCreateUser, useCreateUser } from '@api/users';
 import { useAbility } from '@config';
+import { useAuth } from '@config/providers';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { initialValuesUser, userCreateSchema } from '../schemas';
@@ -14,6 +15,7 @@ import { SelectAccessRoles, SelectCenterDepartments } from '../components';
 
 export const CreateUser = () => {
 	const ability = useAbility();
+	const { authState } = useAuth();
 	const undergrads = useGetAllUndergrads();
 	const postgrads = useGetAllPostgrads();
 	const contractTypes = useGetAllContractTypes();
@@ -31,7 +33,9 @@ export const CreateUser = () => {
 	const { mutateAsync: addUserAsync } = useCreateUser();
 	const navigate = useNavigate();
 
-	const canManageRoles = ability.can('manage', 'user-roles');
+	// Solo el super admin puede elegir el rol de un usuario nuevo; los demás
+	// creadores siempre obtienen el rol por defecto (DOCENTE) en el backend.
+	const canManageRoles = !!authState.user?.isSuperAdmin;
 	const canManageDepartments = ability.can('manage', 'user-departments');
 
 	const {

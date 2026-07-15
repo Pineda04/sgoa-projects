@@ -10,21 +10,22 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ResponseMessage, ApiCommonResponses } from 'src/common/decorators';
+import {
+  ResponseMessage,
+  ApiCommonResponses,
+  RequirePermission,
+} from 'src/common/decorators';
 import { CreateContractTypeDto } from '../dto/create-contract-type.dto';
 import { UpdateContractTypeDto } from '../dto/update-contract-type.dto';
 import { ContractTypesService } from '../services/contract-types.service';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('contract-types')
-@Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
 export class ContractTypesController {
   constructor(private readonly contractTypesService: ContractTypesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de contrato.')
   @ApiBody({
@@ -42,13 +43,7 @@ export class ContractTypesController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de contrato obtenido correctamente.')
   @ApiCommonResponses({
@@ -69,6 +64,7 @@ export class ContractTypesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de contrato obtenido correctamente.')
   @ApiCommonResponses({
@@ -83,7 +79,7 @@ export class ContractTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('update', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de contrato.')
   @ApiBody({
@@ -107,7 +103,7 @@ export class ContractTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el tipo de contrato.')
   @ApiCommonResponses({

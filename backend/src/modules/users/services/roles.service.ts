@@ -1,13 +1,14 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
+import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TRole } from '../types';
-import { EUserRole } from 'src/common/enums';
+import { TPermission, TRole, TRoleWithPermissions } from '../types';
 
 @Injectable()
 export class RolesService {
@@ -26,13 +27,10 @@ export class RolesService {
   async findAll(): Promise<TRole[]> {
     const roles = await this.prisma.role.findMany();
 
-    // if (roles.length === 0)
-    //   throw new NotFoundException('No se encontraron datos.'); // tambien se puede devolver un 200 como consulta exitosa pero con data []
-
     return roles;
   }
 
-  async findManyByNames(names: EUserRole[]): Promise<TRole[]> {
+  async findManyByNames(names: string[]): Promise<TRole[]> {
     const roles = await this.prisma.role.findMany({
       where: { name: { in: names } },
     });
@@ -55,12 +53,26 @@ export class RolesService {
     if (!role)
       throw new NotFoundException(`El rol con id <${id}> no fue encontrado.`);
 
-    // throw new HttpException(
-    //   `El rol con id <${id}> no fue encontrado.`,
-    //   HttpStatus.NOT_FOUND,
-    // );
-
     return role;
+  }
+
+  async findOneWithPermissions(id: string): Promise<TRoleWithPermissions> {
+    const role = await this.prisma.role.findUnique({
+      where: { id },
+      include: {
+        rolePermissions: { include: { permission: true } },
+      },
+    });
+
+    if (!role)
+      throw new NotFoundException(`El rol con id <${id}> no fue encontrado.`);
+
+    const { rolePermissions, ...roleData } = role;
+
+    return {
+      ...roleData,
+      permissions: rolePermissions.map((rp) => rp.permission),
+    };
   }
 
   async findOneByName(name: string): Promise<TRole> {
@@ -74,11 +86,6 @@ export class RolesService {
       throw new NotFoundException(
         `El rol con nombre <${name}> no fue encontrado.`,
       );
-
-    // throw new HttpException(
-    //   `El rol con id <${id}> no fue encontrado.`,
-    //   HttpStatus.NOT_FOUND,
-    // );
 
     return role;
   }
@@ -96,7 +103,49 @@ export class RolesService {
     return roleUpdate;
   }
 
+  async findAllPermissions(): Promise<TPermission[]> {
+    return this.prisma.permission.findMany();
+  }
+
+  async updatePermissions(
+    roleId: string,
+    { permissionIds }: UpdateRolePermissionsDto,
+  ): Promise<TRole> {
+    const role = await this.findOne(roleId);
+
+    if (role.isSuperAdmin)
+      throw new ForbiddenException(
+        'El rol de super administrador no gestiona permisos mediante la matriz: su acceso es total por definición.',
+      );
+
+    await this.prisma.$transaction([
+      this.prisma.rolePermission.deleteMany({ where: { roleId } }),
+      this.prisma.rolePermission.createMany({
+        data: permissionIds.map((permissionId) => ({ roleId, permissionId })),
+        skipDuplicates: true,
+      }),
+    ]);
+
+    return role;
+  }
+
   async remove(id: string): Promise<TRole> {
+    const role = await this.findOne(id);
+
+    if (role.isSuperAdmin)
+      throw new ForbiddenException(
+        'El rol de super administrador es protegido y no puede eliminarse.',
+      );
+
+    const assignedUsersCount = await this.prisma.userRole.count({
+      where: { roleId: id },
+    });
+
+    if (assignedUsersCount > 0)
+      throw new BadRequestException(
+        `No se puede eliminar el rol <${role.name}> porque tiene ${assignedUsersCount} usuario(s) asignado(s).`,
+      );
+
     const roleDelete = await this.prisma.role.delete({
       where: {
         id,

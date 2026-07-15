@@ -1,7 +1,0 @@
-export enum EUserRole {
-  DIRECCION = 'DIRECCION',
-  ADMIN = 'ADMIN',
-  COORDINADOR_AREA = 'COORDINADOR_AREA',
-  DOCENTE = 'DOCENTE',
-  RRHH = 'RRHH',
-}

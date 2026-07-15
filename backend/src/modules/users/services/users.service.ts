@@ -12,7 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { TUser } from '../types';
 import { RolesService } from './roles.service';
 import * as argon from 'argon2';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import {
   generatePassword,
   hourToDateUTC,
@@ -55,19 +55,22 @@ export class UsersService {
     createUserDto: CreateUserDto,
     currentUser: TJwtPayload,
   ) {
-    const { sub: userId, roles } = currentUser;
+    const { roles } = currentUser;
+
+    const teacherRoleNames: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
 
     // Verifica si el usuario no tiene ninguno de los roles DOCENTE o COORDINADOR_AREA, y en ese caso crea el usuario.
     if (
       createUserDto.roles.length !== 0 &&
-      !createUserDto.roles.some((role) =>
-        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(role),
-      )
+      !createUserDto.roles.some((role) => teacherRoleNames.includes(role))
     )
       return await this.create(createUserDto);
 
     // Ya existe el decorador... validacion extra
-    if (roles.length === 1 && roles.includes(EUserRole.DOCENTE))
+    if (roles.length === 1 && roles.includes(ROLE_NAMES.DOCENTE))
       throw new ForbiddenException(
         'Los docentes no pueden asignar un departamento.',
       );
@@ -97,12 +100,12 @@ export class UsersService {
       EPosition.NONE,
     );
 
-    if (roles.includes(EUserRole.DOCENTE) && createUserDto.positionId)
+    if (roles.includes(ROLE_NAMES.DOCENTE) && createUserDto.positionId)
       throw new ForbiddenException('Los docentes no pueden asignar un cargo.');
 
     if (
-      roles.includes(EUserRole.COORDINADOR_AREA) &&
-      !roles.includes(EUserRole.ADMIN) &&
+      roles.includes(ROLE_NAMES.COORDINADOR_AREA) &&
+      !currentUser.isSuperAdmin &&
       createUserDto.positionId !== postionNone.id
     ) {
       createUserDto.positionId = postionNone.id;
@@ -137,11 +140,33 @@ export class UsersService {
     return await this.create(createUserDto);
   }
 
+  normalizeRolesForCreate(
+    roleNames: string[],
+    currentUser: TJwtPayload,
+  ): string[] {
+    if (currentUser.isSuperAdmin) return roleNames;
+
+    return [ROLE_NAMES.DOCENTE];
+  }
+
+  // Solo el super admin puede modificar los roles de un usuario existente.
+  assertCanChangeRoles(
+    roleNames: string[] | undefined,
+    currentUser: TJwtPayload,
+  ) {
+    if (roleNames === undefined) return;
+    if (currentUser.isSuperAdmin) return;
+
+    throw new ForbiddenException(
+      'Solo un super administrador puede modificar los roles de un usuario.',
+    );
+  }
+
   async create(createUserDto: CreateUserDto) {
     // Rol DOCENTE por defecto, no se coloca en el dto, ya que al actualizarlo...
     // ...toma el que este por defecto
     if (createUserDto.roles.length === 0)
-      createUserDto.roles.push(EUserRole.DOCENTE);
+      createUserDto.roles.push(ROLE_NAMES.DOCENTE);
 
     let isTempPass = false;
 
@@ -199,10 +224,13 @@ export class UsersService {
       },
     };
 
+    const teacherRoleNamesForCreate: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
+
     const hasTeacherRole = roleEntities.some((role) =>
-      [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(
-        role.name as EUserRole,
-      ),
+      teacherRoleNamesForCreate.includes(role.name),
     );
 
     // Crear aca toda la relacion, por si ocurre un problema...

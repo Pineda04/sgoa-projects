@@ -12,27 +12,19 @@ import {
 import { CreatePostgradDto } from '../dto/create-postgrad.dto';
 import { UpdatePostgradDto } from '../dto/update-postgrad.dto';
 import { PostgradsService } from '../services/postgrads.service';
-import { EUserRole } from 'src/common/enums';
 import {
   ApiCommonResponses,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('postgrads')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.RRHH,
-  EUserRole.DIRECCION,
-  EUserRole.DOCENTE,
-  EUserRole.COORDINADOR_AREA,
-)
 export class PostgradsController {
   constructor(private readonly postgradsService: PostgradsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('create', 'degrees')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un postgrado.')
   @ApiCommonResponses({
@@ -46,6 +38,7 @@ export class PostgradsController {
   }
 
   @Get()
+  @RequirePermission('read', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de postgrados obtenidos correctamente.')
   // @ApiPagination({
@@ -65,6 +58,7 @@ export class PostgradsController {
   }
 
   @Get('array')
+  @RequirePermission('read', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de postgrados en array.')
   findAllArray() {
@@ -72,6 +66,7 @@ export class PostgradsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Postgrado obtenido correctamente.')
   @ApiCommonResponses({
@@ -86,7 +81,7 @@ export class PostgradsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('update', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Postgrado actualizado correctamente.')
   @ApiCommonResponses({
@@ -104,7 +99,7 @@ export class PostgradsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('delete', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Postgrado eliminado correctamente.')
   @ApiCommonResponses({

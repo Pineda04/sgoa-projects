@@ -1,5 +1,4 @@
 import { Ability, AbilityBuilder } from '@casl/ability';
-import { EUserRole } from '@shared/constants';
 import { createContext, useContext } from 'react';
 
 export const AbilityContext = createContext<AppAbility>(new Ability());
@@ -29,7 +28,6 @@ export type Subjects =
 	| 'pc-equipments'
 	| 'audio-equipments'
 	| 'users'
-	| 'user-roles'
 	| 'user-departments'
 	| 'user-status'
 	| 'home'
@@ -41,81 +39,29 @@ export type Subjects =
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
-export function defineAbilityFor(roles: string[]): AppAbility {
+// Permisos ya no se hardcodean por nombre de rol: el backend resuelve, por cada
+// usuario, el set de permisos "action:subject" (o el flag isSuperAdmin) y los
+// entrega en el JWT. Este catálogo de Subjects/Actions se mantiene cerrado y
+// debe sincronizarse manualmente con backend/src/common/constants/permissions.constant.ts.
+export function defineAbilityFor(
+	permissions: string[],
+	isSuperAdmin: boolean
+): AppAbility {
 	const { can, cannot, build } = new AbilityBuilder<AppAbility>(Ability);
 
-	if (!roles || roles.length === 0) {
+	if (isSuperAdmin) {
+		can('manage', 'all');
+		return build();
+	}
+
+	if (!permissions || permissions.length === 0) {
 		cannot('manage', 'all');
 		return build();
 	}
 
-	if (roles.includes(EUserRole.ADMIN)) {
-		can('manage', 'all');
-		cannot('read', 'dashboard-coordinator');
-		cannot('read', 'dashboard-teacher');
-		return build();
-	}
-
-	// ================== DIRECCION ==================
-	if (roles.includes(EUserRole.DIRECCION)) {
-		can('manage', 'dashboard-authorities');
-		can('manage', 'users');
-		can('manage', 'user-roles');
-		can('manage', 'user-status');
-		can('manage', 'user-departments');
-		can('manage', 'courses');
-		can('manage', 'departments');
-		can('manage', 'pc-equipments');
-		can('manage', 'audio-equipments');
-		can('manage', 'centers');
-		can('manage', 'buildings');
-		can('manage', 'classrooms');
-		can('manage', 'degrees');
-		can('manage', 'faculties');
-		can('manage', 'positions');
-		can('manage', 'periods');
-		can('read', 'reports');
-		can('read', 'planifications');
-	}
-
-	// ==================== RRHH ====================
-	if (roles.includes(EUserRole.RRHH)) {
-		can('manage', 'dashboard-authorities');
-		can('manage', 'users');
-		can('manage', 'user-roles');
-		can('manage', 'user-status');
-		can('manage', 'user-departments');
-		can('manage', 'courses');
-		can('manage', 'departments');
-		can('manage', 'buildings');
-		can('manage', 'classrooms');
-		can('manage', 'degrees');
-		can('manage', 'faculties');
-		can('manage', 'positions');
-		can('manage', 'periods');
-		can('read', 'reports');
-		can('read', 'planifications');
-	}
-
-	// ============== COORDINADOR_AREA ==============
-	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('manage', 'dashboard-coordinator');
-		can('manage', 'reports');
-		can('manage', 'planifications');
-		can('manage', 'users');
-		can('read', 'courses');
-		can('read', 'pc-equipments');
-		can('read', 'audio-equipments');
-		can('read', 'classrooms');
-	}
-
-	// =================== DOCENTE ==================
-	if (roles.includes(EUserRole.DOCENTE)) {
-		can('manage', 'dashboard-teacher');
-		can('read', 'courses');
-		can('read', 'reports');
-		can('read', 'planifications');
-		can('read', 'classrooms');
+	for (const entry of permissions) {
+		const [action, subject] = entry.split(':') as [Actions, Subjects];
+		if (action && subject) can(action, subject);
 	}
 
 	return build();
