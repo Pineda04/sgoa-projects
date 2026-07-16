@@ -96,6 +96,11 @@ const MODULES: ModuleConfig[] = [
         path: '/inventory/audio-equipments',
 				subject: 'audio-equipments',
 			},
+			{
+				label: 'Aires Acondicionados',
+				path: '/inventory/air-conditioners',
+				subject: 'airConditioners'
+			}
 		],
 	},
 ];

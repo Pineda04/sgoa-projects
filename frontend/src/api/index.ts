@@ -1,4 +1,5 @@
 export * from './activities';
+export * from './air-conditioners';
 export * from './assignment-reports';
 export * from './auth';
 export * from './brands';

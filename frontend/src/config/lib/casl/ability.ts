@@ -37,7 +37,8 @@ export type Subjects =
 	| 'profile'
 	| 'dashboard-authorities'
 	| 'dashboard-coordinator'
-	| 'dashboard-teacher';
+	| 'dashboard-teacher'
+	| 'airConditioners';
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
@@ -73,6 +74,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
+		can('manage', 'airConditioners');
 		can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
@@ -92,6 +94,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
+		can('manage', 'airConditioners');
 		can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
@@ -107,6 +110,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'pc-equipments');
 		can('read', 'audio-equipments');
 		can('read', 'classrooms');
+		can('read', 'airConditioners');
 	}
 
 	// =================== DOCENTE ==================

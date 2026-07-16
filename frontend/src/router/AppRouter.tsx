@@ -26,6 +26,7 @@ import {
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
 import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
+import { airConditionersRoutes } from '@features/inventory';
 
 
 const router = createBrowserRouter(
@@ -146,7 +147,7 @@ const router = createBrowserRouter(
 			children: classroomsRoutes,
 			errorElement: <div>404</div>,
 		},
-    {
+		{
 			path: 'inventory/pc-equipments/*',
 			element: <ProtectedRoute action="read" subject="pc-equipments" />,
 			children: pcEquipmentsRoutes,
@@ -157,6 +158,12 @@ const router = createBrowserRouter(
 			element: <ProtectedRoute action="read" subject="audio-equipments" />,
 			children: audioEquipmentsRoutes,
 			errorElement: <div>404</div>,
+		},
+		{
+			path: 'inventory/air-conditioners/*',
+			element: <ProtectedRoute action='read' subject='airConditioners' />,
+			children: airConditionersRoutes,
+			errorElement: <div>404</div>
 		},
 		{
 			path: '*',
