@@ -17,7 +17,7 @@ export interface AirConditionerFormInputsProps {
 }
 
 const inputClassName =
-	'w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:text-muted-foreground';
+	'w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:text-muted-foreground';
 
 interface SelectFieldProps {
 	id: string;
@@ -79,12 +79,6 @@ export const AirConditionerFormInputs = ({
 }: AirConditionerFormInputsProps) => {
 	const brands = useGetAllBrands();
 	const conditions = useGetAllConditions();
-
-	const useClassroomsSearch = (
-		searchTerm: string,
-		page?: number,
-		size?: number,
-	) => useGetClassroomsBySearchTerm(searchTerm, page, size);
 
 	const handleClassroomInfo = (classroom: TClassroomSearch) =>
 		formik.setFieldValue('classroomId', classroom.id);
@@ -160,7 +154,7 @@ export const AirConditionerFormInputs = ({
 					Aula
 				</label>
 				<SearchAsyncSelect<TClassroomSearch>
-					hook={useClassroomsSearch}
+					hook={useGetClassroomsBySearchTerm}
 					handleChange={handleClassroomInfo}
 					getOptionValue={c => c.id}
 					getOptionLabel={c => c.name}

@@ -31,9 +31,11 @@ export const ViewAirConditionerModal = ({
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-2">
 				<h1 className="text-xl font-bold mb-1">Detalle del Aire Acondicionado</h1>
-				<p className="text-sm text-gray-500 mb-3">
-					{airConditioner?.description ?? 'Sin descripción'}
-				</p>
+				{!isLoading && (
+					<p className="text-sm text-gray-500 mb-3">
+						{airConditioner?.description ?? 'Sin descripción'}
+					</p>
+				)}
 
 				{isLoading ? (
 					<Loading />

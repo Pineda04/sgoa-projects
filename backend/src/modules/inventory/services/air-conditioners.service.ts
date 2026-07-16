@@ -5,7 +5,7 @@ import { TAirConditioner } from '../types';
 
 @Injectable()
 export class AirConditionersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private readonly airConditionerInclude = {
     brand: {
@@ -37,33 +37,33 @@ export class AirConditionersService {
       description: ac.description,
       brand: ac.brand
         ? {
-            id: ac.brand.id,
-            name: ac.brand.name,
-          }
+          id: ac.brand.id,
+          name: ac.brand.name,
+        }
         : null,
       condition: ac.condition
         ? {
-            id: ac.condition.id,
-            status: ac.condition.status,
-          }
+          id: ac.condition.id,
+          status: ac.condition.status,
+        }
         : null,
       classroom: ac.classroom
         ? {
-            id: ac.classroom.id,
-            name: ac.classroom.name,
-            build: ac.classroom.building
-              ? {
-                  id: ac.classroom.building.id,
-                  name: ac.classroom.building.name,
-                  center: ac.classroom.building.center
-                    ? {
-                        id: ac.classroom.building.center.id,
-                        name: ac.classroom.building.center.name,
-                      }
-                    : null,
+          id: ac.classroom.id,
+          name: ac.classroom.name,
+          build: ac.classroom.building
+            ? {
+              id: ac.classroom.building.id,
+              name: ac.classroom.building.name,
+              center: ac.classroom.building.center
+                ? {
+                  id: ac.classroom.building.center.id,
+                  name: ac.classroom.building.center.name,
                 }
-              : null,
-          }
+                : null,
+            }
+            : null,
+        }
         : null,
     };
   }
@@ -98,7 +98,7 @@ export class AirConditionersService {
     });
 
     if (!airConditioner)
-      throw new NotFoundException(`La marca con id <${id}> no fue encontrada.`);
+      throw new NotFoundException(`El aire acondicionado con id <${id}> no fue encontrado.`);
 
     return this.mapToAirConditioner(airConditioner);
   }
