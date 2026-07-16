@@ -33,4 +33,3 @@ export type TCreateAirConditioner = {
 
 // Tipo para la actualización
 export type TUpdateAirConditioner = Partial<TCreateAirConditioner>;
-

@@ -1,69 +1,78 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from 'src/generated/prisma/client';
 import { CreateAirConditionerDto, UpdateAirConditionerDto } from '../dto';
 import { TAirConditioner } from '../types';
 
-@Injectable()
-export class AirConditionersService {
-  constructor(private prisma: PrismaService) { }
-
-  private readonly airConditionerInclude = {
-    brand: {
-      select: {
-        id: true,
-        name: true,
-      },
+const airConditionerInclude = {
+  brand: {
+    select: {
+      id: true,
+      name: true,
     },
-    condition: {
-      select: {
-        id: true,
-        status: true,
-      },
+  },
+  condition: {
+    select: {
+      id: true,
+      status: true,
     },
-    classroom: {
-      include: {
-        building: {
-          include: {
-            center: true,
-          },
+  },
+  classroom: {
+    include: {
+      building: {
+        include: {
+          center: true,
         },
       },
     },
-  };
+  },
+} satisfies Prisma.AirConditionerInclude;
 
-  private mapToAirConditioner(ac: any): TAirConditioner {
+type TAirConditionerWithRelations = Prisma.AirConditionerGetPayload<{
+  include: typeof airConditionerInclude;
+}>;
+
+@Injectable()
+export class AirConditionersService {
+  constructor(private prisma: PrismaService) {}
+
+  private readonly airConditionerInclude = airConditionerInclude;
+
+  private mapToAirConditioner(
+    ac: TAirConditionerWithRelations,
+  ): TAirConditioner {
     return {
       id: ac.id,
       description: ac.description,
       brand: ac.brand
         ? {
-          id: ac.brand.id,
-          name: ac.brand.name,
-        }
+            id: ac.brand.id,
+            name: ac.brand.name,
+          }
         : null,
       condition: ac.condition
         ? {
-          id: ac.condition.id,
-          status: ac.condition.status,
-        }
+            id: ac.condition.id,
+            status: ac.condition.status,
+          }
         : null,
       classroom: ac.classroom
         ? {
-          id: ac.classroom.id,
-          name: ac.classroom.name,
-          build: ac.classroom.building
-            ? {
-              id: ac.classroom.building.id,
-              name: ac.classroom.building.name,
-              center: ac.classroom.building.center
-                ? {
-                  id: ac.classroom.building.center.id,
-                  name: ac.classroom.building.center.name,
+            id: ac.classroom.id,
+            name: ac.classroom.name,
+            build: ac.classroom.building
+              ? {
+                  id: ac.classroom.building.id,
+                  name: ac.classroom.building.name,
+                  center: ac.classroom.building.center
+                    ? {
+                        id: ac.classroom.building.center.id,
+                        name: ac.classroom.building.center.name,
+                      }
+                    : null,
                 }
-                : null,
-            }
-            : null,
-        }
+              : null,
+          }
         : null,
     };
   }
@@ -98,7 +107,9 @@ export class AirConditionersService {
     });
 
     if (!airConditioner)
-      throw new NotFoundException(`El aire acondicionado con id <${id}> no fue encontrado.`);
+      throw new NotFoundException(
+        `El aire acondicionado con id <${id}> no fue encontrado.`,
+      );
 
     return this.mapToAirConditioner(airConditioner);
   }
@@ -131,4 +142,3 @@ export class AirConditionersService {
     return this.mapToAirConditioner(airConditionerDelete);
   }
 }
-

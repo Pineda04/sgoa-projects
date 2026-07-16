@@ -1,3 +1,4 @@
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { useGetAirConditioners } from '@api/air-conditioners';
 import { useAbility } from '@config/lib/casl/ability';
 import { Button, ModalBase, useModal } from '@shared';
@@ -34,11 +35,12 @@ export const ListAirConditioners = () => {
 				{/* Botón condicionado de crear aire acondicionado */}
 				{canCreate && (
 					<Button
-						onClick={openCreate}
+						type="button"
 						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-						variant="unstyled"
+						onClick={openCreate}
 					>
-						+ Nuevo Aire Acondicionado
+						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+						<span>Nuevo Aire Acondicionado</span>
 					</Button>
 				)}
 			</div>
