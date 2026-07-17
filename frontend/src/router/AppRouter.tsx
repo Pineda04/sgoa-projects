@@ -20,6 +20,7 @@ import { PublicRoute } from './PublicRoute';
 import {
 	DashboardAuthorities,
 	DashboardCoordinator,
+	DashboardMonitor,
 	DashboardTeacher,
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
@@ -79,6 +80,12 @@ const router = createBrowserRouter(
 			path: 'dashboard/teacher',
 			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
 			children: [{ index: true, element: <DashboardTeacher /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'dashboard/monitor',
+			element: <ProtectedRoute action="read" subject="dashboard-monitor" />,
+			children: [{ index: true, element: <DashboardMonitor /> }],
 			errorElement: <div>404</div>,
 		},
 		{

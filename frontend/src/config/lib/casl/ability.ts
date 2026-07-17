@@ -38,7 +38,10 @@ export type Subjects =
 	| 'dashboard-authorities'
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher'
-	| 'airConditioners';
+	| 'airConditioners'
+	| 'dashboard-monitor'
+	| 'schedule-compliance-check'
+	| 'reports-monitor';
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
@@ -120,6 +123,14 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('read', 'reports');
 		can('read', 'planifications');
 		can('read', 'classrooms');
+	}
+
+	// =================== MONITOR ==================
+	if (roles.includes(EUserRole.MONITOR)) {
+		can('manage', 'dashboard-monitor');
+		can('manage', 'schedule-compliance-check');
+		can('read', 'classrooms');
+		can('read', 'buildings');
 	}
 
 	return build();

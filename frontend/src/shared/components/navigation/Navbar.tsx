@@ -121,6 +121,11 @@ const DASHBOARD_CONFIG = [
 		path: '/dashboard/teacher',
 		label: 'Docencia',
 	},
+	{
+		subject: 'dashboard-monitor' as const,
+		path: '/dashboard/monitor',
+		label: 'Monitoreo',
+	},
 ];
 
 export const Navbar = () => {
