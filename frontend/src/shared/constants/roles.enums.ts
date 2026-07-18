@@ -4,6 +4,7 @@ export enum EUserRole {
 	COORDINADOR_AREA = 'COORDINADOR_AREA',
 	DOCENTE = 'DOCENTE',
 	RRHH = 'RRHH',
+	MONITOR = 'MONITOR',
 }
 
 export type TRoles = EUserRole[];

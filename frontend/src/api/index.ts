@@ -20,3 +20,4 @@ export * from './teachers';
 export * from './users';
 export * from './buildings';
 export * from './audio-equipments';
+export * from './monitor';

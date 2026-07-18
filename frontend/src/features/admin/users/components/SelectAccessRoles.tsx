@@ -77,6 +77,7 @@ const rolesAvailables = [
 	EUserRole.RRHH,
 	EUserRole.COORDINADOR_AREA,
 	EUserRole.DOCENTE,
+	EUserRole.MONITOR,
 ].map(r => ({
 	value: r,
 	label: r,

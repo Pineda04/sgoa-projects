@@ -1,5 +1,5 @@
 import { type RouteObject } from 'react-router-dom';
-import { DashboardAuthorities, DashboardCoordinator, DashboardTeacher } from '../pages';
+import { DashboardAuthorities, DashboardCoordinator, DashboardMonitor, DashboardTeacher } from '../pages';
 import { RedirectToDefaultDepartment } from './RedirectToDefaultDepartment';
 
 export const dashboardRoutes: RouteObject[] = [
@@ -18,5 +18,9 @@ export const dashboardRoutes: RouteObject[] = [
   {
     path: 'teacher',
     element: <DashboardTeacher />,
+  },
+  {
+    path: 'monitor',
+    element: <DashboardMonitor />,
   },
 ];
