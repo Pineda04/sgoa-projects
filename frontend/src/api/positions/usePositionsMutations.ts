@@ -77,7 +77,7 @@ export const useDeletePositionMutation = (positionId: string) => {
 
             return { previous } as { previous?: unknown };
         },
-        onError: (err, id, context: any) => {
+        onError: (_err, _id, context: any) => {
             if (context?.previous) {
                 queryClient.setQueryData(positionsKeys.all, context.previous);
             }
