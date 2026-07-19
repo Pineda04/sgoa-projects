@@ -77,6 +77,7 @@ export class TeachersController {
     EUserRole.COORDINADOR_AREA,
     EUserRole.RRHH,
     EUserRole.DIRECCION,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de docentes.')

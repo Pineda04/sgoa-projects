@@ -418,7 +418,9 @@ export class TeachersService {
     return !!deleteTeacher;
   }
 
-  private buildTeacherFilters(query: QueryTeacherDto): Prisma.TeacherWhereInput {
+  private buildTeacherFilters(
+    query: QueryTeacherDto,
+  ): Prisma.TeacherWhereInput {
     const where: Prisma.TeacherWhereInput = {};
 
     if (query.searchTerm) {
@@ -434,6 +436,11 @@ export class TeachersService {
     }
     if (query.contractTypeId) {
       where.contractTypeId = query.contractTypeId;
+    }
+    if (query.periodId) {
+      where.academicReports = {
+        some: { periodId: query.periodId },
+      };
     }
 
     return where;
