@@ -23,4 +23,11 @@ export class QueryTeacherDto extends QueryPaginationDto {
   @IsOptional()
   @IsUUID()
   contractTypeId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID del periodo académico',
+  })
+  @IsOptional()
+  @IsUUID()
+  periodId?: string;
 }

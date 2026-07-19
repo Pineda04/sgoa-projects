@@ -28,6 +28,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AppController } from './app.controller';
 import { TeachersDegreesModule } from './modules/teachers-degrees/teachers-degrees.module';
 import { PlanificatorAiModule } from './modules/planificator-ai/planificator-ai.module';
+import { MonitorModule } from './modules/monitor/monitor.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { PlanificatorAiModule } from './modules/planificator-ai/planificator-ai.
     CloudinaryModule,
     TeachersDegreesModule,
     PlanificatorAiModule,
+    MonitorModule,
   ],
   providers: [
     {

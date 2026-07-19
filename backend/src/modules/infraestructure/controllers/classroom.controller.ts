@@ -50,9 +50,15 @@ export class ClassroomController {
     return this.classroomService.create(createClassroomDto);
   }
 
-  @Get('availability/:id')  
+  @Get('availability/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH, EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.DIRECCION,
+    EUserRole.RRHH,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+  )
   @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
   @ApiCommonResponses({
     summary: 'Obtener disponibilidad de un aula',
@@ -75,6 +81,7 @@ export class ClassroomController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
