@@ -1,32 +1,101 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from 'src/generated/prisma/client';
 import { CreateAirConditionerDto, UpdateAirConditionerDto } from '../dto';
-import {
-  TCreateAirConditioner,
-  TAirConditioner,
-  TUpdateAirConditioner,
-} from '../types';
+import { TAirConditioner } from '../types';
+
+const airConditionerInclude = {
+  brand: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+  condition: {
+    select: {
+      id: true,
+      status: true,
+    },
+  },
+  classroom: {
+    include: {
+      building: {
+        include: {
+          center: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.AirConditionerInclude;
+
+type TAirConditionerWithRelations = Prisma.AirConditionerGetPayload<{
+  include: typeof airConditionerInclude;
+}>;
 
 @Injectable()
 export class AirConditionersService {
   constructor(private prisma: PrismaService) {}
 
+  private readonly airConditionerInclude = airConditionerInclude;
+
+  private mapToAirConditioner(
+    ac: TAirConditionerWithRelations,
+  ): TAirConditioner {
+    return {
+      id: ac.id,
+      description: ac.description,
+      brand: ac.brand
+        ? {
+            id: ac.brand.id,
+            name: ac.brand.name,
+          }
+        : null,
+      condition: ac.condition
+        ? {
+            id: ac.condition.id,
+            status: ac.condition.status,
+          }
+        : null,
+      classroom: ac.classroom
+        ? {
+            id: ac.classroom.id,
+            name: ac.classroom.name,
+            build: ac.classroom.building
+              ? {
+                  id: ac.classroom.building.id,
+                  name: ac.classroom.building.name,
+                  center: ac.classroom.building.center
+                    ? {
+                        id: ac.classroom.building.center.id,
+                        name: ac.classroom.building.center.name,
+                      }
+                    : null,
+                }
+              : null,
+          }
+        : null,
+    };
+  }
+
   async create(
     createAirConditionerDto: CreateAirConditionerDto,
-  ): Promise<TCreateAirConditioner> {
+  ): Promise<TAirConditioner> {
     const newAirConditioner = await this.prisma.airConditioner.create({
       data: {
         ...createAirConditionerDto,
       },
+      include: this.airConditionerInclude,
     });
 
-    return newAirConditioner;
+    return this.mapToAirConditioner(newAirConditioner);
   }
 
   async findAll(): Promise<TAirConditioner[]> {
-    const airConditioners = await this.prisma.airConditioner.findMany();
+    const airConditioners = await this.prisma.airConditioner.findMany({
+      include: this.airConditionerInclude,
+    });
 
-    return airConditioners;
+    return airConditioners.map((ac) => this.mapToAirConditioner(ac));
   }
 
   async findOne(id: string): Promise<TAirConditioner> {
@@ -34,18 +103,21 @@ export class AirConditionersService {
       where: {
         id,
       },
+      include: this.airConditionerInclude,
     });
 
     if (!airConditioner)
-      throw new NotFoundException(`La marca con id <${id}> no fue encontrada.`);
+      throw new NotFoundException(
+        `El aire acondicionado con id <${id}> no fue encontrado.`,
+      );
 
-    return airConditioner;
+    return this.mapToAirConditioner(airConditioner);
   }
 
   async update(
     id: string,
     updateAirConditionerDto: UpdateAirConditionerDto,
-  ): Promise<TUpdateAirConditioner> {
+  ): Promise<TAirConditioner> {
     const airConditionerUpdate = await this.prisma.airConditioner.update({
       where: {
         id,
@@ -53,9 +125,10 @@ export class AirConditionersService {
       data: {
         ...updateAirConditionerDto,
       },
+      include: this.airConditionerInclude,
     });
 
-    return airConditionerUpdate;
+    return this.mapToAirConditioner(airConditionerUpdate);
   }
 
   async remove(id: string): Promise<TAirConditioner> {
@@ -63,8 +136,9 @@ export class AirConditionersService {
       where: {
         id,
       },
+      include: this.airConditionerInclude,
     });
 
-    return airConditionerDelete;
+    return this.mapToAirConditioner(airConditionerDelete);
   }
 }

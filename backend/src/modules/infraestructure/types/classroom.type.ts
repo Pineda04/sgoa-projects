@@ -38,15 +38,6 @@ export type TClassroomDepartmentInfo = {
   facultyId: string;
 };
 
-export type TDigitalBlackboardType = {
-  id: string;
-  description: string | null;
-  brandId: string;
-  monitorTypeId: string;
-  monitorSizeId: string;
-  conditionId: string;
-};
-
 // Tipo para creación
 export type TCreateClassroom = Omit<
   TClassroom,
@@ -66,7 +57,9 @@ type Occupied = {
   startTime: string;
   endTime: string;
   courseId: string;
+  courseName: string;
   teacherId: string;
+  teacherName: string;
 };
 
 type Available = {

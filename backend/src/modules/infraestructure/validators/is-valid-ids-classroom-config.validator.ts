@@ -1,12 +1,10 @@
 import {
-  registerDecorator,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-  ValidatorOptions,
 } from 'class-validator';
 import { BuildingService } from '../services/building.service';
-import { ClassroomService } from '../services/classroom.service';
+import { DigitalBlackboardService } from '../services/digital-blackboard.service';
 import { ConnectivityService } from '../services/connectivity.service';
 import { AudioEquipmentService } from '../services/audio-equipment.service';
 import { Injectable } from '@nestjs/common';
@@ -20,7 +18,7 @@ export class IsValidIdsClassroomConfigConstraint
 {
   constructor(
     private readonly buildingService: BuildingService,
-    private readonly classroomService: ClassroomService,
+    private readonly digitalBlackboardService: DigitalBlackboardService,
     private readonly roomTypeService: RoomTypeService,
     private readonly connectivityService: ConnectivityService,
     private readonly audioEquipmentService: AudioEquipmentService,
@@ -47,7 +45,11 @@ export class IsValidIdsClassroomConfigConstraint
         return !!(await this.audioEquipmentService.findOne(id));
 
       case EClassroomConfig.DIGITAL_BLACKBOARD:
-        return !!(await this.classroomService.findOneDigitalBlackboard(id));
+        try {
+          return !!(await this.digitalBlackboardService.findOne(id));
+        } catch {
+          return false;
+        }
 
       default:
         return false;

@@ -265,7 +265,7 @@ export const Consolidated = ({
 							getRowKey={row =>
 							  `${row.year}-${row.pac}-${row.department}-${row.teacherCode}-${row.courseCode}-${row.section}-${row.modality}`
 							}
-							showRowNumber
+							showRowNumber={false}
 						/>
 						<Pagination totalPages={meta?.lastPage ?? 0} />
 					</>

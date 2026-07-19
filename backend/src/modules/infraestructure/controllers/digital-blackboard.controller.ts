@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiCommonResponses,
   ResponseMessage,
@@ -7,6 +7,8 @@ import {
 import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { DigitalBlackboardService } from '../services/digital-blackboard.service';
+import { CreateDigitalBlackboardDto } from '../dto/create-digital-blackboard.dto';
+import { UpdateDigitalBlackboardDto } from '../dto/update-digital-blackboard.dto';
 
 @Controller('digital-blackboards')
 @Roles(
@@ -48,5 +50,40 @@ export class DigitalBlackboardController {
   })
   findOne(@Param('id', ValidateIdPipe) id: string) {
     return this.digitalBlackboardService.findOne(id);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ResponseMessage('Se ha creado la pizarra digital.')
+  @ApiCommonResponses({
+    summary: 'Crear una pizarra digital',
+    okDescription: 'Pizarra digital creada correctamente.',
+  })
+  create(@Body() createDigitalBlackboardDto: CreateDigitalBlackboardDto) {
+    return this.digitalBlackboardService.create(createDigitalBlackboardDto);
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Se ha actualizado la pizarra digital.')
+  @ApiCommonResponses({
+    summary: 'Actualizar una pizarra digital por ID',
+    okDescription: 'Pizarra digital actualizada correctamente.',
+    notFoundDescription: 'La pizarra digital no existe.',
+  })
+  update(@Param('id', ValidateIdPipe) id: string, @Body() updateDigitalBlackboardDto: UpdateDigitalBlackboardDto) {
+    return this.digitalBlackboardService.update(id, updateDigitalBlackboardDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Se ha eliminado la pizarra digital.')
+  @ApiCommonResponses({
+    summary: 'Eliminar una pizarra digital por ID',
+    okDescription: 'Pizarra digital eliminada correctamente.',
+    notFoundDescription: 'La pizarra digital no existe.',
+  })
+  remove(@Param('id', ValidateIdPipe) id: string) {
+    return this.digitalBlackboardService.remove(id);
   }
 }

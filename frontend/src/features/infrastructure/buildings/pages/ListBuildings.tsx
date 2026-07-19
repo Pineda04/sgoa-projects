@@ -20,6 +20,7 @@ import {
 	Loading,
 	useModal,
 } from '@shared';
+import { useAbility } from '@config';
 
 export const ListBuildings = () => {
 	// 1. Control de modales y estado del edificio seleccionado para edición o eliminación
@@ -29,6 +30,11 @@ export const ListBuildings = () => {
 	const [selectedBuilding, setSelectedBuilding] = useState<TBuilding | null>(
 		null
 	);
+
+	const ability = useAbility();
+	const canCreate = ability.can('create', 'buildings');
+	const canUpdate = ability.can('update', 'buildings');
+	const canDelete = ability.can('delete', 'buildings');
 
 	// 2. Consumo de Queries y Mutaciones de edificios y centros
 	const { data: buildingsResponse, isLoading } = useGetAllBuildings();
@@ -122,29 +128,37 @@ export const ListBuildings = () => {
 				return matchedCenter ? matchedCenter.name : 'N/A';
 			},
 		},
-		{
-			key: 'actions',
-			header: 'Acciones',
-			className: 'text-center w-32 p-4',
-			render: (building: TBuilding) => (
-				<div className="flex items-center justify-center gap-3">
-					<button
-						onClick={() => handleOpenEdit(building)}
-						className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-						title="Editar edificio"
-					>
-						<PencilSquareIcon className="size-5" />
-					</button>
-					<button
-						onClick={() => handleOpenDelete(building)}
-						className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-						title="Eliminar edificio"
-					>
-						<TrashIcon className="size-5" />
-					</button>
-				</div>
-			),
-		},
+		...(canUpdate || canDelete
+			? [
+					{
+						key: 'actions' as const,
+						header: 'Acciones',
+						className: 'text-center w-32 p-4',
+						render: (building: TBuilding) => (
+							<div className="flex items-center justify-center gap-3">
+								{canUpdate && (
+									<button
+										onClick={() => handleOpenEdit(building)}
+										className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+										title="Editar edificio"
+									>
+										<PencilSquareIcon className="size-5" />
+									</button>
+								)}
+								{canDelete && (
+									<button
+										onClick={() => handleOpenDelete(building)}
+										className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+										title="Eliminar edificio"
+									>
+										<TrashIcon className="size-5" />
+									</button>
+								)}
+							</div>
+						),
+					},
+				]
+			: []),
 	];
 
 	return (
@@ -160,13 +174,15 @@ export const ListBuildings = () => {
 					de la institución.
 					</p>
 				</div>
-				<Button
-					onClick={openCreateModal}
-					className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-				>
-					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-					<span>Nuevo Edificio</span>
-				</Button>
+				{canCreate && (
+					<Button
+						onClick={openCreateModal}
+						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+					>
+						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+						<span>Nuevo Edificio</span>
+					</Button>
+				)}
 			</div>
 
 			{/* TABLA DE COMPONENTE DINÁMICO */}
