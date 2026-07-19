@@ -1,9 +1,7 @@
 import {
-  registerDecorator,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-  ValidatorOptions,
 } from 'class-validator';
 import { BuildingService } from '../services/building.service';
 import { DigitalBlackboardService } from '../services/digital-blackboard.service';
@@ -47,7 +45,11 @@ export class IsValidIdsClassroomConfigConstraint
         return !!(await this.audioEquipmentService.findOne(id));
 
       case EClassroomConfig.DIGITAL_BLACKBOARD:
-        return !!(await this.digitalBlackboardService.findOne(id));
+        try {
+          return !!(await this.digitalBlackboardService.findOne(id));
+        } catch {
+          return false;
+        }
 
       default:
         return false;
