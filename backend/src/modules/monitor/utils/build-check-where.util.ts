@@ -1,4 +1,4 @@
-import { endOfDay, startOfDay } from 'date-fns';
+import { endOfDay, parseISO, startOfDay } from 'date-fns';
 import { Prisma } from 'src/generated/prisma/client';
 import { CheckFiltersDto } from '../dto';
 
@@ -9,8 +9,8 @@ export const buildCheckWhere = (
 
   if (query.dateFrom || query.dateTo) {
     where.checkDate = {
-      ...(query.dateFrom ? { gte: startOfDay(new Date(query.dateFrom)) } : {}),
-      ...(query.dateTo ? { lte: endOfDay(new Date(query.dateTo)) } : {}),
+      ...(query.dateFrom ? { gte: startOfDay(parseISO(query.dateFrom)) } : {}),
+      ...(query.dateTo ? { lte: endOfDay(parseISO(query.dateTo)) } : {}),
     };
   }
 
