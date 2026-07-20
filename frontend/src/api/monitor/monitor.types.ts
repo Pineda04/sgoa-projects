@@ -53,3 +53,69 @@ export type TScheduleComplianceCheck = {
 	createdAt: string;
 	updatedAt: string;
 };
+
+export type TMonitorBuilding = {
+	id: string;
+	name: string;
+};
+
+export type TScheduleComplianceCheckDetail = TScheduleComplianceCheck & {
+	monitor: {
+		id: string;
+		name: string;
+	};
+	courseClassroom: {
+		id: string;
+		section: string;
+		days: string;
+		course: {
+			name: string;
+			code: string;
+		};
+		classroom: {
+			name: string;
+			building: {
+				id: string;
+				name: string;
+			};
+		};
+		teacher: {
+			id: string;
+			name: string;
+		};
+	};
+};
+
+export type TCheckFilters = {
+	dateFrom?: string;
+	dateTo?: string;
+	teacherId?: string;
+	buildingId?: string;
+	centerId?: string;
+};
+
+export enum EReportGroupBy {
+	DAY = 'day',
+	TEACHER = 'teacher',
+	BUILDING = 'building',
+}
+
+export type TReportFilters = TCheckFilters & {
+	groupBy?: EReportGroupBy;
+};
+
+export type TMonitorReportSummary = {
+	totalChecks: number;
+	present: number;
+	absent: number;
+	complianceRate: number;
+};
+
+export type TMonitorReportGroup = TMonitorReportSummary & {
+	groupKey: string;
+	groupLabel: string;
+};
+
+export type TMonitorReport = TMonitorReportSummary & {
+	groups?: TMonitorReportGroup[];
+};
