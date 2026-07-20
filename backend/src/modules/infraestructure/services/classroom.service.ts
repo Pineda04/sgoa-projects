@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { UpdateClassroomDto } from '../dto/update-classroom.dto';
-import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto, TDigitalBlackboardType } from '../types';
+import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto} from '../types';
 import { QueryPaginationDto } from 'src/common/dto';
 import { QueryClassroomDto } from '../dto';
 import { isUUID } from 'class-validator';
@@ -59,22 +59,6 @@ export class ClassroomService {
     ]);
     return paginateOutput<TClassroom>(classrooms, count, query);
   }
-
-  async findOneDigitalBlackboard(id: string): Promise<TDigitalBlackboardType> {
-    const digitalBlackboard = await this.prisma.digitalBlackboard.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!digitalBlackboard)
-      throw new NotFoundException(
-        `La pizarra digital con id <${id}> no fue encontrada.`,
-      );
-
-    return digitalBlackboard;
-  }
-
 
  async findOne(id: string): Promise<TClassroomWithDepartments> {
   const classroom = await this.prisma.classroom.findUnique({

@@ -10,7 +10,11 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
-import { CreateCourseClassroomDto, UpdateCourseClassroomDto } from '../dto';
+import {
+  CreateCourseClassroomDto,
+  QueryCourseClassroomDto,
+  UpdateCourseClassroomDto,
+} from '../dto';
 import { CourseClassroomsService } from '../services/course-classrooms.service';
 import {
   ApiPagination,
@@ -23,13 +27,12 @@ import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { QueryPaginationDto } from 'src/common/dto';
 
 @Controller('course-classrooms')
 export class CourseClassroomsController {
   constructor(
     private readonly courseClassroomsService: CourseClassroomsService,
-  ) { }
+  ) {}
 
   @Post()
   @Roles(
@@ -59,6 +62,7 @@ export class CourseClassroomsController {
     EUserRole.DIRECCION,
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de secciones de asignatura.')
@@ -68,8 +72,10 @@ export class CourseClassroomsController {
   })
   @ApiPagination({
     summary: 'Obtener todas las secciones de asignatura, en una lista paginada',
+    description:
+      'Permite filtrar opcionalmente por periodo académico (periodId) y día de la semana (dayOfWeek).',
   })
-  findAll(@Query() query: QueryPaginationDto) {
+  findAll(@Query() query: QueryCourseClassroomDto) {
     return this.courseClassroomsService.findAllWithPagination(query);
   }
 
@@ -164,7 +170,8 @@ export class CourseClassroomsController {
     'Detalle de asignaturas para el periodo especificado en un center-department',
   )
   @ApiCommonResponses({
-    summary: 'Consulta de asignaturas por periodo y center-department para autoridades',
+    summary:
+      'Consulta de asignaturas por periodo y center-department para autoridades',
     okDescription: 'Detalle de asignaturas obtenido correctamente.',
     badRequestDescription: 'La solicitud contiene parámetros inválidos.',
     internalErrorDescription: 'Error interno al procesar la solicitud.',

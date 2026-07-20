@@ -53,14 +53,21 @@ export const conditionsSeed = {
 export const monitorTypesSeed = {
   lcd: { id: '662c8f07-500a-447f-a536-8020045b2fa9', description: 'LCD' },
   crt: { id: '27676e35-85c9-44bb-8659-9dcc54cdacec', description: 'CRT' },
+  oled: { id: '08d9859a-9034-49ed-8d3a-1d90de6447ff', description: 'OLED' },
 };
 
 export const monitorSizesSeed = {
+  inches_15: { id: 'c0cb71c9-34b8-43c6-af1b-86d5140e253a', description: '15"' },
   inches_16: { id: 'b68f9d9b-24e7-4a61-8a0b-72fec2e615e2', description: '16"' },
   inches_17: { id: '3025dadf-8742-4a19-b532-253d48774e63', description: '17"' },
   inches_18: { id: 'f6fff9a5-c6d6-4577-9285-26581cfee476', description: '18"' },
   inches_19: { id: '84d9fd04-dae5-4445-b4d1-06cb6cd7b66f', description: '19"' },
-  inches_15: { id: 'c0cb71c9-34b8-43c6-af1b-86d5140e253a', description: '15"' },
+  inches_55: { id: '33e29289-a16e-4d2b-8361-c148f282e746', description: '55"' },
+  inches_65: { id: '15f01df2-eb09-4146-a49d-461330d20d74', description: '65"' },
+  inches_70: { id: '588cbc2d-080f-482d-923b-28846cdedeac', description: '70"' },
+  inches_86: { id: 'd109a5af-2d52-423f-badb-332406cb0b67', description: '86"' },
+  inches_98: { id: '418d72b0-ae7c-4a66-8936-a857a60e3e1a', description: '98"' },
+  inches_110: { id: 'e5758e17-028c-4aa7-b89e-396a9ddf6769', description: '110"' },
 };
 
 export const pcTypesSeed = {
