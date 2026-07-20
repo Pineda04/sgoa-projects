@@ -5,8 +5,8 @@ import { monitorKeys } from './monitor.keys';
 import { alertSuccess } from '@shared';
 
 export const useCreateCheckMutation = () => {
-	const { mutateAsync } = useMutation({
-		mutationFn: monitorApi.createScheduleCheck,
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: monitorApi.createCheck,
 		onSuccess: async res => {
 			try {
 				await alertSuccess(res);
@@ -15,12 +15,13 @@ export const useCreateCheckMutation = () => {
 			}
 
 			await queryClient.invalidateQueries({
-				queryKey: monitorKeys.lists(),
+				queryKey: monitorKeys.currentAssignments(),
 			});
 		},
 	});
 
 	return {
 		createCheck: mutateAsync,
+		isPendingCreateCheck: isPending,
 	};
 };

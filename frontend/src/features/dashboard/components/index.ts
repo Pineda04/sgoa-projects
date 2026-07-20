@@ -5,3 +5,4 @@ export * from './ListAssignmentReportsAuthorities';
 export * from './ListPlanificationsAuthorities';
 export * from './ListPlanificationsCoordinator';
 export * from './UsersCoordinator';
+export * from './monitor-checklist';
