@@ -43,6 +43,11 @@ const MODULES: ModuleConfig[] = [
 		icon: UsersIcon,
 		sections: [
 			{
+				label: 'Facultades',
+				path: '/admin/faculties',
+				subject: 'faculties',
+			},
+			{
 				label: 'Departamentos',
 				path: '/admin/departments',
 				subject: 'departments',
