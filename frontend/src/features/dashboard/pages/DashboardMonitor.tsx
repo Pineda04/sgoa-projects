@@ -2,6 +2,7 @@ import { useTabWithReset } from '@shared/hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
+import { MonitorChecklist, MonitorReports } from '../components';
 
 export const DashboardMonitor = () => {
 	const validTabs = ['0', '1'];
@@ -36,17 +37,13 @@ export const DashboardMonitor = () => {
 
 				<TabsContent value="0">
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
-						<p className="text-muted-foreground text-center py-12">
-							Módulo de checklist — Próximamente
-						</p>
+						<MonitorChecklist />
 					</div>
 				</TabsContent>
 
 				<TabsContent value="1">
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
-						<p className="text-muted-foreground text-center py-12">
-							Módulo de reportes — Próximamente
-						</p>
+						<MonitorReports />
 					</div>
 				</TabsContent>
 			</Tabs>

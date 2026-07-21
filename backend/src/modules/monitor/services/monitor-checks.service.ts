@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { startOfDay } from 'date-fns';
+import { parseISO, startOfDay } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { paginate, paginateOutput } from 'src/common/utils';
@@ -31,7 +31,7 @@ export class MonitorChecksService {
         `La sección de asignatura con id <${createCheckDto.courseClassroomId}> no fue encontrada.`,
       );
 
-    const checkDate = startOfDay(new Date(createCheckDto.checkDate));
+    const checkDate = startOfDay(parseISO(createCheckDto.checkDate));
 
     const existingCheck = await this.prisma.scheduleComplianceCheck.findUnique({
       where: {

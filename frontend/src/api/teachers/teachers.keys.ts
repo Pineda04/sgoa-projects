@@ -3,6 +3,8 @@ export const teachersKeys = {
 	all: ['teacher'] as const,
 	lists: () => [...teachersKeys.all, 'list'] as const,
 	list: (page: number) => [...teachersKeys.lists(), { page }] as const,
+	autocomplete: (searchTerm: string) =>
+		[...teachersKeys.all, 'autocomplete', searchTerm] as const,
 	details: () => [...teachersKeys.all, 'detail'] as const,
 	detail: (id: string) => ['teacher-detail', id] as const,
 	position: () => [...teachersKeys.all, 'position'] as const,
