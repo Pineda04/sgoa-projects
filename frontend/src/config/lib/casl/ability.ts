@@ -32,6 +32,7 @@ export type Subjects =
 	| 'user-roles'
 	| 'user-departments'
 	| 'user-status'
+	| 'configuration'
 	| 'home'
 	| 'help'
 	| 'profile'
@@ -57,12 +58,14 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'all');
 		cannot('read', 'dashboard-coordinator');
 		cannot('read', 'dashboard-teacher');
+		cannot('read', 'dashboard-monitor');
 		return build();
 	}
 
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
 		can('manage', 'dashboard-authorities');
+		can('manage', 'configuration');
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
@@ -86,6 +89,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
 		can('manage', 'dashboard-authorities');
+		can('manage', 'configuration');
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
