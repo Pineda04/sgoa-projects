@@ -1,9 +1,10 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
+import { Configuration } from '../pages';
 
 export const configurationRoutes: RouteObject[] = [
   {
     path: '',
-    // element: <Help />,
+    element: <Configuration />,
   },
   {
     path: '*',
