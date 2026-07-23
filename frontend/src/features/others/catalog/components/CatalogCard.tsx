@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 
-interface ConfigurationCardProps {
+interface CatalogCardProps {
   icon: ReactNode;
   title: string;
   description: string;
 }
 
-export const ConfigurationCard = ({ icon, title, description }: ConfigurationCardProps) => {
+export const CatalogCard = ({ icon, title, description }: CatalogCardProps) => {
   return (
     <div className="bg-muted/30 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-border/50 hover:border-primary/20 transition-colors duration-200 cursor-pointer">
       <div className='flex items-center'>

@@ -1,1 +1,0 @@
-export { ConfigurationCard } from './ConfigurationCard';

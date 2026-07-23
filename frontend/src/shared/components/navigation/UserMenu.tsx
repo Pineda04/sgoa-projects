@@ -8,7 +8,7 @@ import {
 	ArrowLeftStartOnRectangleIcon,
 	XMarkIcon,
 	QuestionMarkCircleIcon,
-	Cog6ToothIcon,
+	Square2StackIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
 import { useModal } from '@shared/hooks';
@@ -56,7 +56,7 @@ export const UserMenu = () => {
 
 	const handleConfiguration = () => {
 		setIsOpen(false);
-		navigate('/configuration', { replace: true });
+		navigate('/catalogs', { replace: true });
 	};
 
 	const handleProfile = () => {
@@ -178,21 +178,21 @@ export const UserMenu = () => {
 								</div>
 							</button>
 
-							{/* Configuración */}
-							<Can action="read" subject="configuration">
+							{/* Catalogo */}
+							<Can action="read" subject="catalog">
 								<button
 									onClick={handleConfiguration}
 									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
 								>
 									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-										<Cog6ToothIcon className="size-4.5" />
+										<Square2StackIcon className="size-4.5" />
 									</div>
 									<div>
 										<p className="text-sm font-medium">
-											Configuración
+											Catálogo
 										</p>
 										<p className="text-xs text-gray-400 mt-0.5">
-											Ajustes generales del sistema
+											Valores auxiliares del sistema
 										</p>
 									</div>
 								</button>

@@ -3,7 +3,7 @@ import {
   User,
 } from 'lucide-react';
 import { Settings2 } from 'lucide-react';
-import { ConfigurationCard } from '../components';
+import { CatalogCard } from '../components';
 
 const configItems = [
   { key: 'teacher-categories', icon: <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />, title: 'Categorías de Docentes', description: 'Gestión de categorías de docentes' },
@@ -17,7 +17,7 @@ const configItems = [
   { key: 'monitor-sizes', icon: <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />, title: 'Tamaños de Monitor', description: 'Gestión de tamaños de monitor' },
 ];
 
-export const Configuration = () => {
+export const Catalog = () => {
   return (
     <div className="w-auto mx-auto mt-4 sm:mt-6 md:mt-8 mb-8 md:mb-12 px-3 sm:px-4">
       <div className="animate-in slide-up">
@@ -30,7 +30,7 @@ export const Configuration = () => {
               </div>
               <div>
                 <h2 className="text-white font-display text-base sm:text-lg md:text-xl">
-                  Catálogos
+                  Catálogo
                 </h2>
                 <p className="text-white/70 text-xs sm:text-sm">
                   Gestión de valores auxiliares del sistema
@@ -43,7 +43,7 @@ export const Configuration = () => {
           <div className="p-4 sm:p-6 md:p-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {configItems.map(item => (
-                <ConfigurationCard
+                <CatalogCard
                   key={item.key}
                   icon={item.icon}
                   title={item.title}

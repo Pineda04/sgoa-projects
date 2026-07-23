@@ -28,7 +28,7 @@ import { buildingsRoutes } from '@features/infrastructure/buildings/routes/Build
 import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 import { airConditionersRoutes } from '@features/inventory';
-import { configurationRoutes } from '@features/others';
+import { catalogRoutes } from '@features/others';
 
 
 const router = createBrowserRouter(
@@ -60,9 +60,9 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'configuration',
-			element: <ProtectedRoute action="read" subject="configuration" />,
-			children: configurationRoutes,
+			path: 'catalogs',
+			element: <ProtectedRoute action="read" subject="catalog" />,
+			children: catalogRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
