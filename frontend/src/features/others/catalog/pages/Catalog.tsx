@@ -1,9 +1,22 @@
+import { useMemo, useState } from 'react';
 import {
   ClipboardList, Tag, DoorOpen, Wifi, Monitor, Tv, Computer, FileText,
   User,
 } from 'lucide-react';
 import { Settings2 } from 'lucide-react';
-import { CatalogCard } from '../components';
+import {
+  useGetAllConditions,
+  useCreateCondition,
+  useUpdateCondition,
+  useDeleteCondition,
+} from '@api/conditions';
+import {
+  useGetAllRoomTypes,
+  useCreateRoomType,
+  useUpdateRoomType,
+  useDeleteRoomType,
+} from '@api/room-types';
+import { CatalogCard, CatalogCrudModal } from '../components';
 
 const configItems = [
   { key: 'teacher-categories', icon: <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />, title: 'Categorías de Docentes', description: 'Gestión de categorías de docentes' },
@@ -18,6 +31,64 @@ const configItems = [
 ];
 
 export const Catalog = () => {
+  const [activeEntity, setActiveEntity] = useState<string | null>(null);
+
+  const { data: conditions, isLoading: condLoading } = useGetAllConditions();
+  const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
+  const { mutateAsync: createCondition } = useCreateCondition();
+  const { updateCondition } = useUpdateCondition();
+  const { deleteCondition } = useDeleteCondition();
+  const { mutateAsync: createRoomType } = useCreateRoomType();
+  const { updateRoomType } = useUpdateRoomType();
+  const { deleteRoomType } = useDeleteRoomType();
+
+  const entityConfig = useMemo(() => ({
+    conditions: {
+      title: 'Condiciones',
+      fieldKey: 'status' as const,
+      data: conditions,
+      isLoading: condLoading,
+      onSave: async (
+        createItems: Array<{ value: string }>,
+        updateItems: Array<{ id: string; value: string }>,
+        deleteIds: string[]
+      ) => {
+        for (const item of createItems) {
+          await createCondition({ status: item.value });
+        }
+        for (const item of updateItems) {
+          await updateCondition({ id: item.id, body: { status: item.value } });
+        }
+        for (const id of deleteIds) {
+          await deleteCondition(id);
+        }
+      },
+    },
+    'room-types': {
+      title: 'Tipos de Aula',
+      fieldKey: 'description' as const,
+      data: roomTypes,
+      isLoading: rtLoading,
+      onSave: async (
+        createItems: Array<{ value: string }>,
+        updateItems: Array<{ id: string; value: string }>,
+        deleteIds: string[]
+      ) => {
+        for (const item of createItems) {
+          await createRoomType({ description: item.value });
+        }
+        for (const item of updateItems) {
+          await updateRoomType({ id: item.id, body: { description: item.value } });
+        }
+        for (const id of deleteIds) {
+          await deleteRoomType(id);
+        }
+      },
+    },
+  }), [conditions, condLoading, roomTypes, rtLoading, createCondition, updateCondition, deleteCondition, createRoomType, updateRoomType, deleteRoomType]);
+
+  const activeConfig = activeEntity ? entityConfig[activeEntity as keyof typeof entityConfig] : null;
+
   return (
     <div className="w-auto mx-auto mt-4 sm:mt-6 md:mt-8 mb-8 md:mb-12 px-3 sm:px-4">
       <div className="animate-in slide-up">
@@ -48,12 +119,25 @@ export const Catalog = () => {
                   icon={item.icon}
                   title={item.title}
                   description={item.description}
+                  onClick={entityConfig[item.key as keyof typeof entityConfig] ? () => setActiveEntity(item.key) : undefined}
                 />
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {activeConfig && (
+        <CatalogCrudModal
+          isOpen={true}
+          onClose={() => setActiveEntity(null)}
+          title={activeConfig.title}
+          fieldKey={activeConfig.fieldKey}
+          initialData={activeConfig.data}
+          isLoading={activeConfig.isLoading}
+          onSave={activeConfig.onSave}
+        />
+      )}
     </div>
   );
 };

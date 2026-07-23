@@ -4,11 +4,12 @@ interface CatalogCardProps {
   icon: ReactNode;
   title: string;
   description: string;
+  onClick?: () => void;
 }
 
-export const CatalogCard = ({ icon, title, description }: CatalogCardProps) => {
+export const CatalogCard = ({ icon, title, description, onClick }: CatalogCardProps) => {
   return (
-    <div className="bg-muted/30 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-border/50 hover:border-primary/20 transition-colors duration-200 cursor-pointer">
+    <div className="bg-muted/30 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-border/50 hover:border-primary/20 transition-colors duration-200 cursor-pointer" onClick={onClick}>
       <div className='flex items-center'>
         <div className="gap-2 sm:gap-3">
           <div className="size-8 sm:size-10 bg-primary/10 rounded-lg flex items-center justify-center">
