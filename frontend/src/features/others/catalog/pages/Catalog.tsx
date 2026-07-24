@@ -93,6 +93,7 @@ export const Catalog = () => {
 			conditions: {
 				title: 'Condiciones',
 				description: 'Gestión de condiciones de estado',
+				subject: 'conditions' as const,
 				fieldKey: 'status' as const,
 				data: conditions,
 				isLoading: condLoading,
@@ -103,7 +104,9 @@ export const Catalog = () => {
 				) => {
 					await Promise.all([
 						...createItems.map(item =>
-							conditionsApi.createCondition({ status: item.value })
+							conditionsApi.createCondition({
+								status: item.value,
+							})
 						),
 						...updateItems.map(item =>
 							conditionsApi.updateCondition({
@@ -126,6 +129,7 @@ export const Catalog = () => {
 			'room-types': {
 				title: 'Tipos de Aula',
 				description: 'Gestión de tipos de aula',
+				subject: 'room-types' as const,
 				fieldKey: 'description' as const,
 				data: roomTypes,
 				isLoading: rtLoading,
@@ -136,7 +140,9 @@ export const Catalog = () => {
 				) => {
 					await Promise.all([
 						...createItems.map(item =>
-							roomTypesApi.createRoomType({ description: item.value })
+							roomTypesApi.createRoomType({
+								description: item.value,
+							})
 						),
 						...updateItems.map(item =>
 							roomTypesApi.updateRoomType({
@@ -144,9 +150,7 @@ export const Catalog = () => {
 								body: { description: item.value },
 							})
 						),
-						...deleteIds.map(id =>
-							roomTypesApi.deleteRoomType(id)
-						),
+						...deleteIds.map(id => roomTypesApi.deleteRoomType(id)),
 					]);
 					await queryClient.removeQueries({
 						queryKey: roomTypesKeys.all,
@@ -214,6 +218,7 @@ export const Catalog = () => {
 					onClose={() => setActiveEntity(null)}
 					title={activeConfig.title}
 					description={activeConfig.description}
+					subject={activeConfig.subject}
 					fieldKey={activeConfig.fieldKey}
 					initialData={activeConfig.data}
 					isLoading={activeConfig.isLoading}
