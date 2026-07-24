@@ -22,8 +22,22 @@ import {
 	roomTypesKeys,
 } from '@api/room-types';
 import { queryClient } from '@config/lib';
+import { type Subjects } from '@config/lib';
 import { alertSuccess } from '@shared/utils';
 import { CatalogCard, CatalogCrudModal } from '../components';
+
+type EntityConfig = {
+	fieldKey: string;
+	data: Array<{ id: string; [key: string]: string }> | undefined;
+	isLoading: boolean;
+	onSave: (
+		createItems: Array<{ value: string }>,
+		updateItems: Array<{ id: string; value: string }>,
+		deleteIds: string[]
+	) => Promise<void>;
+};
+
+const entitySubjects = new Set<string>(['conditions', 'room-types']);
 
 const configItems = [
 	{
@@ -88,13 +102,10 @@ export const Catalog = () => {
 	const { data: conditions, isLoading: condLoading } = useGetAllConditions();
 	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
 
-	const entityConfig = useMemo(
+	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
 			conditions: {
-				title: 'Condiciones',
-				description: 'Gestión de condiciones de estado',
-				subject: 'conditions' as const,
-				fieldKey: 'status' as const,
+				fieldKey: 'status',
 				data: conditions,
 				isLoading: condLoading,
 				onSave: async (
@@ -127,10 +138,7 @@ export const Catalog = () => {
 				},
 			},
 			'room-types': {
-				title: 'Tipos de Aula',
-				description: 'Gestión de tipos de aula',
-				subject: 'room-types' as const,
-				fieldKey: 'description' as const,
+				fieldKey: 'description',
 				data: roomTypes,
 				isLoading: rtLoading,
 				onSave: async (
@@ -165,7 +173,11 @@ export const Catalog = () => {
 	);
 
 	const activeConfig = activeEntity
-		? entityConfig[activeEntity as keyof typeof entityConfig]
+		? entityConfig[activeEntity]
+		: null;
+
+	const activeItem = activeEntity
+		? configItems.find(item => item.key === activeEntity)
 		: null;
 
 	return (
@@ -199,9 +211,7 @@ export const Catalog = () => {
 									title={item.title}
 									description={item.description}
 									onClick={
-										entityConfig[
-											item.key as keyof typeof entityConfig
-										]
+										entitySubjects.has(item.key)
 											? () => setActiveEntity(item.key)
 											: undefined
 									}
@@ -212,13 +222,13 @@ export const Catalog = () => {
 				</div>
 			</div>
 
-			{activeConfig && (
+			{activeConfig && activeItem && (
 				<CatalogCrudModal
 					isOpen={true}
 					onClose={() => setActiveEntity(null)}
-					title={activeConfig.title}
-					description={activeConfig.description}
-					subject={activeConfig.subject}
+					title={activeItem.title}
+					description={activeItem.description}
+					subject={activeEntity as Subjects}
 					fieldKey={activeConfig.fieldKey}
 					initialData={activeConfig.data}
 					isLoading={activeConfig.isLoading}
