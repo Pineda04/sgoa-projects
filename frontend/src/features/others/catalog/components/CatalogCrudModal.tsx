@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { FiPlus, FiTrash2, FiSave, FiEdit2 } from 'react-icons/fi';
+import { FiPlus, FiSave } from 'react-icons/fi';
 import { Button, ModalBase } from '@shared';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface CatalogItem {
   id: string | null;
@@ -11,6 +12,7 @@ interface CatalogCrudModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  description: string;
   fieldKey: string;
   initialData?: Array<{ id: string; [key: string]: string }>;
   isLoading: boolean;
@@ -25,6 +27,7 @@ export const CatalogCrudModal = ({
   isOpen,
   onClose,
   title,
+  description,
   fieldKey,
   initialData,
   isLoading,
@@ -33,6 +36,7 @@ export const CatalogCrudModal = ({
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveVersion, setSaveVersion] = useState(0);
   const originalRef = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,6 +49,7 @@ export const CatalogCrudModal = ({
       setItems(mapped);
       originalRef.current = JSON.stringify(mapped);
       setEditingIndex(null);
+      setSaveVersion(0);
     }
   }, [isOpen, initialData, fieldKey]);
 
@@ -56,7 +61,7 @@ export const CatalogCrudModal = ({
 
   const hasChanges = useMemo(() => {
     return JSON.stringify(items) !== originalRef.current;
-  }, [items]);
+  }, [items, saveVersion]);
 
   const handleValueChange = useCallback((index: number, value: string) => {
     setItems((prev) => {
@@ -113,6 +118,7 @@ export const CatalogCrudModal = ({
       await onSave(createItems, updateItems, deleteIds);
       originalRef.current = JSON.stringify(items);
       setIsSaving(false);
+      setSaveVersion((v) => v + 1);
     } catch {
       setIsSaving(false);
     }
@@ -134,9 +140,7 @@ export const CatalogCrudModal = ({
       <div className="flex flex-col h-full">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Gestión de valores del catálogo
-          </p>
+          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
         </div>
 
         <div className="flex-1 min-h-0">
@@ -155,7 +159,7 @@ export const CatalogCrudModal = ({
                 return (
                   <div
                     key={item.id ?? `new-${index}`}
-                    className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2"
+                    className="flex items-center gap-2 bg-gray-50 rounded-sm px-3 py-2"
                   >
                     <div className="flex-1 min-w-0">
                       {isEditing ? (
@@ -168,7 +172,7 @@ export const CatalogCrudModal = ({
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') setEditingIndex(null);
                           }}
-                          className="w-full bg-white border border-gray-200 rounded-md px-2 py-1 text-sm text-slate-700 outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20"
+                          className="w-full bg-white border border-gray-200 rounded-sm px-2 py-1 text-sm text-slate-700 outline-none focus:border-blue-600"
                         />
                       ) : (
                         <span className="block text-sm text-slate-700 px-2 py-1">
@@ -179,18 +183,18 @@ export const CatalogCrudModal = ({
                     <button
                       type="button"
                       onClick={() => handleStartEdit(index)}
-                      className="shrink-0 size-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-gray-300 hover:text-blue-500 transition-colors"
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
                       title="Editar"
                     >
-                      <FiEdit2 className="size-4" />
+                      <PencilSquareIcon className="size-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(index)}
-                      className="shrink-0 size-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
                       title="Eliminar"
                     >
-                      <FiTrash2 className="size-4" />
+                      <TrashIcon className="size-4" />
                     </button>
                   </div>
                 );

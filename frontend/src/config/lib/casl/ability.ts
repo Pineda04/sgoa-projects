@@ -33,6 +33,8 @@ export type Subjects =
 	| 'user-departments'
 	| 'user-status'
 	| 'catalog'
+	| 'conditions'
+	| 'room-types'
 	| 'home'
 	| 'help'
 	| 'profile'
@@ -65,7 +67,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
 		can('manage', 'dashboard-authorities');
-		can('manage', 'catalog');
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
@@ -82,6 +83,9 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'positions');
 		can('manage', 'airConditioners');
 		can('manage', 'periods');
+		can('manage', 'catalog');
+		can('manage', 'conditions');
+		can('manage', 'room-types');
 		can('read', 'reports');
 		can('read', 'planifications');
 	}
@@ -89,7 +93,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
 		can('manage', 'dashboard-authorities');
-		can('manage', 'catalog');
 		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
@@ -103,6 +106,9 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'positions');
 		can('manage', 'airConditioners');
 		can('manage', 'periods');
+		can('manage', 'catalog');
+		can('manage', 'conditions');
+		can('manage', 'room-types');
 		can('read', 'reports');
 		can('read', 'planifications');
 	}
