@@ -3,6 +3,7 @@ import { FiPlus, FiSave } from 'react-icons/fi';
 import { Button, ModalBase } from '@shared';
 import { Can, useAbility, type Subjects } from '@config/lib';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { alertError } from '@shared/utils';
 
 interface CatalogItem {
 	id: string | null;
@@ -137,7 +138,8 @@ export const CatalogCrudModal = ({
 			originalRef.current = JSON.stringify(items);
 			setIsSaving(false);
 			setSaveVersion(v => v + 1);
-		} catch {
+		} catch (error) {
+			await alertError(error);
 			setIsSaving(false);
 		}
 	};
