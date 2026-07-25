@@ -8,9 +8,13 @@ import {
 	Tv,
 	Computer,
 	FileText,
-	User,
+	SquareUser,
 } from 'lucide-react';
-import { Settings2 } from 'lucide-react';
+import { queryClient } from '@config/lib';
+import { type Subjects } from '@config/lib';
+import { genericAlert } from '@shared/utils';
+import { CatalogCard, CatalogCrudModal } from '../components';
+import { Square2StackIcon } from '@heroicons/react/24/outline';
 import {
 	useGetAllContractTypes,
 	contractTypesApi,
@@ -27,10 +31,11 @@ import {
 	roomTypesApi,
 	roomTypesKeys,
 } from '@api/room-types';
-import { queryClient } from '@config/lib';
-import { type Subjects } from '@config/lib';
-import { genericAlert } from '@shared/utils';
-import { CatalogCard, CatalogCrudModal } from '../components';
+import {
+	teacherCategoriesApi,
+	teacherCategoriesKeys,
+	useGetAllTeacherCategories,
+} from '@api/teachers';
 
 type EntityConfig = {
 	fieldKey: string;
@@ -44,6 +49,7 @@ type EntityConfig = {
 };
 
 const entitySubjects = new Set<string>([
+	'teacher-categories',
 	'contract-types',
 	'brands',
 	'conditions',
@@ -53,7 +59,7 @@ const entitySubjects = new Set<string>([
 const configItems = [
 	{
 		key: 'teacher-categories',
-		icon: <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
+		icon: <SquareUser className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
 		title: 'Categorías de Docentes',
 		description: 'Gestión de categorías de docentes',
 	},
@@ -110,13 +116,45 @@ const configItems = [
 export const Catalog = () => {
 	const [activeEntity, setActiveEntity] = useState<string | null>(null);
 
+	const { data: teacherCategories, isLoading: tcLoading } =	useGetAllTeacherCategories();
 	const { data: contractTypes, isLoading: ctLoading } = useGetAllContractTypes();
 	const { data: brands, isLoading: brLoading } = useGetAllBrands();
 	const { data: conditions, isLoading: cdLoading } = useGetAllConditions();
-  const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
+	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
+			'teacher-categories': {
+				fieldKey: 'name',
+				data: teacherCategories,
+				isLoading: tcLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							teacherCategoriesApi.createTeacherCategory({
+								name: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							teacherCategoriesApi.updateTeacherCategory({
+								id: item.id,
+								body: { name: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							teacherCategoriesApi.deleteTeacherCategory(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: teacherCategoriesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
 			'contract-types': {
 				fieldKey: 'name',
 				data: contractTypes,
@@ -148,7 +186,7 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			'brands': {
+			brands: {
 				fieldKey: 'name',
 				data: brands,
 				isLoading: brLoading,
@@ -169,9 +207,7 @@ export const Catalog = () => {
 								body: { name: item.value },
 							})
 						),
-						...deleteIds.map(id =>
-							brandsApi.deleteBrand(id)
-						),
+						...deleteIds.map(id => brandsApi.deleteBrand(id)),
 					]);
 					queryClient.removeQueries({
 						queryKey: brandsKeys.all,
@@ -179,7 +215,7 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			'conditions': {
+			conditions: {
 				fieldKey: 'status',
 				data: conditions,
 				isLoading: cdLoading,
@@ -241,6 +277,8 @@ export const Catalog = () => {
 			},
 		}),
 		[
+			teacherCategories,
+			tcLoading,
 			contractTypes,
 			ctLoading,
 			brands,
@@ -266,7 +304,7 @@ export const Catalog = () => {
 					<div className="bg-linear-to-r from-primary to-primary-hover px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6">
 						<div className="flex items-center gap-3 sm:gap-4">
 							<div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-xl md:rounded-2xl flex items-center justify-center">
-								<Settings2 className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
+								<Square2StackIcon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
 							</div>
 							<div>
 								<h2 className="text-white font-display text-base sm:text-lg md:text-xl">
