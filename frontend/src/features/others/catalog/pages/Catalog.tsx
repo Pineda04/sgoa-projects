@@ -10,6 +10,7 @@ import {
 	FileText,
 	SquareUser,
 	Clock,
+	Headphones,
 } from 'lucide-react';
 import { queryClient } from '@config/lib';
 import { type Subjects } from '@config/lib';
@@ -58,6 +59,11 @@ import {
 	shiftsApi,
 	shiftsKeys,
 } from '@api/shifts';
+import {
+	useGetAllAudioEquipments,
+	audioEquipmentsApi,
+	audioEquipmentsKeys,
+} from '@api/audio-equipments';
 
 type EntityConfig = {
 	fieldKey: string;
@@ -81,6 +87,7 @@ const entitySubjects = new Set<string>([
 	'pc-types',
 	'monitor-types',
 	'monitor-sizes',
+	'audio-equipments',
 ]);
 
 const configItems = [
@@ -103,12 +110,6 @@ const configItems = [
 		description: 'Gestión de tipos de jornadas',
 	},
 	{
-		key: 'brands',
-		icon: <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
-		title: 'Marcas',
-		description: 'Gestión de marcas de equipo',
-	},
-	{
 		key: 'room-types',
 		icon: <DoorOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
 		title: 'Tipos de Aula',
@@ -127,10 +128,22 @@ const configItems = [
 		description: 'Gestión de condiciones de estado',
 	},
 	{
+		key: 'brands',
+		icon: <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
+		title: 'Marcas',
+		description: 'Gestión de marcas de equipo',
+	},
+	{
 		key: 'pc-types',
 		icon: <Computer className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
 		title: 'Tipos de PC',
 		description: 'Gestión de tipos de computadoras',
+	},
+	{
+		key: 'audio-equipments',
+		icon: <Headphones className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
+		title: 'Tipos de Audio',
+		description: 'Gestión de tipos de audio',
 	},
 	{
 		key: 'monitor-types',
@@ -159,6 +172,7 @@ export const Catalog = () => {
 	const { data: monitorTypes, isLoading: mtLoading } = useGetAllMonitorTypes();
 	const { data: monitorSizes, isLoading: msLoading } = useGetAllMonitorSizes();
 	const { data: shifts, isLoading: shLoading } = useGetAllShifts();
+	const { data: audioEquipments, isLoading: aeLoading } =	useGetAllAudioEquipments();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -468,6 +482,37 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
+			'audio-equipments': {
+				fieldKey: 'description',
+				data: audioEquipments,
+				isLoading: aeLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							audioEquipmentsApi.createAudioEquipment({
+								description: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							audioEquipmentsApi.updateAudioEquipment(
+								item.id,
+								{ description: item.value }
+							)
+						),
+						...deleteIds.map(id =>
+							audioEquipmentsApi.deleteAudioEquipment(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: audioEquipmentsKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
 		}),
 		[
 			teacherCategories,
@@ -490,6 +535,8 @@ export const Catalog = () => {
 			msLoading,
 			shifts,
 			shLoading,
+			audioEquipments,
+			aeLoading,
 		]
 	);
 

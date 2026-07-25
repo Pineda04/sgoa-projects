@@ -35,7 +35,6 @@ export type Subjects =
 	| 'planifications'
 	| 'reports'
 	| 'pc-equipments'
-	| 'audio-equipments'
 	| 'airConditioners'
 	| 'schedule-compliance-check'
   | 'reports-monitor'
@@ -48,6 +47,7 @@ export type Subjects =
 	| 'connectivities'
 	| 'room-types'
 	| 'pc-types'
+	| 'audio-equipments'
 	| 'monitor-types'
 	| 'monitor-sizes'
 	| 'home'
@@ -86,7 +86,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'pc-equipments');
-		can('manage', 'audio-equipments');
 		can('manage', 'centers');
 		can('manage', 'buildings');
 		can('manage', 'classrooms');
@@ -108,6 +107,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'connectivities');
 		can('manage', 'room-types');
 		can('manage', 'pc-types');
+		can('manage', 'audio-equipments');
 		can('manage', 'monitor-types');
 		can('manage', 'monitor-sizes');
 	}
