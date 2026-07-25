@@ -12,6 +12,12 @@ import {
 } from 'lucide-react';
 import { Settings2 } from 'lucide-react';
 import {
+	useGetAllContractTypes,
+	contractTypesApi,
+	contractTypesKeys,
+} from '@api/contract-types';
+import { useGetAllBrands, brandsApi, brandsKeys } from '@api/brands';
+import {
 	useGetAllConditions,
 	conditionsApi,
 	conditionsKeys,
@@ -21,11 +27,6 @@ import {
 	roomTypesApi,
 	roomTypesKeys,
 } from '@api/room-types';
-import {
-	useGetAllContractTypes,
-	contractTypesApi,
-	contractTypesKeys,
-} from '@api/contract-types';
 import { queryClient } from '@config/lib';
 import { type Subjects } from '@config/lib';
 import { genericAlert } from '@shared/utils';
@@ -42,7 +43,12 @@ type EntityConfig = {
 	) => Promise<void>;
 };
 
-const entitySubjects = new Set<string>(['conditions', 'room-types', 'contract-types']);
+const entitySubjects = new Set<string>([
+	'contract-types',
+	'brands',
+	'conditions',
+	'room-types',
+]);
 
 const configItems = [
 	{
@@ -104,16 +110,79 @@ const configItems = [
 export const Catalog = () => {
 	const [activeEntity, setActiveEntity] = useState<string | null>(null);
 
-	const { data: conditions, isLoading: condLoading } = useGetAllConditions();
-	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
 	const { data: contractTypes, isLoading: ctLoading } = useGetAllContractTypes();
+	const { data: brands, isLoading: brLoading } = useGetAllBrands();
+	const { data: conditions, isLoading: cdLoading } = useGetAllConditions();
+  const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
-			conditions: {
+			'contract-types': {
+				fieldKey: 'name',
+				data: contractTypes,
+				isLoading: ctLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							contractTypesApi.createContractType({
+								name: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							contractTypesApi.updateContractType({
+								id: item.id,
+								body: { name: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							contractTypesApi.deleteContractType(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: contractTypesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
+			'brands': {
+				fieldKey: 'name',
+				data: brands,
+				isLoading: brLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							brandsApi.createBrand({
+								name: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							brandsApi.updateBrand({
+								id: item.id,
+								body: { name: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							brandsApi.deleteBrand(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: brandsKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
+			'conditions': {
 				fieldKey: 'status',
 				data: conditions,
-				isLoading: condLoading,
+				isLoading: cdLoading,
 				onSave: async (
 					createItems: Array<{ value: string }>,
 					updateItems: Array<{ id: string; value: string }>,
@@ -170,44 +239,20 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			'contract-types': {
-				fieldKey: 'name',
-				data: contractTypes,
-				isLoading: ctLoading,
-				onSave: async (
-					createItems: Array<{ value: string }>,
-					updateItems: Array<{ id: string; value: string }>,
-					deleteIds: string[]
-				) => {
-					await Promise.all([
-						...createItems.map(item =>
-							contractTypesApi.createContractType({
-								name: item.value,
-							})
-						),
-						...updateItems.map(item =>
-							contractTypesApi.updateContractType({
-								id: item.id,
-								body: { name: item.value },
-							})
-						),
-						...deleteIds.map(id =>
-							contractTypesApi.deleteContractType(id)
-						),
-					]);
-					queryClient.removeQueries({
-						queryKey: contractTypesKeys.all,
-					});
-					await genericAlert('Cambios guardados correctamente');
-				},
-			},
 		}),
-		[conditions, condLoading, roomTypes, rtLoading, contractTypes, ctLoading]
+		[
+			contractTypes,
+			ctLoading,
+			brands,
+			brLoading,
+			conditions,
+			cdLoading,
+			roomTypes,
+			rtLoading,
+		]
 	);
 
-	const activeConfig = activeEntity
-		? entityConfig[activeEntity]
-		: null;
+	const activeConfig = activeEntity ? entityConfig[activeEntity] : null;
 
 	const activeItem = activeEntity
 		? configItems.find(item => item.key === activeEntity)
