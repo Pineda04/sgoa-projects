@@ -9,6 +9,7 @@ import {
 	Computer,
 	FileText,
 	SquareUser,
+	Clock,
 } from 'lucide-react';
 import { queryClient } from '@config/lib';
 import { type Subjects } from '@config/lib';
@@ -52,6 +53,11 @@ import {
 	monitorTypesKeys,
 	monitorSizesKeys,
 } from '@api/pc-equipments';
+import {
+	useGetAllShifts,
+	shiftsApi,
+	shiftsKeys,
+} from '@api/shifts';
 
 type EntityConfig = {
 	fieldKey: string;
@@ -67,6 +73,7 @@ type EntityConfig = {
 const entitySubjects = new Set<string>([
 	'teacher-categories',
 	'contract-types',
+	'shifts',
 	'brands',
 	'conditions',
 	'connectivities',
@@ -88,6 +95,12 @@ const configItems = [
 		icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
 		title: 'Tipos de Contratación',
 		description: 'Gestión de tipos de contrato',
+	},
+	{
+		key: 'shifts',
+		icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />,
+		title: 'Jornadas',
+		description: 'Gestión de tipos de jornadas',
 	},
 	{
 		key: 'brands',
@@ -145,6 +158,7 @@ export const Catalog = () => {
 	const { data: pcTypes, isLoading: ptLoading } = useGetAllPcTypes();
 	const { data: monitorTypes, isLoading: mtLoading } = useGetAllMonitorTypes();
 	const { data: monitorSizes, isLoading: msLoading } = useGetAllMonitorSizes();
+	const { data: shifts, isLoading: shLoading } = useGetAllShifts();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -423,6 +437,37 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
+			'shifts': {
+				fieldKey: 'name',
+				data: shifts,
+				isLoading: shLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							shiftsApi.createShift({
+								name: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							shiftsApi.updateShift({
+								id: item.id,
+								body: { name: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							shiftsApi.deleteShift(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: shiftsKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
 		}),
 		[
 			teacherCategories,
@@ -443,6 +488,8 @@ export const Catalog = () => {
 			mtLoading,
 			monitorSizes,
 			msLoading,
+			shifts,
+			shLoading,
 		]
 	);
 
