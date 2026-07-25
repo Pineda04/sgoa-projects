@@ -32,6 +32,11 @@ import {
 	roomTypesKeys,
 } from '@api/room-types';
 import {
+	useGetAllConnectivities,
+	connectivitiesApi,
+	connectivitiesKeys,
+} from '@api/connectivities';
+import {
 	teacherCategoriesApi,
 	teacherCategoriesKeys,
 	useGetAllTeacherCategories,
@@ -53,6 +58,7 @@ const entitySubjects = new Set<string>([
 	'contract-types',
 	'brands',
 	'conditions',
+	'connectivities',
 	'room-types',
 ]);
 
@@ -121,6 +127,7 @@ export const Catalog = () => {
 	const { data: brands, isLoading: brLoading } = useGetAllBrands();
 	const { data: conditions, isLoading: cdLoading } = useGetAllConditions();
 	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
+	const { data: connectivities, isLoading: cnLoading } = useGetAllConnectivities();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -275,6 +282,37 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
+			connectivities: {
+				fieldKey: 'description',
+				data: connectivities,
+				isLoading: cnLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							connectivitiesApi.createConnectivity({
+								description: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							connectivitiesApi.updateConnectivity({
+								id: item.id,
+								body: { description: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							connectivitiesApi.deleteConnectivity(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: connectivitiesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
 		}),
 		[
 			teacherCategories,
@@ -287,6 +325,8 @@ export const Catalog = () => {
 			cdLoading,
 			roomTypes,
 			rtLoading,
+			connectivities,
+			cnLoading,
 		]
 	);
 
