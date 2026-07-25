@@ -41,6 +41,17 @@ import {
 	teacherCategoriesKeys,
 	useGetAllTeacherCategories,
 } from '@api/teachers';
+import {
+	useGetAllPcTypes,
+	useGetAllMonitorTypes,
+	useGetAllMonitorSizes,
+	pcTypesApi,
+	monitorTypesApi,
+	monitorSizesApi,
+	pcTypesKeys,
+	monitorTypesKeys,
+	monitorSizesKeys,
+} from '@api/pc-equipments';
 
 type EntityConfig = {
 	fieldKey: string;
@@ -60,6 +71,9 @@ const entitySubjects = new Set<string>([
 	'conditions',
 	'connectivities',
 	'room-types',
+	'pc-types',
+	'monitor-types',
+	'monitor-sizes',
 ]);
 
 const configItems = [
@@ -128,6 +142,9 @@ export const Catalog = () => {
 	const { data: conditions, isLoading: cdLoading } = useGetAllConditions();
 	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
 	const { data: connectivities, isLoading: cnLoading } = useGetAllConnectivities();
+	const { data: pcTypes, isLoading: ptLoading } = useGetAllPcTypes();
+	const { data: monitorTypes, isLoading: mtLoading } = useGetAllMonitorTypes();
+	const { data: monitorSizes, isLoading: msLoading } = useGetAllMonitorSizes();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -193,7 +210,7 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			brands: {
+			'brands': {
 				fieldKey: 'name',
 				data: brands,
 				isLoading: brLoading,
@@ -222,7 +239,7 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			conditions: {
+			'conditions': {
 				fieldKey: 'status',
 				data: conditions,
 				isLoading: cdLoading,
@@ -282,7 +299,7 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
-			connectivities: {
+			'connectivities': {
 				fieldKey: 'description',
 				data: connectivities,
 				isLoading: cnLoading,
@@ -313,6 +330,99 @@ export const Catalog = () => {
 					await genericAlert('Cambios guardados correctamente');
 				},
 			},
+			'pc-types': {
+				fieldKey: 'description',
+				data: pcTypes,
+				isLoading: ptLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							pcTypesApi.createPcType({
+								description: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							pcTypesApi.updatePcType({
+								id: item.id,
+								body: { description: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							pcTypesApi.deletePcType(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: pcTypesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
+			'monitor-types': {
+				fieldKey: 'description',
+				data: monitorTypes,
+				isLoading: mtLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							monitorTypesApi.createMonitorType({
+								description: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							monitorTypesApi.updateMonitorType({
+								id: item.id,
+								body: { description: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							monitorTypesApi.deleteMonitorType(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: monitorTypesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
+			'monitor-sizes': {
+				fieldKey: 'description',
+				data: monitorSizes,
+				isLoading: msLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							monitorSizesApi.createMonitorSize({
+								description: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							monitorSizesApi.updateMonitorSize({
+								id: item.id,
+								body: { description: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							monitorSizesApi.deleteMonitorSize(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: monitorSizesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
 		}),
 		[
 			teacherCategories,
@@ -327,6 +437,12 @@ export const Catalog = () => {
 			rtLoading,
 			connectivities,
 			cnLoading,
+			pcTypes,
+			ptLoading,
+			monitorTypes,
+			mtLoading,
+			monitorSizes,
+			msLoading,
 		]
 	);
 
