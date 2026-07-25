@@ -21,9 +21,14 @@ import {
 	roomTypesApi,
 	roomTypesKeys,
 } from '@api/room-types';
+import {
+	useGetAllContractTypes,
+	contractTypesApi,
+	contractTypesKeys,
+} from '@api/contract-types';
 import { queryClient } from '@config/lib';
 import { type Subjects } from '@config/lib';
-import { alertSuccess } from '@shared/utils';
+import { genericAlert } from '@shared/utils';
 import { CatalogCard, CatalogCrudModal } from '../components';
 
 type EntityConfig = {
@@ -37,7 +42,7 @@ type EntityConfig = {
 	) => Promise<void>;
 };
 
-const entitySubjects = new Set<string>(['conditions', 'room-types']);
+const entitySubjects = new Set<string>(['conditions', 'room-types', 'contract-types']);
 
 const configItems = [
 	{
@@ -101,6 +106,7 @@ export const Catalog = () => {
 
 	const { data: conditions, isLoading: condLoading } = useGetAllConditions();
 	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
+	const { data: contractTypes, isLoading: ctLoading } = useGetAllContractTypes();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -129,12 +135,10 @@ export const Catalog = () => {
 							conditionsApi.deleteCondition(id)
 						),
 					]);
-					await queryClient.removeQueries({
+					queryClient.removeQueries({
 						queryKey: conditionsKeys.all,
 					});
-					await alertSuccess({
-						data: { message: 'Cambios guardados correctamente' },
-					} as any);
+					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'room-types': {
@@ -160,16 +164,45 @@ export const Catalog = () => {
 						),
 						...deleteIds.map(id => roomTypesApi.deleteRoomType(id)),
 					]);
-					await queryClient.removeQueries({
+					queryClient.removeQueries({
 						queryKey: roomTypesKeys.all,
 					});
-					await alertSuccess({
-						data: { message: 'Cambios guardados correctamente' },
-					} as any);
+					await genericAlert('Cambios guardados correctamente');
+				},
+			},
+			'contract-types': {
+				fieldKey: 'name',
+				data: contractTypes,
+				isLoading: ctLoading,
+				onSave: async (
+					createItems: Array<{ value: string }>,
+					updateItems: Array<{ id: string; value: string }>,
+					deleteIds: string[]
+				) => {
+					await Promise.all([
+						...createItems.map(item =>
+							contractTypesApi.createContractType({
+								name: item.value,
+							})
+						),
+						...updateItems.map(item =>
+							contractTypesApi.updateContractType({
+								id: item.id,
+								body: { name: item.value },
+							})
+						),
+						...deleteIds.map(id =>
+							contractTypesApi.deleteContractType(id)
+						),
+					]);
+					queryClient.removeQueries({
+						queryKey: contractTypesKeys.all,
+					});
+					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 		}),
-		[conditions, condLoading, roomTypes, rtLoading]
+		[conditions, condLoading, roomTypes, rtLoading, contractTypes, ctLoading]
 	);
 
 	const activeConfig = activeEntity

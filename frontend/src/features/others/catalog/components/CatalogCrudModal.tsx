@@ -302,8 +302,9 @@ export const CatalogCrudModal = ({
 				</div>
 
 				{canWrite && (
-					<div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
-						<Button
+					<div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
+            <Button
+              className='w-full sm:w-auto'
 							type="button"
 							variant="outline"
 							onClick={handleCancel}
@@ -311,7 +312,8 @@ export const CatalogCrudModal = ({
 						>
 							Cancelar
 						</Button>
-						<Button
+            <Button
+              className='w-full sm:w-auto'
 							type="button"
 							onClick={handleSave}
 							disabled={!hasChanges || isSaving || hasEmptyValue}

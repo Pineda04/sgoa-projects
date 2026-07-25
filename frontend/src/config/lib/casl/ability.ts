@@ -34,6 +34,7 @@ export type Subjects =
 	| 'user-status'
 	| 'catalog'
 	| 'conditions'
+	| 'contract-types'
 	| 'room-types'
 	| 'home'
 	| 'help'
@@ -85,6 +86,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'periods');
 		can('manage', 'catalog');
 		can('manage', 'conditions');
+		can('manage', 'contract-types');
 		can('manage', 'room-types');
 		can('read', 'reports');
 		can('read', 'planifications');
@@ -108,6 +110,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'periods');
 		can('manage', 'catalog');
 		can('manage', 'conditions');
+		can('manage', 'contract-types');
 		can('manage', 'room-types');
 		can('read', 'reports');
 		can('read', 'planifications');
