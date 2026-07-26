@@ -103,8 +103,7 @@ export const CatalogCrudModal = ({
 	const handleRestore = useCallback((index: number) => {
 		setItems(prev => {
 			const next = [...prev];
-			const { deleted, ...rest } = next[index];
-			next[index] = rest;
+			delete next[index].deleted;
 			return next;
 		});
 	}, []);
