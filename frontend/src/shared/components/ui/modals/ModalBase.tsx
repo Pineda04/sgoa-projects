@@ -32,7 +32,7 @@ export const ModalBase = ({ isOpen, onClose, children }: IModal) => {
 				if (e.target === e.currentTarget) onClose();
 			}}
 		>
-			<div className="bg-white rounded-lg shadow-2xl p-6 lg:max-w-5xl w-full relative m-10 max-h-[90vh] overflow-auto">
+			<div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 lg:max-w-5xl w-full relative m-4 sm:m-10 max-h-[90vh] overflow-auto">
 				{/*<Button
 					className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 cursor-pointer z-40"
 					onClick={onClose}

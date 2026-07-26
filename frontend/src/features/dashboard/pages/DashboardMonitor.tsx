@@ -36,13 +36,13 @@ export const DashboardMonitor = () => {
 				</TabsList>
 
 				<TabsContent value="0">
-					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
+					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 p-3 sm:p-6">
 						<MonitorChecklist />
 					</div>
 				</TabsContent>
 
 				<TabsContent value="1">
-					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
+					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-3 sm:p-6">
 						<MonitorReports />
 					</div>
 				</TabsContent>
