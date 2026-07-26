@@ -83,4 +83,12 @@ export class QueryConsolidatedDto {
     IsValidClassroomConfigConstraint,
   )
   courseId?: string;
+
+  @ApiProperty({
+    description: 'Buscador por nombre de docente o nombre de la clase',
+    example: 'Matemática',
+    required: false,
+  })
+  @IsOptional()
+  searchTerm?: string;
 }

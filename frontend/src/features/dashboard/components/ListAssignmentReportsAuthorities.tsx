@@ -1,15 +1,34 @@
+import { useState } from 'react';
 import { useGetAllAssignmentReportsForAuthorities } from '@api/assignment-reports';
 import { TAssignmentReport } from '@api/assignment-reports';
+import { useGetAllDepartments } from '@api/departments';
+import { useGetAllCenters } from '@api/centers';
 import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable, TagError } from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce, usePaginationParams } from '@shared/hooks';
 
 export const ListAssignmentReportsAuthorities = () => {
 	const navigate = useNavigate();
-	const { isLoading, isError, data } = useGetAllAssignmentReportsForAuthorities();
+	const { setPage } = usePaginationParams();
 
-	if (isLoading) return <Loading />;
-	if (isError) return <TagError text="No se encontraron datos disponibles." />;
+	const [searchTerm, setSearchTerm] = useState('');
+	const { debouncedValue: debouncedSearch } = useDebounce(searchTerm, 500);
+	const [yearFilter, setYearFilter] = useState('');
+	const [pacFilter, setPacFilter] = useState('');
+	const [departmentFilter, setDepartmentFilter] = useState('');
+	const [centerFilter, setCenterFilter] = useState('');
+
+	const { data: departments } = useGetAllDepartments();
+	const { data: centers } = useGetAllCenters();
+
+	const { isLoading, isError, data } = useGetAllAssignmentReportsForAuthorities(
+		yearFilter || undefined,
+		pacFilter || undefined,
+		departmentFilter || undefined,
+		centerFilter || undefined,
+		debouncedSearch || undefined
+	);
 
 	const reports = (data?.data ?? []) as TAssignmentReport[];
 
@@ -83,19 +102,120 @@ export const ListAssignmentReportsAuthorities = () => {
 	];
 
 	return (
-		<>
-			<div className="py-2 mt-4">
-				<ResponsiveTable<TAssignmentReport>
-					columns={columns}
-					data={reports}
-					getRowKey={r => r.id}
-					loading={isLoading}
-					emptyMessage="No hay informes disponibles"
-				/>
+		<div className="space-y-4">
+			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4 mb-4 mt-4">
+				<div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-5 gap-4">
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Buscar Docente
+						</label>
+						<input
+							type="text"
+							placeholder="Nombre de docente..."
+							value={searchTerm}
+							onChange={e => {
+								setSearchTerm(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						/>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Centro
+						</label>
+						<select
+							value={centerFilter}
+							onChange={e => {
+								setCenterFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos los centros</option>
+							{centers?.map(c => (
+								<option key={c.id} value={c.id}>
+									{c.name}
+								</option>
+							))}
+						</select>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Departamento
+						</label>
+						<select
+							value={departmentFilter}
+							onChange={e => {
+								setDepartmentFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos los departamentos</option>
+							{departments?.map(d => (
+								<option key={d.id} value={d.id}>
+									{d.name}
+								</option>
+							))}
+						</select>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Año
+						</label>
+						<input
+							type="number"
+							placeholder="Ej. 2025"
+							value={yearFilter}
+							onChange={e => {
+								setYearFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						/>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							PAC
+						</label>
+						<select
+							value={pacFilter}
+							onChange={e => {
+								setPacFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+					</div>
+				</div>
 			</div>
-			<div className="mt-4">
-				<Pagination totalPages={data?.meta?.lastPage} />
-			</div>
-		</>
+
+			{isLoading ? (
+				<Loading />
+			) : isError ? (
+				<TagError text="No se encontraron datos disponibles." />
+			) : (
+				<>
+					<div className="py-2">
+						<ResponsiveTable<TAssignmentReport>
+							columns={columns}
+							data={reports}
+							getRowKey={r => r.id}
+							loading={isLoading}
+							emptyMessage="No hay informes disponibles"
+						/>
+					</div>
+					<div className="mt-4">
+						<Pagination totalPages={data?.meta?.lastPage} />
+					</div>
+				</>
+			)}
+		</div>
 	);
 };

@@ -19,13 +19,15 @@ export const coursesApi = {
 	getAllCourses: (
 		searchTerm: string,
 		page: number = 1,
-		size: number = 25
+		size: number = 25,
+		activeStatus?: boolean
 	) => {
 		const params = new URLSearchParams({
 			searchTerm,
 			page: String(page),
 			size: String(size),
 		});
+		if (activeStatus !== undefined) params.set('activeStatus', String(activeStatus));
 
 		return api.get<IResponse<TCourse[]>>(`/courses/search?${params}`);
 	},
@@ -37,13 +39,15 @@ export const coursesApi = {
 		centerDepartmentId: string,
 		searchTerm: string,
 		page: number = 1,
-		size: number = 25
+		size: number = 25,
+		activeStatus?: boolean
 	) => {
 		const params = new URLSearchParams({
 			searchTerm,
 			page: String(page),
 			size: String(size),
 		});
+		if (activeStatus !== undefined) params.set('activeStatus', String(activeStatus));
 
 		return api.get<IResponse<TCourse[]>>(
 			`/courses/search/${centerDepartmentId}?${params}`
@@ -147,6 +151,7 @@ export const courseStadisticsApi = {
 		centerDepartmentId?: string;
 		page?: number;
 		size?: number;
+		searchTerm?: string;
 	}) => {
 		const searchParams = new URLSearchParams();
 		if (params.year) searchParams.set('year', params.year);
@@ -155,6 +160,7 @@ export const courseStadisticsApi = {
 			searchParams.set('centerDepartmentId', params.centerDepartmentId);
 		if (params.page) searchParams.set('page', String(params.page));
 		if (params.size) searchParams.set('size', String(params.size));
+		if (params.searchTerm) searchParams.set('searchTerm', params.searchTerm);
 		return api.get<IResponse<TOutputConsolidated[]>>(
 			`/course-stadistics/consolidated?${searchParams}`
 		);

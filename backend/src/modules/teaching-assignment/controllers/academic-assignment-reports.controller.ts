@@ -105,8 +105,22 @@ export class AssignmentReportsController {
     internalErrorDescription: 'Error interno al obtener los informes.',
     notFoundDescription: 'No se encontraron informes de asignación académica.',
   })
-  findAll(@Query() query: QueryPaginationDto) {
-    return this.academicAssignmentReportsService.findAllWithPagination(query);
+  findAll(
+    @Query() query: QueryPaginationDto,
+    @Query('year') year?: string,
+    @Query('pac') pac?: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('centerId') centerId?: string,
+    @Query('teacherName') teacherName?: string,
+  ) {
+    return this.academicAssignmentReportsService.findAllWithPagination(
+      query,
+      year,
+      pac,
+      departmentId,
+      centerId,
+      teacherName,
+    );
   }
 
   @Get('periods')
@@ -394,11 +408,15 @@ export class AssignmentReportsController {
     @Query() query: QueryPaginationDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
     @GetCurrentUserId() userId: string,
+    @Query('year') year?: string,
+    @Query('pac') pac?: string,
   ) {
     return this.academicAssignmentReportsService.findAllByCoordinatorOnlyPeriods(
       query,
       userId,
       centerDepartmentId,
+      year,
+      pac,
     );
   }
 
@@ -423,9 +441,19 @@ export class AssignmentReportsController {
     notFoundDescription:
       'No se encontraron periodos con asignaciones académicas registradas.',
   })
-  findAllPeriodsForAuthorities(@Query() query: QueryPaginationDto) {
+  findAllPeriodsForAuthorities(
+    @Query() query: QueryPaginationDto,
+    @Query('year') year?: string,
+    @Query('pac') pac?: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('centerId') centerId?: string,
+  ) {
     return this.academicAssignmentReportsService.findAllPeriodsForAuthorities(
       query,
+      year,
+      pac,
+      departmentId,
+      centerId,
     );
   }
 
@@ -514,6 +542,9 @@ export class AssignmentReportsController {
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
     @Query('periodId', ValidateIdPipe) periodId?: string,
     @Query('teacherId', ValidateIdPipe) teacherId?: string,
+    @Query('year') year?: string,
+    @Query('pac') pac?: string,
+    @Query('teacherName') teacherName?: string,
   ) {
     return this.academicAssignmentReportsService.findOneByCoordinatorAndPeriodId(
       query,
@@ -521,6 +552,9 @@ export class AssignmentReportsController {
       centerDepartmentId,
       periodId,
       teacherId,
+      year,
+      pac,
+      teacherName,
     );
   }
 

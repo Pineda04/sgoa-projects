@@ -53,15 +53,24 @@ export const academicAssignmentReportsApi = {
 	getAcademicAssignmentOnlyPeriods: (
 		page: number = 1,
 		size: number = 10,
-		centerDepartmentId: string
-	) =>
-		api.get<
+		centerDepartmentId: string,
+		year?: string,
+		pac?: string
+	) => {
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
+		if (year) params.set('year', year);
+		if (pac) params.set('pac', pac);
+		return api.get<
 			IResponse<
 				(TCurrentAcademicPeriod & { centerDepartmentId: string })[]
 			>
 		>(
-			`/academic-assignment-reports/coordinator/${centerDepartmentId}/periods?page=${page}&size=${size}`
-		),
+			`/academic-assignment-reports/coordinator/${centerDepartmentId}/periods?${params}`
+		);
+	},
 
 	// WARNING: No usar este.
 	getAcademicAssignmentByPeriodIdAndCenter: (
@@ -77,17 +86,43 @@ export const academicAssignmentReportsApi = {
 		periodId?: string,
 		teacherId?: string,
 		page: number = 1,
-		size: number = 25
-	) =>
-		api.get<IResponse<TAssignmentReport[]>>(
-			`/academic-assignment-reports/departments/${centerDepartmentId}?${periodId ? 'periodId=' + periodId : ''
-			}${teacherId ? '&teacherId=' + teacherId : ''
-			}&page=${page}&size=${size}`
-		),
+		size: number = 25,
+		year?: string,
+		pac?: string,
+		teacherName?: string
+	) => {
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
+		if (periodId) params.set('periodId', periodId);
+		if (teacherId) params.set('teacherId', teacherId);
+		if (year) params.set('year', year);
+		if (pac) params.set('pac', pac);
+		if (teacherName) params.set('teacherName', teacherName);
+		return api.get<IResponse<TAssignmentReport[]>>(
+			`/academic-assignment-reports/departments/${centerDepartmentId}?${params}`
+		);
+	},
 
 	// Todos los periodos con asignaciones (todos los centros y departamentos)
-	getAllPeriodsForAuthorities: (page: number = 1, size: number = 10) =>
-		api.get<
+	getAllPeriodsForAuthorities: (
+		page: number = 1,
+		size: number = 10,
+		year?: string,
+		pac?: string,
+		departmentId?: string,
+		centerId?: string
+	) => {
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
+		if (year) params.set('year', year);
+		if (pac) params.set('pac', pac);
+		if (departmentId) params.set('departmentId', departmentId);
+		if (centerId) params.set('centerId', centerId);
+		return api.get<
 			IResponse<
 				(TCurrentAcademicPeriod & {
 					centerDepartmentId: string;
@@ -95,13 +130,32 @@ export const academicAssignmentReportsApi = {
 					departmentName: string;
 				})[]
 			>
-		>(`/academic-assignment-reports/periods/all?page=${page}&size=${size}`),
+		>(`/academic-assignment-reports/periods/all?${params}`);
+	},
 
 	// Todos los informes de asignación académica — para ADMIN, DIRECCION, RRHH
-	getAllAssignmentReports: (page: number = 1, size: number = 25) =>
-		api.get<IResponse<TAssignmentReport[]>>(
-			`/academic-assignment-reports?page=${page}&size=${size}`
-		),
+	getAllAssignmentReports: (
+		page: number = 1,
+		size: number = 25,
+		year?: string,
+		pac?: string,
+		departmentId?: string,
+		centerId?: string,
+		teacherName?: string
+	) => {
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
+		if (year) params.set('year', year);
+		if (pac) params.set('pac', pac);
+		if (departmentId) params.set('departmentId', departmentId);
+		if (centerId) params.set('centerId', centerId);
+		if (teacherName) params.set('teacherName', teacherName);
+		return api.get<IResponse<TAssignmentReport[]>>(
+			`/academic-assignment-reports?${params}`
+		);
+	},
 
 	getAllAcademicAssignmentReportsOnlyPeriods: () =>
 		api.get<

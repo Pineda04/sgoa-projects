@@ -31,7 +31,10 @@ export const academicAssignmentCoordinatorKeys = {
 	periodCenterTeacher: (
 		periodId: string,
 		centerDepartmentId: string,
-		teacherId: string
+		teacherId: string,
+		year?: string,
+		pac?: string,
+		teacherName?: string
 	) =>
 		[
 			...academicAssignmentCoordinatorKeys.all,
@@ -39,6 +42,9 @@ export const academicAssignmentCoordinatorKeys = {
 			periodId,
 			centerDepartmentId,
 			teacherId,
+			year ?? '',
+			pac ?? '',
+			teacherName ?? '',
 		] as const,
 	periodPage: (page: number, size: number) =>
 		[
@@ -48,13 +54,20 @@ export const academicAssignmentCoordinatorKeys = {
 			'size',
 			size,
 		] as const,
-	periodPageCenter: (page: number, centerDepartmentId: string) =>
+	periodPageCenter: (
+		page: number,
+		centerDepartmentId: string,
+		year?: string,
+		pac?: string
+	) =>
 		[
 			...academicAssignmentCoordinatorKeys.onlyPeriods,
 			'page',
 			page,
 			'center',
 			centerDepartmentId,
+			year ?? '',
+			pac ?? '',
 		] as const,
 	search: (searchTerm: string, page: number) =>
 		[
@@ -79,8 +92,42 @@ export const academicAssignmentCoordinatorKeys = {
 
 export const academicAssignmentAuthoritiesKeys = {
 	all: ['academic-assignment-authorities'] as const,
-	periods: (page: number, size: number) =>
-		[...academicAssignmentAuthoritiesKeys.all, 'periods', page, size] as const,
-	reports: (page: number, size: number) =>
-		[...academicAssignmentAuthoritiesKeys.all, 'reports', page, size] as const,
+	periods: (
+		page: number,
+		size: number,
+		year?: string,
+		pac?: string,
+		departmentId?: string,
+		centerId?: string
+	) =>
+		[
+			...academicAssignmentAuthoritiesKeys.all,
+			'periods',
+			page,
+			size,
+			year ?? '',
+			pac ?? '',
+			departmentId ?? '',
+			centerId ?? '',
+		] as const,
+	reports: (
+		page: number,
+		size: number,
+		year?: string,
+		pac?: string,
+		departmentId?: string,
+		centerId?: string,
+		teacherName?: string
+	) =>
+		[
+			...academicAssignmentAuthoritiesKeys.all,
+			'reports',
+			page,
+			size,
+			year ?? '',
+			pac ?? '',
+			departmentId ?? '',
+			centerId ?? '',
+			teacherName ?? '',
+		] as const,
 };

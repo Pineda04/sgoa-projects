@@ -221,9 +221,46 @@ export class AcademicAssignmentReportsService {
 
   async findAllWithPagination(
     query: QueryPaginationDto,
+    year?: string,
+    pac?: string,
+    departmentId?: string,
+    centerId?: string,
+    teacherName?: string,
   ): Promise<IPaginateOutput<TAcademicAssignmentReport>> {
+    const where: Prisma.AcademicAssignmentReportWhereInput = {
+      ...(year || pac
+        ? {
+            period: {
+              ...(year ? { year: parseInt(year) } : {}),
+              ...(pac ? { pac: parseInt(pac) } : {}),
+            },
+          }
+        : {}),
+      ...(departmentId || centerId
+        ? {
+            centerDepartment: {
+              ...(departmentId ? { departmentId } : {}),
+              ...(centerId ? { centerId } : {}),
+            },
+          }
+        : {}),
+      ...(teacherName
+        ? {
+            teacher: {
+              user: {
+                name: {
+                  contains: teacherName,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          }
+        : {}),
+    };
+
     const [academicAssignmentReports, count] = await Promise.all([
       this.prisma.academicAssignmentReport.findMany({
+        where,
         ...paginate(query),
         relationLoadStrategy: 'join',
         include: this.includeOptionsAAR,
@@ -232,7 +269,7 @@ export class AcademicAssignmentReportsService {
           centerDepartmentId: true,
         },
       }),
-      this.prisma.academicAssignmentReport.count(),
+      this.prisma.academicAssignmentReport.count({ where }),
     ]);
 
     return paginateOutput<TAcademicAssignmentReport>(
@@ -348,6 +385,8 @@ export class AcademicAssignmentReportsService {
     query: QueryPaginationDto,
     userId: string,
     centerDepartmentId: string,
+    year?: string,
+    pac?: string,
   ): Promise<
     IPaginateOutput<
       TAcademicPeriod & { title: string; centerDepartmentId: string }
@@ -359,14 +398,36 @@ export class AcademicAssignmentReportsService {
         centerDepartmentId,
       );
 
+    const where = {
+      centerDepartmentId,
+      ...(year || pac
+        ? {
+            period: {
+              ...(year ? { year: parseInt(year) } : {}),
+              ...(pac ? { pac: parseInt(pac) } : {}),
+            },
+          }
+        : {}),
+    };
+
+    const countWhere = {
+      centerDepartmentId: user.centerDepartmentId,
+      ...(year || pac
+        ? {
+            period: {
+              ...(year ? { year: parseInt(year) } : {}),
+              ...(pac ? { pac: parseInt(pac) } : {}),
+            },
+          }
+        : {}),
+    };
+
     // Periodos donde existen reportes y que sean del departamento del usuario.
     const [periods, count] = await Promise.all([
       this.prisma.academicAssignmentReport.findMany({
         ...paginate(query),
         distinct: ['periodId'],
-        where: {
-          centerDepartmentId,
-        },
+        where,
         relationLoadStrategy: 'join',
         select: {
           period: true,
@@ -376,9 +437,7 @@ export class AcademicAssignmentReportsService {
       this.prisma.academicAssignmentReport
         .findMany({
           distinct: ['periodId'],
-          where: {
-            centerDepartmentId: user.centerDepartmentId,
-          },
+          where: countWhere,
           select: {
             periodId: true,
           },
@@ -405,6 +464,10 @@ export class AcademicAssignmentReportsService {
   // en el esquema de la DB crear un indice compuesto por 'periodId', 'centerDepartmentId para optimizacion
   async findAllPeriodsForAuthorities(
     query: QueryPaginationDto,
+    year?: string,
+    pac?: string,
+    departmentId?: string,
+    centerId?: string,
   ): Promise<
     IPaginateOutput<
       TAcademicPeriod & {
@@ -415,10 +478,30 @@ export class AcademicAssignmentReportsService {
       }
     >
   > {
+    const where = {
+      ...(year || pac
+        ? {
+            period: {
+              ...(year ? { year: parseInt(year) } : {}),
+              ...(pac ? { pac: parseInt(pac) } : {}),
+            },
+          }
+        : {}),
+      ...(departmentId || centerId
+        ? {
+            centerDepartment: {
+              ...(departmentId ? { departmentId } : {}),
+              ...(centerId ? { centerId } : {}),
+            },
+          }
+        : {}),
+    };
+
     const [rows, count] = await Promise.all([
       this.prisma.academicAssignmentReport.findMany({
         ...paginate(query),
         distinct: ['periodId', 'centerDepartmentId'],
+        where,
         relationLoadStrategy: 'join',
         orderBy: [{ periodId: 'asc' }, { centerDepartmentId: 'asc' }],
         select: {
@@ -435,6 +518,7 @@ export class AcademicAssignmentReportsService {
       this.prisma.academicAssignmentReport
         .findMany({
           distinct: ['periodId', 'centerDepartmentId'],
+          where,
           select: { periodId: true, centerDepartmentId: true },
         })
         .then((results) => results.length),
@@ -614,6 +698,9 @@ export class AcademicAssignmentReportsService {
     centerDepartmentId: string,
     periodId?: string,
     teacherId?: string,
+    year?: string,
+    pac?: string,
+    teacherName?: string,
   ): Promise<
     IPaginateOutput<
       TCustomOmit<
@@ -628,11 +715,30 @@ export class AcademicAssignmentReportsService {
       centerDepartmentId,
     );
 
-    const where = {
-      periodId,
+    const where: Prisma.AcademicAssignmentReportWhereInput = {
       centerDepartmentId,
-      // ...(teacherId ? { teacherId } : {}),
-      teacherId,
+      ...(periodId ? { periodId } : {}),
+      ...(teacherId ? { teacherId } : {}),
+      ...(year || pac
+        ? {
+            period: {
+              ...(year ? { year: parseInt(year) } : {}),
+              ...(pac ? { pac: parseInt(pac) } : {}),
+            },
+          }
+        : {}),
+      ...(teacherName
+        ? {
+            teacher: {
+              user: {
+                name: {
+                  contains: teacherName,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          }
+        : {}),
     };
 
     const [academicAssignmentReports, count] = await Promise.all([
