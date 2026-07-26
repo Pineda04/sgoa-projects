@@ -15,13 +15,13 @@ interface SummaryCardProps {
 }
 
 const SummaryCard = ({ label, value, icon, accentClassName }: SummaryCardProps) => (
-	<div className="flex items-center gap-3 rounded-xl border border-card-border bg-card p-4 shadow-sm">
-		<div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${accentClassName}`}>
+	<div className="flex items-center gap-2 rounded-xl border border-card-border bg-card p-3 shadow-sm sm:gap-3 sm:p-4">
+		<div className={`flex size-9 shrink-0 items-center justify-center rounded-lg sm:size-10 ${accentClassName}`}>
 			{icon}
 		</div>
 		<div className="min-w-0">
-			<p className="text-xs text-muted-foreground">{label}</p>
-			<p className="truncate text-xl font-semibold text-foreground">{value}</p>
+			<p className="truncate text-xs text-muted-foreground">{label}</p>
+			<p className="truncate text-lg font-semibold text-foreground sm:text-xl">{value}</p>
 		</div>
 	</div>
 );
@@ -44,17 +44,17 @@ const ComplianceByGroupChart = ({
 	);
 
 	return (
-		<div className="rounded-xl border border-card-border bg-card p-4 shadow-sm">
-			<p className="mb-4 text-sm font-semibold text-foreground">
+		<div className="rounded-xl border border-card-border bg-card p-3 shadow-sm sm:p-4">
+			<p className="mb-3 text-sm font-semibold text-foreground sm:mb-4">
 				{getGroupByChartTitle(groupBy)}
 			</p>
-			<div className="flex h-40 items-end gap-2 overflow-x-auto">
+			<div className="flex h-32 items-end gap-1.5 overflow-x-auto sm:h-40 sm:gap-2">
 				{sortedGroups.map(group => {
 					const label = formatGroupLabel(group);
 					return (
 						<div
 							key={group.groupKey}
-							className="flex h-full min-w-10 flex-1 flex-col items-center justify-end gap-1.5"
+							className="flex h-full min-w-9 flex-1 flex-col items-center justify-end gap-1 sm:min-w-10 sm:gap-1.5"
 							title={`${label}: ${group.complianceRate.toFixed(1)}% (${group.present}/${group.totalChecks})`}
 						>
 							<span className="text-[11px] font-medium text-muted-foreground">

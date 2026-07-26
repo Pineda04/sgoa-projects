@@ -139,7 +139,13 @@ export const MonitorReportFilters = ({
 			</div>
 
 			<div className="sm:col-span-2 lg:col-span-5">
-				<Button type="button" variant="outline" size="sm" onClick={onReset}>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={onReset}
+					className="w-full sm:w-auto"
+				>
 					Limpiar filtros
 				</Button>
 			</div>

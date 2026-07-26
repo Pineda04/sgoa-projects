@@ -136,7 +136,7 @@ export const MonitorReportTable = ({
 				<p className="text-sm font-semibold text-foreground">
 					Incidencias registradas
 				</p>
-				<div className="flex gap-2">
+				<div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
 					<Button
 						type="button"
 						variant="outline"
@@ -149,7 +149,7 @@ export const MonitorReportTable = ({
 						) : (
 							<FileText className="size-4" />
 						)}
-						Exportar a PDF
+						<span className="hidden sm:inline">Exportar a </span>PDF
 					</Button>
 					<Button
 						type="button"
@@ -163,7 +163,7 @@ export const MonitorReportTable = ({
 						) : (
 							<FileSpreadsheet className="size-4" />
 						)}
-						Exportar a Excel
+						<span className="hidden sm:inline">Exportar a </span>Excel
 					</Button>
 				</div>
 			</div>
