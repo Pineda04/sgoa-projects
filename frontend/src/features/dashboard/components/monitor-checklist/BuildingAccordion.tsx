@@ -71,11 +71,11 @@ export const BuildingAccordion = ({
 				/>
 			</button>
 
-			{isOpen && (
-				<div
-					id={panelId}
-					className={`border-t border-border ${BODY_CLASSES[view]}`}
-				>
+			<div
+				hidden={!isOpen}
+				id={panelId}
+				className={`border-t border-border ${BODY_CLASSES[view]}`}
+			>
 					<AssignmentList
 						items={group.items}
 						view={view}
@@ -84,8 +84,7 @@ export const BuildingAccordion = ({
 						onConfirm={onConfirm}
 						onOpenModal={onOpenModal}
 					/>
-				</div>
-			)}
+			</div>
 		</section>
 	);
 };
