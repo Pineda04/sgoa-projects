@@ -25,9 +25,9 @@ import {
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
-import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 import { airConditionersRoutes } from '@features/inventory';
+import { catalogRoutes } from '@features/others';
 
 
 const router = createBrowserRouter(
@@ -56,6 +56,12 @@ const router = createBrowserRouter(
 			path: 'help',
 			element: <PrivateRoute />,
 			children: helpRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'catalog',
+			element: <ProtectedRoute action="read" subject="catalog" />,
+			children: catalogRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
@@ -170,12 +176,6 @@ const router = createBrowserRouter(
 			path: 'inventory/pc-equipments/*',
 			element: <ProtectedRoute action="read" subject="pc-equipments" />,
 			children: pcEquipmentsRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
-			path: 'inventory/audio-equipments',
-			element: <ProtectedRoute action="read" subject="audio-equipments" />,
-			children: audioEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
