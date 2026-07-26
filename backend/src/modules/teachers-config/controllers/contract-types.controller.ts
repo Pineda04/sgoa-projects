@@ -24,7 +24,7 @@ export class ContractTypesController {
   constructor(private readonly contractTypesService: ContractTypesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de contrato.')
   @ApiBody({
@@ -83,7 +83,7 @@ export class ContractTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de contrato.')
   @ApiBody({
@@ -107,7 +107,7 @@ export class ContractTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el tipo de contrato.')
   @ApiCommonResponses({

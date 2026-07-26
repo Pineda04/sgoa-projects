@@ -20,6 +20,7 @@ export const MonitorReports = () => {
 	const [dateTo, setDateTo] = useState(getTodayDateString);
 	const [teacherId, setTeacherId] = useState('');
 	const [buildingId, setBuildingId] = useState('');
+	const [groupBy, setGroupBy] = useState(EReportGroupBy.DAY);
 	const [teacherResetKey, setTeacherResetKey] = useState(0);
 
 	const { data: buildings } = useGetMonitorBuildings();
@@ -35,8 +36,8 @@ export const MonitorReports = () => {
 	);
 
 	const reportFilters = useMemo(
-		() => ({ ...filters, groupBy: EReportGroupBy.DAY }),
-		[filters]
+		() => ({ ...filters, groupBy }),
+		[filters, groupBy]
 	);
 
 	const reportQuery = useGetComplianceReport(reportFilters);
@@ -47,6 +48,7 @@ export const MonitorReports = () => {
 		setDateTo(getTodayDateString());
 		setTeacherId('');
 		setBuildingId('');
+		setGroupBy(EReportGroupBy.DAY);
 		setTeacherResetKey(key => key + 1);
 	};
 
@@ -56,12 +58,14 @@ export const MonitorReports = () => {
 				dateFrom={dateFrom}
 				dateTo={dateTo}
 				buildingId={buildingId}
+				groupBy={groupBy}
 				buildings={buildings ?? []}
 				teacherResetKey={teacherResetKey}
 				onDateFromChange={setDateFrom}
 				onDateToChange={setDateTo}
 				onBuildingChange={setBuildingId}
 				onTeacherChange={setTeacherId}
+				onGroupByChange={setGroupBy}
 				onReset={handleReset}
 			/>
 
@@ -71,6 +75,7 @@ export const MonitorReports = () => {
 				<MonitorReportSummary
 					report={reportQuery.data}
 					isLoading={reportQuery.isLoading}
+					groupBy={groupBy}
 				/>
 			)}
 
@@ -79,6 +84,8 @@ export const MonitorReports = () => {
 				isLoading={checksQuery.isLoading}
 				isError={checksQuery.isError}
 				totalPages={checksQuery.data?.meta?.lastPage ?? 0}
+				filters={filters}
+				summary={reportQuery.data}
 			/>
 		</div>
 	);
