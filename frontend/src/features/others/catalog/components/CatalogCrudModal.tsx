@@ -143,15 +143,50 @@ export const CatalogCrudModal = ({
 		if (hasEmptyValue) return;
 
 		setIsSaving(true);
+		setEditingIndex(null);
+
 		try {
-			await onSave(createItems, updateItems, deleteIds);
+			if (createItems.length > 0 || updateItems.length > 0) {
+				await onSave(createItems, updateItems, []);
+			}
+
+			const succeededIds: string[] = [];
+			const failedIds: string[] = [];
+			let lastError: unknown;
+
+			for (const id of deleteIds) {
+				try {
+					await onSave([], [], [id]);
+					succeededIds.push(id);
+				} catch (error) {
+					failedIds.push(id);
+					lastError = error;
+				}
+			}
+
+			const nextItems = items
+				.filter(i => !(i.id && succeededIds.includes(i.id)))
+				.map(i =>
+					i.id && failedIds.includes(i.id)
+						? { ...i, deleted: false }
+						: i
+				);
+
+			setItems(nextItems);
+			originalRef.current = JSON.stringify(nextItems);
 
 			setIsSaving(false);
-			genericAlert('Cambios guardados correctamente');
-			onClose();
+
+			if (failedIds.length === 0) {
+				genericAlert('Cambios guardados correctamente');
+				onClose();
+			} else {
+				await alertError(lastError);
+			}
 		} catch (error) {
-			await alertError(error);
 			setIsSaving(false);
+			setItems(JSON.parse(originalRef.current));
+			await alertError(error);
 		}
 	};
 
