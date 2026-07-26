@@ -1,5 +1,11 @@
-import { FileSpreadsheet, FileText } from 'lucide-react';
-import { TScheduleComplianceCheckDetail } from '@api/monitor';
+import { useState } from 'react';
+import { FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import {
+	monitorApi,
+	TCheckFilters,
+	TMonitorReportSummary,
+	TScheduleComplianceCheckDetail,
+} from '@api/monitor';
 import {
 	Button,
 	DataTable,
@@ -8,10 +14,21 @@ import {
 	type IDataTableColumn,
 } from '@shared/components';
 import { ESwalIcons, genericAlert } from '@shared/utils';
+import {
+	buildExportRows,
+	EXPORT_ALL_CHECKS_SIZE,
+} from './monitor-report-export.utils';
+import { exportMonitorReportExcel } from './monitor-report-excel.utils';
+import { exportMonitorReportPdf } from './monitor-report-pdf.utils';
 import { formatCheckDate, STATUS_BADGE_CONFIG } from './monitor-reports.utils';
 
-const handleExport = () => {
-	genericAlert('Funcionalidad próxima disponible.', ESwalIcons.SUCCESS, 2000);
+type TExportFormat = 'pdf' | 'excel';
+
+const EMPTY_SUMMARY: TMonitorReportSummary = {
+	totalChecks: 0,
+	present: 0,
+	absent: 0,
+	complianceRate: 0,
 };
 
 const columns: IDataTableColumn<TScheduleComplianceCheckDetail>[] = [
@@ -57,6 +74,8 @@ interface MonitorReportTableProps {
 	isLoading: boolean;
 	isError: boolean;
 	totalPages: number;
+	filters: TCheckFilters;
+	summary?: TMonitorReportSummary;
 }
 
 export const MonitorReportTable = ({
@@ -64,7 +83,53 @@ export const MonitorReportTable = ({
 	isLoading,
 	isError,
 	totalPages,
+	filters,
+	summary,
 }: MonitorReportTableProps) => {
+	const [exportingFormat, setExportingFormat] = useState<TExportFormat | null>(
+		null
+	);
+
+	const handleExport = async (format: TExportFormat) => {
+		setExportingFormat(format);
+		try {
+			const response = await monitorApi.getChecks(
+				1,
+				EXPORT_ALL_CHECKS_SIZE,
+				filters
+			);
+			const rows = buildExportRows(response.data.data);
+
+			if (rows.length === 0) {
+				genericAlert(
+					'No hay incidencias para exportar en este periodo.',
+					ESwalIcons.ERROR
+				);
+				return;
+			}
+
+			const exportParams = {
+				rows,
+				summary: summary ?? EMPTY_SUMMARY,
+				dateFrom: filters.dateFrom,
+				dateTo: filters.dateTo,
+			};
+
+			if (format === 'pdf') {
+				await exportMonitorReportPdf(exportParams);
+			} else {
+				await exportMonitorReportExcel(exportParams);
+			}
+		} catch {
+			genericAlert(
+				'Ocurrió un error al generar el archivo. Intenta nuevamente.',
+				ESwalIcons.ERROR
+			);
+		} finally {
+			setExportingFormat(null);
+		}
+	};
+
 	return (
 		<div className="space-y-3">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -76,18 +141,28 @@ export const MonitorReportTable = ({
 						type="button"
 						variant="outline"
 						size="sm"
-						onClick={handleExport}
+						disabled={exportingFormat !== null}
+						onClick={() => handleExport('pdf')}
 					>
-						<FileText className="size-4" />
+						{exportingFormat === 'pdf' ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<FileText className="size-4" />
+						)}
 						Exportar a PDF
 					</Button>
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
-						onClick={handleExport}
+						disabled={exportingFormat !== null}
+						onClick={() => handleExport('excel')}
 					>
-						<FileSpreadsheet className="size-4" />
+						{exportingFormat === 'excel' ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<FileSpreadsheet className="size-4" />
+						)}
 						Exportar a Excel
 					</Button>
 				</div>

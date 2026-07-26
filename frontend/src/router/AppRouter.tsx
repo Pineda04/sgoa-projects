@@ -11,7 +11,7 @@ import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } fr
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
-import { AcademicAssignmentReport } from '@features/academic/reports/pages';
+import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
@@ -104,6 +104,12 @@ const router = createBrowserRouter(
 			path: 'academic/reports/teacher/:id',
 			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
 			children: [{ index: true, element: <AcademicAssignmentReport /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'academic/reports/monitor',
+			element: <ProtectedRoute action="read" subject="reports-monitor" />,
+			children: [{ index: true, element: <MonitorReport /> }],
 			errorElement: <div>404</div>,
 		},
 		{

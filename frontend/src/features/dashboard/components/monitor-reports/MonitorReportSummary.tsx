@@ -1,7 +1,11 @@
 import { ClipboardList, Percent, UserCheck, UserX } from 'lucide-react';
-import { TMonitorReport } from '@api/monitor';
+import { EReportGroupBy, TMonitorReport } from '@api/monitor';
 import { SkeletonCard } from '@shared/components';
-import { formatCheckDate } from './monitor-reports.utils';
+import {
+	formatGroupLabel,
+	getGroupByChartTitle,
+	isDateGroupKey,
+} from './monitor-reports.utils';
 
 interface SummaryCardProps {
 	label: string;
@@ -22,41 +26,52 @@ const SummaryCard = ({ label, value, icon, accentClassName }: SummaryCardProps) 
 	</div>
 );
 
-const ComplianceByDayChart = ({ report }: { report: TMonitorReport }) => {
+const ComplianceByGroupChart = ({
+	report,
+	groupBy,
+}: {
+	report: TMonitorReport;
+	groupBy: EReportGroupBy;
+}) => {
 	const groups = report.groups ?? [];
 
 	if (groups.length === 0) return null;
 
 	const sortedGroups = [...groups].sort((a, b) =>
-		a.groupKey.localeCompare(b.groupKey)
+		isDateGroupKey(a.groupKey) && isDateGroupKey(b.groupKey)
+			? a.groupKey.localeCompare(b.groupKey)
+			: a.groupLabel.localeCompare(b.groupLabel)
 	);
 
 	return (
 		<div className="rounded-xl border border-card-border bg-card p-4 shadow-sm">
 			<p className="mb-4 text-sm font-semibold text-foreground">
-				Cumplimiento por día
+				{getGroupByChartTitle(groupBy)}
 			</p>
 			<div className="flex h-40 items-end gap-2 overflow-x-auto">
-				{sortedGroups.map(group => (
-					<div
-						key={group.groupKey}
-						className="flex h-full min-w-10 flex-1 flex-col items-center justify-end gap-1.5"
-						title={`${formatCheckDate(group.groupKey)}: ${group.complianceRate.toFixed(1)}% (${group.present}/${group.totalChecks})`}
-					>
-						<span className="text-[11px] font-medium text-muted-foreground">
-							{group.complianceRate.toFixed(0)}%
-						</span>
+				{sortedGroups.map(group => {
+					const label = formatGroupLabel(group);
+					return (
 						<div
-							className="w-full rounded-t-md bg-primary/80 transition-all"
-							style={{
-								height: `${Math.max(group.complianceRate, 2)}%`,
-							}}
-						/>
-						<span className="text-[10px] text-muted-foreground">
-							{formatCheckDate(group.groupKey)}
-						</span>
-					</div>
-				))}
+							key={group.groupKey}
+							className="flex h-full min-w-10 flex-1 flex-col items-center justify-end gap-1.5"
+							title={`${label}: ${group.complianceRate.toFixed(1)}% (${group.present}/${group.totalChecks})`}
+						>
+							<span className="text-[11px] font-medium text-muted-foreground">
+								{group.complianceRate.toFixed(0)}%
+							</span>
+							<div
+								className="w-full rounded-t-md bg-primary/80 transition-all"
+								style={{
+									height: `${Math.max(group.complianceRate, 2)}%`,
+								}}
+							/>
+							<span className="w-full truncate text-center text-[10px] text-muted-foreground">
+								{label}
+							</span>
+						</div>
+					);
+				})}
 			</div>
 		</div>
 	);
@@ -65,11 +80,13 @@ const ComplianceByDayChart = ({ report }: { report: TMonitorReport }) => {
 interface MonitorReportSummaryProps {
 	report?: TMonitorReport;
 	isLoading: boolean;
+	groupBy: EReportGroupBy;
 }
 
 export const MonitorReportSummary = ({
 	report,
 	isLoading,
+	groupBy,
 }: MonitorReportSummaryProps) => {
 	if (isLoading) {
 		return (
@@ -113,7 +130,7 @@ export const MonitorReportSummary = ({
 				/>
 			</div>
 
-			<ComplianceByDayChart report={report} />
+			<ComplianceByGroupChart report={report} groupBy={groupBy} />
 		</div>
 	);
 };
