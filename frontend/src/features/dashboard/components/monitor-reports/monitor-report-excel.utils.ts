@@ -16,9 +16,28 @@ const downloadBlob = (blob: Blob, fileName: string) => {
 	const link = document.createElement('a');
 	link.href = url;
 	link.download = fileName;
+	document.body.appendChild(link);
 	link.click();
-	URL.revokeObjectURL(url);
+	document.body.removeChild(link);
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
+
+const RISKY_LEADING_CHARS = ['=', '+', '-', '@'];
+
+const sanitizeExcelCell = (value: string): string =>
+	RISKY_LEADING_CHARS.some(char => value.startsWith(char)) ? `'${value}` : value;
+
+const sanitizeRowForExcel = (
+	row: TMonitorReportExportRow
+): TMonitorReportExportRow => ({
+	fecha: sanitizeExcelCell(row.fecha),
+	hora: sanitizeExcelCell(row.hora),
+	aula: sanitizeExcelCell(row.aula),
+	edificio: sanitizeExcelCell(row.edificio),
+	docente: sanitizeExcelCell(row.docente),
+	estado: sanitizeExcelCell(row.estado),
+	observaciones: sanitizeExcelCell(row.observaciones),
+});
 
 export async function exportMonitorReportExcel({
 	rows,
@@ -40,7 +59,7 @@ export async function exportMonitorReportExcel({
 		{ header: 'Observaciones', key: 'observaciones', width: 32 },
 	];
 	incidentsSheet.getRow(1).font = { bold: true };
-	incidentsSheet.addRows(rows);
+	incidentsSheet.addRows(rows.map(sanitizeRowForExcel));
 
 	const summarySheet = workbook.addWorksheet('Resumen');
 	summarySheet.columns = [

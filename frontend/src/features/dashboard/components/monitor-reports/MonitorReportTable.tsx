@@ -120,6 +120,15 @@ export const MonitorReportTable = ({
 			} else {
 				await exportMonitorReportExcel(exportParams);
 			}
+
+			const total = response.data.meta?.total ?? rows.length;
+			if (total > rows.length) {
+				genericAlert(
+					`Se exportaron ${rows.length} de ${total} incidencias. Reduce el rango de fechas para exportar el resto.`,
+					ESwalIcons.ERROR,
+					4000
+				);
+			}
 		} catch {
 			genericAlert(
 				'Ocurrió un error al generar el archivo. Intenta nuevamente.',
