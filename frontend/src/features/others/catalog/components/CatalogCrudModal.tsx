@@ -46,7 +46,6 @@ export const CatalogCrudModal = ({
 	const [items, setItems] = useState<CatalogItem[]>([]);
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
-	const [saveVersion, setSaveVersion] = useState(0);
 	const originalRef = useRef('');
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +58,6 @@ export const CatalogCrudModal = ({
 			setItems(mapped);
 			originalRef.current = JSON.stringify(mapped);
 			setEditingIndex(null);
-			setSaveVersion(0);
 		}
 	}, [isOpen, initialData, fieldKey]);
 
@@ -71,7 +69,7 @@ export const CatalogCrudModal = ({
 
 	const hasChanges = useMemo(() => {
 		return JSON.stringify(items) !== originalRef.current;
-	}, [items, saveVersion]);
+	}, [items]);
 
 	const hasEmptyValue = useMemo(
 		() => items.some(i => !i.value.trim()),
@@ -136,21 +134,9 @@ export const CatalogCrudModal = ({
 		try {
 			await onSave(createItems, updateItems, deleteIds);
 
-			setItems(prev => {
-				let counter = 0;
-				const updated = prev.map(item => {
-					if (!item.id) {
-						return { ...item, id: `_new_${Date.now()}_${counter++}` };
-					}
-					return item;
-				});
-				originalRef.current = JSON.stringify(updated);
-				return updated;
-			});
-
 			setIsSaving(false);
-			setSaveVersion(v => v + 1);
 			genericAlert('Cambios guardados correctamente');
+			onClose();
 		} catch (error) {
 			await alertError(error);
 			setIsSaving(false);
