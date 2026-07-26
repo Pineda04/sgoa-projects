@@ -23,6 +23,7 @@ import { ConditionsService } from '../services/conditions.service';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.MONITOR,
 )
 export class ConditionsController {
   constructor(private readonly conditionService: ConditionsService) {}
@@ -51,6 +52,7 @@ export class ConditionsController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de condiciones.')
