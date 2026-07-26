@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { FiPlus, FiSave } from 'react-icons/fi';
 import { Button, ModalBase } from '@shared';
 import { Can, useAbility, type Subjects } from '@config/lib';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import { alertError, genericAlert } from '@shared/utils';
 
 interface CatalogItem {
 	id: string | null;
 	value: string;
+	deleted?: boolean;
 }
 
 interface CatalogCrudModalProps {
@@ -72,7 +73,7 @@ export const CatalogCrudModal = ({
 	}, [items]);
 
 	const hasEmptyValue = useMemo(
-		() => items.some(i => !i.value.trim()),
+		() => items.some(i => !i.deleted && !i.value.trim()),
 		[items]
 	);
 
@@ -91,8 +92,20 @@ export const CatalogCrudModal = ({
 	}, [items.length]);
 
 	const handleDelete = useCallback((index: number) => {
-		setItems(prev => prev.filter((_, i) => i !== index));
+		setItems(prev => {
+			const next = [...prev];
+			next[index] = { ...next[index], deleted: true };
+			return next;
+		});
 		setEditingIndex(prev => (prev === index ? null : prev));
+	}, []);
+
+	const handleRestore = useCallback((index: number) => {
+		setItems(prev => {
+			const next = [...prev];
+			next[index] = { ...next[index], deleted: false };
+			return next;
+		});
 	}, []);
 
 	const handleStartEdit = useCallback((index: number) => {
@@ -104,20 +117,19 @@ export const CatalogCrudModal = ({
 		const originalMap = new Map(
 			original.filter(i => i.id).map(i => [i.id!, i])
 		);
-		const currentMap = new Map(
-			items.filter(i => i.id).map(i => [i.id!, i])
-		);
 
-		const createItems = items
+		const activeItems = items.filter(i => !i.deleted);
+
+		const createItems = activeItems
 			.filter(i => !i.id)
 			.map(i => ({ value: i.value }));
 
-		const updateItems = items
+		const updateItems = activeItems
 			.filter(i => i.id && i.value !== originalMap.get(i.id!)?.value)
 			.map(i => ({ id: i.id!, value: i.value }));
 
-		const deleteIds = original
-			.filter(i => i.id && !currentMap.has(i.id!))
+		const deleteIds = items
+			.filter(i => i.id && i.deleted)
 			.map(i => i.id!);
 
 		if (
@@ -185,93 +197,110 @@ export const CatalogCrudModal = ({
 												const isEditing =
 													editingIndex === index;
 												return (
-													<div
-														key={
-															item.id ??
-															`new-${index}`
-														}
-														className="flex items-center gap-2 bg-gray-100/60 rounded-sm px-3 py-2"
-													>
-														<div className="flex-1 min-w-0">
-															{isEditing ? (
-																<input
-																	ref={
-																		inputRef
-																	}
-																	type="text"
-																	value={
-																		item.value
-																	}
-																	onChange={e =>
-																		handleValueChange(
-																			index,
-																			e
-																				.target
-																				.value
-																		)
-																	}
-																	onBlur={() =>
+												<div
+													key={
+														item.id ??
+														`new-${index}`
+													}
+													className={`flex items-center gap-2 rounded-sm px-3 py-2 ${item.deleted ? 'bg-gray-100/50' : 'bg-gray-100'}`}
+												>
+													<div className="flex-1 min-w-0">
+														{isEditing ? (
+															<input
+																ref={
+																	inputRef
+																}
+																type="text"
+																value={
+																	item.value
+																}
+																onChange={e =>
+																	handleValueChange(
+																		index,
+																		e
+																			.target
+																			.value
+																	)
+																}
+																onBlur={() =>
+																	setEditingIndex(
+																		null
+																	)
+																}
+																onKeyDown={e => {
+																	if (
+																		e.key ===
+																		'Enter'
+																	)
 																		setEditingIndex(
 																			null
+																		);
+																}}
+																className="w-full bg-white border border-gray-200 rounded-sm px-2 py-1 text-sm text-slate-700 outline-none focus:border-blue-600"
+															/>
+														) : (
+															<span className={`block text-sm px-2 py-1 ${item.deleted ? 'text-gray-400 line-through' : 'text-slate-700'}`}>
+																{item.value || (
+																	<span className="text-gray-300">
+																		Valor
+																		vacío
+																	</span>
+																)}
+															</span>
+														)}
+													</div>
+													{item.deleted ? (
+														<button
+															type="button"
+															onClick={() =>
+																handleRestore(
+																	index
+																)
+															}
+															className="p-1.5 text-green-600 hover:bg-green-50 rounded-full transition-colors cursor-pointer"
+															title="Restaurar"
+														>
+															<ArrowUturnLeftIcon className="size-4" />
+														</button>
+													) : (
+														<>
+															<Can
+																action="update"
+																subject={subject}
+															>
+																<button
+																	type="button"
+																	onClick={() =>
+																		handleStartEdit(
+																			index
 																		)
 																	}
-																	onKeyDown={e => {
-																		if (
-																			e.key ===
-																			'Enter'
+																	className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+																	title="Editar"
+																>
+																	<PencilSquareIcon className="size-4" />
+																</button>
+															</Can>
+															<Can
+																action="delete"
+																subject={subject}
+															>
+																<button
+																	type="button"
+																	onClick={() =>
+																		handleDelete(
+																			index
 																		)
-																			setEditingIndex(
-																				null
-																			);
-																	}}
-																	className="w-full bg-white border border-gray-200 rounded-sm px-2 py-1 text-sm text-slate-700 outline-none focus:border-blue-600"
-																/>
-															) : (
-																<span className="block text-sm text-slate-700 px-2 py-1">
-																	{item.value || (
-																		<span className="text-gray-300">
-																			Valor
-																			vacío
-																		</span>
-																	)}
-																</span>
-															)}
-														</div>
-														<Can
-															action="update"
-															subject={subject}
-														>
-															<button
-																type="button"
-																onClick={() =>
-																	handleStartEdit(
-																		index
-																	)
-																}
-																className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
-																title="Editar"
-															>
-																<PencilSquareIcon className="size-4" />
-															</button>
-														</Can>
-														<Can
-															action="delete"
-															subject={subject}
-														>
-															<button
-																type="button"
-																onClick={() =>
-																	handleDelete(
-																		index
-																	)
-																}
-																className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-																title="Eliminar"
-															>
-																<TrashIcon className="size-4" />
-															</button>
-														</Can>
-													</div>
+																	}
+																	className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+																	title="Eliminar"
+																>
+																	<TrashIcon className="size-4" />
+																</button>
+															</Can>
+														</>
+													)}
+												</div>
 												);
 											})}
 										</div>
