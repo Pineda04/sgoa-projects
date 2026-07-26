@@ -131,6 +131,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'schedule-compliance-check');
 		can('read', 'classrooms');
 		can('read', 'buildings');
+		can('read', 'reports-monitor');
 	}
 
 	return build();

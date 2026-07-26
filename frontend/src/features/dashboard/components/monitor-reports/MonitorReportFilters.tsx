@@ -1,7 +1,9 @@
 import { TMonitorBuilding } from '@api';
+import { EReportGroupBy } from '@api/monitor';
 import { TOutputTeacherPosition, useGetTeachersForAutocomplete } from '@api/teachers';
 import { Button, SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
+import { GROUP_BY_OPTIONS } from './monitor-reports.utils';
 
 const useTeachersSearch = (searchTerm: string) =>
 	useGetTeachersForAutocomplete(searchTerm);
@@ -13,12 +15,14 @@ interface MonitorReportFiltersProps {
 	dateFrom: string;
 	dateTo: string;
 	buildingId: string;
+	groupBy: EReportGroupBy;
 	buildings: TMonitorBuilding[];
 	teacherResetKey: number;
 	onDateFromChange: (value: string) => void;
 	onDateToChange: (value: string) => void;
 	onBuildingChange: (buildingId: string) => void;
 	onTeacherChange: (teacherId: string) => void;
+	onGroupByChange: (groupBy: EReportGroupBy) => void;
 	onReset: () => void;
 }
 
@@ -26,16 +30,18 @@ export const MonitorReportFilters = ({
 	dateFrom,
 	dateTo,
 	buildingId,
+	groupBy,
 	buildings,
 	teacherResetKey,
 	onDateFromChange,
 	onDateToChange,
 	onBuildingChange,
 	onTeacherChange,
+	onGroupByChange,
 	onReset,
 }: MonitorReportFiltersProps) => {
 	return (
-		<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+		<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
 			<div>
 				<label
 					htmlFor="report-date-from"
@@ -111,8 +117,35 @@ export const MonitorReportFilters = ({
 				</select>
 			</div>
 
-			<div className="sm:col-span-2 lg:col-span-4">
-				<Button type="button" variant="outline" size="sm" onClick={onReset}>
+			<div>
+				<label
+					htmlFor="report-group-by-filter"
+					className="mb-1.5 block text-xs font-semibold text-foreground"
+				>
+					Agrupar por
+				</label>
+				<select
+					id="report-group-by-filter"
+					value={groupBy}
+					onChange={e => onGroupByChange(e.target.value as EReportGroupBy)}
+					className={inputClassName}
+				>
+					{GROUP_BY_OPTIONS.map(option => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</select>
+			</div>
+
+			<div className="sm:col-span-2 lg:col-span-5">
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={onReset}
+					className="w-full sm:w-auto"
+				>
 					Limpiar filtros
 				</Button>
 			</div>
