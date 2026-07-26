@@ -102,6 +102,11 @@ const MODULES: ModuleConfig[] = [
 				subject: 'audio-equipments',
 			},
 			{
+				label: 'Pizarras',
+				path: '/inventory/digital-blackboards',
+				subject: 'digital-blackboards',
+			},
+			{
 				label: 'Aires Acondicionados',
 				path: '/inventory/air-conditioners',
 				subject: 'airConditioners'
