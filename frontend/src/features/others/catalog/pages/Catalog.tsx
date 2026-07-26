@@ -204,7 +204,9 @@ export const Catalog = () => {
 					queryKey: teacherCategoriesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -241,7 +243,9 @@ export const Catalog = () => {
 					queryKey: contractTypesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -276,7 +280,9 @@ export const Catalog = () => {
 					queryKey: brandsKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -313,7 +319,9 @@ export const Catalog = () => {
 					queryKey: conditionsKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -348,7 +356,9 @@ export const Catalog = () => {
 					queryKey: roomTypesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -385,7 +395,9 @@ export const Catalog = () => {
 					queryKey: connectivitiesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -422,7 +434,9 @@ export const Catalog = () => {
 					queryKey: pcTypesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -459,7 +473,9 @@ export const Catalog = () => {
 					queryKey: monitorTypesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -496,7 +512,9 @@ export const Catalog = () => {
 					queryKey: monitorSizesKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -533,7 +551,9 @@ export const Catalog = () => {
 					queryKey: shiftsKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
@@ -570,7 +590,9 @@ export const Catalog = () => {
 					queryKey: audioEquipmentsKeys.all,
 				});
 				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled.map(r => (r.value as { data: { data: { id: string } } }).data.data.id);
+				const createdIds = fulfilled
+					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
+					.filter((id): id is string => typeof id === 'string');
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
