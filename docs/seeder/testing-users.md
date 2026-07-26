@@ -10,6 +10,7 @@ Usuarios disponibles de forma inmediata al ejecutar el proyecto por primera vez.
 | `rrhh@me.com` | `12345` | `RRHH` |
 | `coordinator@me.com` | `12345` | `COORDINADOR_AREA` |
 | `teacher@me.com` | `12345` | `DOCENTE` |
+| `monitor@me.com` | `12345` | `MONITOR` |
 
 ## Seed CUROC
 Estos usuarios solo estan disponibles al ejecutar el script `sql` con los datos institucionales de UNAH Campus Copán (CUROC).  

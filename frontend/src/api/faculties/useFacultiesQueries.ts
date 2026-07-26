@@ -12,3 +12,14 @@ export const useGetAllFaculties = () =>
         staleTime: STALE_TIME.VERY_LONG,
         select: res => res.data.data,
     })
+
+export const useGetOneFaculty = (id: string) =>
+    useQuery({
+        queryKey: facultiesKeys.detail(id),
+        queryFn: () => facultiesApi.getOneFaculty(id),
+        retry: false,
+        refetchOnWindowFocus: false,
+        staleTime: STALE_TIME.VERY_LONG,
+        enabled: !!id,
+        select: res => res.data.data,
+    })

@@ -3,7 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCourseClassroomDto, UpdateCourseClassroomDto } from '../dto';
+import {
+  CreateCourseClassroomDto,
+  QueryCourseClassroomDto,
+  UpdateCourseClassroomDto,
+} from '../dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   TCreateCourseClassroom,
@@ -12,9 +16,9 @@ import {
   TCourseClassroomSelectPeriod,
   TCourse,
 } from '../types';
+import { Prisma } from 'src/generated/prisma/client';
 import { AcademicPeriodsService } from 'src/modules/teaching-assignment/services/academic-periods.service';
 import { IPaginateOutput } from 'src/common/interfaces';
-import { QueryPaginationDto } from 'src/common/dto';
 import { paginate, paginateOutput } from 'src/common/utils';
 import { TTeachingSession } from 'src/modules/teaching-assignment/types';
 import { formatISO } from 'date-fns';
@@ -33,12 +37,11 @@ export class CourseClassroomsService {
     private readonly teacherDepartmentPositionService: TeacherDepartmentPositionService,
     private readonly positionsService: PositionsService,
     private readonly centerDepartmentsService: CenterDepartmentsService,
-  ) { }
+  ) {}
 
   async create(
     createCourseClassroomDto: CreateCourseClassroomDto,
   ): Promise<TCreateCourseClassroom> {
-
     //Quitae la opcion de subir los horarios como números ya que no se para que o como serviria la distinción
     if (!/^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/.test(createCourseClassroomDto.days)) {
       throw new BadRequestException(
@@ -46,7 +49,11 @@ export class CourseClassroomsService {
       );
     }
 
-    if (!/^(?:[01]\d|2[0-3]):[0-5]\d - (?:[01]\d|2[0-3]):[0-5]\d$/.test(createCourseClassroomDto.section)) {
+    if (
+      !/^(?:[01]\d|2[0-3]):[0-5]\d - (?:[01]\d|2[0-3]):[0-5]\d$/.test(
+        createCourseClassroomDto.section,
+      )
+    ) {
       throw new BadRequestException(
         'La propiedad "section" debe tener el formato HH:mm - HH:mm (ej. 10:00 - 12:00).',
       );
@@ -68,17 +75,30 @@ export class CourseClassroomsService {
   }
 
   async findAllWithPagination(
-    query: QueryPaginationDto,
+    query: QueryCourseClassroomDto,
   ): Promise<IPaginateOutput<TCourseClassroom>> {
+    const where: Prisma.CourseClassroomWhereInput = {};
+
+    if (query.periodId) {
+      where.teachingSession = {
+        assignmentReport: { periodId: query.periodId },
+      };
+    }
+
+    if (query.dayOfWeek) {
+      where.days = { contains: query.dayOfWeek };
+    }
+
     const [courseClassrooms, count] = await Promise.all([
       this.prisma.courseClassroom.findMany({
+        where,
         ...paginate(query),
         relationLoadStrategy: 'join',
         include: {
           course: true,
         },
       }),
-      this.prisma.courseClassroom.count(),
+      this.prisma.courseClassroom.count({ where }),
     ]);
 
     return paginateOutput<TCourseClassroom>(courseClassrooms, count, query);

@@ -1,13 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import { teacherCategoriesApi, teacherDepartmentPositionApi, teachersApi } from './teachers.api';
-import { coordinatorsKeys, teacherCategoriesKeys, teachersKeys } from './teachers.keys';
+import {
+	teacherCategoriesApi,
+	teacherDepartmentPositionApi,
+	teachersApi,
+} from './teachers.api';
+import {
+	coordinatorsKeys,
+	teacherCategoriesKeys,
+	teachersKeys,
+} from './teachers.keys';
 import { usersKeys } from '../users';
 import { usePaginationParams } from '@shared/hooks';
 import { STALE_TIME } from '@config/lib';
 import { useAuth } from '@config/providers';
 
 export const useGetTeachers = (
-	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string },
+	filters?: {
+		searchTerm?: string;
+		categoryId?: string;
+		contractTypeId?: string;
+	},
 	options?: { enabled?: boolean }
 ) => {
 	const { page, size } = usePaginationParams();
@@ -33,12 +45,28 @@ export const useGetTeachersBySearchTerm = (searchTerm: string) => {
 	const { page, size } = usePaginationParams();
 	return useQuery({
 		queryKey: usersKeys.search(searchTerm, page),
-		queryFn: () => teachersApi.getTeachersBySearchTerm(searchTerm, page, size),
+		queryFn: () =>
+			teachersApi.getTeachersBySearchTerm(searchTerm, page, size),
 		enabled: searchTerm.length >= 2,
 		staleTime: STALE_TIME.SHORT,
 		select: res => res.data,
 	});
 };
+
+const AUTOCOMPLETE_PAGE = 1;
+const AUTOCOMPLETE_SIZE = 20;
+
+export const useGetTeachersForAutocomplete = (searchTerm: string) =>
+	useQuery({
+		queryKey: teachersKeys.autocomplete(searchTerm),
+		queryFn: () =>
+			teachersApi.getAllTeachers(AUTOCOMPLETE_PAGE, AUTOCOMPLETE_SIZE, {
+				searchTerm,
+			}),
+		enabled: searchTerm.length >= 2,
+		staleTime: STALE_TIME.SHORT,
+		select: res => res.data,
+	});
 
 export const useGetCurrentTeacher = () => {
 	const {
@@ -59,7 +87,9 @@ export const useGetTeacherPosition = (centerDepartmentId?: string) =>
 			centerDepartmentId ?? '',
 		] as const,
 		queryFn: () =>
-			teacherDepartmentPositionApi.getTeacherPosition(String(centerDepartmentId)),
+			teacherDepartmentPositionApi.getTeacherPosition(
+				String(centerDepartmentId)
+			),
 		enabled: Boolean(centerDepartmentId),
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data.data,
@@ -86,12 +116,21 @@ export const useGetAllTeacherCategories = () =>
 
 export const useGetTeachersCoordinator = (
 	centerDepartmentId: string,
-	filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+	filters?: {
+		searchTerm?: string;
+		categoryId?: string;
+		contractTypeId?: string;
+	}
 ) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: teachersKeys.coordinator(page, size, centerDepartmentId, filters),
+		queryKey: teachersKeys.coordinator(
+			page,
+			size,
+			centerDepartmentId,
+			filters
+		),
 		queryFn: () =>
 			teachersApi.getAllTeachersCoordinator(
 				page,

@@ -1,7 +1,11 @@
+import { TCheckFilters, TReportFilters } from './monitor.types';
+
 export const monitorKeys = {
 	all: ['monitor'] as const,
-	lists: () => [...monitorKeys.all, 'list'] as const,
-	list: (page: number) => [...monitorKeys.lists(), { page }] as const,
-	details: () => [...monitorKeys.all, 'detail'] as const,
-	detail: (id: string) => ['monitor-detail', id] as const,
+	currentAssignments: () => [...monitorKeys.all, 'current-assignments'] as const,
+	buildings: () => [...monitorKeys.all, 'buildings'] as const,
+	checks: (page: number, size: number, filters?: TCheckFilters) =>
+		[...monitorKeys.all, 'checks', page, size, filters ?? {}] as const,
+	report: (filters?: TReportFilters) =>
+		[...monitorKeys.all, 'report', filters ?? {}] as const,
 };

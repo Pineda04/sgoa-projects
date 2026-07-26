@@ -7,11 +7,11 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes, degreesRoutes, positionsRoutes } from '@features/admin';
+import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } from '@features/admin';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
-import { AcademicAssignmentReport } from '@features/academic/reports/pages';
+import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
@@ -107,6 +107,12 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'academic/reports/monitor',
+			element: <ProtectedRoute action="read" subject="reports-monitor" />,
+			children: [{ index: true, element: <MonitorReport /> }],
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'academic/reports/*',
 			element: <ProtectedRoute action="read" subject="reports" />,
 			children: reportsRoutes,
@@ -122,6 +128,12 @@ const router = createBrowserRouter(
 			path: 'admin/departments/*',
 			element: <ProtectedRoute action="read" subject="departments" />,
 			children: departmentsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/faculties/*',
+			element: <ProtectedRoute action="read" subject="faculties" />,
+			children: facultiesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

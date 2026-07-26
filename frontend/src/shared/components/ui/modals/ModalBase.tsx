@@ -1,7 +1,6 @@
 import type React from 'react';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Button } from '../button';
 
 const portalRoot = document.getElementById('portal-root') ?? document.body;
 
