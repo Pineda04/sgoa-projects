@@ -26,6 +26,7 @@ import { ApiBody } from '@nestjs/swagger';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.MONITOR,
 )
 export class AudioEquipmentController {
   constructor(private readonly audioEquipmentService: AudioEquipmentService) {}
@@ -52,6 +53,7 @@ export class AudioEquipmentController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de audio.')

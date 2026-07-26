@@ -20,9 +20,16 @@ import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
 
 @Controller('departments')
-@Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+@Roles(
+  EUserRole.ADMIN,
+  EUserRole.DIRECCION,
+  EUserRole.RRHH,
+  EUserRole.MONITOR,
+  EUserRole.COORDINADOR_AREA,
+  EUserRole.DOCENTE,
+)
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) { }
+  constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -48,6 +55,7 @@ export class DepartmentsController {
     EUserRole.DOCENTE,
     EUserRole.DIRECCION,
     EUserRole.RRHH,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de departamentos.')

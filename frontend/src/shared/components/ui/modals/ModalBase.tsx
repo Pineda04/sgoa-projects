@@ -34,7 +34,7 @@ export const ModalBase = ({ isOpen, onClose, children, showCloseButton = true }:
 				if (e.target === e.currentTarget) onClose();
 			}}
 		>
-			<div className="bg-white rounded-lg shadow-2xl p-6 lg:max-w-5xl w-full relative m-10 max-h-[90vh] overflow-auto">
+			<div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 lg:max-w-5xl w-full relative m-4 sm:m-10 max-h-[90vh] overflow-auto">
 				{showCloseButton && (
 					<Button
 						className="absolute top-4 font-bold right-4 text-gray-500 hover:text-gray-700 cursor-pointer z-40"
