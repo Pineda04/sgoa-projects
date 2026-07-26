@@ -56,7 +56,7 @@ export const UserMenu = () => {
 
 	const handleConfiguration = () => {
 		setIsOpen(false);
-		navigate('/catalogs', { replace: true });
+		navigate('/catalog', { replace: true });
 	};
 
 	const handleProfile = () => {

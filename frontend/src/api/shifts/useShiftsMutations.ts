@@ -8,7 +8,7 @@ export const useCreateShift = () =>
 		mutationFn: (body: { name: string }) => shiftsApi.createShift(body),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: shiftsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: shiftsKeys.all });
 		},
 	});
 
@@ -18,7 +18,7 @@ export const useUpdateShift = () => {
 			shiftsApi.updateShift({ id, body }),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: shiftsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: shiftsKeys.all });
 		},
 	});
 
@@ -30,7 +30,7 @@ export const useDeleteShift = () => {
 		mutationFn: (id: string) => shiftsApi.deleteShift(id),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: shiftsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: shiftsKeys.all });
 		},
 	});
 

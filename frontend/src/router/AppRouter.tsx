@@ -59,7 +59,7 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'catalogs',
+			path: 'catalog',
 			element: <ProtectedRoute action="read" subject="catalog" />,
 			children: catalogRoutes,
 			errorElement: <div>404</div>,

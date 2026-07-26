@@ -8,6 +8,6 @@ export const catalogRoutes: RouteObject[] = [
   },
   {
     path: '*',
-    element: <Navigate to="/catalogs" replace />,
+    element: <Navigate to="/catalog" replace />,
   },
 ];

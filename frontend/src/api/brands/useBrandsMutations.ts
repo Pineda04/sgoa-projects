@@ -8,7 +8,7 @@ export const useCreateBrand = () =>
 		mutationFn: (body: { name: string }) => brandsApi.createBrand(body),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: brandsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: brandsKeys.all });
 		},
 	});
 
@@ -18,7 +18,7 @@ export const useUpdateBrand = () => {
 			brandsApi.updateBrand({ id, body }),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: brandsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: brandsKeys.all });
 		},
 	});
 
@@ -30,7 +30,7 @@ export const useDeleteBrand = () => {
 		mutationFn: (id: string) => brandsApi.deleteBrand(id),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: brandsKeys.all });
+			await queryClient.invalidateQueries({ queryKey: brandsKeys.all });
 		},
 	});
 

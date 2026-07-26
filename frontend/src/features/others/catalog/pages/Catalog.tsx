@@ -184,7 +184,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							teacherCategoriesApi.createTeacherCategory({
 								name: item.value,
@@ -200,10 +200,14 @@ export const Catalog = () => {
 							teacherCategoriesApi.deleteTeacherCategory(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: teacherCategoriesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: teacherCategoriesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'contract-types': {
 				fieldKey: 'name',
@@ -214,7 +218,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							contractTypesApi.createContractType({
 								name: item.value,
@@ -230,10 +234,14 @@ export const Catalog = () => {
 							contractTypesApi.deleteContractType(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: contractTypesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: contractTypesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'brands': {
 				fieldKey: 'name',
@@ -244,7 +252,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							brandsApi.createBrand({
 								name: item.value,
@@ -258,10 +266,14 @@ export const Catalog = () => {
 						),
 						...deleteIds.map(id => brandsApi.deleteBrand(id)),
 					]);
-					queryClient.removeQueries({
-						queryKey: brandsKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: brandsKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'conditions': {
 				fieldKey: 'status',
@@ -272,7 +284,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							conditionsApi.createCondition({
 								status: item.value,
@@ -288,10 +300,14 @@ export const Catalog = () => {
 							conditionsApi.deleteCondition(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: conditionsKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: conditionsKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'room-types': {
 				fieldKey: 'description',
@@ -302,7 +318,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							roomTypesApi.createRoomType({
 								description: item.value,
@@ -316,10 +332,14 @@ export const Catalog = () => {
 						),
 						...deleteIds.map(id => roomTypesApi.deleteRoomType(id)),
 					]);
-					queryClient.removeQueries({
-						queryKey: roomTypesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: roomTypesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'connectivities': {
 				fieldKey: 'description',
@@ -330,7 +350,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							connectivitiesApi.createConnectivity({
 								description: item.value,
@@ -346,10 +366,14 @@ export const Catalog = () => {
 							connectivitiesApi.deleteConnectivity(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: connectivitiesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: connectivitiesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'pc-types': {
 				fieldKey: 'description',
@@ -360,7 +384,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							pcTypesApi.createPcType({
 								description: item.value,
@@ -376,10 +400,14 @@ export const Catalog = () => {
 							pcTypesApi.deletePcType(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: pcTypesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: pcTypesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'monitor-types': {
 				fieldKey: 'description',
@@ -390,7 +418,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							monitorTypesApi.createMonitorType({
 								description: item.value,
@@ -406,10 +434,14 @@ export const Catalog = () => {
 							monitorTypesApi.deleteMonitorType(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: monitorTypesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: monitorTypesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'monitor-sizes': {
 				fieldKey: 'description',
@@ -420,7 +452,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							monitorSizesApi.createMonitorSize({
 								description: item.value,
@@ -436,10 +468,14 @@ export const Catalog = () => {
 							monitorSizesApi.deleteMonitorSize(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: monitorSizesKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: monitorSizesKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'shifts': {
 				fieldKey: 'name',
@@ -450,7 +486,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							shiftsApi.createShift({
 								name: item.value,
@@ -466,10 +502,14 @@ export const Catalog = () => {
 							shiftsApi.deleteShift(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: shiftsKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: shiftsKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 			'audio-equipments': {
 				fieldKey: 'description',
@@ -480,7 +520,7 @@ export const Catalog = () => {
 					updateItems: Array<{ id: string; value: string }>,
 					deleteIds: string[]
 				) => {
-					await Promise.all([
+					const results = await Promise.allSettled([
 						...createItems.map(item =>
 							audioEquipmentsApi.createAudioEquipment({
 								description: item.value,
@@ -496,10 +536,14 @@ export const Catalog = () => {
 							audioEquipmentsApi.deleteAudioEquipment(id)
 						),
 					]);
-					queryClient.removeQueries({
-						queryKey: audioEquipmentsKeys.all,
-					});
-				},
+				queryClient.invalidateQueries({
+					queryKey: audioEquipmentsKeys.all,
+				});
+				const rejected = results.filter(r => r.status === 'rejected');
+				if (rejected.length > 0) {
+					throw rejected[0].reason;
+				}
+			},
 			},
 		}),
 		[

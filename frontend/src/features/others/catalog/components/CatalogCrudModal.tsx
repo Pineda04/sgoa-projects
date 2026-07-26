@@ -103,7 +103,8 @@ export const CatalogCrudModal = ({
 	const handleRestore = useCallback((index: number) => {
 		setItems(prev => {
 			const next = [...prev];
-			next[index] = { ...next[index], deleted: false };
+			const { deleted, ...rest } = next[index];
+			next[index] = rest;
 			return next;
 		});
 	}, []);
@@ -179,14 +180,14 @@ export const CatalogCrudModal = ({
 
 			if (failedIds.length === 0) {
 				genericAlert('Cambios guardados correctamente');
-				onClose();
 			} else {
 				await alertError(lastError);
 			}
+			onClose();
 		} catch (error) {
 			setIsSaving(false);
-			setItems(JSON.parse(originalRef.current));
 			await alertError(error);
+			onClose();
 		}
 	};
 

@@ -10,8 +10,8 @@ export const academicPeriodsSeed: AcademicPeriod[] = [
   {
     year: 2025,
     pac: 1,
-    startDate: new Date(2026, 0, 13), // 13 de enero
-    endDate: new Date(2026, 4, 11), // 11 de mayo
+    startDate: new Date(2025, 0, 13), // 13 de enero
+    endDate: new Date(2025, 4, 11), // 11 de mayo
     pac_modality: 'Trimestre',
   },
   {

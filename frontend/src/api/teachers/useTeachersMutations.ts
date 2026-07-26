@@ -42,7 +42,7 @@ export const useCreateTeacherCategory = () =>
 		mutationFn: (body: { name: string }) => teacherCategoriesApi.createTeacherCategory(body),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: teacherCategoriesKeys.all });
+			await queryClient.invalidateQueries({ queryKey: teacherCategoriesKeys.all });
 		},
 	});
 
@@ -52,7 +52,7 @@ export const useUpdateTeacherCategory = () => {
 			teacherCategoriesApi.updateTeacherCategory({ id, body }),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: teacherCategoriesKeys.all });
+			await queryClient.invalidateQueries({ queryKey: teacherCategoriesKeys.all });
 		},
 	});
 
@@ -64,7 +64,7 @@ export const useDeleteTeacherCategory = () => {
 		mutationFn: (id: string) => teacherCategoriesApi.deleteTeacherCategory(id),
 		onSuccess: async (res) => {
 			alertSuccess(res);
-			await queryClient.removeQueries({ queryKey: teacherCategoriesKeys.all });
+			await queryClient.invalidateQueries({ queryKey: teacherCategoriesKeys.all });
 		},
 	});
 
