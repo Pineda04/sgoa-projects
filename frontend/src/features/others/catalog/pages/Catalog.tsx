@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { queryClient } from '@config/lib';
 import { type Subjects } from '@config/lib';
-import { genericAlert } from '@shared/utils';
 import { CatalogCard, CatalogCrudModal } from '../components';
 import { Square2StackIcon } from '@heroicons/react/24/outline';
 import {
