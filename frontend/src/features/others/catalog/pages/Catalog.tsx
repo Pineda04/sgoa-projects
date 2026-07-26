@@ -204,7 +204,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: teacherCategoriesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'contract-types': {
@@ -235,7 +234,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: contractTypesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'brands': {
@@ -264,7 +262,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: brandsKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'conditions': {
@@ -295,7 +292,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: conditionsKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'room-types': {
@@ -324,7 +320,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: roomTypesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'connectivities': {
@@ -355,7 +350,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: connectivitiesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'pc-types': {
@@ -386,7 +380,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: pcTypesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'monitor-types': {
@@ -417,7 +410,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: monitorTypesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'monitor-sizes': {
@@ -448,7 +440,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: monitorSizesKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'shifts': {
@@ -479,7 +470,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: shiftsKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 			'audio-equipments': {
@@ -510,7 +500,6 @@ export const Catalog = () => {
 					queryClient.removeQueries({
 						queryKey: audioEquipmentsKeys.all,
 					});
-					await genericAlert('Cambios guardados correctamente');
 				},
 			},
 		}),

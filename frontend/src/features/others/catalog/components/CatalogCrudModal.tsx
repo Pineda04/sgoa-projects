@@ -3,7 +3,7 @@ import { FiPlus, FiSave } from 'react-icons/fi';
 import { Button, ModalBase } from '@shared';
 import { Can, useAbility, type Subjects } from '@config/lib';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { alertError } from '@shared/utils';
+import { alertError, genericAlert } from '@shared/utils';
 
 interface CatalogItem {
 	id: string | null;
@@ -135,9 +135,22 @@ export const CatalogCrudModal = ({
 		setIsSaving(true);
 		try {
 			await onSave(createItems, updateItems, deleteIds);
-			originalRef.current = JSON.stringify(items);
+
+			setItems(prev => {
+				let counter = 0;
+				const updated = prev.map(item => {
+					if (!item.id) {
+						return { ...item, id: `_new_${Date.now()}_${counter++}` };
+					}
+					return item;
+				});
+				originalRef.current = JSON.stringify(updated);
+				return updated;
+			});
+
 			setIsSaving(false);
 			setSaveVersion(v => v + 1);
+			genericAlert('Cambios guardados correctamente');
 		} catch (error) {
 			await alertError(error);
 			setIsSaving(false);
