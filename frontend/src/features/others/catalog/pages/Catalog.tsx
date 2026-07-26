@@ -72,7 +72,7 @@ type EntityConfig = {
 		createItems: Array<{ value: string }>,
 		updateItems: Array<{ id: string; value: string }>,
 		deleteIds: string[]
-	) => Promise<void>;
+	) => Promise<{ createdIds: string[] }>;
 };
 
 const entitySubjects = new Set<string>([
@@ -203,10 +203,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: teacherCategoriesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'contract-types': {
@@ -237,10 +243,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: contractTypesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'brands': {
@@ -269,10 +281,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: brandsKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'conditions': {
@@ -303,10 +321,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: conditionsKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'room-types': {
@@ -335,10 +359,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: roomTypesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'connectivities': {
@@ -369,10 +399,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: connectivitiesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'pc-types': {
@@ -403,10 +439,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: pcTypesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'monitor-types': {
@@ -437,10 +479,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: monitorTypesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'monitor-sizes': {
@@ -471,10 +519,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: monitorSizesKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'shifts': {
@@ -505,10 +559,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: shiftsKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 			'audio-equipments': {
@@ -539,10 +599,16 @@ export const Catalog = () => {
 				queryClient.invalidateQueries({
 					queryKey: audioEquipmentsKeys.all,
 				});
+				const createdIds = results.slice(0, createItems.length)
+					.filter((r): r is PromiseFulfilledResult<{ data: { data: { id: string } } }> =>
+						r.status === 'fulfilled'
+					)
+					.map(r => r.value.data.data.id);
 				const rejected = results.filter(r => r.status === 'rejected');
 				if (rejected.length > 0) {
 					throw rejected[0].reason;
 				}
+				return { createdIds };
 			},
 			},
 		}),

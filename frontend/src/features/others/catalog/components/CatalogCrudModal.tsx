@@ -24,7 +24,7 @@ interface CatalogCrudModalProps {
 		createItems: Array<{ value: string }>,
 		updateItems: Array<{ id: string; value: string }>,
 		deleteIds: string[]
-	) => Promise<void>;
+	) => Promise<{ createdIds: string[] }>;
 }
 
 export const CatalogCrudModal = ({
@@ -147,9 +147,19 @@ export const CatalogCrudModal = ({
 		setEditingIndex(null);
 
 		try {
+			let createdIds: string[] = [];
 			if (createItems.length > 0 || updateItems.length > 0) {
-				await onSave(createItems, updateItems, []);
+				const result = await onSave(createItems, updateItems, []);
+				createdIds = result.createdIds;
 			}
+
+			let createdIdx = 0;
+			const itemsWithIds = items.map(item => {
+				if (!item.id && !item.deleted) {
+					return { ...item, id: createdIds[createdIdx++] };
+				}
+				return item;
+			});
 
 			const succeededIds: string[] = [];
 			const failedIds: string[] = [];
@@ -165,7 +175,7 @@ export const CatalogCrudModal = ({
 				}
 			}
 
-			const nextItems = items
+			const nextItems = itemsWithIds
 				.filter(i => !(i.id && succeededIds.includes(i.id)))
 				.map(i =>
 					i.id && failedIds.includes(i.id)
@@ -175,7 +185,6 @@ export const CatalogCrudModal = ({
 
 			setItems(nextItems);
 			originalRef.current = JSON.stringify(nextItems);
-
 			setIsSaving(false);
 
 			if (failedIds.length === 0) {
@@ -183,11 +192,9 @@ export const CatalogCrudModal = ({
 			} else {
 				await alertError(lastError);
 			}
-			onClose();
 		} catch (error) {
 			setIsSaving(false);
 			await alertError(error);
-			onClose();
 		}
 	};
 
