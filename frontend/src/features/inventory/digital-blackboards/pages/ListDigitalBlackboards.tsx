@@ -32,7 +32,7 @@ export const ListDigitalBlackboards = () => {
 				{canCreate && (
 					<Button
 						type="button"
-						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+						className="w-fit justify-start group bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
 						onClick={openCreate}
 					>
 						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />

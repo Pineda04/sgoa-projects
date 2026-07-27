@@ -73,8 +73,13 @@ export const DigitalBlackboardsTable = ({
 
 	const handleConfirmDelete = async () => {
 		if (!selectedDigitalBlackboard) return;
-		await deleteDigitalBlackboard(selectedDigitalBlackboard.id);
-		handleCloseDelete();
+		try {
+			await deleteDigitalBlackboard(selectedDigitalBlackboard.id);
+			handleCloseDelete();
+		} catch {
+			// El error ya se muestra mediante el manejador global de mutaciones.
+			// El modal de confirmación se mantiene abierto para reintentar.
+		}
 	};
 
 	const handleOpenEdit = useCallback(
