@@ -31,6 +31,7 @@ import { ApiBody } from '@nestjs/swagger';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.MONITOR,
 )
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
@@ -58,6 +59,7 @@ export class ClassroomController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
   @ApiCommonResponses({

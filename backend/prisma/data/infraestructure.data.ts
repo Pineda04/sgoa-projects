@@ -74,7 +74,6 @@ export const buildingsSeed = [
 ];
 
 export const connectivitiesSeed = {
-  noone: { id: '15e2500c-0f91-40b8-9e39-875f21649429', description: 'Ninguna' },
   wireless: {
     id: '2e4d0046-295c-46f5-8b36-d4e1ed996e8b',
     description: 'Inalámbrica',
@@ -89,7 +88,7 @@ export const connectivitiesSeed = {
   },
   points32: {
     id: 'bba1a4c5-fc20-4a3b-8394-e9d286014cd2',
-    description: '32 Puntos',
+    description: '32 Puertos',
   },
   ports21: {
     id: 'ea81024b-e71c-4a8a-9717-a037b0c8c76a',

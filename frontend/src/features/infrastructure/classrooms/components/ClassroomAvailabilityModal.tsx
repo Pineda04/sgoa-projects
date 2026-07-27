@@ -197,7 +197,7 @@ export const ClassroomAvailabilityModal = ({
 	}
 
 	return (
-		<ModalBase isOpen={isOpen} onClose={onClose}>
+		<ModalBase isOpen={isOpen} onClose={onClose} showCloseButton={false}>
 			<div className="flex max-h-[calc(90vh-6rem)] flex-col p-2">
 				{/* Encabezado */}
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
