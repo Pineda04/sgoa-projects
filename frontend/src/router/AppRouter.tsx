@@ -181,7 +181,7 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'inventory/air-conditioners/*',
-			element: <ProtectedRoute action='read' subject='airConditioners' />,
+			element: <ProtectedRoute action='read' subject='air-conditioners' />,
 			children: airConditionersRoutes,
 			errorElement: <div>404</div>
 		},

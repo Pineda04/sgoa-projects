@@ -99,10 +99,10 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Aires Acondicionados',
 				path: '/inventory/air-conditioners',
-				subject: 'airConditioners'
+				subject: 'air-conditioners'
 			},
 			{
-				label: 'Pizarras',
+				label: 'Pizarras Digitales',
 				path: '/inventory/digital-blackboards',
 				subject: 'digital-blackboards',
 			},

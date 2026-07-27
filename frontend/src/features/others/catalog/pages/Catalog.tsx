@@ -12,7 +12,7 @@ import {
 	Clock,
 	Headphones,
 } from 'lucide-react';
-import { queryClient } from '@config/lib';
+import { queryClient, Can } from '@config/lib';
 import { type Subjects } from '@config/lib';
 import { CatalogCard, CatalogCrudModal } from '../components';
 import { Square2StackIcon } from '@heroicons/react/24/outline';
@@ -658,17 +658,26 @@ export const Catalog = () => {
 					<div className="p-4 sm:p-6 md:p-8">
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 							{configItems.map(item => (
-								<CatalogCard
+								<Can
 									key={item.key}
-									icon={item.icon}
-									title={item.title}
-									description={item.description}
-									onClick={
-										entitySubjects.has(item.key)
-											? () => setActiveEntity(item.key)
-											: undefined
+									action="read"
+									subject={item.key as Subjects}
+								>
+									{({ isAllowed }) =>
+										isAllowed ? (
+											<CatalogCard
+												icon={item.icon}
+												title={item.title}
+												description={item.description}
+												onClick={
+													entitySubjects.has(item.key)
+														? () => setActiveEntity(item.key)
+														: undefined
+												}
+											/>
+										) : null
 									}
-								/>
+								</Can>
 							))}
 						</div>
 					</div>
