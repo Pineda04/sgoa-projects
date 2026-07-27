@@ -97,20 +97,15 @@ const MODULES: ModuleConfig[] = [
 				subject: 'pc-equipments',
 			},
 			{
-				label: 'Audio',
-        path: '/inventory/audio-equipments',
-				subject: 'audio-equipments',
+				label: 'Aires Acondicionados',
+				path: '/inventory/air-conditioners',
+				subject: 'airConditioners'
 			},
 			{
 				label: 'Pizarras',
 				path: '/inventory/digital-blackboards',
 				subject: 'digital-blackboards',
 			},
-			{
-				label: 'Aires Acondicionados',
-				path: '/inventory/air-conditioners',
-				subject: 'airConditioners'
-			}
 		],
 	},
 ];
