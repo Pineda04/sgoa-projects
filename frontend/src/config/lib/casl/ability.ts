@@ -35,7 +35,8 @@ export type Subjects =
 	| 'planifications'
 	| 'reports'
 	| 'pc-equipments'
-	| 'airConditioners'
+	| 'air-conditioners'
+	| 'digital-blackboards'
 	| 'schedule-compliance-check'
   | 'reports-monitor'
 	| 'catalog'
@@ -92,7 +93,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
-		can('manage', 'airConditioners');
+		can('manage', 'air-conditioners');
+		can('manage', 'digital-blackboards');
     can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
@@ -130,7 +132,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
-		can('manage', 'airConditioners');
     can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
@@ -140,13 +141,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'teacher-categories');
 		can('manage', 'contract-types');
 		can('manage', 'shifts');
-		can('manage', 'brands');
-    can('manage', 'conditions');
     can('manage', 'connectivities');
     can('manage', 'room-types');
-    can('manage', 'pc-types');
-		can('manage', 'monitor-types');
-		can('manage', 'monitor-sizes');
 	}
 
 	// ============== COORDINADOR_AREA ==============
@@ -160,10 +156,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'reports');
 		can('manage', 'planifications');
 		can('read', 'courses');
-		can('read', 'pc-equipments');
-		can('read', 'audio-equipments');
 		can('read', 'classrooms');
-		can('read', 'airConditioners');
 	}
 
 	// =================== DOCENTE ==================

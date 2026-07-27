@@ -26,8 +26,9 @@ import {
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
-import { airConditionersRoutes } from '@features/inventory';
+import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
 import { catalogRoutes } from '@features/others';
+
 
 
 const router = createBrowserRouter(
@@ -180,9 +181,15 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'inventory/air-conditioners/*',
-			element: <ProtectedRoute action='read' subject='airConditioners' />,
+			element: <ProtectedRoute action='read' subject='air-conditioners' />,
 			children: airConditionersRoutes,
 			errorElement: <div>404</div>
+		},
+		{
+			path: 'inventory/digital-blackboards/*',
+			element: <ProtectedRoute action="read" subject="digital-blackboards" />,
+			children: digitalBlackboardsRoutes,
+			errorElement: <div>404</div>,
 		},
 		{
 			path: '*',
