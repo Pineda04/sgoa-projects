@@ -27,6 +27,7 @@ import { ApiBody } from '@nestjs/swagger';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.MONITOR,
 )
 export class ConnectivityController {
   constructor(private readonly connectivityService: ConnectivityService) {}
@@ -53,6 +54,7 @@ export class ConnectivityController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de conectividades.')

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, Length } from 'class-validator';
 
 export class CreateTeacherCategoryDto {
   @ApiProperty({
@@ -19,14 +19,14 @@ export class CreateTeacherCategoryDto {
   @ApiProperty({
     description: 'Descripción de la categoría.',
     example: 'Docente con plaza titular',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString({
     message: 'La propiedad <description> debe ser una cadena de texto.',
   })
-  @IsNotEmpty({ message: 'La propiedad <description> no debe estar vacía.' })
   @Length(1, 100, {
     message: 'La propiedad <description> debe tener entre 1 y 100 caracteres.',
   })
-  description: string;
+  description?: string;
 }

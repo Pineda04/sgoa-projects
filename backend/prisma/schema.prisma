@@ -113,9 +113,9 @@ model TeacherPostgraduateDegree {
 }
 
 model TeacherCategory {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @unique
-  description String
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
   teachers    Teacher[]
 
   @@map("teacher_categories")

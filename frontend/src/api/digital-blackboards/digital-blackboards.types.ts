@@ -6,3 +6,13 @@ export type TDigitalBlackboard = {
 	monitorSizeId: string;
 	conditionId: string;
 };
+
+export type TCreateDigitalBlackboard = {
+	description?: string | null;
+	brandId: string;
+	monitorTypeId: string;
+	monitorSizeId: string;
+	conditionId: string;
+};
+
+export type TUpdateDigitalBlackboard = Partial<TCreateDigitalBlackboard>;
