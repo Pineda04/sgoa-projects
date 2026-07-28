@@ -66,6 +66,7 @@ export const useGetAcademicAssignmentCoordinatorOnlyPeriods = (
 	return useQuery({
 		queryKey: academicAssignmentCoordinatorKeys.periodPageCenter(
 			page,
+			size,
 			centerDepartmentId ?? '',
 			year,
 			pac
@@ -120,6 +121,8 @@ export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 			periodId ?? '',
 			centerDepartmentId,
 			teacherId ?? 'all',
+			page,
+			size,
 			year,
 			pac,
 			teacherName

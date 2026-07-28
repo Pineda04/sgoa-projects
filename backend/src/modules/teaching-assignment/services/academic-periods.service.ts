@@ -74,6 +74,27 @@ export class AcademicPeriodsService {
     pac_modality?: string,
   ): Promise<TAcademicPeriod[]> {
    // await this.currentAcademicPeriod(); Kenneth: Comentado porque literalmente no se para que llama este servicio, solo estorba en el caso de que no haya un trimestre registrado.
+
+    // Validate year parameter
+    if (year !== undefined) {
+      const trimmedYear = year.trim();
+      if (trimmedYear === '' || !/^\d+$/.test(trimmedYear) || isNaN(parseInt(trimmedYear))) {
+        throw new BadRequestException(
+          'El valor de <year> debe ser un número entero válido.',
+        );
+      }
+    }
+
+    // Validate pac parameter
+    if (pac !== undefined) {
+      const trimmedPac = pac.trim();
+      if (trimmedPac === '' || !/^\d+$/.test(trimmedPac) || isNaN(parseInt(trimmedPac))) {
+        throw new BadRequestException(
+          'El valor de <pac> debe ser un número entero válido.',
+        );
+      }
+    }
+
     const where: Prisma.AcademicPeriodWhereInput = {
       ...(year ? { year: parseInt(year) } : {}),
       ...(pac ? { pac: parseInt(pac) } : {}),

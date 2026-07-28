@@ -21,6 +21,7 @@ import {
   propertiesAcademicAssignment,
   TAcademicAssignment,
   UpdateAcademicAssignmentReportDto,
+  QueryAssignmentFiltersDto,
 } from '../dto';
 import {
   ApiPagination,
@@ -107,19 +108,15 @@ export class AssignmentReportsController {
   })
   findAll(
     @Query() query: QueryPaginationDto,
-    @Query('year') year?: string,
-    @Query('pac') pac?: string,
-    @Query('departmentId') departmentId?: string,
-    @Query('centerId') centerId?: string,
-    @Query('teacherName') teacherName?: string,
+    @Query() filters: QueryAssignmentFiltersDto,
   ) {
     return this.academicAssignmentReportsService.findAllWithPagination(
       query,
-      year,
-      pac,
-      departmentId,
-      centerId,
-      teacherName,
+      filters.year,
+      filters.pac,
+      filters.departmentId,
+      filters.centerId,
+      filters.teacherName,
     );
   }
 
@@ -408,15 +405,14 @@ export class AssignmentReportsController {
     @Query() query: QueryPaginationDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
     @GetCurrentUserId() userId: string,
-    @Query('year') year?: string,
-    @Query('pac') pac?: string,
+    @Query() filters: QueryAssignmentFiltersDto,
   ) {
     return this.academicAssignmentReportsService.findAllByCoordinatorOnlyPeriods(
       query,
       userId,
       centerDepartmentId,
-      year,
-      pac,
+      filters.year,
+      filters.pac,
     );
   }
 
@@ -443,17 +439,14 @@ export class AssignmentReportsController {
   })
   findAllPeriodsForAuthorities(
     @Query() query: QueryPaginationDto,
-    @Query('year') year?: string,
-    @Query('pac') pac?: string,
-    @Query('departmentId') departmentId?: string,
-    @Query('centerId') centerId?: string,
+    @Query() filters: QueryAssignmentFiltersDto,
   ) {
     return this.academicAssignmentReportsService.findAllPeriodsForAuthorities(
       query,
-      year,
-      pac,
-      departmentId,
-      centerId,
+      filters.year,
+      filters.pac,
+      filters.departmentId,
+      filters.centerId,
     );
   }
 
@@ -542,9 +535,7 @@ export class AssignmentReportsController {
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
     @Query('periodId', ValidateIdPipe) periodId?: string,
     @Query('teacherId', ValidateIdPipe) teacherId?: string,
-    @Query('year') year?: string,
-    @Query('pac') pac?: string,
-    @Query('teacherName') teacherName?: string,
+    @Query() filters: QueryAssignmentFiltersDto = {},
   ) {
     return this.academicAssignmentReportsService.findOneByCoordinatorAndPeriodId(
       query,
@@ -552,9 +543,9 @@ export class AssignmentReportsController {
       centerDepartmentId,
       periodId,
       teacherId,
-      year,
-      pac,
-      teacherName,
+      filters.year,
+      filters.pac,
+      filters.teacherName,
     );
   }
 

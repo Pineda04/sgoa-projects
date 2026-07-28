@@ -32,6 +32,8 @@ export const academicAssignmentCoordinatorKeys = {
 		periodId: string,
 		centerDepartmentId: string,
 		teacherId: string,
+		page: number,
+		size: number,
 		year?: string,
 		pac?: string,
 		teacherName?: string
@@ -42,6 +44,8 @@ export const academicAssignmentCoordinatorKeys = {
 			periodId,
 			centerDepartmentId,
 			teacherId,
+			page,
+			size,
 			year ?? '',
 			pac ?? '',
 			teacherName ?? '',
@@ -56,6 +60,7 @@ export const academicAssignmentCoordinatorKeys = {
 		] as const,
 	periodPageCenter: (
 		page: number,
+		size: number,
 		centerDepartmentId: string,
 		year?: string,
 		pac?: string
@@ -64,6 +69,8 @@ export const academicAssignmentCoordinatorKeys = {
 			...academicAssignmentCoordinatorKeys.onlyPeriods,
 			'page',
 			page,
+			'size',
+			size,
 			'center',
 			centerDepartmentId,
 			year ?? '',
