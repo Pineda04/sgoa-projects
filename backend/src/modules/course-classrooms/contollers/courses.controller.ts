@@ -89,7 +89,7 @@ export class CoursesController {
   })
   findBySearchTerm(
     @Query('searchTerm') searchTerm: string,
-    @Query('activeStatus') activeStatus: string,
+    @Query('activeStatus') activeStatus: string | undefined,
     @Query() query: QueryPaginationDto,
   ) {
     const active = activeStatus !== undefined ? activeStatus === 'true' : undefined;
@@ -119,7 +119,7 @@ export class CoursesController {
   })
   findBySearchTermAndCenterDepartment(
     @Query('searchTerm') searchTerm: string,
-    @Query('activeStatus') activeStatus: string,
+    @Query('activeStatus') activeStatus: string | undefined,
     @Query() query: QueryPaginationDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
   ) {

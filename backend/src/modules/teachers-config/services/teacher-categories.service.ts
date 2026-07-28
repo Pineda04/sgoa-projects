@@ -13,7 +13,8 @@ export class TeacherCategoriesService {
   ): Promise<TTeacherCategory> {
     const newTeacherCategory = await this.prisma.teacherCategory.create({
       data: {
-        ...createTeacherCategoryDto,
+       name: createTeacherCategoryDto.name,
+    description: createTeacherCategoryDto.description ?? '',
       },
     });
 
@@ -68,7 +69,8 @@ export class TeacherCategoriesService {
         id,
       },
       data: {
-        ...updateTeacherCategoryDto,
+        name: updateTeacherCategoryDto.name,
+        description: updateTeacherCategoryDto.description ?? '',
       },
     });
 
