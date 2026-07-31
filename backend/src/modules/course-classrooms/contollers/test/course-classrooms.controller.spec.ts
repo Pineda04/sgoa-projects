@@ -8,6 +8,8 @@ describe('CourseClassroomsController', () => {
   const mockCourseClassroomsService = {};
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CourseClassroomsController],
       providers: [CourseClassroomsService],

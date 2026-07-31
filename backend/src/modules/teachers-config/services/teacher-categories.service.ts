@@ -13,8 +13,8 @@ export class TeacherCategoriesService {
   ): Promise<TTeacherCategory> {
     const newTeacherCategory = await this.prisma.teacherCategory.create({
       data: {
-       name: createTeacherCategoryDto.name,
-    description: createTeacherCategoryDto.description ?? '',
+        name: createTeacherCategoryDto.name,
+        description: createTeacherCategoryDto.description ?? '',
       },
     });
 
@@ -23,9 +23,6 @@ export class TeacherCategoriesService {
 
   async findAll(): Promise<TTeacherCategory[]> {
     const teacherCategories = await this.prisma.teacherCategory.findMany();
-
-    // if (teacherCategories.length === 0)
-    //   throw new NotFoundException('No se encontraron datos.'); // tambien se puede devolver un 200 como consulta exitosa pero con data []
 
     return teacherCategories;
   }
@@ -69,8 +66,12 @@ export class TeacherCategoriesService {
         id,
       },
       data: {
-        name: updateTeacherCategoryDto.name,
-        description: updateTeacherCategoryDto.description ?? '',
+        ...(updateTeacherCategoryDto.name !== undefined && {
+          name: updateTeacherCategoryDto.name,
+        }),
+        ...(updateTeacherCategoryDto.description !== undefined && {
+          description: updateTeacherCategoryDto.description ?? '',
+        }),
       },
     });
 

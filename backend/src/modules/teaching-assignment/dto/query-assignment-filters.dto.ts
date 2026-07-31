@@ -4,13 +4,13 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class QueryAssignmentFiltersDto {
   @ApiPropertyOptional({
     description: 'Año para filtrar los informes',
-    example: '2025',
+    example: '2026',
   })
   @IsOptional()
   @IsNumberString(
-    {},
+    { no_symbols: true },
     {
-      message: 'El valor de <year> debe ser un número.',
+      message: 'El valor de <year> debe ser un número entero.',
     },
   )
   year?: string;
@@ -21,9 +21,9 @@ export class QueryAssignmentFiltersDto {
   })
   @IsOptional()
   @IsNumberString(
-    {},
+    { no_symbols: true },
     {
-      message: 'El valor de <pac> debe ser un número.',
+      message: 'El valor de <pac> debe ser un número entero.',
     },
   )
   pac?: string;
