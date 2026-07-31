@@ -32,3 +32,18 @@ export const genericAlert = async (
 
 export const alertSuccess = async (res: AxiosResponse<IResponse<unknown>>) =>
 	genericAlert(res.data.message);
+
+export interface IApiError {
+	message: string;
+	statusCode?: number;
+}
+
+export const alertError = async (error: unknown) => {
+	const message =
+		(error as { response?: { data?: IApiError } })?.response?.data
+			?.message ??
+		(error as IApiError)?.message ??
+		'Ha ocurrido un error inesperado';
+
+	await genericAlert(message, ESwalIcons.ERROR, 3000);
+};

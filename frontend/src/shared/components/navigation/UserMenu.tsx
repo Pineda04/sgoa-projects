@@ -7,11 +7,13 @@ import {
 	LockClosedIcon,
 	ArrowLeftStartOnRectangleIcon,
 	XMarkIcon,
-  QuestionMarkCircleIcon,
+	QuestionMarkCircleIcon,
+	Square2StackIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
 import { useModal } from '@shared/hooks';
 import { Button, ModalBase } from '../ui';
+import { Can } from '@config/lib';
 
 export const UserMenu = () => {
 	const navigate = useNavigate();
@@ -52,9 +54,19 @@ export const UserMenu = () => {
 		handleShowModalUpdatePassword();
 	};
 
+	const handleConfiguration = () => {
+		setIsOpen(false);
+		navigate('/catalog', { replace: true });
+	};
+
 	const handleProfile = () => {
 		setIsOpen(false);
 		navigate('/admin/users/profile', { replace: true });
+	};
+
+	const handleHelp = () => {
+		setIsOpen(false);
+		navigate('/help', { replace: true });
 	};
 
 	const getInitials = (name?: string) => {
@@ -166,9 +178,29 @@ export const UserMenu = () => {
 								</div>
 							</button>
 
+							{/* Catalogo */}
+							<Can action="read" subject="catalog">
+								<button
+									onClick={handleConfiguration}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								>
+									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+										<Square2StackIcon className="size-4.5" />
+									</div>
+									<div>
+										<p className="text-sm font-medium">
+											Catálogo
+										</p>
+										<p className="text-xs text-gray-400 mt-0.5">
+											Valores auxiliares del sistema
+										</p>
+									</div>
+								</button>
+							</Can>
+
 							{/* Ayuda */}
 							<button
-								onClick={() => navigate('/help')}
+								onClick={handleHelp}
 								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
 							>
 								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">

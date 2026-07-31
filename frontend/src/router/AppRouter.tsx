@@ -11,7 +11,7 @@ import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } fr
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
-import { AcademicAssignmentReport } from '@features/academic/reports/pages';
+import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
@@ -25,9 +25,10 @@ import {
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
-import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
-import { airConditionersRoutes } from '@features/inventory';
+import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
+import { catalogRoutes } from '@features/others';
+
 
 
 const router = createBrowserRouter(
@@ -56,6 +57,12 @@ const router = createBrowserRouter(
 			path: 'help',
 			element: <PrivateRoute />,
 			children: helpRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'catalog',
+			element: <ProtectedRoute action="read" subject="catalog" />,
+			children: catalogRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
@@ -104,6 +111,12 @@ const router = createBrowserRouter(
 			path: 'academic/reports/teacher/:id',
 			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
 			children: [{ index: true, element: <AcademicAssignmentReport /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'academic/reports/monitor',
+			element: <ProtectedRoute action="read" subject="reports-monitor" />,
+			children: [{ index: true, element: <MonitorReport /> }],
 			errorElement: <div>404</div>,
 		},
 		{
@@ -167,16 +180,16 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'inventory/audio-equipments',
-			element: <ProtectedRoute action="read" subject="audio-equipments" />,
-			children: audioEquipmentsRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
 			path: 'inventory/air-conditioners/*',
-			element: <ProtectedRoute action='read' subject='airConditioners' />,
+			element: <ProtectedRoute action='read' subject='air-conditioners' />,
 			children: airConditionersRoutes,
 			errorElement: <div>404</div>
+		},
+		{
+			path: 'inventory/digital-blackboards/*',
+			element: <ProtectedRoute action="read" subject="digital-blackboards" />,
+			children: digitalBlackboardsRoutes,
+			errorElement: <div>404</div>,
 		},
 		{
 			path: '*',

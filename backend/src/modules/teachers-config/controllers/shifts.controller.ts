@@ -24,7 +24,7 @@ export class ShiftsController {
   constructor(private readonly shiftsService: ShiftsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un turno.')
   @ApiBody({ type: CreateShiftDto, description: 'Datos para crear un turno.' })
@@ -74,7 +74,7 @@ export class ShiftsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el turno.')
   @ApiBody({
@@ -96,7 +96,7 @@ export class ShiftsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el turno.')
   @ApiCommonResponses({

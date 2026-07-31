@@ -16,6 +16,7 @@ import { UpdateDigitalBlackboardDto } from '../dto/update-digital-blackboard.dto
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.MONITOR,
 )
 export class DigitalBlackboardController {
   constructor(
@@ -29,6 +30,7 @@ export class DigitalBlackboardController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pizarras digitales.')

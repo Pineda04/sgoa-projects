@@ -1,18 +1,20 @@
 import { useTabWithReset } from '@shared/hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { useUser } from '@config/providers';
-import { MonitorChecklist } from '../components';
+import { useGetCurrentAcademicPeriod } from '@api/periods';
+import { MonitorChecklist, MonitorReports } from '../components';
 
 export const DashboardMonitor = () => {
 	const validTabs = ['0', '1'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
+	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const currentUser = useUser();
 
 	return (
 		<div className="pb-8 sm:pb-12">
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold mb-2">
-					Panel de Monitoreo
+					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
 				</h2>
 				<p className="text-sm">{currentUser.user?.name}</p>
 				<p className="text-sm">{currentUser.user?.code}</p>
@@ -34,16 +36,14 @@ export const DashboardMonitor = () => {
 				</TabsList>
 
 				<TabsContent value="0">
-					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
+					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-4 sm:p-6">
 						<MonitorChecklist />
 					</div>
 				</TabsContent>
 
 				<TabsContent value="1">
-					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-6">
-						<p className="text-muted-foreground text-center py-12">
-							Módulo de reportes — Próximamente
-						</p>
+					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-4 sm:p-6">
+						<MonitorReports />
 					</div>
 				</TabsContent>
 			</Tabs>

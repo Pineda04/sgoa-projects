@@ -91,7 +91,7 @@ export const ViewClassroomModal = ({
 	const disableAvailability = isVirtual || isInactive;
 
 	return (
-		<ModalBase isOpen={isOpen} onClose={onClose}>
+		<ModalBase isOpen={isOpen} onClose={onClose} showCloseButton={false}>
 			<div className="p-2 max-h-[calc(90vh-6rem)] overflow-auto">
 				<h1 className="text-xl font-bold mb-1">Detalle del Aula</h1>
 				<div className="flex items-center gap-3 mb-3">

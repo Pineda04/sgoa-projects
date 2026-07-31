@@ -21,7 +21,7 @@ import { Roles } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('centers')
-@Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+@Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH, EUserRole.MONITOR)
 export class CentersController {
   constructor(private readonly centersService: CentersService) {}
 

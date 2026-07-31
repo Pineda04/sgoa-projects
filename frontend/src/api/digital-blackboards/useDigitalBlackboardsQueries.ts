@@ -12,3 +12,12 @@ export const useGetAllDigitalBlackboards = () =>
 		staleTime: STALE_TIME.VERY_LONG,
 		select: res => res.data.data,
 	});
+
+export const useGetDigitalBlackboard = (id: string) =>
+	useQuery({
+		queryKey: digitalBlackboardsKeys.detail(id),
+		queryFn: () => digitalBlackboardsApi.getOneDigitalBlackboard(id),
+		enabled: Boolean(id),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});

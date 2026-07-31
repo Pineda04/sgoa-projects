@@ -26,7 +26,7 @@ export class TeacherCategoriesController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.CREATED) // Cambiado a CREATED (201)
   @ResponseMessage('Se ha creado una categoría de docente.')
   @ApiBody({
@@ -83,7 +83,7 @@ export class TeacherCategoriesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la categoría de docente.')
   @ApiBody({
@@ -107,7 +107,7 @@ export class TeacherCategoriesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la categoría de docente.')
   @ApiCommonResponses({

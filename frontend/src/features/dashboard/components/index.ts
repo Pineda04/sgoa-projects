@@ -6,3 +6,4 @@ export * from './ListPlanificationsAuthorities';
 export * from './ListPlanificationsCoordinator';
 export * from './UsersCoordinator';
 export * from './monitor-checklist';
+export * from './monitor-reports';
