@@ -1,41 +1,53 @@
 import { useMemo, useState } from 'react';
-import {
-	TMonitorAssignmentCheckStatus,
-	TMonitorCurrentAssignment,
-	useGetCurrentAssignments,
-} from '@api/monitor';
-import { SkeletonCard, useModal } from '@shared';
+import { CircleCheck } from 'lucide-react';
+import { useGetCurrentAssignments } from '@api/monitor';
+import { SkeletonCard, useLocalStorageState, useModal } from '@shared';
 import { BuildingAccordion } from './BuildingAccordion';
 import { CheckModal } from './CheckModal';
-import { ChecklistFilters, TStatusFilter } from './ChecklistFilters';
-import { JornadaToggle } from './JornadaToggle';
+import { ChecklistProgress } from './ChecklistProgress';
+import { ChecklistToolbar } from './ChecklistToolbar';
+import { useRegisterCheck } from './useRegisterCheck';
 import {
-	getAssignmentStatus,
+	buildChecklistItems,
+	CHECKLIST_VIEW_STORAGE_KEY,
+	countPendingByJornada,
+	filterByScope,
+	filterByStatus,
 	getCurrentJornada,
-	getJornadaFromSection,
-	TJornada,
+	groupItemsByBuilding,
+	isChecklistView,
+	summarizeItems,
+	TChecklistItem,
+	TChecklistView,
+	TJornadaFilter,
+	TStatusFilter,
 } from './checklist.utils';
-
-interface SelectedAssignment {
-	assignment: TMonitorCurrentAssignment;
-	classroomName: string;
-	buildingName: string;
-}
 
 export const MonitorChecklist = () => {
 	const { data, isLoading, isError } = useGetCurrentAssignments();
+	const { registerCheck, checkOverrides, submittingId, isRegistering } =
+		useRegisterCheck();
 
-	const [jornada, setJornada] = useState<TJornada>(getCurrentJornada);
+	const [view, setView] = useLocalStorageState<TChecklistView>(
+		CHECKLIST_VIEW_STORAGE_KEY,
+		'COMPACT',
+		isChecklistView
+	);
+	const [jornada, setJornada] = useState<TJornadaFilter>(getCurrentJornada);
 	const [buildingId, setBuildingId] = useState('');
-	const [statusFilter, setStatusFilter] = useState<TStatusFilter>('ALL');
-	const [collapsedBuildingIds, setCollapsedBuildingIds] = useState<
-		Set<string>
-	>(new Set());
-	const [checkOverrides, setCheckOverrides] = useState<
-		Record<string, TMonitorAssignmentCheckStatus>
-	>({});
-	const [selected, setSelected] = useState<SelectedAssignment | null>(null);
+	const [status, setStatus] = useState<TStatusFilter>('ALL');
+	const [search, setSearch] = useState('');
+	const [areFiltersOpen, setAreFiltersOpen] = useState(false);
+	const [collapsedBuildingIds, setCollapsedBuildingIds] = useState<Set<string>>(
+		new Set()
+	);
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [isModalOpen, openModal, closeModal] = useModal();
+
+	const items = useMemo(
+		() => buildChecklistItems(data ?? [], checkOverrides),
+		[data, checkOverrides]
+	);
 
 	const buildingOptions = useMemo(
 		() =>
@@ -46,41 +58,32 @@ export const MonitorChecklist = () => {
 		[data]
 	);
 
-	const visibleBuildings = useMemo(() => {
-		if (!data) return [];
+	const jornadaPendingCounts = useMemo(() => {
+		const scoped = filterByScope(items, {
+			jornada: 'ALL',
+			buildingId,
+			search,
+		});
 
-		return data
-			.filter(building => !buildingId || building.buildingId === buildingId)
-			.map(building => ({
-				...building,
-				classrooms: building.classrooms
-					.map(classroom => ({
-						...classroom,
-						assignments: classroom.assignments
-							.map(assignment => ({
-								...assignment,
-								check: checkOverrides[assignment.courseClassroomId] ?? assignment.check,
-							}))
-							.filter(assignment => {
-								const assignmentJornada = getJornadaFromSection(
-									assignment.section
-								);
-								const matchesJornada =
-									assignmentJornada === null || assignmentJornada === jornada;
+		return {
+			MORNING: countPendingByJornada(scoped, 'MORNING'),
+			AFTERNOON: countPendingByJornada(scoped, 'AFTERNOON'),
+			ALL: countPendingByJornada(scoped, 'ALL'),
+		};
+	}, [items, buildingId, search]);
 
-								const status = getAssignmentStatus(assignment.check);
-								const matchesStatus =
-									statusFilter === 'ALL' ||
-									(statusFilter === 'PENDING' && status === 'PENDING') ||
-									(statusFilter === 'VERIFIED' && status !== 'PENDING');
+	const scopeItems = useMemo(
+		() => filterByScope(items, { jornada, buildingId, search }),
+		[items, jornada, buildingId, search]
+	);
+	const scopeSummary = useMemo(() => summarizeItems(scopeItems), [scopeItems]);
 
-								return matchesJornada && matchesStatus;
-							}),
-					}))
-					.filter(classroom => classroom.assignments.length > 0),
-			}))
-			.filter(building => building.classrooms.length > 0);
-	}, [data, buildingId, jornada, statusFilter, checkOverrides]);
+	const groups = useMemo(
+		() => groupItemsByBuilding(filterByStatus(scopeItems, status)),
+		[scopeItems, status]
+	);
+
+	const selectedItem = items.find(item => item.id === selectedId) ?? null;
 
 	const handleToggleBuilding = (buildingIdToToggle: string) => {
 		setCollapsedBuildingIds(prev => {
@@ -91,20 +94,29 @@ export const MonitorChecklist = () => {
 		});
 	};
 
-	const handleRegister = (
-		assignment: TMonitorCurrentAssignment,
-		classroomName: string,
-		buildingName: string
-	) => {
-		setSelected({ assignment, classroomName, buildingName });
+	const handleResetFilters = () => {
+		setBuildingId('');
+		setStatus('ALL');
+		setSearch('');
+	};
+
+	const handleQuickConfirm = (item: TChecklistItem, isPresent: boolean) => {
+		void registerCheck({ courseClassroomId: item.id, isPresent });
+	};
+
+	const handleOpenModal = (item: TChecklistItem) => {
+		setSelectedId(item.id);
 		openModal();
 	};
 
-	const handleCheckComplete = (
-		courseClassroomId: string,
-		check: TMonitorAssignmentCheckStatus
-	) => {
-		setCheckOverrides(prev => ({ ...prev, [courseClassroomId]: check }));
+	const handleModalSubmit = (isPresent: boolean, observation: string) => {
+		if (!selectedItem) return Promise.resolve(false);
+
+		return registerCheck({
+			courseClassroomId: selectedItem.id,
+			isPresent,
+			observation,
+		});
 	};
 
 	if (isLoading) {
@@ -119,52 +131,74 @@ export const MonitorChecklist = () => {
 
 	if (isError) {
 		return (
-			<p className="text-sm text-red-500">
+			<p className="text-sm text-destructive">
 				Error al cargar las asignaciones del día. Intenta nuevamente.
 			</p>
 		);
 	}
 
-	if (!data || data.length === 0) {
+	if (items.length === 0) {
 		return (
-			<p className="text-muted-foreground text-center py-12">
+			<p className="py-12 text-center text-muted-foreground">
 				No hay asignaciones para el día de hoy
 			</p>
 		);
 	}
 
 	return (
-		<div className="space-y-5">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-				<JornadaToggle value={jornada} onChange={setJornada} />
-				<ChecklistFilters
-					buildings={buildingOptions}
-					buildingId={buildingId}
-					onBuildingChange={setBuildingId}
-					status={statusFilter}
-					onStatusChange={setStatusFilter}
-				/>
-			</div>
+		<div className="space-y-4">
+			<ChecklistToolbar
+				jornada={jornada}
+				onJornadaChange={setJornada}
+				jornadaPendingCounts={jornadaPendingCounts}
+				view={view}
+				onViewChange={setView}
+				search={search}
+				onSearchChange={setSearch}
+				buildings={buildingOptions}
+				buildingId={buildingId}
+				onBuildingChange={setBuildingId}
+				status={status}
+				onStatusChange={setStatus}
+				scopeSummary={scopeSummary}
+				areFiltersOpen={areFiltersOpen}
+				onToggleFilters={() => setAreFiltersOpen(prev => !prev)}
+				onResetFilters={handleResetFilters}
+			/>
 
-			{visibleBuildings.length === 0 ? (
-				<p className="text-muted-foreground text-center py-12">
-					No hay asignaciones que coincidan con los filtros seleccionados.
-				</p>
+			{scopeSummary.total > 0 && <ChecklistProgress summary={scopeSummary} />}
+
+			{groups.length === 0 ? (
+				<div className="py-12 text-center">
+					{scopeSummary.total > 0 && status === 'PENDING' ? (
+						<>
+							<CircleCheck className="mx-auto mb-3 size-10 text-green-500" />
+							<p className="font-medium text-foreground">
+								No quedan verificaciones pendientes
+							</p>
+							<p className="text-sm text-muted-foreground">
+								Ya registraste todas las asignaciones de esta selección.
+							</p>
+						</>
+					) : (
+						<p className="text-muted-foreground">
+							No hay asignaciones que coincidan con los filtros seleccionados.
+						</p>
+					)}
+				</div>
 			) : (
 				<div className="space-y-3">
-					{visibleBuildings.map(building => (
+					{groups.map(group => (
 						<BuildingAccordion
-							key={building.buildingId}
-							building={building}
-							isOpen={!collapsedBuildingIds.has(building.buildingId)}
-							onToggle={() => handleToggleBuilding(building.buildingId)}
-							onRegister={(assignment, classroomName) =>
-								handleRegister(
-									assignment,
-									classroomName,
-									building.buildingName
-								)
-							}
+							key={group.buildingId}
+							group={group}
+							view={view}
+							isOpen={!collapsedBuildingIds.has(group.buildingId)}
+							onToggle={() => handleToggleBuilding(group.buildingId)}
+							submittingId={submittingId}
+							isRegistering={isRegistering}
+							onConfirm={handleQuickConfirm}
+							onOpenModal={handleOpenModal}
 						/>
 					))}
 				</div>
@@ -173,10 +207,9 @@ export const MonitorChecklist = () => {
 			<CheckModal
 				isOpen={isModalOpen}
 				onClose={closeModal}
-				assignment={selected?.assignment ?? null}
-				buildingName={selected?.buildingName ?? ''}
-				classroomName={selected?.classroomName ?? ''}
-				onCheckComplete={handleCheckComplete}
+				item={selectedItem}
+				isSubmitting={isRegistering}
+				onSubmit={handleModalSubmit}
 			/>
 		</div>
 	);
