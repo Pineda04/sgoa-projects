@@ -1,5 +1,6 @@
 import type { FormikProps } from 'formik';
 import { useGetAllBuildings } from '@api/buildings';
+import { useGetAllDepartments } from '@api/departments';
 import { useGetAllRoomTypes } from '@api/room-types';
 import { useGetAllConnectivities } from '@api/connectivities';
 import { useGetAllAudioEquipments } from '@api/audio-equipments';
@@ -62,6 +63,7 @@ interface SelectFieldProps {
 	onBlur: (e: React.FocusEvent<HTMLSelectElement>) => void;
 }
 
+
 const SelectField = ({
 	id,
 	label,
@@ -101,6 +103,60 @@ const SelectField = ({
 	</div>
 );
 
+interface MultiSelectFieldProps {
+	label: string;
+	options: { value: string; label: string }[];
+	selectedValues: string[];
+	isLoading?: boolean;
+	disabled?: boolean;
+	error?: string;
+	touched?: boolean;
+	onToggle: (value: string) => void;
+}
+
+const MultiSelectField = ({
+	label,
+	options,
+	selectedValues,
+	isLoading = false,
+	disabled = false,
+	error,
+	touched,
+	onToggle,
+}: MultiSelectFieldProps) => (
+	<div className="space-y-2 md:col-span-2">
+		<label className="text-sm font-medium text-foreground">{label}</label>
+		<div className="border border-border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 bg-muted">
+			{isLoading ? (
+				<p className="text-sm text-muted-foreground">Cargando...</p>
+			) : options.length === 0 ? (
+				<p className="text-sm text-muted-foreground">
+					No hay departamentos disponibles
+				</p>
+			) : (
+				options.map(option => (
+					<label
+						key={option.value}
+						className="flex items-center gap-2 text-sm cursor-pointer"
+					>
+						<input
+							type="checkbox"
+							checked={selectedValues.includes(option.value)}
+							onChange={() => onToggle(option.value)}
+							disabled={disabled}
+							className="size-4 cursor-pointer accent-green-600"
+						/>
+						{option.label}
+					</label>
+				))
+			)}
+		</div>
+		{touched && error ? (
+			<p className="text-xs text-destructive">{error}</p>
+		) : null}
+	</div>
+);
+
 export const ClassroomFormInputs = ({
 	formik,
 	disabled = false,
@@ -110,6 +166,7 @@ export const ClassroomFormInputs = ({
 	const connectivities = useGetAllConnectivities();
 	const audioEquipments = useGetAllAudioEquipments();
 	const conditions = useGetAllConditions();
+	const departments = useGetAllDepartments();
 	const digitalBlackboards = useGetAllDigitalBlackboards();
 
 	const selectFields: SelectFieldProps[] = [
@@ -194,6 +251,16 @@ export const ClassroomFormInputs = ({
 		onBlur: formik.handleBlur,
 	}));
 
+	const departmentOptions = departments.data?.map(d => ({ value: d.id, label: d.name })) ?? [];
+
+	const selectedDepartmentIds = formik.values.departmentIds ?? [];
+
+	const handleToggleDepartment = (departmentId: string) => {
+		const current = formik.values.departmentIds ?? [];
+		const next = current.includes(departmentId) ? current.filter(id => id !== departmentId) : [...current, departmentId];
+		formik.setFieldValue('departmentIds', next);
+	};
+
 	return (
 		<>
 			<div className="space-y-2 md:col-span-2">
@@ -256,6 +323,19 @@ export const ClassroomFormInputs = ({
 			{selectFields.map(field => (
 				<SelectField key={field.id} {...field} />
 			))}
+
+			<MultiSelectField
+				label="Departamentos (opcional)"
+				options={departmentOptions}
+				selectedValues={selectedDepartmentIds}
+				isLoading={departments.isLoading}
+				disabled={disabled}
+				error={
+					typeof formik.errors.departmentIds === 'string' ? formik.errors.departmentIds : undefined
+				}
+				touched={Boolean(formik.touched.departmentIds)}
+				onToggle={handleToggleDepartment}
+			/>
 
 			<div className="flex items-center gap-2 md:col-span-2">
 				<input
