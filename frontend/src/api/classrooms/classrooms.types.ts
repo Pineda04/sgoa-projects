@@ -17,6 +17,7 @@ export type TClassroom = {
 	digitalBlackboardId?: string | null;
 	maxCapacity?: number | null;
 	activeStatus?: boolean;
+	departments?: { id: string; name: string }[];
 };
 
 // Forma reducida que devuelve el endpoint de búsqueda (/classrooms/search)
@@ -29,7 +30,10 @@ export type TClassroomSearch = {
 	};
 };
 
-export type TCreateClassroom = Omit<TClassroom, 'id'>;
+//Hize este cambio por diferencias entre los campos en BE de crear y TClassroom
+export type TCreateClassroom = Omit<TClassroom, 'id' | 'departments'> & {
+  departmentIds?: string[];
+};
 
 export type TUpdateClassroom = Partial<TCreateClassroom>;
 

@@ -209,6 +209,14 @@ export const ListClassrooms = () => {
 				</div>
 			),
 		},
+		{
+			key: 'departments',
+			header: 'Departamentos',
+			mobileLabel: 'Departamentos',
+			render: row =>
+				row.departments && row.departments.length > 0
+					? row.departments.map(d => d.name).join(', ') : '—',
+		},
 	];
 
 	return (

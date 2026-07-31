@@ -203,4 +203,11 @@ export class CreateClassroomDto {
     IsValidIdsInventoryConfigConstraint,
   )
   conditionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'IDs de los departamentos asociados al aula.',
+  })
+  @IsOptional()
+  @IsUUID('all', { each: true, message: 'Cada departmentId debe ser un UUID válido.' })
+  departmentIds?: string[];
 }
