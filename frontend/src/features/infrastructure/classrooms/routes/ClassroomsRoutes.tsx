@@ -21,6 +21,12 @@ const EditClassroomLazy = React.lazy(() =>
 	}))
 );
 
+const ViewClassroomLazy = React.lazy(() =>
+	import('../pages/ViewClassroom').then(module => ({
+		default: module.ViewClassroom,
+	}))
+);
+
 export const classroomsRoutes: RouteObject[] = [
 	{
 		path: '',
@@ -47,6 +53,14 @@ export const classroomsRoutes: RouteObject[] = [
 				element: (
 					<React.Suspense fallback={<Loading />}>
 						<EditClassroomLazy />
+					</React.Suspense>
+				),
+			},
+			{
+				path: 'view/:id',
+				element: (
+					<React.Suspense fallback={<Loading />}>
+						<ViewClassroomLazy />
 					</React.Suspense>
 				),
 			},
