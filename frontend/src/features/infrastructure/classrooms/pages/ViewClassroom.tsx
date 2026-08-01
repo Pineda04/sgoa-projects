@@ -355,6 +355,8 @@ export const ViewClassroom = () => {
 									<p className="text-sm text-muted-foreground">
 										Cargando...
 									</p>
+								) : airConditioners.isError ? (
+									<EmptyState text="No se pudieron cargar los aires acondicionados" />
 								) : classroomAirConditioners.length === 0 ? (
 									<EmptyState text="Sin aires acondicionados asignados" />
 								) : (
