@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useGetAcademicAssignmentCoordinatorOnlyPeriods } from '@api/assignment-reports';
 import { ListPlanificationsTable } from '@features/academic/planifications';
+import { Button } from '@shared/components';
 import { usePaginationParams } from '@shared/hooks';
+import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 
 interface IProps {
 	centerDepartmentId: string;
@@ -11,6 +14,7 @@ export const ListPlanificationsCoordinator = ({
 	centerDepartmentId,
 }: IProps) => {
 	const { setPage } = usePaginationParams();
+	const navigate = useNavigate();
 	const [yearFilter, setYearFilter] = useState('');
 	const [pacFilter, setPacFilter] = useState('');
 
@@ -58,6 +62,19 @@ export const ListPlanificationsCoordinator = ({
 							<option value="3">3</option>
 						</select>
 					</div>
+				</div>
+				<div className="flex justify-end col-span-1">
+					<Button
+						onClick={() =>
+							navigate(
+								`/academic/planifications/new/${centerDepartmentId}`
+							)
+						}
+						className="bg-green-500 text-white p-2 hover:bg-green-600 transition"
+					>
+						<Plus className="size-4 mr-1" />
+						Agregar planificación
+					</Button>
 				</div>
 			</div>
 

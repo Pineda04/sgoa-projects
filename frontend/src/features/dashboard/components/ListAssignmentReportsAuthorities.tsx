@@ -103,7 +103,7 @@ export const ListAssignmentReportsAuthorities = () => {
 
 	return (
 		<div className="space-y-4">
-			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4 mb-4 mt-4">
+			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4 mb-4">
 				<div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-5 gap-4">
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">

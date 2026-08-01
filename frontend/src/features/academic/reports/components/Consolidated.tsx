@@ -169,7 +169,7 @@ export const Consolidated = ({
 
 	return (
 		<div className="min-h-screen bg-transparent">
-			<div className="px-8 pb-4 grid items-end grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="pb-4 grid items-end grid-cols-1 md:grid-cols-4 gap-4">
 				<div className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">
@@ -249,7 +249,7 @@ export const Consolidated = ({
 				</div>
 			</div>
 
-			<div className="w-full overflow-x-auto px-4 pb-10">
+			<div className="w-full overflow-x-auto pb-10">
 				{isCoordWithoutCoordination ? (
 					<TagError text="No tiene coordinaciones asignadas." />
 				) : consolidatedQuery.isLoading ? (
