@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { CreateAcademicPeriodModal } from '../components/CreateAcademicPeriodModal';
 import { EditAcademicPeriodModal } from '../components/EditAcademicPeriodModal';
 import { DeleteAcademicPeriodModal } from '../components/DeleteAcademicPeriodModal';
-import { useModal } from '@shared/hooks';
+import { useModal, usePaginationParams } from '@shared/hooks';
 import { TCurrentAcademicPeriod, useDeleteAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
 import { Button, DataTable, IDataTableColumn, Loading } from '@shared/components';
 import { ESwalIcons, genericAlert } from '@shared/utils';
@@ -30,10 +30,26 @@ export const AcademicPeriodsList = () => {
 	const canUpdate = ability.can('update', 'periods');
 	const canDelete = ability.can('delete', 'periods');
 
-	const { data: periods, isLoading } = useGetAcademicPeriods();
-	const { mutate: deletePeriod, isPending: isDeleting } = useDeleteAcademicPeriod();
+	const { setPage } = usePaginationParams();
 
-	if (isLoading) return <Loading />;
+	const [yearFilter, setYearFilter] = useState('');
+	const [pacFilter, setPacFilter] = useState('');
+	const [modalityFilter, setModalityFilter] = useState('');
+
+	const { data: allPeriods } = useGetAcademicPeriods();
+
+	const years = useMemo(() => {
+		if (!allPeriods) return [];
+		const uniqueYears = [...new Set(allPeriods.map(p => p.year))];
+		return uniqueYears.sort((a, b) => b - a);
+	}, [allPeriods]);
+
+	const { data: periods, isLoading } = useGetAcademicPeriods(
+		yearFilter || undefined,
+		pacFilter || undefined,
+		modalityFilter || undefined
+	);
+	const { mutate: deletePeriod, isPending: isDeleting } = useDeleteAcademicPeriod();
 
 	const handleOpenEdit = (period: TCurrentAcademicPeriod) => {
 		setSelected(period);
@@ -132,25 +148,88 @@ export const AcademicPeriodsList = () => {
 	];
 
 	return (
-		<div className="py-6 w-full max-w-7xl mx-auto">
-			<div className="flex flex-col sm:flex-row justify-center items-center mb-6">
-				{canCreate && (
-					<Button
-						onClick={openCreate}
-						className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
-					>
-						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-						<span>Nuevo Periodo</span>
-					</Button>
-				)}
+		<div className="pb-6 w-full max-w-7xl mx-auto space-y-4">
+			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4">
+				<div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Año
+						</label>
+						<select
+							value={yearFilter}
+							onChange={e => {
+								setYearFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							{years.map(y => (
+								<option key={y} value={y}>
+									{y}
+								</option>
+							))}
+						</select>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							PAC
+						</label>
+						<select
+							value={pacFilter}
+							onChange={e => {
+								setPacFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Modalidad
+						</label>
+						<select
+							value={modalityFilter}
+							onChange={e => {
+								setModalityFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todas</option>
+							<option value="Trimestre">Trimestre</option>
+							<option value="Semestre">Semestre</option>
+						</select>
+					</div>
+				</div>
+				<div className="flex md:justify-end sm:justify-start">
+					{canCreate && (
+						<Button
+							onClick={openCreate}
+							className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
+						>
+							<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+							<span>Nuevo Periodo</span>
+						</Button>
+					)}
+				</div>
 			</div>
 
-			<DataTable<TCurrentAcademicPeriod>
-				columns={columns}
-				data={periods ?? []}
-				getRowKey={period => period.id}
-				emptyMessage="No hay periodos académicos registrados."
-			/>
+			{isLoading ? (
+				<Loading />
+			) : (
+				<DataTable<TCurrentAcademicPeriod>
+					columns={columns}
+					data={periods ?? []}
+					getRowKey={period => period.id}
+					emptyMessage="No hay periodos académicos registrados."
+				/>
+			)}
 
 			<CreateAcademicPeriodModal isOpen={isCreateOpen} onClose={closeCreate} />
 
@@ -168,10 +247,10 @@ export const AcademicPeriodsList = () => {
 				}}
 				onConfirm={handleConfirmDelete}
 				periodTitle={
-				selected
-					? `PAC ${selected.pac} ${selected.pac_modality} ${selected.year}`
-					: undefined
-			}
+					selected
+						? `PAC ${selected.pac} ${selected.pac_modality} ${selected.year}`
+						: undefined
+				}
 				isPending={isDeleting}
 			/>
 		</div>

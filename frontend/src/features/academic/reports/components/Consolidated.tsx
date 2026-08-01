@@ -1,111 +1,87 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@config/providers';
+import { useMemo, useState, useEffect } from 'react';
+import { useAuth } from '@config';
 import { EUserRole } from '@shared/constants';
-import { useGetConsolidated, type TOutputConsolidated } from '@api/courses';
-import { useGetAllDepartments } from '@api/departments';
-import { useGetAllMyCoordinations } from '@api/teachers';
+import { usePaginationParams, useDebounce } from '@shared/hooks';
 import {
-	useGetAcademicPeriods,
 	useGetCurrentAcademicPeriod,
+	useGetAcademicPeriods,
 } from '@api/periods';
+import { useGetAllMyCoordinations } from '@api/teachers';
+import { useGetAllDepartments } from '@api/departments';
+import { useGetConsolidated } from '@api/courses';
 import {
 	DataTable,
-	type IDataTableColumn,
-} from '@shared/components/ui/DataTable';
-import { Pagination } from '@shared/components/ui/Pagination';
-import { SkeletonTable } from '@shared/components/ui/Skeleton';
-import { usePaginationParams } from '@shared/hooks';
-import { cn } from '@config/lib';
-import { TagError } from '@shared/components/ui/TagError';
+	Pagination,
+	SkeletonTable,
+} from '@shared/components';
+import { TOutputConsolidated } from '@api/courses/courses.types';
 
-function formatPercent(value: number): string {
-	return `${(value ?? 0).toFixed(2)}%`;
+interface Props {
+	centerDepartmentId?: string;
+	showDepartmentFilter?: boolean;
 }
 
-function InconsistencyBadge({ value }: { value: string }) {
-	const isCorrect = value === 'Correcto';
-	return (
-		<span
-			className={cn(
-				'px-2 py-0.5 rounded-full text-xs font-medium',
-				isCorrect
-					? 'bg-green-100 text-green-800'
-					: 'bg-red-100 text-red-800'
-			)}
-		>
-			{value}
-		</span>
-	);
-}
-
-const columns: IDataTableColumn<TOutputConsolidated>[] = [
-	{ key: 'courseCode', header: 'Código' },
-	{ key: 'courseName', header: 'Asignatura', hiddenOnMobile: true },
-	{ key: 'section', header: 'Sección' },
-	{ key: 'initial', header: 'Inicio' },
-	{ key: 'final', header: 'Final' },
-	{ key: 'ABD', header: 'ABD' },
-	{ key: 'NSP', header: 'NSP' },
-	{ key: 'RPB', header: 'RPB' },
-	{ key: 'APB', header: 'APB' },
+const columns = [
 	{
-		key: 'finalSummatoryInconsistency',
-		header: 'Inconsistencia Final',
-		hiddenOnMobile: true,
-		render: row => (
-			<InconsistencyBadge value={row.finalSummatoryInconsistency} />
-		),
+		key: 'courseCode',
+		header: 'Código',
+		mobileLabel: 'Código',
 	},
 	{
-		key: 'initialSummatoryInconsistency',
-		header: 'Inconsistencia Inicial',
-		hiddenOnMobile: true,
-		render: row => (
-			<InconsistencyBadge value={row.initialSummatoryInconsistency} />
-		),
-	},
-	{ key: 'teacherCode', header: 'Empleado', hiddenOnMobile: true },
-	{ key: 'teacherName', header: 'Nombre', hiddenOnMobile: true },
-	{ key: 'department', header: 'Departamento', hiddenOnMobile: true },
-	{ key: 'modality', header: 'Modalidad', hiddenOnMobile: true },
-	{
-		key: 'indexAPB',
-		header: 'Índice de aprobación',
-		hiddenOnMobile: true,
-		render: row => formatPercent(row.indexAPB),
+		key: 'courseName',
+		header: 'Asignatura',
+		mobileLabel: 'Asig.',
 	},
 	{
-		key: 'indexRPB',
-		header: 'Índice de reprobación',
-		hiddenOnMobile: true,
-		render: row => formatPercent(row.indexRPB),
+		key: 'section',
+		header: 'Sección',
+		mobileLabel: 'Sec.',
+	},
+	{
+		key: 'initial',
+		header: 'Matrícula Inicial',
+		mobileLabel: 'Inicial',
+	},
+	{
+		key: 'final',
+		header: 'Matrícula Final',
+		mobileLabel: 'Final',
+	},
+	{
+		key: 'teacherName',
+		header: 'Docente',
+		mobileLabel: 'Docente',
+	},
+	{
+		key: 'modality',
+		header: 'Modalidad',
+		mobileLabel: 'Modalidad',
 	},
 	{
 		key: 'indexABD',
-		header: 'Índice de abandono',
-		hiddenOnMobile: true,
-		render: row => formatPercent(row.indexABD),
+		header: '% ABD',
+		mobileLabel: '% ABD',
+		render: (row: TOutputConsolidated) => `${row.indexABD.toFixed(2)}%`,
 	},
 	{
 		key: 'indexNSP',
-		header: 'Índice de NSP',
-		hiddenOnMobile: true,
-		render: row => formatPercent(row.indexNSP),
+		header: '% NSP',
+		mobileLabel: '% NSP',
+		render: (row: TOutputConsolidated) => `${row.indexNSP.toFixed(2)}%`,
 	},
 	{
-		key: 'terminalEfficiency',
-		header: 'Eficiencia terminal',
-		hiddenOnMobile: true,
-		render: row => formatPercent(row.terminalEfficiency),
+		key: 'indexRPB',
+		header: '% RPB',
+		mobileLabel: '% RPB',
+		render: (row: TOutputConsolidated) => `${row.indexRPB.toFixed(2)}%`,
 	},
-	{ key: 'pac', header: 'Período' },
-	{ key: 'year', header: 'Año' },
+	{
+		key: 'indexAPB',
+		header: '% APB',
+		mobileLabel: '% APB',
+		render: (row: TOutputConsolidated) => `${row.indexAPB.toFixed(2)}%`,
+	},
 ];
-
-type Props = {
-	centerDepartmentId?: string;
-	showDepartmentFilter?: boolean;
-};
 
 export const Consolidated = ({
 	centerDepartmentId: propCenterDepartmentId,
@@ -118,7 +94,7 @@ export const Consolidated = ({
 	);
 	const isCoord = roles.includes(EUserRole.COORDINADOR_AREA);
 
-	const { page, size } = usePaginationParams();
+	const { page, size, setPage } = usePaginationParams();
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();
 	const { data: periods } = useGetAcademicPeriods();
 	const { data: coordinations, isLoading: isLoadingCoordinations } =
@@ -129,6 +105,8 @@ export const Consolidated = ({
 	const [selectedYear, setSelectedYear] = useState('');
 	const [selectedPac, setSelectedPac] = useState('');
 	const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
+	const [searchTerm, setSearchTerm] = useState('');
+	const { debouncedValue: debouncedSearch } = useDebounce(searchTerm, 500);
 
 	useEffect(() => {
 		if (currentPeriod) {
@@ -172,6 +150,7 @@ export const Consolidated = ({
 			year: selectedYear || undefined,
 			pac: selectedPac || undefined,
 			...(centerDepartmentId ? { centerDepartmentId } : {}),
+			searchTerm: debouncedSearch || undefined,
 			page,
 			size,
 		},
@@ -189,83 +168,105 @@ export const Consolidated = ({
 
 	return (
 		<div className="min-h-screen bg-transparent">
-			<div className="px-8 pb-4 flex items-center gap-4 flex-wrap">
-				{showDepartmentFilter && (
-					<div className="flex items-center gap-2">
-						<label className="block font-semibold text-sm text-foreground">
-							Departamento:
+			<div className="pb-4 grid items-end grid-cols-1 md:grid-cols-4 gap-4">
+				<div className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Buscar Clase o Docente
+						</label>
+						<input
+							type="text"
+							placeholder="Nombre de clase o docente..."
+							value={searchTerm}
+							onChange={e => {
+								setSearchTerm(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						/>
+					</div>
+					{showDepartmentFilter && (
+						<div>
+							<label className="block mb-2 font-semibold text-sm text-foreground">
+								Departamento
+							</label>
+							<select
+								value={selectedDepartmentId}
+								onChange={e => {
+									setSelectedDepartmentId(e.target.value);
+									setPage(1);
+								}}
+								className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+							>
+								<option value="">Todos los departamentos</option>
+								{allDepartments?.map(d => (
+									<option key={d.id} value={d.id}>
+										{d.name}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Año
 						</label>
 						<select
-							value={selectedDepartmentId}
-							onChange={e =>
-								setSelectedDepartmentId(e.target.value)
-							}
+							value={selectedYear}
+							onChange={e => {
+								setSelectedYear(e.target.value);
+								setPage(1);
+							}}
 							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 						>
-							<option value="">Todos los departamentos</option>
-							{allDepartments?.map(d => (
-								<option key={d.id} value={d.id}>
-									{d.name}
+							{years.map(y => (
+								<option key={y} value={y}>
+									{y}
 								</option>
 							))}
 						</select>
 					</div>
-				)}
-				<div className="flex items-center gap-2">
-					<label className="block font-semibold text-sm text-foreground">
-						Año:
-					</label>
-					<select
-						value={selectedYear}
-						onChange={e => setSelectedYear(e.target.value)}
-						className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-					>
-						{years.map(y => (
-							<option key={y} value={y}>
-								{y}
-							</option>
-						))}
-					</select>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<label className="block font-semibold text-sm text-foreground">
-						PAC:
-					</label>
-					<select
-						value={selectedPac}
-						onChange={e => setSelectedPac(e.target.value)}
-						className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-					>
-						{[1, 2, 3].map(p => (
-							<option key={p} value={p}>
-								{p}
-							</option>
-						))}
-					</select>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							PAC
+						</label>
+						<select
+							value={selectedPac}
+							onChange={e => {
+								setSelectedPac(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							{[1, 2, 3].map(p => (
+								<option key={p} value={p}>
+									{p}
+								</option>
+							))}
+						</select>
+					</div>
 				</div>
 			</div>
 
-			<div className="w-full overflow-x-auto px-4 pb-10">
-				{isCoordWithoutCoordination ? (
-					<TagError text="No tiene coordinaciones asignadas." />
-				) : consolidatedQuery.isLoading ? (
+			<div className="w-full overflow-x-auto pb-10">
+				{consolidatedQuery.isLoading ? (
 					<div className="rounded-xl bg-white p-6 shadow-md">
-						<SkeletonTable columns={20} rows={5} />
+						<SkeletonTable columns={11} rows={5} />
 					</div>
-				) : consolidatedQuery.isError ? (
-					<TagError text="No se encontraron datos disponibles." />
-				) : !data || data.length === 0 ? (
-					<TagError text="No hay datos de rendimiento académico para los filtros seleccionados" />
 				) : (
 					<>
 						<DataTable
 							columns={columns}
-							data={data}
+							data={data ?? []}
 							getRowKey={row =>
-							  `${row.year}-${row.pac}-${row.department}-${row.teacherCode}-${row.courseCode}-${row.section}-${row.modality}`
+								`${row.year}-${row.pac}-${row.department}-${row.teacherCode}-${row.courseCode}-${row.section}-${row.modality}`
 							}
 							showRowNumber={false}
+							emptyMessage={
+								isCoordWithoutCoordination
+									? 'No tiene coordinaciones asignadas.'
+									: 'No hay datos de rendimiento académico para los filtros seleccionados'
+							}
 						/>
 						<Pagination totalPages={meta?.lastPage ?? 0} />
 					</>

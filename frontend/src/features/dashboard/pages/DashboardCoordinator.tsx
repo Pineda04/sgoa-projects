@@ -1,9 +1,7 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
-import { DocumentPlusIcon } from '@heroicons/react/24/outline';
+import { Navigate, useParams } from 'react-router-dom';
 import { CourseList } from '@features/academic/courses';
 import { useTabWithReset } from '@shared/hooks';
 import {
-	Button,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -43,25 +41,6 @@ export const DashboardCoordinator = () => {
 
 				{/* Planificaciones */}
 				<TabsContent value="0">
-					<div className="flex flex-row gap-10 justify-center mb-2 mt-4">
-						<Link
-							to={`/academic/planifications/new/${centerDepartmentId}`}
-							style={{
-								pointerEvents: centerDepartmentId
-									? 'auto'
-									: 'none',
-							}}
-						>
-							<Button
-								className="bg-green-500 hover:bg-green-600 duration-500"
-								disabled={!centerDepartmentId}
-							>
-								<DocumentPlusIcon className="size-6" />
-								Agregar planificación
-							</Button>
-						</Link>
-					</div>
-
 					<ListPlanificationsCoordinator
 						key={centerDepartmentId}
 						centerDepartmentId={centerDepartmentId ?? ''}
