@@ -23,6 +23,8 @@ import { CreateAirConditionerDto, UpdateAirConditionerDto } from '../dto';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.DOCENTE,
+  EUserRole.MONITOR,
 )
 export class AirConditionersController {
   constructor(

@@ -23,6 +23,8 @@ import { MonitorTypesService } from '../services/monitor-types.service';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.DOCENTE,
+  EUserRole.MONITOR,
 )
 export class MonitorTypesController {
   constructor(private readonly monitorTypesService: MonitorTypesService) {}

@@ -21,11 +21,7 @@ import {
 	Pagination,
 } from '@shared/components';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
-import {
-	ClassroomAvailabilityModal,
-	DeleteClassroomModal,
-	ViewClassroomModal,
-} from '../components';
+import { ClassroomAvailabilityModal, DeleteClassroomModal } from '../components';
 
 export const ListClassrooms = () => {
 	const navigate = useNavigate();
@@ -38,7 +34,6 @@ export const ListClassrooms = () => {
 	const roomTypes = useGetAllRoomTypes();
 
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
-	const [isViewOpen, openView, closeView] = useModal();
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
 	const [selectedClassroom, setSelectedClassroom] =
 		useState<TClassroom | null>(null);
@@ -68,13 +63,6 @@ export const ListClassrooms = () => {
 		() => new Map(roomTypes.data?.map(t => [t.id, t.description])),
 		[roomTypes.data]
 	);
-
-	const handleOpenView = (classroom: TClassroom) => {
-		setSelectedClassroom(classroom);
-		openView();
-	};
-
-	const handleCloseView = () => closeView();
 
 	const handleOpenDelete = (classroom: TClassroom) => {
 		setSelectedClassroom(classroom);
@@ -178,7 +166,9 @@ export const ListClassrooms = () => {
 			render: row => (
 				<div className="flex items-center justify-center gap-3">
 					<button
-						onClick={() => handleOpenView(row)}
+						onClick={() =>
+							navigate(`/infrastructure/classrooms/view/${row.id}`)
+						}
 						className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
 						title="Ver aula"
 					>
@@ -328,14 +318,6 @@ export const ListClassrooms = () => {
 					/>
 					<Pagination totalPages={classrooms.data?.meta?.lastPage} />
 				</>
-			)}
-
-			{selectedClassroom && (
-				<ViewClassroomModal
-					isOpen={isViewOpen}
-					onClose={handleCloseView}
-					classroom={selectedClassroom}
-				/>
 			)}
 
 			{selectedClassroom && (
