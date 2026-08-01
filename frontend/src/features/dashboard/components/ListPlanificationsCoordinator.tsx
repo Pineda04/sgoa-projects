@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGetAcademicAssignmentCoordinatorOnlyPeriods } from '@api/assignment-reports';
 import { ListPlanificationsTable } from '@features/academic/planifications';
 import { Button } from '@shared/components';
 import { usePaginationParams } from '@shared/hooks';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { useGetAcademicPeriods } from '@api/periods';
 
 interface IProps {
 	centerDepartmentId: string;
@@ -17,6 +18,14 @@ export const ListPlanificationsCoordinator = ({
 	const navigate = useNavigate();
 	const [yearFilter, setYearFilter] = useState('');
 	const [pacFilter, setPacFilter] = useState('');
+
+	const { data: periods } = useGetAcademicPeriods();
+
+	const years = useMemo(() => {
+		if (!periods) return [];
+		const uniqueYears = [...new Set(periods.map(p => p.year))];
+		return uniqueYears.sort((a, b) => b - a);
+	}, [periods]);
 
 	const { isLoading, isError, data } =
 		useGetAcademicAssignmentCoordinatorOnlyPeriods(
@@ -33,16 +42,21 @@ export const ListPlanificationsCoordinator = ({
 						<label className="block mb-2 font-semibold text-sm text-foreground">
 							Año
 						</label>
-						<input
-							type="number"
-							placeholder="Filtrar por año..."
+						<select
 							value={yearFilter}
 							onChange={e => {
 								setYearFilter(e.target.value);
 								setPage(1);
 							}}
-							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-						/>
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							{years.map(y => (
+								<option key={y} value={y}>
+									{y}
+								</option>
+							))}
+						</select>
 					</div>
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">

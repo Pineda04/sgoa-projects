@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { CreateAcademicPeriodModal } from '../components/CreateAcademicPeriodModal';
 import { EditAcademicPeriodModal } from '../components/EditAcademicPeriodModal';
@@ -35,6 +35,14 @@ export const AcademicPeriodsList = () => {
 	const [yearFilter, setYearFilter] = useState('');
 	const [pacFilter, setPacFilter] = useState('');
 	const [modalityFilter, setModalityFilter] = useState('');
+
+	const { data: allPeriods } = useGetAcademicPeriods();
+
+	const years = useMemo(() => {
+		if (!allPeriods) return [];
+		const uniqueYears = [...new Set(allPeriods.map(p => p.year))];
+		return uniqueYears.sort((a, b) => b - a);
+	}, [allPeriods]);
 
 	const { data: periods, isLoading } = useGetAcademicPeriods(
 		yearFilter || undefined,
@@ -147,16 +155,21 @@ export const AcademicPeriodsList = () => {
 						<label className="block mb-2 font-semibold text-sm text-foreground">
 							Año
 						</label>
-						<input
-							type="number"
-							placeholder="Ej. 2025"
+						<select
 							value={yearFilter}
 							onChange={e => {
 								setYearFilter(e.target.value);
 								setPage(1);
 							}}
-							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-						/>
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							{years.map(y => (
+								<option key={y} value={y}>
+									{y}
+								</option>
+							))}
+						</select>
 					</div>
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">
