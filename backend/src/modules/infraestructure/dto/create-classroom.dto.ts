@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsNotEmpty,
   IsString,
   IsInt,
@@ -203,4 +204,12 @@ export class CreateClassroomDto {
     IsValidIdsInventoryConfigConstraint,
   )
   conditionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'IDs de los departamentos asociados al aula.',
+  })
+  @IsOptional()
+  @IsArray({ message: 'La propiedad <departmentIds> debe ser un arreglo.' })
+  @IsUUID('all', { each: true, message: 'Cada departmentId debe ser un UUID válido.' })
+  departmentIds?: string[];
 }

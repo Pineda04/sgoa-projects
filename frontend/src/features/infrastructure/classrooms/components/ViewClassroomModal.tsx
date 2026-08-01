@@ -81,6 +81,11 @@ export const ViewClassroomModal = ({
 					`Pizarra digital (${digitalBlackboard.id.slice(0, 8)})`
 				: undefined;
 
+	const departmentsNames =
+		classroom.departments && classroom.departments.length > 0
+			? classroom.departments.map(d => d.name).join(', ')
+			: 'Sin departamentos asignados';
+
 	const isVirtual = roomTypeName?.toLowerCase() === 'espacio virtual';
 	const isInactive = !classroom.activeStatus;
 	const disableAvailability = isVirtual || isInactive;
@@ -122,6 +127,12 @@ export const ViewClassroomModal = ({
 						label="Pizarra digital"
 						value={digitalBlackboardName}
 					/>
+
+					<DetailField
+						label="Departamentos"
+						value={departmentsNames}
+					/>
+
 					<DetailField label="Escritorios" value={classroom.desks} />
 					<DetailField label="Mesas" value={classroom.tables} />
 					<DetailField

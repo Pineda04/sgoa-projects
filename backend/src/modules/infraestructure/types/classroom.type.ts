@@ -18,6 +18,7 @@ export type TClassroom = {
   digitalBlackboardId?: string | null;
   maxCapacity?: number | null;
   activeStatus?: boolean;
+  departments?: { id: string; name: string }[];
   // building?: TBuilding;
   // roomType?: TRoomType;
   // connectivity?: TConnectivity;
