@@ -9,7 +9,7 @@ import {
 	WifiIcon,
 	Squares2X2Icon,
 } from '@heroicons/react/24/outline';
-import { Snowflake } from 'lucide-react';
+import { ArrowLeft, Snowflake } from 'lucide-react';
 import { useGetClassroomById } from '@api/classrooms';
 import { useGetAllBuildings } from '@api/buildings';
 import { useGetAllRoomTypes } from '@api/room-types';
@@ -197,6 +197,14 @@ export const ViewClassroom = () => {
 							<Button
 								type="button"
 								variant="outline"
+								onClick={() => navigate(-1)}
+							>
+								<ArrowLeft className="size-4" />
+								Volver
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
 								onClick={openAvail}
 								disabled={disableAvailability}
 								className={
@@ -348,7 +356,7 @@ export const ViewClassroom = () => {
 							</SectionCard>
 
 							<SectionCard
-								title="Aires acondicionados"
+								title="Aire acondicionado"
 								icon={<Snowflake className="size-4.5" />}
 							>
 								{airConditioners.isLoading ? (
