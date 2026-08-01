@@ -105,6 +105,8 @@ export class ClassroomController {
     EUserRole.RRHH,
     EUserRole.DIRECCION,
     EUserRole.COORDINADOR_AREA,
+    EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas encontrado correctamente.')
@@ -132,6 +134,7 @@ export class ClassroomController {
     EUserRole.RRHH,
     EUserRole.COORDINADOR_AREA,
     EUserRole.DOCENTE,
+    EUserRole.MONITOR,
   )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el aula.')
