@@ -27,7 +27,7 @@ export const ListPlanificationsCoordinator = ({
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
-	const { isLoading, isError, data } =
+	const { isLoading, data } =
 		useGetAcademicAssignmentCoordinatorOnlyPeriods(
 			centerDepartmentId,
 			yearFilter || undefined,
@@ -94,7 +94,6 @@ export const ListPlanificationsCoordinator = ({
 
 			<ListPlanificationsTable
 				isLoading={isLoading}
-				isError={isError}
 				data={data ?? null}
 			/>
 		</div>

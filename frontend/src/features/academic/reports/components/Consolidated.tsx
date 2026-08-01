@@ -12,7 +12,6 @@ import { useGetConsolidated } from '@api/courses';
 import {
 	DataTable,
 	Pagination,
-	TagError,
 	SkeletonTable,
 } from '@shared/components';
 import { TOutputConsolidated } from '@api/courses/courses.types';
@@ -250,25 +249,24 @@ export const Consolidated = ({
 			</div>
 
 			<div className="w-full overflow-x-auto pb-10">
-				{isCoordWithoutCoordination ? (
-					<TagError text="No tiene coordinaciones asignadas." />
-				) : consolidatedQuery.isLoading ? (
+				{consolidatedQuery.isLoading ? (
 					<div className="rounded-xl bg-white p-6 shadow-md">
 						<SkeletonTable columns={11} rows={5} />
 					</div>
-				) : consolidatedQuery.isError ? (
-					<TagError text="No se encontraron datos disponibles." />
-				) : !data || data.length === 0 ? (
-					<TagError text="No hay datos de rendimiento académico para los filtros seleccionados" />
 				) : (
 					<>
 						<DataTable
 							columns={columns}
-							data={data}
+							data={data ?? []}
 							getRowKey={row =>
 								`${row.year}-${row.pac}-${row.department}-${row.teacherCode}-${row.courseCode}-${row.section}-${row.modality}`
 							}
 							showRowNumber={false}
+							emptyMessage={
+								isCoordWithoutCoordination
+									? 'No tiene coordinaciones asignadas.'
+									: 'No hay datos de rendimiento académico para los filtros seleccionados'
+							}
 						/>
 						<Pagination totalPages={meta?.lastPage ?? 0} />
 					</>

@@ -3,7 +3,7 @@ import { useGetAllAssignmentReportsForAuthorities } from '@api/assignment-report
 import { TAssignmentReport } from '@api/assignment-reports';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetAllCenters } from '@api/centers';
-import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable, TagError } from '@shared/components';
+import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce, usePaginationParams } from '@shared/hooks';
@@ -32,7 +32,7 @@ export const ListAssignmentReportsAuthorities = () => {
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
-	const { isLoading, isError, data } = useGetAllAssignmentReportsForAuthorities(
+	const { isLoading, data } = useGetAllAssignmentReportsForAuthorities(
 		yearFilter || undefined,
 		pacFilter || undefined,
 		departmentFilter || undefined,
@@ -213,11 +213,9 @@ export const ListAssignmentReportsAuthorities = () => {
 
 			{isLoading ? (
 				<Loading />
-			) : isError ? (
-				<TagError text="No se encontraron datos disponibles." />
 			) : (
 				<>
-					<div className="py-2">
+					<div className="py-2 bg-white">
 						<ResponsiveTable<TAssignmentReport>
 							columns={columns}
 							data={reports}

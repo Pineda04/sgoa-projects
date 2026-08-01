@@ -3,7 +3,7 @@ import { useGetAllPeriodsForAuthorities } from '@api/assignment-reports';
 import { TCurrentAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetAllCenters } from '@api/centers';
-import { DataTable, IDataTableColumn, Pagination, TagError, Loading } from '@shared/components';
+import { DataTable, IDataTableColumn, Pagination, Loading } from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePaginationParams } from '@shared/hooks';
@@ -33,7 +33,7 @@ export const ListPlanificationsAuthorities = () => {
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
-	const { isLoading, isError, data } = useGetAllPeriodsForAuthorities(
+	const { isLoading, data } = useGetAllPeriodsForAuthorities(
 		yearFilter || undefined,
 		pacFilter || undefined,
 		departmentFilter || undefined,
@@ -169,8 +169,6 @@ export const ListPlanificationsAuthorities = () => {
 
 			{isLoading ? (
 				<Loading />
-			) : isError ? (
-				<TagError text="No se encontraron datos disponibles." />
 			) : (
 				<div className="w-full py-2">
 					<DataTable<TPlanificationAuthorityRow>

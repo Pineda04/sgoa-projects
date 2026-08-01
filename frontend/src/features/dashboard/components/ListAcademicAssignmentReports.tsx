@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useGetAcademicAssignmentReportsCoordinatorByCenter } from '@api/assignment-reports';
-import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable, TagError } from '@shared/components';
+import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce, usePaginationParams } from '@shared/hooks';
@@ -44,7 +44,7 @@ export const ListAcademicAssignmentReports = ({
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
-	const { isLoading, isError, data } =
+	const { isLoading, data } =
 		useGetAcademicAssignmentReportsCoordinatorByCenter(
 			centerDepartmentId,
 			undefined,
@@ -176,11 +176,9 @@ export const ListAcademicAssignmentReports = ({
 
 			{isLoading ? (
 				<Loading />
-			) : isError ? (
-				<TagError text="No se encontraron datos disponibles." />
 			) : (
 				<>
-					<div className="py-2">
+					<div className="py-2 bg-white">
 						<ResponsiveTable<ReportData>
 							columns={columns}
 							data={reports}
