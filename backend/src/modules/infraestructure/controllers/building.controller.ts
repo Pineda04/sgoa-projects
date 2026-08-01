@@ -13,6 +13,7 @@ import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateBuildingDto, UpdateBuildingDto } from '../dto';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -40,6 +41,7 @@ export class BuildingController {
 
   @Get()
   @RequirePermission('read', 'buildings')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de edificios.')
   @ApiCommonResponses({

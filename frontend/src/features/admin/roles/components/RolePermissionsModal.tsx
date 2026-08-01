@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { FiSave } from 'react-icons/fi';
 import { Button, ModalBase, Loading } from '@shared/components';
 import {
+	TPermission,
 	TRole,
 	useGetRole,
 	useGetPermissionsCatalog,
 	useUpdateRolePermissions,
 } from '@api/roles';
-import { Actions } from '@config/lib/casl/ability';
+import { AssignableActions, Subjects } from '@config/lib/casl/ability';
 import { ACTION_LABELS, SUBJECT_LABELS } from './permission-labels';
 
 interface RolePermissionsModalProps {
@@ -16,7 +17,13 @@ interface RolePermissionsModalProps {
 	role?: TRole;
 }
 
-const ACTIONS_ORDER: Actions[] = ['manage', 'read', 'create', 'update', 'delete'];
+const ACTIONS_ORDER: AssignableActions[] = [
+	'manage',
+	'read',
+	'create',
+	'update',
+	'delete',
+];
 
 export const RolePermissionsModal = ({
 	isOpen,
@@ -37,14 +44,16 @@ export const RolePermissionsModal = ({
 	}, [isOpen, roleData]);
 
 	const bySubject = useMemo(() => {
-		const map = new Map<string, typeof catalog>();
-		for (const permission of catalog ?? []) {
+		const map = new Map<Subjects, TPermission[]>();
+		for (const permission of catalog?.permissions ?? []) {
 			const list = map.get(permission.subject) ?? [];
 			list.push(permission);
 			map.set(permission.subject, list);
 		}
 		return map;
 	}, [catalog]);
+
+	const lookupDependencies = catalog?.lookupDependencies ?? {};
 
 	const togglePermission = (permissionId: string) => {
 		setSelected(prev => {
@@ -71,7 +80,11 @@ export const RolePermissionsModal = ({
 				</h1>
 				<p className="text-xs text-gray-500 mb-5">
 					Marca las acciones permitidas por módulo. &quot;Gestionar&quot;
-					incluye ver, crear, editar y eliminar.
+					incluye ver, crear, editar y eliminar. Los módulos indicados como
+					<span className="text-green-700"> consulta automática </span>
+					se conceden solos para que los formularios puedan cargar sus
+					listas desplegables; no dan acceso al menú ni al mantenimiento de
+					esos módulos.
 				</p>
 
 				{isLoading ? (
@@ -103,9 +116,24 @@ export const RolePermissionsModal = ({
 												className="border-t border-gray-100"
 											>
 												<td className="px-3 py-2 text-gray-700">
-													{SUBJECT_LABELS[
-														subject as keyof typeof SUBJECT_LABELS
-													] ?? subject}
+													<span>
+														{SUBJECT_LABELS[subject] ??
+															subject}
+													</span>
+													{!!lookupDependencies[subject]
+														?.length && (
+														<span className="block text-[11px] text-green-700">
+															Consulta automática:{' '}
+															{lookupDependencies[
+																subject
+															]!.map(
+																dep =>
+																	SUBJECT_LABELS[
+																		dep
+																	] ?? dep
+															).join(', ')}
+														</span>
+													)}
 												</td>
 												{ACTIONS_ORDER.map(action => {
 													const permission = permissions?.find(

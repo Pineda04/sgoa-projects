@@ -14,6 +14,7 @@ import { UpdateClassroomDto } from '../dto/update-classroom.dto';
 import {
   ApiCommonResponses,
   ApiPagination,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -63,6 +64,7 @@ export class ClassroomController {
 
   @Get()
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
   @ApiPagination({

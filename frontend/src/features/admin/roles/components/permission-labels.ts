@@ -1,6 +1,6 @@
-import { Actions, Subjects } from '@config/lib/casl/ability';
+import { AssignableActions, Subjects } from '@config/lib/casl/ability';
 
-export const ACTION_LABELS: Record<Actions, string> = {
+export const ACTION_LABELS: Record<AssignableActions, string> = {
 	manage: 'Gestionar (todo)',
 	read: 'Ver',
 	create: 'Crear',

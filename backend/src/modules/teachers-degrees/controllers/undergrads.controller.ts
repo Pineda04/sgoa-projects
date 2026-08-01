@@ -14,6 +14,7 @@ import { UpdateUndergradDto } from '../dto/update-undergrad.dto';
 import { UndergradsService } from '../services/undergrads.service';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -44,6 +45,7 @@ export class UndergradsController {
 
   @Get()
   @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pregrados.')
   // @ApiPagination({
@@ -64,6 +66,7 @@ export class UndergradsController {
 
   @Get('array')
   @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pregrados en arreglo.')
   @ApiCommonResponses({

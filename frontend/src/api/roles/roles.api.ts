@@ -2,7 +2,7 @@ import { api } from '@config/lib';
 import { IResponse } from '@shared';
 import {
 	TCreateRole,
-	TPermission,
+	TPermissionsCatalog,
 	TRole,
 	TRoleWithPermissions,
 	TUpdateRole,
@@ -16,7 +16,7 @@ export const rolesApi = {
 		api.get<IResponse<TRoleWithPermissions>>(`/roles/${id}`),
 
 	getPermissionsCatalog: () =>
-		api.get<IResponse<TPermission[]>>(`/roles/permissions/catalog`),
+		api.get<IResponse<TPermissionsCatalog>>(`/roles/permissions/catalog`),
 
 	create: (body: TCreateRole) =>
 		api.post<IResponse<TRole>>(`/roles`, body),

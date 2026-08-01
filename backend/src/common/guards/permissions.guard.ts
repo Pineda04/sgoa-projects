@@ -3,7 +3,12 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { TJwtPayload } from 'src/modules/auth/types';
 import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
-import { TPermissionAction, TPermissionSubject } from '../constants';
+import { LOOKUP_SOURCE_KEY } from '../decorators/lookup-source.decorator';
+import {
+  LOOKUP_ACTION,
+  TPermissionAction,
+  TPermissionSubject,
+} from '../constants';
 
 interface IReqWithUser extends Request {
   user: TJwtPayload;
@@ -27,11 +32,19 @@ export class PermissionsGuard implements CanActivate {
 
     if (user.isSuperAdmin) return true;
 
-    const needed = `${required.action}:${required.subject}`;
-    const managed = `manage:${required.subject}`;
+    const accepted = [
+      `${required.action}:${required.subject}`,
+      `manage:${required.subject}`,
+    ];
 
-    return (
-      user.permissions?.some((p) => p === needed || p === managed) ?? false
+    const isLookupSource = this.reflector.getAllAndOverride<boolean>(
+      LOOKUP_SOURCE_KEY,
+      [context.getHandler(), context.getClass()],
     );
+
+    if (isLookupSource && required.action === 'read')
+      accepted.push(`${LOOKUP_ACTION}:${required.subject}`);
+
+    return user.permissions?.some((p) => accepted.includes(p)) ?? false;
   }
 }

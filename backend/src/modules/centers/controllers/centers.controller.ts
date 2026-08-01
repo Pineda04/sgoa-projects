@@ -16,7 +16,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { CreateCenterDto } from '../dto/create-center.dto';
 import { UpdateCenterDto } from '../dto/update-center.dto';
 import { CentersService } from '../services/centers.service';
-import { RequirePermission } from 'src/common/decorators';
+import { LookupSource, RequirePermission } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('centers')
@@ -46,6 +46,7 @@ export class CentersController {
 
   @Get()
   @RequirePermission('read', 'centers')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar centros',
@@ -64,6 +65,7 @@ export class CentersController {
 
   @Get(':id')
   @RequirePermission('read', 'centers')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener centro por ID',

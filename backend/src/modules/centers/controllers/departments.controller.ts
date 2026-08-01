@@ -17,6 +17,7 @@ import { ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -45,6 +46,7 @@ export class DepartmentsController {
 
   @Get()
   @RequirePermission('read', 'departments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de departamentos.')
   @ApiCommonResponses({

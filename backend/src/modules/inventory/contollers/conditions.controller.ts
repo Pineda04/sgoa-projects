@@ -12,6 +12,7 @@ import {
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -42,6 +43,7 @@ export class ConditionsController {
 
   @Get()
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de condiciones.')
   @ApiCommonResponses({

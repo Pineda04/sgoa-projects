@@ -17,14 +17,14 @@ import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { ValidateIdPipe } from 'src/common/pipes';
-import { SuperAdminOnly } from 'src/common/decorators';
+import { RequirePermission, SuperAdminOnly } from 'src/common/decorators';
 
 @Controller('roles')
-@SuperAdminOnly()
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Rol creado exitosamente.')
   @ApiBody({
@@ -44,6 +44,7 @@ export class RolesController {
   }
 
   @Get()
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de roles.')
   @ApiCommonResponses({
@@ -57,6 +58,7 @@ export class RolesController {
   }
 
   @Get('permissions/catalog')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Catálogo de permisos.')
   @ApiCommonResponses({
@@ -71,6 +73,7 @@ export class RolesController {
   }
 
   @Get(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del rol obtenida.')
   @ApiCommonResponses({
@@ -85,6 +88,7 @@ export class RolesController {
   }
 
   @Patch(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Rol actualizado correctamente.')
   @ApiBody({
@@ -106,6 +110,7 @@ export class RolesController {
   }
 
   @Patch(':id/permissions')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Permisos del rol actualizados correctamente.')
   @ApiBody({
@@ -128,6 +133,7 @@ export class RolesController {
   }
 
   @Delete(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Rol eliminado correctamente.')
   @ApiCommonResponses({

@@ -15,6 +15,7 @@ import { UpdateFacultyDto } from '../dto/update-faculty.dto';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -41,6 +42,7 @@ export class FacultiesController {
 
   @Get()
   @RequirePermission('read', 'faculties')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de facultades.')
   @ApiCommonResponses({

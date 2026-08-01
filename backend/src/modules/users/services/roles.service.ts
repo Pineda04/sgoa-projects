@@ -8,7 +8,8 @@ import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TPermission, TRole, TRoleWithPermissions } from '../types';
+import { TPermissionsCatalog, TRole, TRoleWithPermissions } from '../types';
+import { SUBJECT_LOOKUP_DEPENDENCIES } from 'src/common/constants';
 
 @Injectable()
 export class RolesService {
@@ -103,8 +104,13 @@ export class RolesService {
     return roleUpdate;
   }
 
-  async findAllPermissions(): Promise<TPermission[]> {
-    return this.prisma.permission.findMany();
+  async findAllPermissions(): Promise<TPermissionsCatalog> {
+    const permissions = await this.prisma.permission.findMany();
+
+    return {
+      permissions,
+      lookupDependencies: SUBJECT_LOOKUP_DEPENDENCIES,
+    };
   }
 
   async updatePermissions(

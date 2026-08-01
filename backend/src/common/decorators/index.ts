@@ -3,6 +3,7 @@ export * from './get-current-user-id.decorator';
 export * from './public.decorator';
 export * from './response-message.decorator';
 export * from './require-permission.decorator';
+export * from './lookup-source.decorator';
 export * from './super-admin-only.decorator';
 export * from './validator-constraint.decorator';
 export * from './pagination-swagger.decorator';

@@ -1,4 +1,4 @@
-import { Actions, Subjects } from '@config/lib/casl/ability';
+import { AssignableActions, Subjects } from '@config/lib/casl/ability';
 
 export type TRole = {
 	id: string;
@@ -9,8 +9,13 @@ export type TRole = {
 
 export type TPermission = {
 	id: string;
-	action: Actions;
+	action: AssignableActions;
 	subject: Subjects;
+};
+
+export type TPermissionsCatalog = {
+	permissions: TPermission[];
+	lookupDependencies: Partial<Record<Subjects, Subjects[]>>;
 };
 
 export type TRoleWithPermissions = TRole & {

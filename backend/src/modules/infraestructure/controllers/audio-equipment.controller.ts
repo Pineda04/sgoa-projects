@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -40,6 +41,7 @@ export class AudioEquipmentController {
 
   @Get()
   @RequirePermission('read', 'audio-equipments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de audio.')
   @ApiCommonResponses({

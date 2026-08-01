@@ -13,7 +13,7 @@ import {
 import { CreatePositionDto } from '../dto/create-position.dto';
 import { UpdatePositionDto } from '../dto/update-position.dto';
 import { PositionsService } from '../services/positions.service';
-import { RequirePermission } from 'src/common/decorators';
+import { LookupSource, RequirePermission } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiBody } from '@nestjs/swagger';
 
@@ -41,6 +41,7 @@ export class PositionsController {
 
   @Get()
   @RequirePermission('read', 'positions')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de cargos obtenido correctamente.')
   @ApiCommonResponses({

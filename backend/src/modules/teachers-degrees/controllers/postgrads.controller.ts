@@ -14,6 +14,7 @@ import { UpdatePostgradDto } from '../dto/update-postgrad.dto';
 import { PostgradsService } from '../services/postgrads.service';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -39,6 +40,7 @@ export class PostgradsController {
 
   @Get()
   @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de postgrados obtenidos correctamente.')
   // @ApiPagination({
@@ -59,6 +61,7 @@ export class PostgradsController {
 
   @Get('array')
   @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de postgrados en array.')
   findAllArray() {

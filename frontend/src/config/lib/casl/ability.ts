@@ -10,7 +10,20 @@ export const useAbility = () => {
 	return context;
 };
 
-export type Actions = 'manage' | 'read' | 'create' | 'update' | 'delete';
+export type AssignableActions =
+	| 'manage'
+	| 'read'
+	| 'create'
+	| 'update'
+	| 'delete';
+
+/**
+ * `lookup` no es asignable: el backend la deriva al emitir el JWT para los
+ * módulos de los que un rol depende (ej. quien gestiona Departamentos recibe
+ * `lookup:faculties` para poder llenar el selector de facultades). Solo habilita
+ * los listados de catálogo — nunca el menú, la ruta ni el CRUD del módulo.
+ */
+export type Actions = AssignableActions | 'lookup';
 export type Subjects =
 	| 'all'
 	| 'activities'

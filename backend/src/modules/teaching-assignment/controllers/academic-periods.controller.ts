@@ -14,7 +14,8 @@ import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 import { AcademicPeriodsService } from '../services/academic-periods.service';
 import { CreateAcademicPeriodDto, UpdateAcademicPeriodDto } from '../dto';
-import { RequirePermission, ResponseMessage } from 'src/common/decorators';
+import { LookupSource,
+  RequirePermission, ResponseMessage } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { TPacModality } from '../types';
 
@@ -45,6 +46,7 @@ export class AcademicPeriodsController {
 
   @Get()
   @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Listar periodos académicos',
@@ -74,6 +76,7 @@ export class AcademicPeriodsController {
 
   @Get('current')
   @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener periodo académico actual',
