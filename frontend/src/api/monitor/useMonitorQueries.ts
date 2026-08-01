@@ -13,7 +13,7 @@ export const useGetCurrentAssignments = () =>
 		queryKey: monitorKeys.currentAssignments(),
 		queryFn: () => monitorApi.getCurrentAssignments(),
 		staleTime: STALE_TIME.SHORT,
-		refetchInterval: CURRENT_ASSIGNMENTS_REFETCH_INTERVAL,
+		refetchInterval: () => (navigator.onLine ? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL : false),
 		select: res => res.data.data,
 	});
 

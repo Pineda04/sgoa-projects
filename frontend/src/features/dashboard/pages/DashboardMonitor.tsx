@@ -1,24 +1,28 @@
-import { useTabWithReset } from '@shared/hooks';
+import { useTabWithReset, useSyncEngine } from '@shared/hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
-import { MonitorChecklist, MonitorReports } from '../components';
+import { MonitorChecklist, MonitorReports, SyncIndicator } from '../components';
 
 export const DashboardMonitor = () => {
 	const validTabs = ['0', '1'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const currentUser = useUser();
+	const { status, pendingCount } = useSyncEngine();
 
 	return (
 		<div className="pb-8 sm:pb-12">
-			<div className="mb-6">
-				<h2 className="text-2xl font-semibold mb-2">
-					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
-				</h2>
-				<p className="text-sm">{currentUser.user?.name}</p>
-				<p className="text-sm">{currentUser.user?.code}</p>
-				<p className="text-sm">{currentUser.user?.email || ''}</p>
+			<div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<h2 className="text-2xl font-semibold mb-2">
+						UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
+					</h2>
+					<p className="text-sm">{currentUser.user?.name}</p>
+					<p className="text-sm">{currentUser.user?.code}</p>
+					<p className="text-sm">{currentUser.user?.email || ''}</p>
+				</div>
+				<SyncIndicator status={status} pendingCount={pendingCount} />
 			</div>
 
 			<Tabs

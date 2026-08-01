@@ -119,7 +119,7 @@ export const MonitorChecklist = () => {
 		});
 	};
 
-	if (isLoading) {
+	if (isLoading && !data) {
 		return (
 			<div className="space-y-3">
 				<SkeletonCard fields={5} />
@@ -129,7 +129,7 @@ export const MonitorChecklist = () => {
 		);
 	}
 
-	if (isError) {
+	if (isError && !data) {
 		return (
 			<p className="text-sm text-destructive">
 				Error al cargar las asignaciones del día. Intenta nuevamente.

@@ -16,7 +16,7 @@ import {
   Roles,
 } from 'src/common/decorators';
 import { EUserRole } from 'src/common/enums';
-import { CheckFiltersDto, CreateCheckDto } from '../dto';
+import { BatchSyncChecksDto, CheckFiltersDto, CreateCheckDto } from '../dto';
 import { MonitorChecksService } from '../services/monitor-checks.service';
 
 @Controller('monitor/checks')
@@ -45,6 +45,27 @@ export class MonitorChecksController {
     @Body() createCheckDto: CreateCheckDto,
   ) {
     return this.monitorChecksService.create(monitorId, createCheckDto);
+  }
+
+  @Post('batch-sync')
+  @Roles(EUserRole.MONITOR)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Verificaciones offline sincronizadas correctamente.')
+  @ApiBody({
+    type: BatchSyncChecksDto,
+    description:
+      'Lista de verificaciones registradas localmente sin conexión a internet.',
+  })
+  @ApiCommonResponses({
+    summary: 'Sincronizar verificaciones registradas offline',
+    okDescription: 'Verificaciones sincronizadas correctamente.',
+    badRequestDescription: 'El formato del payload es inválido.',
+  })
+  batchSync(
+    @GetCurrentUserId() monitorId: string,
+    @Body() dto: BatchSyncChecksDto,
+  ) {
+    return this.monitorChecksService.batchSync(monitorId, dto);
   }
 
   @Get()

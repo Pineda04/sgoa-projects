@@ -7,7 +7,7 @@ import { parseISO, startOfDay } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { paginate, paginateOutput } from 'src/common/utils';
-import { CheckFiltersDto, CreateCheckDto } from '../dto';
+import { BatchSyncChecksDto, CheckFiltersDto, CreateCheckDto } from '../dto';
 import {
   TScheduleComplianceCheck,
   TScheduleComplianceCheckDetail,
@@ -61,6 +61,52 @@ export class MonitorChecksService {
     });
 
     return newCheck;
+  }
+
+  async batchSync(
+    monitorId: string,
+    dto: BatchSyncChecksDto,
+  ): Promise<{ synced: number; skipped: number }> {
+    let synced = 0;
+    let skipped = 0;
+
+    for (const check of dto.checks) {
+      try {
+        const checkDate = startOfDay(parseISO(check.checkDate));
+
+        await this.prisma.scheduleComplianceCheck.upsert({
+          where: {
+            courseClassroomId_checkDate_checkTime: {
+              courseClassroomId: check.courseClassroomId,
+              checkDate,
+              checkTime: check.checkTime,
+            },
+          },
+          create: {
+            courseClassroomId: check.courseClassroomId,
+            monitorId,
+            checkDate,
+            checkTime: check.checkTime,
+            isPresent: check.isPresent,
+            observation: check.observation,
+            offlineId: check.offlineId,
+            syncedAt: new Date(),
+          },
+          update: {
+            // Si el registro ya existía (creado por otro monitor), solo
+            // se actualiza syncedAt para registrar el intento de sincronización.
+            syncedAt: new Date(),
+          },
+        });
+
+        synced++;
+      } catch {
+        // Error inesperado en un registro individual, continuar con los demás
+        skipped++;
+      }
+    }
+
+    return { synced, skipped };
   }
 
   async findAllWithFilters(

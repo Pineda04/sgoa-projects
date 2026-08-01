@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react';
-import {
-	TMonitorAssignmentCheckStatus,
-	useCreateCheckMutation,
-} from '@api/monitor';
+import { TMonitorAssignmentCheckStatus } from '@api/monitor';
+import { db } from '@config/lib';
 import { getCurrentTimeString, getTodayDateString } from './checklist.utils';
 
 interface RegisterCheckInput {
@@ -12,7 +10,6 @@ interface RegisterCheckInput {
 }
 
 export const useRegisterCheck = () => {
-	const { createCheck, isPendingCreateCheck } = useCreateCheckMutation();
 	const [submittingId, setSubmittingId] = useState<string | null>(null);
 	const [checkOverrides, setCheckOverrides] = useState<
 		Record<string, TMonitorAssignmentCheckStatus>
@@ -23,40 +20,48 @@ export const useRegisterCheck = () => {
 			setSubmittingId(courseClassroomId);
 
 			try {
-				const res = await createCheck({
+				const offlineId = crypto.randomUUID();
+				const checkDate = getTodayDateString();
+				const checkTime = getCurrentTimeString();
+
+				// 1. Guardar localmente en Dexie
+				await db.offlineChecks.add({
+					offlineId,
 					courseClassroomId,
-					checkDate: getTodayDateString(),
-					checkTime: getCurrentTimeString(),
+					checkDate,
+					checkTime,
 					isPresent,
 					observation: observation?.trim() || undefined,
+					syncStatus: 'PENDING',
+					createdAt: Date.now(),
 				});
 
-				const created = res.data.data;
+				// 2. Reflejar inmediatamente en la UI local
 				setCheckOverrides(prev => ({
 					...prev,
 					[courseClassroomId]: {
-						id: created.id,
-						isPresent: created.isPresent,
-						checkTime: created.checkTime,
-						observation: created.observation ?? null,
+						id: offlineId, // se usa offlineId como ID temporal
+						isPresent,
+						checkTime,
+						observation: observation?.trim() || null,
 					},
 				}));
 
 				return true;
-			} catch {
-				// El error ya se notifica globalmente
+			} catch (error) {
+				console.error('Error al guardar verificación localmente:', error);
 				return false;
 			} finally {
 				setSubmittingId(null);
 			}
 		},
-		[createCheck]
+		[]
 	);
 
 	return {
 		registerCheck,
 		checkOverrides,
 		submittingId,
-		isRegistering: isPendingCreateCheck,
+		isRegistering: !!submittingId,
 	};
 };
