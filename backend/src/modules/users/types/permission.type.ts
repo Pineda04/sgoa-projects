@@ -6,5 +6,5 @@ export type TPermission = {
 
 export type TPermissionsCatalog = {
   permissions: TPermission[];
-  lookupDependencies: Record<string, readonly string[]>;
+  impliedPermissions: Partial<Record<string, readonly string[]>>;
 };

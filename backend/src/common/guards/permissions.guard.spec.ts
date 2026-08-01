@@ -4,7 +4,7 @@ import { PermissionsGuard } from './permissions.guard';
 import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
 import { LOOKUP_SOURCE_KEY } from '../decorators/lookup-source.decorator';
 import {
-  expandWithLookupPermissions,
+  expandImpliedPermissions,
   TPermissionAction,
   TPermissionSubject,
 } from '../constants';
@@ -36,10 +36,8 @@ const buildGuard = ({ permission, isLookupSource }: TEndpoint) => {
   return new PermissionsGuard(reflector);
 };
 
-describe('Permisos implícitos de referencia (lookup)', () => {
-  const departmentManager = expandWithLookupPermissions([
-    'manage:departments',
-  ]);
+describe('Permisos implícitos', () => {
+  const departmentManager = expandImpliedPermissions(['manage:departments']);
 
   it('deriva lookup:faculties a partir de manage:departments', () => {
     expect(departmentManager).toEqual(
@@ -92,6 +90,73 @@ describe('Permisos implícitos de referencia (lookup)', () => {
     expect(listadoDeCentros.canActivate(buildContext(departmentManager))).toBe(
       false,
     );
+  });
+
+  it('expande de forma transitiva: manage:users trae sus propios catálogos', () => {
+    expect(expandImpliedPermissions(['manage:users'])).toEqual(
+      expect.arrayContaining([
+        'manage:users',
+        'lookup:centers',
+        'lookup:positions',
+        'lookup:periods',
+        'lookup:degrees',
+      ]),
+    );
+  });
+
+  it('un lookup no arrastra nada: es lectura de catálogo, no acceso al módulo', () => {
+    expect(expandImpliedPermissions(['lookup:departments'])).toEqual([
+      'lookup:departments',
+    ]);
+  });
+
+  describe('dashboards: el permiso concede lo que hacen sus pestañas', () => {
+    const authorities = expandImpliedPermissions([
+      'manage:dashboard-authorities',
+    ]);
+
+    it.each([
+      ['read', 'planifications'],
+      ['read', 'reports'],
+      ['read', 'users'],
+      ['read', 'courses'],
+      ['read', 'periods'],
+      ['create', 'users'],
+      ['delete', 'reports'],
+    ] as [TPermissionAction, TPermissionSubject][])(
+      'habilita %s:%s (pestañas del dashboard de autoridades)',
+      (action, subject) => {
+        const guard = buildGuard({ permission: { action, subject } });
+
+        expect(guard.canActivate(buildContext(authorities))).toBe(true);
+      },
+    );
+
+    it('trae el catálogo de departamentos del Consolidado sin abrir su módulo', () => {
+      expect(authorities).toContain('lookup:departments');
+      expect(authorities).not.toContain('read:departments');
+    });
+
+    it('no se desborda a módulos ajenos al dashboard', () => {
+      const guard = buildGuard({
+        permission: { action: 'read', subject: 'pc-equipments' },
+      });
+
+      expect(guard.canActivate(buildContext(authorities))).toBe(false);
+    });
+
+    it('el dashboard docente no concede gestión de informes ajenos', () => {
+      const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
+
+      expect(teacher).toContain('read:reports');
+      expect(teacher).not.toContain('manage:reports');
+
+      const borrarInforme = buildGuard({
+        permission: { action: 'delete', subject: 'reports' },
+      });
+
+      expect(borrarInforme.canActivate(buildContext(teacher))).toBe(false);
+    });
   });
 
   it('mantiene el acceso total del super administrador', () => {

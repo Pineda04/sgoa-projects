@@ -9,7 +9,7 @@ import { UpdateRoleDto } from '../dto/update-role.dto';
 import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TPermissionsCatalog, TRole, TRoleWithPermissions } from '../types';
-import { SUBJECT_LOOKUP_DEPENDENCIES } from 'src/common/constants';
+import { SUBJECT_IMPLIED_PERMISSIONS } from 'src/common/constants';
 
 @Injectable()
 export class RolesService {
@@ -109,7 +109,7 @@ export class RolesService {
 
     return {
       permissions,
-      lookupDependencies: SUBJECT_LOOKUP_DEPENDENCIES,
+      impliedPermissions: SUBJECT_IMPLIED_PERMISSIONS,
     };
   }
 

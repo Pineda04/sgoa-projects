@@ -15,7 +15,7 @@ export type TPermission = {
 
 export type TPermissionsCatalog = {
 	permissions: TPermission[];
-	lookupDependencies: Partial<Record<Subjects, Subjects[]>>;
+	impliedPermissions: Partial<Record<Subjects, string[]>>;
 };
 
 export type TRoleWithPermissions = TRole & {

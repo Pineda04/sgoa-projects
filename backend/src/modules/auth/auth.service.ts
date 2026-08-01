@@ -15,7 +15,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { nanoid } from 'nanoid';
 import { MailService } from '../mail/services/mail.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { expandWithLookupPermissions } from 'src/common/constants';
+import { expandImpliedPermissions } from 'src/common/constants';
 
 @Injectable()
 export class AuthService {
@@ -135,7 +135,7 @@ export class AuthService {
     const isSuperAdmin = userRoles.some((ur) => ur.role.isSuperAdmin);
     const permissions = isSuperAdmin
       ? []
-      : expandWithLookupPermissions([
+      : expandImpliedPermissions([
           ...new Set(
             userRoles.flatMap((ur) =>
               ur.role.rolePermissions.map(

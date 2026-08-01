@@ -1,4 +1,14 @@
-import { AssignableActions, Subjects } from '@config/lib/casl/ability';
+import { Actions, AssignableActions, Subjects } from '@config/lib/casl/ability';
+
+/** Etiquetas compactas para listar los permisos implícitos de un módulo. */
+export const IMPLIED_ACTION_LABELS: Record<Actions, string> = {
+	manage: 'Gestionar',
+	read: 'Ver',
+	create: 'Crear',
+	update: 'Editar',
+	delete: 'Eliminar',
+	lookup: 'Consultar',
+};
 
 export const ACTION_LABELS: Record<AssignableActions, string> = {
 	manage: 'Gestionar (todo)',

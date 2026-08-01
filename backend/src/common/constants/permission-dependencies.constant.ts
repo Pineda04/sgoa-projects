@@ -18,7 +18,7 @@ export type TLookupAction = typeof LOOKUP_ACTION;
  * Módulos cuyo listado puede exponerse como dato de referencia a roles que no
  * los gestionan. Son catálogos (nombres, no información sensible ni
  * transaccional): por eso quedan fuera cursos, reportes, planificaciones,
- * usuarios y actividades, que sí requieren un `read:` explícito en la matriz.
+ * usuarios y actividades, que solo se conceden como permiso real.
  */
 export const LOOKUP_SUBJECTS = [
   'faculties',
@@ -34,56 +34,82 @@ export const LOOKUP_SUBJECTS = [
 
 export type TLookupSubject = (typeof LOOKUP_SUBJECTS)[number];
 
-/**
- * Dependencias de referencia entre módulos: "para operar <clave> hace falta
- * poder consultar el catálogo de <valores>".
- *
- * Refleja los selectores reales de los formularios del frontend. Al agregar un
- * selector que apunte a otro módulo, hay que registrarlo aquí; de lo contrario
- * un rol con permiso total sobre el módulo no podrá completar el formulario.
- */
-export const SUBJECT_LOOKUP_DEPENDENCIES: Partial<
-  Record<TPermissionSubject, readonly TLookupSubject[]>
+const lookup = (...subjects: TLookupSubject[]) =>
+  subjects.map((subject) => `${LOOKUP_ACTION}:${subject}`);
+
+const grant = (
+  action: 'manage' | 'read' | 'update',
+  ...subjects: TPermissionSubject[]
+) => subjects.map((subject) => `${action}:${subject}`);
+
+export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
+  Record<TPermissionSubject, readonly string[]>
 > = {
+  // --- Dependencias de catálogo (selectores de formularios) ---------------
   // Crear/editar un departamento pide seleccionar su facultad.
-  departments: ['faculties'],
+  departments: lookup('faculties'),
   // Un edificio pertenece a un centro.
-  buildings: ['centers'],
+  buildings: lookup('centers'),
   // El formulario de aula selecciona edificio y equipo de audio.
-  classrooms: ['buildings', 'audio-equipments'],
+  classrooms: lookup('buildings', 'audio-equipments'),
   // El formulario de equipo de cómputo selecciona aula (y su condición) y departamento.
-  'pc-equipments': ['classrooms', 'departments'],
+  'pc-equipments': lookup('classrooms', 'departments'),
   // Cursos se filtran y crean por departamento, centro y periodo.
-  courses: ['departments', 'centers', 'periods'],
+  courses: lookup('departments', 'centers', 'periods'),
   // Los títulos se registran contra un periodo académico.
-  degrees: ['periods'],
+  degrees: lookup('periods'),
   // Alta de usuario: centro, cargo, periodo y títulos.
-  users: ['centers', 'positions', 'periods', 'degrees'],
-  'user-departments': ['centers', 'departments', 'positions'],
+  users: lookup('centers', 'positions', 'periods', 'degrees'),
+  'user-departments': lookup('centers', 'departments', 'positions'),
   // Los reportes se consultan por departamento y periodo.
-  reports: ['departments', 'periods'],
+  reports: lookup('departments', 'periods'),
   // La planificación asigna aulas dentro de un periodo.
-  planifications: ['classrooms', 'periods'],
+  planifications: lookup('classrooms', 'periods'),
+
+  // --- Vistas compuestas: el dashboard concede lo de sus pestañas ---------
+  // Pestañas: Planificaciones, Informes, Usuarios, Clases, Periodos, Consolidado.
+  'dashboard-authorities': [
+    ...grant('manage', 'planifications', 'reports', 'users', 'courses', 'periods'),
+    ...lookup('departments'),
+  ],
+  // Pestañas: Planificaciones, Informes, Usuarios, Clases, Consolidado.
+  'dashboard-coordinator': [
+    ...grant('manage', 'planifications', 'reports', 'users', 'courses'),
+    ...lookup('departments', 'periods'),
+  ],
+  // Pestañas: Clases asignadas e Informes, ambas acotadas al propio docente.
+  // Refleja el alcance del rol DOCENTE sembrado: consulta lo suyo, edita su
+  // planificación y gestiona las actividades complementarias del informe.
+  'dashboard-teacher': [
+    ...grant('read', 'courses', 'reports', 'planifications'),
+    ...grant('update', 'planifications'),
+    ...grant('manage', 'activities'),
+    ...lookup('periods'),
+  ],
 };
 
 /**
- * Expande un set de permisos asignados ("action:subject") agregando los
- * "lookup:subject" implícitos. Basta con tener cualquier acción sobre un módulo
- * para obtener la lectura de referencia de sus dependencias.
+ * Expande un set de permisos asignados agregando, de forma transitiva, los que
+ * cada módulo arrastra. Los `lookup:` no propagan nada: son una lectura de
+ * catálogo, no el permiso de operar el módulo.
  */
-export const expandWithLookupPermissions = (
-  permissions: string[],
-): string[] => {
+export const expandImpliedPermissions = (permissions: string[]): string[] => {
   const expanded = new Set(permissions);
+  const pending = [...permissions];
 
-  for (const permission of permissions) {
+  while (pending.length) {
+    const permission = pending.pop()!;
+
+    if (permission.startsWith(`${LOOKUP_ACTION}:`)) continue;
+
     const subject = permission.split(':')[1] as TPermissionSubject;
-    const dependencies = SUBJECT_LOOKUP_DEPENDENCIES[subject];
 
-    if (!dependencies) continue;
+    for (const implied of SUBJECT_IMPLIED_PERMISSIONS[subject] ?? []) {
+      if (expanded.has(implied)) continue;
 
-    for (const dependency of dependencies)
-      expanded.add(`${LOOKUP_ACTION}:${dependency}`);
+      expanded.add(implied);
+      pending.push(implied);
+    }
   }
 
   return [...expanded];

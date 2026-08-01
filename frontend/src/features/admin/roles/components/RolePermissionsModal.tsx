@@ -8,8 +8,20 @@ import {
 	useGetPermissionsCatalog,
 	useUpdateRolePermissions,
 } from '@api/roles';
-import { AssignableActions, Subjects } from '@config/lib/casl/ability';
-import { ACTION_LABELS, SUBJECT_LABELS } from './permission-labels';
+import { Actions, AssignableActions, Subjects } from '@config/lib/casl/ability';
+import {
+	ACTION_LABELS,
+	IMPLIED_ACTION_LABELS,
+	SUBJECT_LABELS,
+} from './permission-labels';
+
+const formatImplied = (permission: string) => {
+	const [action, subject] = permission.split(':') as [Actions, Subjects];
+
+	return `${IMPLIED_ACTION_LABELS[action] ?? action} ${
+		SUBJECT_LABELS[subject] ?? subject
+	}`;
+};
 
 interface RolePermissionsModalProps {
 	isOpen: boolean;
@@ -53,7 +65,7 @@ export const RolePermissionsModal = ({
 		return map;
 	}, [catalog]);
 
-	const lookupDependencies = catalog?.lookupDependencies ?? {};
+	const impliedPermissions = catalog?.impliedPermissions ?? {};
 
 	const togglePermission = (permissionId: string) => {
 		setSelected(prev => {
@@ -80,11 +92,11 @@ export const RolePermissionsModal = ({
 				</h1>
 				<p className="text-xs text-gray-500 mb-5">
 					Marca las acciones permitidas por módulo. &quot;Gestionar&quot;
-					incluye ver, crear, editar y eliminar. Los módulos indicados como
-					<span className="text-green-700"> consulta automática </span>
-					se conceden solos para que los formularios puedan cargar sus
-					listas desplegables; no dan acceso al menú ni al mantenimiento de
-					esos módulos.
+					incluye ver, crear, editar y eliminar. Lo que aparece como
+					<span className="text-green-700"> Incluye </span>
+					se concede solo: &quot;Consultar&quot; es apenas la lista para
+					llenar un desplegable, mientras que los dashboards conceden lo
+					que dejan hacer sus pestañas &mdash; son permisos amplios.
 				</p>
 
 				{isLoading ? (
@@ -120,17 +132,14 @@ export const RolePermissionsModal = ({
 														{SUBJECT_LABELS[subject] ??
 															subject}
 													</span>
-													{!!lookupDependencies[subject]
+													{!!impliedPermissions[subject]
 														?.length && (
 														<span className="block text-[11px] text-green-700">
-															Consulta automática:{' '}
-															{lookupDependencies[
+															Incluye:{' '}
+															{impliedPermissions[
 																subject
 															]!.map(
-																dep =>
-																	SUBJECT_LABELS[
-																		dep
-																	] ?? dep
+																formatImplied
 															).join(', ')}
 														</span>
 													)}
