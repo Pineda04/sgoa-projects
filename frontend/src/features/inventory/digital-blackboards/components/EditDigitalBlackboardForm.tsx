@@ -48,6 +48,7 @@ export const EditDigitalBlackboardForm = ({
 			monitorTypeId: digitalBlackboard.monitorTypeId,
 			monitorSizeId: digitalBlackboard.monitorSizeId,
 			conditionId: digitalBlackboard.conditionId,
+			classroomId: digitalBlackboard.classroom?.id ?? '',
 		});
 	}, [digitalBlackboard]);
 
@@ -75,6 +76,13 @@ export const EditDigitalBlackboardForm = ({
 	if (isLoading) return <Loading />;
 	if (isError || !digitalBlackboard) return <TagError />;
 
+	const classroomDefaultOption = digitalBlackboard.classroom
+		? {
+				value: digitalBlackboard.classroom.id,
+				label: digitalBlackboard.classroom.name,
+			}
+		: null;
+
 	return (
 		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
 			<h1 className="text-xl font-bold mb-1 shrink-0">
@@ -93,6 +101,7 @@ export const EditDigitalBlackboardForm = ({
 				<DigitalBlackboardFormInputs
 					formik={formik}
 					disabled={isPendingUpdate}
+					classroomDefaultOption={classroomDefaultOption}
 				/>
 			</form>
 

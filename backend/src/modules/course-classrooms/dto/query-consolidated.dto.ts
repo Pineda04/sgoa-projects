@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNumberString, IsOptional } from 'class-validator';
+import { IsUUID, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ValidatorConstraintDecorator } from 'src/common/decorators';
 import { ETeachingAssignmentConfig } from 'src/modules/teaching-assignment/enums';
 import { IsValidIdsTeachingAssignmentConfigConstraint } from 'src/modules/teaching-assignment/validators';
@@ -83,4 +83,15 @@ export class QueryConsolidatedDto {
     IsValidClassroomConfigConstraint,
   )
   courseId?: string;
+
+  @ApiProperty({
+    description: 'Buscador por nombre de docente o nombre de la clase',
+    example: 'Matemática',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({
+    message: 'El valor de <searchTerm> debe ser una cadena de texto.',
+  })
+  searchTerm?: string;
 }

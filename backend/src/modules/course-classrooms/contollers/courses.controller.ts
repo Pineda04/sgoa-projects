@@ -89,9 +89,11 @@ export class CoursesController {
   })
   findBySearchTerm(
     @Query('searchTerm') searchTerm: string,
+    @Query('activeStatus') activeStatus: string | undefined,
     @Query() query: QueryPaginationDto,
   ) {
-    return this.coursesService.findBySearchTerm(searchTerm, query);
+    const active = activeStatus !== undefined ? activeStatus === 'true' : undefined;
+    return this.coursesService.findBySearchTerm(searchTerm, query, undefined, active);
   }
 
   @Get('search/:centerDepartmentId')
@@ -117,13 +119,16 @@ export class CoursesController {
   })
   findBySearchTermAndCenterDepartment(
     @Query('searchTerm') searchTerm: string,
+    @Query('activeStatus') activeStatus: string | undefined,
     @Query() query: QueryPaginationDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
   ) {
+    const active = activeStatus !== undefined ? activeStatus === 'true' : undefined;
     return this.coursesService.findBySearchTerm(
       searchTerm,
       query,
       centerDepartmentId,
+      active,
     );
   }
 

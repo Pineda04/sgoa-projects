@@ -13,10 +13,10 @@ export const useGetCurrentAcademicPeriod = () =>
 		select: res => res.data.data,
 	});
 
-export const useGetAcademicPeriods = () =>
+export const useGetAcademicPeriods = (year?: string, pac?: string, modality?: string) =>
 	useQuery({
-		queryKey: academicPeriodsKeys.lists(),
-		queryFn: academicPeriodsApi.getAcademicPeriods,
+		queryKey: academicPeriodsKeys.lists(year, pac, modality),
+		queryFn: () => academicPeriodsApi.getAcademicPeriods(year, pac, modality),
 		retry: false,
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.LONG,

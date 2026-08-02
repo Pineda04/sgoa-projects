@@ -1,5 +1,5 @@
 import { TCurrentAcademicPeriod } from '@api/periods';
-import { DataTable, IDataTableColumn, Pagination, TagError } from '@shared/components';
+import { DataTable, IDataTableColumn, Pagination } from '@shared/components';
 import { IResponse } from '@shared/interfaces';
 import { EyeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -10,16 +10,13 @@ type TPlanificationRow = TCurrentAcademicPeriod & {
 
 interface ListPlanificationsTableProps {
 	isLoading: boolean;
-	isError: boolean;
 	data: IResponse<TPlanificationRow[]> | null;
 }
 
 export const ListPlanificationsTable = ({
 	isLoading,
-	isError,
 	data,
 }: ListPlanificationsTableProps) => {
-	if (isError) return <TagError />;
 
 	const columns: IDataTableColumn<TPlanificationRow>[] = [
 		{
