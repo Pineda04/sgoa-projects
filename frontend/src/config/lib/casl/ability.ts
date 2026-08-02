@@ -76,6 +76,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
     can('manage', 'dashboard-authorities');
+    can('manage', 'profile');
 
     // Usuarios
 		can('manage', 'users');
@@ -116,7 +117,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
-		can('manage', 'dashboard-authorities');
+    can('manage', 'dashboard-authorities');
+		can('manage', 'profile');
 
 		// Usuarios
     can('manage', 'users');
@@ -147,7 +149,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('manage', 'dashboard-coordinator');
+    can('manage', 'dashboard-coordinator');
+		can('manage', 'profile');
 
 		// Usuarios
     can('manage', 'users');
@@ -161,7 +164,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
-		can('manage', 'dashboard-teacher');
+    can('manage', 'dashboard-teacher');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
     can('read', 'courses');
@@ -172,7 +176,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// =================== MONITOR ==================
 	if (roles.includes(EUserRole.MONITOR)) {
-		can('manage', 'dashboard-monitor');
+    can('manage', 'dashboard-monitor');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
     can('manage', 'schedule-compliance-check');
