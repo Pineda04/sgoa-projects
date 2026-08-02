@@ -79,14 +79,16 @@ const createCourseColumns = (
 					key: 'actions' as const,
 					header: 'Acciones',
 					mobileLabel: 'Acciones',
-					render: (row: CourseWithDepartment) => (
-						<button
-							onClick={() => onView(row.id)}
-							title="Ver / Editar clase"
-							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
-						>
-							<EyeIcon className="size-5" />
-						</button>
+        render: (row: CourseWithDepartment) => (
+            <div className='flex items-center justify-center'>
+  						<button
+  							onClick={() => onView(row.id)}
+  							title="Ver / Editar clase"
+  							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
+  						>
+  							<EyeIcon className="size-5" />
+  						</button>
+            </div>
 					),
 				},
 			]

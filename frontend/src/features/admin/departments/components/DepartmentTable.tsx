@@ -29,8 +29,8 @@ export const DepartmentTable = ({
 		{ key: 'facultyName', header: 'Facultad', mobileLabel: 'Facultad' },
 		{
 			key: 'uvs',
-			header: 'Unidades Valorativas',
-			mobileLabel: 'UVs',
+			header: 'UV',
+			mobileLabel: 'UV',
 			render: (row: TOutputDepartment) =>
 				row.uvs !== null ? row.uvs : '—',
 		},
