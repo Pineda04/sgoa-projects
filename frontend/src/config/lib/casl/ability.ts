@@ -156,10 +156,9 @@ export function defineAbilityFor(roles: string[]): AppAbility {
     can('manage', 'users');
 
     // Modulos/Secciones
-		can('manage', 'reports');
+    can('manage', 'reports');
 		can('manage', 'planifications');
 		can('read', 'courses');
-		can('read', 'classrooms');
 	}
 
 	// =================== DOCENTE ==================
@@ -171,7 +170,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
     can('read', 'courses');
 		can('read', 'reports');
 		can('read', 'planifications');
-		can('read', 'classrooms');
 	}
 
 	// =================== MONITOR ==================
@@ -181,8 +179,6 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 		// Modulos/Secciones
     can('manage', 'schedule-compliance-check');
-		can('read', 'classrooms');
-		can('read', 'buildings');
 		can('read', 'reports-monitor');
 	}
 
