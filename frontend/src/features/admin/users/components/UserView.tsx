@@ -557,7 +557,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
+							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-[#144C74]/90 transition duration-500 cursor-pointer"
 							hidden={isEdit || !canUpdate}
 							onClick={handleEdit}
 							variant="unstyled"
@@ -567,17 +567,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#5BC85C] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-green-300 transition duration-500 cursor-pointer"
-							hidden={!isEdit}
-							onClick={() => formik.handleSubmit()}
-							variant="unstyled"
-						>
-							<Save className="size-5" />
-							Guardar
-						</Button>
-						<Button
-							type="button"
-							className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-red-400 transition duration-500 cursor-pointer"
 							hidden={!isEdit}
 							onClick={() => {
 								handleEdit();
@@ -585,10 +574,19 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 									values: initialValues,
 								});
 							}}
+							variant="outline"
+						>
+							Cancelar
+						</Button>
+						<Button
+							type="button"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
+							hidden={!isEdit}
+							onClick={() => formik.handleSubmit()}
 							variant="unstyled"
 						>
-							<XCircle className="size-5" />
-							Cancelar
+							<Save className="size-5" />
+							Guardar
 						</Button>
 					</div>
 				</div>

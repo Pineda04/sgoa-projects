@@ -16,6 +16,7 @@ import {
 	useCreateComplementaryActivity,
 	useUpdateComplementaryActivity,
 } from '@api/activities';
+import { FiSave } from 'react-icons/fi';
 
 const MAX_FILES = 5;
 
@@ -473,24 +474,25 @@ export const ComplementaryActivity = ({
 			<div className="flex justify-end">
 				<Button
 					type="button"
-					className="bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-500 mr-2"
+					onClick={onClose}
+					variant="outline"
+				>
+					Cancelar
+				</Button>
+				<Button
+					type="button"
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
 					form="form-complementary-activity"
 					onClick={handleClick}
 					disabled={
 						JSON.stringify(values) ===
 							JSON.stringify(initialValues) && files.length === 0
 					}
-					variant="unstyled"
-				>
-					{initialValuesData ? 'Actualizar' : 'Agregar'}
-				</Button>
-				<Button
-					type="button"
-					className="bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-500"
-					onClick={onClose}
-					variant="unstyled"
-				>
-					Cancelar
+        >
+          <FiSave className="size-4" />
+          <span>
+            {initialValuesData ? 'Actualizar Actividad' : 'Agregar Actividad'}
+          </span>
 				</Button>
 			</div>
 		</>

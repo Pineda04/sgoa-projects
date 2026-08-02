@@ -10,6 +10,7 @@ import {
 	TAirConditionerFormValues,
 } from '../schemas';
 import { AirConditionerFormInputs } from './AirConditionerFormInputs';
+import { FiSave } from 'react-icons/fi';
 
 interface EditAirConditionerFormProps {
 	airConditionerId: string;
@@ -101,23 +102,26 @@ export const EditAirConditionerForm = ({
 			</form>
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
+  			<Button
+  				type="button"
+  				onClick={onCancel}
+  				disabled={isPendingUpdate}
+  				variant="outline"
+  			>
+  				Cancelar
+  			</Button>
 				<Button
 					type="submit"
 					form="edit-air-conditioner-form"
 					disabled={isPendingUpdate}
-					className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 				>
-					{isPendingUpdate ? 'Guardando...' : 'Actualizar'}
-				</Button>
-				<Button
-					type="button"
-					onClick={onCancel}
-					disabled={isPendingUpdate}
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
-				>
-					Cancelar
+          {!isPendingUpdate && <FiSave className="size-4" />}
+					<span>
+						{isPendingUpdate
+							? 'Guardando...'
+							: 'Actualizar Aire Acondicionado'}
+					</span>
 				</Button>
 			</div>
 		</div>
