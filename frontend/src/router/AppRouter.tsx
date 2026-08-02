@@ -8,7 +8,6 @@ import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
 import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } from '@features/admin';
-import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
@@ -93,12 +92,6 @@ const router = createBrowserRouter(
 			path: 'dashboard/monitor',
 			element: <ProtectedRoute action="read" subject="dashboard-monitor" />,
 			children: [{ index: true, element: <DashboardMonitor /> }],
-			errorElement: <div>404</div>,
-		},
-		{
-			path: 'academic/courses/*',
-			element: <ProtectedRoute action="read" subject="courses" />,
-			children: coursesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
