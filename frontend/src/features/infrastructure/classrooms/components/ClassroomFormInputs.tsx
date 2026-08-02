@@ -5,7 +5,6 @@ import { useGetAllRoomTypes } from '@api/room-types';
 import { useGetAllConnectivities } from '@api/connectivities';
 import { useGetAllAudioEquipments } from '@api/audio-equipments';
 import { useGetAllConditions } from '@api/conditions';
-import { useGetAllDigitalBlackboards } from '@api/digital-blackboards';
 import { TClassroomFormValues } from '../schemas';
 
 export interface ClassroomFormInputsProps {
@@ -167,7 +166,6 @@ export const ClassroomFormInputs = ({
 	const audioEquipments = useGetAllAudioEquipments();
 	const conditions = useGetAllConditions();
 	const departments = useGetAllDepartments();
-	const digitalBlackboards = useGetAllDigitalBlackboards();
 
 	const selectFields: SelectFieldProps[] = [
 		{
@@ -222,19 +220,6 @@ export const ClassroomFormInputs = ({
 					label: c.status,
 				})) ?? [],
 			isLoading: conditions.isLoading,
-		},
-		{
-			id: 'digitalBlackboardId',
-			label: 'Pizarra digital (opcional)',
-			placeholder: 'Sin pizarra digital asignada',
-			options:
-				digitalBlackboards.data?.map(d => ({
-					value: d.id,
-					label:
-						d.description?.trim() ||
-						`Pizarra digital (${d.id.slice(0, 8)})`,
-				})) ?? [],
-			isLoading: digitalBlackboards.isLoading,
 		},
 	].map(field => ({
 		...field,
