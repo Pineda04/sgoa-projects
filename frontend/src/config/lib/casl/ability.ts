@@ -18,6 +18,7 @@ export type Subjects =
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher'
 	| 'dashboard-monitor'
+	| 'dashboard-tab-classrooms'
 	| 'users'
 	| 'user-roles'
 	| 'user-departments'
@@ -164,6 +165,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
     can('manage', 'dashboard-teacher');
+    can('read', 'dashboard-tab-classrooms');
 		can('manage', 'profile');
 
 		// Modulos/Secciones
@@ -175,6 +177,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// =================== MONITOR ==================
 	if (roles.includes(EUserRole.MONITOR)) {
     can('manage', 'dashboard-monitor');
+    can('read', 'dashboard-tab-classrooms');
 		can('manage', 'profile');
 
 		// Modulos/Secciones

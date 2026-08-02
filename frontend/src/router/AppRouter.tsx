@@ -162,7 +162,12 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'infrastructure/classrooms/*',
-			element: <ProtectedRoute action="read" subject="classrooms" />,
+			element: (
+				<ProtectedRoute
+					action="read"
+					subject={['classrooms', 'dashboard-tab-classrooms']}
+				/>
+			),
 			children: classroomsRoutes,
 			errorElement: <div>404</div>,
 		},
