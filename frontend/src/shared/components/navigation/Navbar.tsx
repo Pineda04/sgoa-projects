@@ -202,6 +202,13 @@ export const Navbar = () => {
 	}, [location.pathname]);
 
 	const handleModuleClick = (moduleId: string) => {
+		if (moduleId === 'dashboard') {
+			const mod = visibleModules.find(m => m.id === moduleId);
+			if (mod && mod.sections.length === 1) {
+				navigate(mod.sections[0].path);
+				return;
+			}
+		}
 		setOpenDropdownId(prev => (prev === moduleId ? null : moduleId));
 	};
 
@@ -289,7 +296,8 @@ export const Navbar = () => {
 									<span className="hidden lg:inline">
 										{mod.label}
 									</span>
-									{mod.sections.length > 0 && (
+									{mod.sections.length >
+										(mod.id === 'dashboard' ? 1 : 0) && (
 										<ChevronDownIcon
 											className={`size-3.5 transition-transform duration-200 ${openDropdownId === mod.id
 													? 'rotate-180'
