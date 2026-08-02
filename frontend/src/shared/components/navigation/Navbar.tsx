@@ -9,6 +9,7 @@ import {
 	BuildingLibraryIcon,
 	UsersIcon,
 	ClipboardDocumentListIcon,
+	HomeIcon,
 } from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
@@ -266,7 +267,7 @@ export const Navbar = () => {
 					to={'/home'}
 					className="flex items-center gap-2 md:gap-3 group"
 				>
-					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden sm:block">
+					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
 						SPI UNAH
 					</span>
 				</Link>
@@ -274,7 +275,7 @@ export const Navbar = () => {
 
 			{visibleModules.length > 0 && (
 				<>
-					<div className="hidden md:flex items-center gap-1">
+					<div className="hidden lg:flex items-center gap-1">
 						{visibleModules.map(mod => (
 							<div key={mod.id} className="relative">
 								<button
@@ -350,11 +351,25 @@ export const Navbar = () => {
 					</div>
 
 					<div
-						className={`fixed md:hidden inset-0 top-12.5 sm:top-14 bg-primary/98 backdrop-blur-lg
+						className={`fixed lg:hidden inset-0 top-12.5 sm:top-14 bg-primary/98 backdrop-blur-lg
 							flex flex-col items-start justify-start gap-1 transition-all duration-300 z-40 overflow-y-auto
 							${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
 					>
 						<div className="w-full px-3 py-4 space-y-1">
+							<Link
+								to="/home"
+								onClick={() => setIsOpen(false)}
+								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200 lg:hidden
+									${location.pathname === '/home'
+										? 'bg-white/15'
+										: 'hover:bg-white/5'
+									}`}
+							>
+								<HomeIcon className="size-5 text-white/70 shrink-0" />
+								<span className="text-base font-medium text-white/90 flex-1 text-left">
+									Inicio
+								</span>
+							</Link>
 							{visibleModules.map(mod => (
 								<div key={mod.id} className="w-full">
 									<button
@@ -439,7 +454,7 @@ export const Navbar = () => {
 							setIsOpen(!isOpen);
 							setMobileExpandedId(null);
 						}}
-						className="md:hidden p-1.5 sm:p-2 hover:bg-white/10 text-white"
+						className="lg:hidden p-1.5 sm:p-2 hover:bg-white/10 text-white"
 						variant="ghost"
 						size="icon"
 					>

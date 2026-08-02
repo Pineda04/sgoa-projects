@@ -57,20 +57,27 @@ export const useGetAllAcademicAssignmentCoordinator = () =>
 	});
 
 export const useGetAcademicAssignmentCoordinatorOnlyPeriods = (
-	centerDepartmentId?: string
+	centerDepartmentId?: string,
+	year?: string,
+	pac?: string
 ) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
 		queryKey: academicAssignmentCoordinatorKeys.periodPageCenter(
 			page,
-			centerDepartmentId ?? ''
+			size,
+			centerDepartmentId ?? '',
+			year,
+			pac
 		),
 		queryFn: () =>
 			academicAssignmentReportsApi.getAcademicAssignmentOnlyPeriods(
 				page,
 				size,
-				centerDepartmentId ?? ''
+				centerDepartmentId ?? '',
+				year,
+				pac
 			),
 		enabled:
 			centerDepartmentId === '' ? false : Boolean(centerDepartmentId),
@@ -102,7 +109,10 @@ export const useGetAcademicAssignmentCoordinatorByPeriodAndCenter = (
 export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 	centerDepartmentId: string,
 	periodId?: string,
-	teacherId?: string
+	teacherId?: string,
+	year?: string,
+	pac?: string,
+	teacherName?: string
 ) => {
 	const { page, size } = usePaginationParams();
 
@@ -110,7 +120,12 @@ export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 		queryKey: academicAssignmentCoordinatorKeys.periodCenterTeacher(
 			periodId ?? '',
 			centerDepartmentId,
-			teacherId ?? 'all'
+			teacherId ?? 'all',
+			page,
+			size,
+			year,
+			pac,
+			teacherName
 		),
 		queryFn: () =>
 			academicAssignmentReportsApi.getAcademicAssignmentReportsByCenter(
@@ -118,7 +133,10 @@ export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 				periodId,
 				teacherId,
 				page,
-				size
+				size,
+				year,
+				pac,
+				teacherName
 			),
 		enabled: Boolean(centerDepartmentId),
 		staleTime: STALE_TIME.MEDIUM,
@@ -127,26 +145,67 @@ export const useGetAcademicAssignmentReportsCoordinatorByCenter = (
 };
 
 // Hook para obtener todos los periodos con asignaciones (ADMIN, DIRECCION, RRHH)
-export const useGetAllPeriodsForAuthorities = () => {
+export const useGetAllPeriodsForAuthorities = (
+	year?: string,
+	pac?: string,
+	departmentId?: string,
+	centerId?: string
+) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: academicAssignmentAuthoritiesKeys.periods(page, size),
+		queryKey: academicAssignmentAuthoritiesKeys.periods(
+			page,
+			size,
+			year,
+			pac,
+			departmentId,
+			centerId
+		),
 		queryFn: () =>
-			academicAssignmentReportsApi.getAllPeriodsForAuthorities(page, size),
+			academicAssignmentReportsApi.getAllPeriodsForAuthorities(
+				page,
+				size,
+				year,
+				pac,
+				departmentId,
+				centerId
+			),
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data,
 	});
 };
 
 // Hook para obtener todos los informes de asignación (ADMIN, DIRECCION, RRHH)
-export const useGetAllAssignmentReportsForAuthorities = () => {
+export const useGetAllAssignmentReportsForAuthorities = (
+	year?: string,
+	pac?: string,
+	departmentId?: string,
+	centerId?: string,
+	teacherName?: string
+) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: academicAssignmentAuthoritiesKeys.reports(page, size),
+		queryKey: academicAssignmentAuthoritiesKeys.reports(
+			page,
+			size,
+			year,
+			pac,
+			departmentId,
+			centerId,
+			teacherName
+		),
 		queryFn: () =>
-			academicAssignmentReportsApi.getAllAssignmentReports(page, size),
+			academicAssignmentReportsApi.getAllAssignmentReports(
+				page,
+				size,
+				year,
+				pac,
+				departmentId,
+				centerId,
+				teacherName
+			),
 		staleTime: STALE_TIME.MEDIUM,
 		select: res => res.data,
 	});

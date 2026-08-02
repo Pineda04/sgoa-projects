@@ -23,6 +23,8 @@ import { BrandsService } from '../services/brands.service';
   EUserRole.DIRECCION,
   EUserRole.RRHH,
   EUserRole.COORDINADOR_AREA,
+  EUserRole.DOCENTE,
+  EUserRole.MONITOR,
 )
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}

@@ -83,21 +83,21 @@ export const DashboardTeacher = () => {
 	);
 
 	const courseColumns: IResponsiveColumn<TCourseClassroom>[] = [
-		{ key: 'course.code', header: 'Cod.', mobileLabel: 'Cod.' },
+		{ key: 'course.code', header: 'Código', mobileLabel: 'Código' },
 		{
 			key: 'course.name',
 			header: 'Asignatura',
 			mobileLabel: 'Asig.',
 			render: (row: TCourseClassroom) => (
-				<span className="font-medium max-w-50 truncate block">
+				<span className="flex justify-center py-2">
 					{row.course.name}
 				</span>
 			),
 		},
 		{
 			key: 'section',
-			header: 'Sec.',
-			mobileLabel: 'Sec.',
+			header: 'Sección',
+			mobileLabel: 'Sección',
 			render: (row: TCourseClassroom) => (
 				<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
 					{row.section}
@@ -128,30 +128,6 @@ export const DashboardTeacher = () => {
 			mobileLabel: 'Aula',
 			hiddenOnMobile: true,
 		},
-		{
-			key: 'course.department.name',
-			header: 'Carrera',
-			mobileLabel: 'Carrera',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'coordinator.name',
-			header: 'Coordinador',
-			mobileLabel: 'Coord.',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'classroom.center.name',
-			header: 'Centro',
-			mobileLabel: 'Centro',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'observation',
-			header: 'Obs.',
-			mobileLabel: 'Obs.',
-			hiddenOnMobile: true,
-		},
 	];
 
 	const reportColumns: IResponsiveColumn<ReportPeriod>[] = [
@@ -160,32 +136,20 @@ export const DashboardTeacher = () => {
 			header: 'Periodo',
 			mobileLabel: 'Periodo',
 			render: (row: ReportPeriod) => (
-				<div>
+				<div className="flex justify-center items-center gap-2 flex-wrap">
 					<span className="inline-flex items-center px-2 py-1 rounded-md bg-accent/20 text-foreground text-xs font-medium">
 						PAC {row.pac}
 					</span>
-					<p className="text-xs text-muted-foreground mt-1">
+					<p>
 						{row.pac_modality}, {row.year}
 					</p>
 				</div>
 			),
 		},
 		{
-			key: 'department',
-			header: 'Carrera',
-			mobileLabel: 'Carrera',
-			hiddenOnMobile: true,
-		},
-		{
-			key: 'center',
-			header: 'Centro',
-			mobileLabel: 'Centro',
-			hiddenOnMobile: true,
-		},
-		{
 			key: 'reportId',
-			header: 'Ver',
-			mobileLabel: 'Ver',
+			header: 'Acciones',
+			mobileLabel: 'Acciones',
 			render: (row: ReportPeriod) => (
 				<Button
 					onClick={() => handleView(row.reportId, 'view')}

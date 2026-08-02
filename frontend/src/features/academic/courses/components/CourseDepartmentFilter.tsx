@@ -23,9 +23,8 @@ export const CourseDepartmentFilter = ({
 	if (isLoading) return <Loading />;
 
 	return (
-    <div className='grid grid-cols-1 md:grid-cols-2 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0'>
-      {/* Centro */}
-			<div className='w-full'>
+		<>
+			<div className="w-full">
 				<label
 					className="block mb-2 font-semibold text-sm text-foreground"
 					htmlFor="center"
@@ -53,9 +52,8 @@ export const CourseDepartmentFilter = ({
 					{centers.data &&
 						setOptions<TAcademicCommonProps>(centers.data ?? [])}
 				</select>
-      </div>
-			{/* Departamento */}
-			<div className='w-full'>
+			</div>
+			<div className="w-full">
 				<label className="block mb-2 font-semibold text-sm text-foreground">
 					Departamento
 				</label>
@@ -85,6 +83,6 @@ export const CourseDepartmentFilter = ({
 						)}
 				</select>
 			</div>
-    </div>
+		</>
 	);
 };

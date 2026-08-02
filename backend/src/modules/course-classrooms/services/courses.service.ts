@@ -146,6 +146,7 @@ export class CoursesService {
     searchTerm: string = '',
     query: QueryPaginationDto,
     centerDepartmentId?: string,
+    activeStatus?: boolean,
   ) {
     const where: Prisma.CourseWhereInput = {
       OR: [
@@ -165,6 +166,7 @@ export class CoursesService {
             },
           }
         : {}),
+      ...(activeStatus !== undefined ? { activeStatus } : {}),
     };
 
     const [results, count] = await Promise.all([

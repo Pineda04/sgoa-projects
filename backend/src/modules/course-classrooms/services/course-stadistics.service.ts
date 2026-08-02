@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from 'src/generated/prisma/client';
 import {
   CreateCourseStadisticDto,
   QueryConsolidatedDto,
@@ -121,7 +122,7 @@ export class CourseStadisticsService {
     query: QueryPaginationDto,
     searchQuery: QueryConsolidatedDto,
   ): Promise<IPaginateOutput<TOutputConsolidated>> {
-    const where = {
+    const where: Prisma.CourseStadisticWhereInput = {
       courseClassroom: {
         teachingSession: {
           assignmentReport: {
@@ -140,6 +141,34 @@ export class CourseStadisticsService {
           },
         },
         ...(searchQuery.courseId ? { courseId: searchQuery.courseId } : {}),
+        ...(searchQuery.searchTerm
+          ? {
+              OR: [
+                {
+                  course: {
+                    name: {
+                      contains: searchQuery.searchTerm,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                },
+                {
+                  teachingSession: {
+                    assignmentReport: {
+                      teacher: {
+                        user: {
+                          name: {
+                            contains: searchQuery.searchTerm,
+                            mode: 'insensitive' as const,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
       },
     };
 
