@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { PencilIcon, Save, XCircle } from 'lucide-react';
+import { PencilIcon, Save } from 'lucide-react';
 import { IoWarningOutline } from 'react-icons/io5';
 import { askDel } from '@shared/utils/delete-action';
 import Select, {
