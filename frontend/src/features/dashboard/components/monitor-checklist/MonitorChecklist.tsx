@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import { useGetCurrentAssignments } from '@api/monitor';
-import { SkeletonCard, useLocalStorageState, useModal } from '@shared';
+import { useAuth } from '@config/providers';
+import {
+	useCachedAssignments,
+	useIsOnline,
+	useLocalStorageState,
+	useModal,
+} from '@shared/hooks';
+import { SkeletonCard } from '@shared';
 import { BuildingAccordion } from './BuildingAccordion';
 import { CheckModal } from './CheckModal';
 import { ChecklistProgress } from './ChecklistProgress';
 import { ChecklistToolbar } from './ChecklistToolbar';
 import { useRegisterCheck } from './useRegisterCheck';
+import { useOfflineChecksToday } from './useOfflineChecksToday';
 import {
 	buildChecklistItems,
 	CHECKLIST_VIEW_STORAGE_KEY,
@@ -24,9 +32,26 @@ import {
 } from './checklist.utils';
 
 export const MonitorChecklist = () => {
-	const { data, isLoading, isError } = useGetCurrentAssignments();
+	const isOnline = useIsOnline();
+	// Feature: email de la sesión (JWT) como clave de la caché Dexie; disponible offline.
+	const sessionEmail = useAuth().authState.user?.email;
+	const { data, isLoading, isError } = useGetCurrentAssignments({
+		enabled: isOnline,
+		email: sessionEmail,
+	});
+	// Feature: leer las asignaciones desde Dexie cuando no hay red (sin llamar al endpoint).
+	const cachedAssignments = useCachedAssignments(sessionEmail);
+	const sourceData = isOnline ? data : cachedAssignments;
+	// Feature: registros locales (Dexie) del día como overrides durables, para que el
+	// estado registrado sobreviva a desmontajes (navegar a otra página) y se eviten
+	// duplicados al sincronizar. Los overrides en memoria tienen mayor prioridad.
+	const localChecksMap = useOfflineChecksToday();
 	const { registerCheck, checkOverrides, submittingId, isRegistering } =
 		useRegisterCheck();
+	const effectiveOverrides = useMemo(
+		() => ({ ...localChecksMap, ...checkOverrides }),
+		[localChecksMap, checkOverrides]
+	);
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
 		CHECKLIST_VIEW_STORAGE_KEY,
@@ -45,17 +70,17 @@ export const MonitorChecklist = () => {
 	const [isModalOpen, openModal, closeModal] = useModal();
 
 	const items = useMemo(
-		() => buildChecklistItems(data ?? [], checkOverrides),
-		[data, checkOverrides]
+		() => buildChecklistItems(sourceData ?? [], effectiveOverrides),
+		[sourceData, effectiveOverrides]
 	);
 
 	const buildingOptions = useMemo(
 		() =>
-			(data ?? []).map(building => ({
+			(sourceData ?? []).map(building => ({
 				id: building.buildingId,
 				name: building.buildingName,
 			})),
-		[data]
+		[sourceData]
 	);
 
 	const jornadaPendingCounts = useMemo(() => {

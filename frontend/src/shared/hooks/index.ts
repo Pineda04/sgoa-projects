@@ -6,3 +6,6 @@ export * from './useLocalStorageState';
 export * from './useShowPassword';
 export * from './useTabWithReset';
 export * from './useSyncEngine';
+export * from './useIsOnline';
+export * from './useCachedAssignments';
+export * from './useCachedAcademicPeriod';

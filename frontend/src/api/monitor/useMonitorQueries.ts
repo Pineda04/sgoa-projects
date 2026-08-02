@@ -2,20 +2,34 @@ import { useQuery } from '@tanstack/react-query';
 import { monitorApi } from './monitor.api';
 import { monitorKeys } from './monitor.keys';
 import { TCheckFilters, TReportFilters } from './monitor.types';
-import { STALE_TIME } from '@config/lib';
+import { STALE_TIME, saveCurrentAssignments } from '@config/lib';
 import { useDebounce, usePaginationParams } from '@shared/hooks';
 
 const CURRENT_ASSIGNMENTS_REFETCH_INTERVAL = 60 * 1000;
 const FILTERS_DEBOUNCE_DELAY = 400;
 
-export const useGetCurrentAssignments = () =>
-	useQuery({
+export const useGetCurrentAssignments = (options?: {
+	enabled?: boolean;
+	email?: string;
+}) => {
+	const { enabled = true, email } = options ?? {};
+
+	return useQuery({
 		queryKey: monitorKeys.currentAssignments(),
-		queryFn: () => monitorApi.getCurrentAssignments(),
+		queryFn: async () => {
+			const res = await monitorApi.getCurrentAssignments();
+			// Feature: sobreescribir la caché local (Dexie) en cada fetch exitoso
+			// para habilitar el modo offline del monitor.
+			if (email) await saveCurrentAssignments(email, res.data.data);
+			return res;
+		},
+		enabled,
 		staleTime: STALE_TIME.SHORT,
-		refetchInterval: () => (navigator.onLine ? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL : false),
+		refetchInterval: () =>
+			enabled && navigator.onLine ? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL : false,
 		select: res => res.data.data,
 	});
+};
 
 export const useGetMonitorBuildings = () =>
 	useQuery({

@@ -1,4 +1,25 @@
 import Dexie, { type Table } from 'dexie';
+import type { TMonitorBuildingAssignments } from '@api/monitor';
+import type { TCurrentAcademicPeriod } from '@api/periods';
+
+// Feature: caché en Dexie (clave por email) para modo offline del monitor.
+export interface MonitorAssignmentsCache {
+	/** Email del monitor (clave primaria, normalizado a minúsculas) */
+	email: string;
+	/** Asignaciones del día devueltas por GET /monitor/current-assignments */
+	buildings: TMonitorBuildingAssignments[];
+	/** Timestamp Unix de la última actualización desde el servidor */
+	fetchedAt: number;
+}
+
+export interface AcademicPeriodCache {
+	/** Email del usuario (clave primaria, normalizado a minúsculas) */
+	email: string;
+	/** Período vigente devuelto por GET /academic-periods/current */
+	period: TCurrentAcademicPeriod;
+	/** Timestamp Unix de la última actualización desde el servidor */
+	fetchedAt: number;
+}
 
 export interface OfflineCheck {
 	/** UUID generado en el frontend con crypto.randomUUID() */
@@ -33,6 +54,10 @@ class LocalDB extends Dexie {
 	offlineChecks!: Table<OfflineCheck>;
 	// Feature: tabla de credenciales cifradas para permitir login offline (rol MONITOR)
 	credentials!: Table<StoredCredential>;
+	// Feature: caché de asignaciones del día por email para modo offline
+	monitorAssignments!: Table<MonitorAssignmentsCache>;
+	// Feature: caché del período académico vigente por email para modo offline
+	academicPeriods!: Table<AcademicPeriodCache>;
 
 	constructor() {
 		super('SGOALocalDB');
@@ -44,6 +69,14 @@ class LocalDB extends Dexie {
 			// Feature: v2 agrega la tabla credentials (clave primaria: email)
 			offlineChecks: 'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
 			credentials: 'email',
+		});
+		this.version(3).stores({
+			// Feature: v3 agrega las tablas de caché para modo offline del monitor
+			// (clave primaria: email del monitor; una fila por usuario)
+			offlineChecks: 'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
+			credentials: 'email',
+			monitorAssignments: 'email',
+			academicPeriods: 'email',
 		});
 	}
 }

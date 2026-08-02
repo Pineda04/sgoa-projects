@@ -1,14 +1,31 @@
-import { useTabWithReset, useSyncEngine } from '@shared/hooks';
+import {
+	useTabWithReset,
+	useSyncEngine,
+	useIsOnline,
+	useCachedAcademicPeriod,
+} from '@shared/hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
-import { useUser } from '@config/providers';
+import { useAuth, useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { MonitorChecklist, MonitorReports, SyncIndicator } from '../components';
 
 export const DashboardMonitor = () => {
 	const validTabs = ['0', '1'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
-	const academicPeriodInfo = useGetCurrentAcademicPeriod();
+	const isOnline = useIsOnline();
 	const currentUser = useUser();
+	// Feature: email de la sesión (JWT) como clave de la caché Dexie; está disponible
+	// incluso offline, a diferencia de useUser() que hace una petición HTTP.
+	const sessionEmail = useAuth().authState.user?.email;
+	const academicPeriodInfo = useGetCurrentAcademicPeriod({
+		enabled: isOnline,
+		email: sessionEmail,
+	});
+	// Feature: leer el período vigente desde Dexie cuando no hay red.
+	const cachedAcademicPeriod = useCachedAcademicPeriod(sessionEmail);
+	const periodTitle = isOnline
+		? academicPeriodInfo.data?.title
+		: cachedAcademicPeriod?.title;
 	const { status, pendingCount } = useSyncEngine();
 
 	return (
@@ -16,7 +33,7 @@ export const DashboardMonitor = () => {
 			<div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<h2 className="text-2xl font-semibold mb-2">
-						UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
+						UNAH PAC{' '}{periodTitle ?? '...'}
 					</h2>
 					<p className="text-sm">{currentUser.user?.name}</p>
 					<p className="text-sm">{currentUser.user?.code}</p>

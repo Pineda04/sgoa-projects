@@ -24,6 +24,16 @@ export const useRegisterCheck = () => {
 				const checkDate = getTodayDateString();
 				const checkTime = getCurrentTimeString();
 
+				// Feature: evitar registros duplicados del día (misma clase+curso), que
+				// al sincronizar crearían dos asistencias en el backend.
+				const existing = await db.offlineChecks
+					.where('courseClassroomId')
+					.equals(courseClassroomId)
+					.filter(check => check.checkDate === checkDate)
+					.first();
+
+				if (existing) return true;
+
 				// 1. Guardar localmente en Dexie
 				await db.offlineChecks.add({
 					offlineId,

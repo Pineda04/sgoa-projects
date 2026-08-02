@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload } from '@shared/interfaces';
 import { authApi, IAuthLogin, ITokens, useLogin } from '@api/auth';
 import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
-import { queryClient, db, saveCredentials, verifyCredentials } from '@config/lib';
+import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache } from '@config/lib';
 import { clear as clearIdb } from 'idb-keyval';
 
 const initialState: IAuthStateProps = {
@@ -66,6 +66,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 		});
 
 		setAccessToken(accessToken);
+
+		// Feature: dejar solo la caché local (asignaciones/período) de este monitor.
+		void clearOtherMonitorsCache(info.email);
 
 		return {
 			status: true,
@@ -129,6 +132,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				password: userCredentials.password,
 				accessToken: data.data.access_token,
 			});
+
+			// Feature: descartar la caché local de otros monitores del dispositivo.
+			void clearOtherMonitorsCache(userCredentials.email);
 
 			return data;
 		} catch (error: unknown) {
