@@ -475,6 +475,7 @@ export const ComplementaryActivity = ({
 				<Button
 					type="button"
 					onClick={onClose}
+					disabled={isPendingUpdate}
 					variant="outline"
 				>
 					Cancelar
@@ -485,14 +486,18 @@ export const ComplementaryActivity = ({
 					form="form-complementary-activity"
 					onClick={handleClick}
 					disabled={
-						JSON.stringify(values) ===
-							JSON.stringify(initialValues) && files.length === 0
+						isPendingUpdate ||
+						(JSON.stringify(values) ===
+							JSON.stringify(initialValues) &&
+							files.length === 0)
 					}
-        >
-          <FiSave className="size-4" />
-          <span>
-            {initialValuesData ? 'Actualizar Actividad' : 'Agregar Actividad'}
-          </span>
+				>
+					<FiSave className="size-4" />
+					<span>
+						{initialValuesData
+							? 'Actualizar Actividad'
+							: 'Agregar Actividad'}
+					</span>
 				</Button>
 			</div>
 		</>
