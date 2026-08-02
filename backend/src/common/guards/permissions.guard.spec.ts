@@ -159,6 +159,65 @@ describe('Permisos implícitos', () => {
     });
   });
 
+  describe('módulos incorporados desde main', () => {
+    it('el dashboard de monitoreo habilita registrar y consultar verificaciones', () => {
+      const monitor = expandImpliedPermissions(['manage:dashboard-monitor']);
+
+      for (const [action, subject] of [
+        ['create', 'schedule-compliance-check'],
+        ['read', 'schedule-compliance-check'],
+        ['read', 'reports-monitor'],
+      ] as [TPermissionAction, TPermissionSubject][]) {
+        const guard = buildGuard({ permission: { action, subject } });
+
+        expect(guard.canActivate(buildContext(monitor))).toBe(true);
+      }
+
+      // Recorre aulas y edificios, pero no administra esos módulos.
+      expect(monitor).toContain('lookup:classrooms');
+      expect(monitor).not.toContain('read:classrooms');
+    });
+
+    it('la página Catálogo concede las entidades que administra', () => {
+      const catalog = expandImpliedPermissions(['manage:catalog']);
+
+      expect(catalog).toEqual(
+        expect.arrayContaining([
+          'manage:brands',
+          'manage:conditions',
+          'manage:room-types',
+          'manage:shifts',
+          'manage:contract-types',
+          'manage:teacher-categories',
+        ]),
+      );
+    });
+
+    it('el formulario de aula alcanza sus catálogos sin abrirles el módulo', () => {
+      const classroomManager = expandImpliedPermissions(['manage:classrooms']);
+
+      for (const subject of [
+        'conditions',
+        'connectivities',
+        'room-types',
+        'digital-blackboards',
+      ] as TPermissionSubject[]) {
+        expect(classroomManager).toContain(`lookup:${subject}`);
+
+        const listado = buildGuard({
+          permission: { action: 'read', subject },
+          isLookupSource: true,
+        });
+        const alta = buildGuard({
+          permission: { action: 'create', subject },
+        });
+
+        expect(listado.canActivate(buildContext(classroomManager))).toBe(true);
+        expect(alta.canActivate(buildContext(classroomManager))).toBe(false);
+      }
+    });
+  });
+
   it('mantiene el acceso total del super administrador', () => {
     const guard = buildGuard({
       permission: { action: 'delete', subject: 'faculties' },

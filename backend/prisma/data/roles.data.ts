@@ -25,4 +25,9 @@ export const rolesSeed = [
     name: 'DOCENTE',
     description: 'Todos los docentes, estos deben crear el perfil de docente.',
   },
+  {
+    id: '9b1e3c1a-2f6a-4b8d-9a3e-3a4c2f6e1a7d',
+    name: 'MONITOR',
+    description: 'Personal encargado de verificar el cumplimiento de horarios en las aulas.',
+  },
 ];

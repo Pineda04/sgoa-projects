@@ -30,6 +30,17 @@ export const LOOKUP_SUBJECTS = [
   'degrees',
   'classrooms',
   'audio-equipments',
+  'digital-blackboards',
+  'brands',
+  'conditions',
+  'connectivities',
+  'room-types',
+  'pc-types',
+  'monitor-types',
+  'monitor-sizes',
+  'contract-types',
+  'shifts',
+  'teacher-categories',
 ] as const;
 
 export type TLookupSubject = (typeof LOOKUP_SUBJECTS)[number];
@@ -50,23 +61,66 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
   departments: lookup('faculties'),
   // Un edificio pertenece a un centro.
   buildings: lookup('centers'),
-  // El formulario de aula selecciona edificio y equipo de audio.
-  classrooms: lookup('buildings', 'audio-equipments'),
-  // El formulario de equipo de cómputo selecciona aula (y su condición) y departamento.
-  'pc-equipments': lookup('classrooms', 'departments'),
+  // El formulario de aula arma su configuración con edificio, equipo de audio,
+  // pizarra digital, condición, conectividad y tipo de aula.
+  classrooms: lookup(
+    'buildings',
+    'audio-equipments',
+    'digital-blackboards',
+    'conditions',
+    'connectivities',
+    'room-types',
+  ),
+  // El formulario de equipo de cómputo selecciona aula, departamento y sus catálogos.
+  'pc-equipments': lookup(
+    'classrooms',
+    'departments',
+    'brands',
+    'conditions',
+    'pc-types',
+    'monitor-types',
+    'monitor-sizes',
+  ),
+  // Aire acondicionado y pizarra digital comparten catálogos con inventario.
+  'air-conditioners': lookup('classrooms', 'brands', 'conditions'),
+  'digital-blackboards': lookup('brands', 'conditions'),
   // Cursos se filtran y crean por departamento, centro y periodo.
   courses: lookup('departments', 'centers', 'periods'),
   // Los títulos se registran contra un periodo académico.
   degrees: lookup('periods'),
-  // Alta de usuario: centro, cargo, periodo y títulos.
-  users: lookup('centers', 'positions', 'periods', 'degrees'),
+  // Alta de usuario: centro, cargo, periodo, títulos y los catálogos laborales.
+  users: lookup(
+    'centers',
+    'positions',
+    'periods',
+    'degrees',
+    'contract-types',
+    'shifts',
+    'teacher-categories',
+  ),
   'user-departments': lookup('centers', 'departments', 'positions'),
   // Los reportes se consultan por departamento y periodo.
   reports: lookup('departments', 'periods'),
   // La planificación asigna aulas dentro de un periodo.
   planifications: lookup('classrooms', 'periods'),
 
-  // --- Vistas compuestas: el dashboard concede lo de sus pestañas ---------
+  // --- Vistas compuestas: conceden lo que dejan hacer sus secciones -------
+  // La página Catálogo administra en un solo lugar todas las entidades chicas.
+  catalog: grant(
+    'manage',
+    'teacher-categories',
+    'contract-types',
+    'shifts',
+    'room-types',
+    'connectivities',
+    'conditions',
+    'brands',
+    'pc-types',
+    'audio-equipments',
+    'monitor-types',
+    'monitor-sizes',
+  ),
+
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Periodos, Consolidado.
   'dashboard-authorities': [
     ...grant('manage', 'planifications', 'reports', 'users', 'courses', 'periods'),
@@ -85,6 +139,13 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     ...grant('update', 'planifications'),
     ...grant('manage', 'activities'),
     ...lookup('periods'),
+  ],
+  // Checklist de cumplimiento de horarios: el monitor registra y consulta sus
+  // verificaciones sobre las aulas y edificios que recorre.
+  'dashboard-monitor': [
+    ...grant('manage', 'schedule-compliance-check'),
+    ...grant('read', 'reports-monitor'),
+    ...lookup('classrooms', 'buildings'),
   ],
 };
 

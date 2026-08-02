@@ -6,8 +6,13 @@ export const academicPeriodsApi = {
 	getCurrentAcademicPeriod: () =>
 		api.get<IResponse<TCurrentAcademicPeriod>>(`/academic-periods/current`),
 
-	getAcademicPeriods: () =>
-		api.get<IResponse<TCurrentAcademicPeriod[]>>(`/academic-periods`),
+	getAcademicPeriods: (year?: string, pac?: string, modality?: string) => {
+		const params = new URLSearchParams();
+		if (year) params.set('year', year);
+		if (pac) params.set('pac', pac);
+		if (modality) params.set('modality', modality);
+		return api.get<IResponse<TCurrentAcademicPeriod[]>>(`/academic-periods?${params}`);
+	},
 
 	getAcademicPeriodNextToCreate: (modality: TPacModality = 'Trimestre') =>
 		api.get<IResponse<TCurrentAcademicPeriod>>(

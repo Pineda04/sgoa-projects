@@ -12,6 +12,7 @@ import {
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -26,7 +27,7 @@ export class AirConditionersController {
   ) {}
 
   @Post()
-  @RequirePermission('create', 'classrooms')
+  @RequirePermission('create', 'air-conditioners')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un aire acondicionado.')
   @ApiBody({
@@ -43,7 +44,8 @@ export class AirConditionersController {
   }
 
   @Get()
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'air-conditioners')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aires acondicionados.')
   @ApiCommonResponses({
@@ -55,7 +57,7 @@ export class AirConditionersController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'air-conditioners')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado obtenido.')
   @ApiCommonResponses({
@@ -68,7 +70,7 @@ export class AirConditionersController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'classrooms')
+  @RequirePermission('update', 'air-conditioners')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado actualizado.')
   @ApiBody({
@@ -89,7 +91,7 @@ export class AirConditionersController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'classrooms')
+  @RequirePermission('delete', 'air-conditioners')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Aire acondicionado eliminado.')
   @ApiCommonResponses({

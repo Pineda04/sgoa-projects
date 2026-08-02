@@ -1,7 +1,7 @@
 import { EyeIcon, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { UserView } from './UserView';
-import { TOutputTeacherPosition, useGetAllTeacherCategories, useGetTeachers, useGetTeachersCoordinator } from '@api/teachers';
+import { TOutputTeacher, useGetAllTeacherCategories, useGetTeachers, useGetTeachersCoordinator } from '@api/teachers';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 import {
@@ -55,10 +55,10 @@ export const UsersTable = ({
 		handleCloseModalUpdateUser,
 	] = useModal();
 
-	const [userInfo, setUserInfo] = useState<TOutputTeacherPosition>();
+	const [userInfo, setUserInfo] = useState<TOutputTeacher>();
 
 	const handleSelectedUser = useCallback(
-		(data: TOutputTeacherPosition) => {
+		(data: TOutputTeacher) => {
 			setUserInfo(data);
 			handleShowModalUpdateUser();
 		},
@@ -73,7 +73,7 @@ export const UsersTable = ({
 		return userInfo;
 	}, [data, userInfo]);
 
-	const columns: IDataTableColumn<TOutputTeacherPosition>[] = [
+	const columns: IDataTableColumn<TOutputTeacher>[] = [
 		{ key: 'code', header: 'Código', mobileLabel: 'Cod.' },
 		{ key: 'name', header: 'Nombre', mobileLabel: 'Nombre' },
 		{
@@ -81,7 +81,7 @@ export const UsersTable = ({
 			header: 'Pregrado',
 			mobileLabel: 'Pregrado',
 			hiddenOnMobile: true,
-			render: (row: TOutputTeacherPosition) =>
+			render: (row: TOutputTeacher) =>
 				row.undergrads.length !== 0 ? row.undergrads[0].name : '—',
 		},
 		{
@@ -89,7 +89,7 @@ export const UsersTable = ({
 			header: 'Posgrado',
 			mobileLabel: 'Posgrado',
 			hiddenOnMobile: true,
-			render: (row: TOutputTeacherPosition) =>
+			render: (row: TOutputTeacher) =>
 				row.postgrads.length !== 0 ? row.postgrads[0].name : '—',
 		},
 		{
@@ -110,7 +110,7 @@ export const UsersTable = ({
 						key: 'actions' as const,
 						header: 'Acciones',
 						mobileLabel: 'Acciones',
-						render: (row: TOutputTeacherPosition) => (
+						render: (row: TOutputTeacher) => (
 							<Button
 								onClick={() => handleSelectedUser(row)}
 								className="cursor-pointer"

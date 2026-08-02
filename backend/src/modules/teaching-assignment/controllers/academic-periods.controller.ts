@@ -55,8 +55,12 @@ export class AcademicPeriodsController {
     okDescription: 'Lista de periodos académicos obtenida correctamente.',
     internalErrorDescription: 'Error interno al obtener los periodos.',
   })
-  findAll() {
-    return this.academicPeriodsService.findAll();
+  findAll(
+    @Query('year') year?: string,
+    @Query('pac') pac?: string,
+    @Query('modality') modality?: string,
+  ) {
+    return this.academicPeriodsService.findAll(year, pac, modality);
   }
 
   @Get('one/:id')

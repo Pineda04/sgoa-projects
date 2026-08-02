@@ -7,11 +7,17 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes, degreesRoutes, rolesRoutes } from '@features/admin';
+import {
+	departmentsRoutes,
+	degreesRoutes,
+	positionsRoutes,
+	facultiesRoutes,
+	rolesRoutes,
+} from '@features/admin';
 import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
-import { AcademicAssignmentReport } from '@features/academic/reports/pages';
+import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
@@ -20,12 +26,15 @@ import { PublicRoute } from './PublicRoute';
 import {
 	DashboardAuthorities,
 	DashboardCoordinator,
+	DashboardMonitor,
 	DashboardTeacher,
 	RedirectToDefaultDepartment,
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
-import { audioEquipmentsRoutes } from '@features/inventory/audio-equipments/routes/AudioEquipamentsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
+import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
+import { catalogRoutes } from '@features/others';
+
 
 
 const router = createBrowserRouter(
@@ -57,6 +66,12 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'catalog',
+			element: <ProtectedRoute action="read" subject="catalog" />,
+			children: catalogRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'dashboard/authorities',
 			element: <ProtectedRoute action="read" subject="dashboard-authorities" />,
 			children: [{ index: true, element: <DashboardAuthorities /> }],
@@ -81,6 +96,12 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'dashboard/monitor',
+			element: <ProtectedRoute action="read" subject="dashboard-monitor" />,
+			children: [{ index: true, element: <DashboardMonitor /> }],
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'academic/courses/*',
 			element: <ProtectedRoute action="read" subject="courses" />,
 			children: coursesRoutes,
@@ -96,6 +117,12 @@ const router = createBrowserRouter(
 			path: 'academic/reports/teacher/:id',
 			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
 			children: [{ index: true, element: <AcademicAssignmentReport /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'academic/reports/monitor',
+			element: <ProtectedRoute action="read" subject="reports-monitor" />,
+			children: [{ index: true, element: <MonitorReport /> }],
 			errorElement: <div>404</div>,
 		},
 		{
@@ -117,9 +144,21 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'admin/faculties/*',
+			element: <ProtectedRoute action="read" subject="faculties" />,
+			children: facultiesRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'admin/degrees/*',
 			element: <ProtectedRoute action="read" subject="degrees" />,
 			children: degreesRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/positions/*',
+			element: <ProtectedRoute action="read" subject="positions" />,
+			children: positionsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
@@ -146,16 +185,22 @@ const router = createBrowserRouter(
 			children: classroomsRoutes,
 			errorElement: <div>404</div>,
 		},
-    {
+		{
 			path: 'inventory/pc-equipments/*',
 			element: <ProtectedRoute action="read" subject="pc-equipments" />,
 			children: pcEquipmentsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'inventory/audio-equipments',
-			element: <ProtectedRoute action="read" subject="audio-equipments" />,
-			children: audioEquipmentsRoutes,
+			path: 'inventory/air-conditioners/*',
+			element: <ProtectedRoute action='read' subject='air-conditioners' />,
+			children: airConditionersRoutes,
+			errorElement: <div>404</div>
+		},
+		{
+			path: 'inventory/digital-blackboards/*',
+			element: <ProtectedRoute action="read" subject="digital-blackboards" />,
+			children: digitalBlackboardsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

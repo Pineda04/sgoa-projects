@@ -63,13 +63,14 @@ export const useGetCourseClassroomById = (id?: string) =>
 
 export const useGetAllCourses = (
 	isActive: boolean = false,
-	searchTerm: string
+	searchTerm: string,
+	activeStatus?: boolean
 ) => {
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: ['courses', 'all', searchTerm, page, size],
-		queryFn: () => coursesApi.getAllCourses(searchTerm, page, size),
+		queryKey: ['courses', 'all', searchTerm, activeStatus !== undefined ? String(activeStatus) : 'all', page, size],
+		queryFn: () => coursesApi.getAllCourses(searchTerm, page, size, activeStatus),
 		retry: false,
 		enabled: isActive,
 		refetchOnWindowFocus: false,
@@ -136,7 +137,8 @@ export const useGetCourseById = (id: string) =>
 
 export const useSearchCourses = (
 	centerDepartmentId: string | undefined,
-	searchTerm: string
+	searchTerm: string,
+	activeStatus?: boolean
 ) => {
 	const { page, size } = usePaginationParams();
 
@@ -146,11 +148,12 @@ export const useSearchCourses = (
 			'search',
 			centerDepartmentId,
 			searchTerm,
+			activeStatus !== undefined ? String(activeStatus) : 'all',
 			page,
 			size,
 		],
 		queryFn: () =>
-			coursesApi.searchCourse(centerDepartmentId ?? '', searchTerm, page, size),
+			coursesApi.searchCourse(centerDepartmentId ?? '', searchTerm, page, size, activeStatus),
 		enabled: Boolean(
 			searchTerm !== ''
 				? searchTerm.length >= 3 && !!centerDepartmentId
@@ -180,6 +183,7 @@ export const useGetConsolidated = (
 		centerDepartmentId?: string;
 		page?: number;
 		size?: number;
+		searchTerm?: string;
 	},
 	enabled?: boolean
 ) =>

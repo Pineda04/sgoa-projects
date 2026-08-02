@@ -18,6 +18,7 @@ export type TClassroom = {
   digitalBlackboardId?: string | null;
   maxCapacity?: number | null;
   activeStatus?: boolean;
+  departments?: { id: string; name: string }[];
   // building?: TBuilding;
   // roomType?: TRoomType;
   // connectivity?: TConnectivity;
@@ -36,15 +37,6 @@ export type TClassroomDepartmentInfo = {
   name: string;
   uvs: number | null;
   facultyId: string;
-};
-
-export type TDigitalBlackboardType = {
-  id: string;
-  description: string | null;
-  brandId: string;
-  monitorTypeId: string;
-  monitorSizeId: string;
-  conditionId: string;
 };
 
 // Tipo para creación

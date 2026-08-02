@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -24,7 +25,7 @@ export class RoomTypeController {
   constructor(private readonly roomTypeService: RoomTypeService) {}
 
   @Post()
-  @RequirePermission('create', 'classrooms')
+  @RequirePermission('create', 'room-types')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de aula.')
   @ApiBody({ type: CreateRoomTypeDto })
@@ -39,7 +40,8 @@ export class RoomTypeController {
   }
 
   @Get()
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'room-types')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de aula.')
   @ApiCommonResponses({
@@ -51,7 +53,7 @@ export class RoomTypeController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'room-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del tipo de aula.')
   @ApiCommonResponses({
@@ -64,7 +66,7 @@ export class RoomTypeController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'classrooms')
+  @RequirePermission('update', 'room-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de aula.')
   @ApiBody({ type: UpdateRoomTypeDto })
@@ -82,7 +84,7 @@ export class RoomTypeController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'classrooms')
+  @RequirePermission('delete', 'room-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el tipo de aula.')
   @ApiCommonResponses({

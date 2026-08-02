@@ -34,4 +34,11 @@ export const usersSeed = (rolesData: Record<string, string>) => [
     hash: '12345',
     roleIds: [rolesData.DOCENTE],
   },
+  {
+    name: 'user6',
+    email: 'monitor@me.com',
+    code: '99994',
+    hash: '12345',
+    roleIds: [rolesData.MONITOR],
+  },
 ];

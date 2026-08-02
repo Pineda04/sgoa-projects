@@ -75,7 +75,16 @@ export const teacherDepartmentPositionApi = {
 
 export const teacherCategoriesApi = {
 	getAllTeacherCategories: () =>
-		api.get<IResponse<TAcademicCommonProps[]>>(`/teacher-categories`),
+    api.get<IResponse<TAcademicCommonProps[]>>(`/teacher-categories`),
+
+  createTeacherCategory: (body: { name: string }) =>
+		api.post<IResponse<TAcademicCommonProps>>(`/teacher-categories`, body),
+
+	updateTeacherCategory: ({ id, body }: { id: string; body: { name: string } }) =>
+		api.patch<IResponse<TAcademicCommonProps>>(`/teacher-categories/${id}`, body),
+
+	deleteTeacherCategory: (id: string) =>
+		api.delete<IResponse<void>>(`/teacher-categories/${id}`),
 };
 
 export const teachingSessionsApi = {

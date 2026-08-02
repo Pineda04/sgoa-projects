@@ -13,6 +13,7 @@ import { ApiBody } from '@nestjs/swagger';
 import {
   ResponseMessage,
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
 } from 'src/common/decorators';
 import { CreateShiftDto } from '../dto/create-shift.dto';
@@ -25,7 +26,7 @@ export class ShiftsController {
   constructor(private readonly shiftsService: ShiftsService) {}
 
   @Post()
-  @RequirePermission('create', 'users')
+  @RequirePermission('create', 'shifts')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un turno.')
   @ApiBody({ type: CreateShiftDto, description: 'Datos para crear un turno.' })
@@ -40,7 +41,8 @@ export class ShiftsController {
   }
 
   @Get()
-  @RequirePermission('read', 'users')
+  @RequirePermission('read', 'shifts')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de turnos.')
   @ApiCommonResponses({
@@ -55,7 +57,7 @@ export class ShiftsController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'users')
+  @RequirePermission('read', 'shifts')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de un turno.')
   @ApiCommonResponses({
@@ -70,7 +72,7 @@ export class ShiftsController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'users')
+  @RequirePermission('update', 'shifts')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el turno.')
   @ApiBody({
@@ -92,7 +94,7 @@ export class ShiftsController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'users')
+  @RequirePermission('delete', 'shifts')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el turno.')
   @ApiCommonResponses({

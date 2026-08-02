@@ -1,3 +1,6 @@
+// Solo se listan los permisos asignados: el backend deriva los implícitos al
+// emitir el JWT (ver SUBJECT_IMPLIED_PERMISSIONS), así que no hace falta
+// repetir acá los catálogos que alimentan los selectores de cada formulario.
 export const rolePermissionsSeed: Record<string, string[]> = {
   DIRECCION: [
     'manage:dashboard-authorities',
@@ -8,6 +11,8 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:departments',
     'manage:pc-equipments',
     'manage:audio-equipments',
+    'manage:air-conditioners',
+    'manage:digital-blackboards',
     'manage:centers',
     'manage:buildings',
     'manage:classrooms',
@@ -16,6 +21,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:positions',
     'manage:periods',
     'manage:activities',
+    'manage:catalog',
     'read:reports',
     'read:planifications',
   ],
@@ -33,6 +39,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:positions',
     'manage:periods',
     'manage:activities',
+    'manage:catalog',
     'read:reports',
     'read:planifications',
   ],
@@ -57,5 +64,10 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'update:planifications',
     'read:classrooms',
     'read:degrees',
+  ],
+  MONITOR: [
+    'manage:dashboard-monitor',
+    'manage:schedule-compliance-check',
+    'read:reports-monitor',
   ],
 };

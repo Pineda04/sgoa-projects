@@ -12,6 +12,7 @@ import {
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -24,7 +25,7 @@ export class MonitorSizesController {
   constructor(private readonly monitorSizesService: MonitorSizesService) {}
 
   @Post()
-  @RequirePermission('create', 'pc-equipments')
+  @RequirePermission('create', 'monitor-sizes')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tamaño de monitor creado exitosamente.')
   @ApiBody({
@@ -41,7 +42,8 @@ export class MonitorSizesController {
   }
 
   @Get()
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'monitor-sizes')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tamaños de monitor.')
   @ApiCommonResponses({
@@ -53,7 +55,7 @@ export class MonitorSizesController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'monitor-sizes')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor obtenido.')
   @ApiCommonResponses({
@@ -66,7 +68,7 @@ export class MonitorSizesController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'pc-equipments')
+  @RequirePermission('update', 'monitor-sizes')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor actualizado.')
   @ApiBody({
@@ -87,7 +89,7 @@ export class MonitorSizesController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'pc-equipments')
+  @RequirePermission('delete', 'monitor-sizes')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tamaño de monitor eliminado.')
   @ApiCommonResponses({

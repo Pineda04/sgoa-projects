@@ -25,7 +25,7 @@ export class ConditionsController {
   constructor(private readonly conditionService: ConditionsService) {}
 
   @Post()
-  @RequirePermission('create', 'classrooms')
+  @RequirePermission('create', 'conditions')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Condición creada exitosamente.')
   @ApiBody({
@@ -42,7 +42,7 @@ export class ConditionsController {
   }
 
   @Get()
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'conditions')
   @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de condiciones.')
@@ -55,7 +55,7 @@ export class ConditionsController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición obtenida.')
   @ApiCommonResponses({
@@ -68,7 +68,7 @@ export class ConditionsController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'classrooms')
+  @RequirePermission('update', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición actualizada.')
   @ApiBody({
@@ -89,7 +89,7 @@ export class ConditionsController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'classrooms')
+  @RequirePermission('delete', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición eliminada.')
   @ApiCommonResponses({

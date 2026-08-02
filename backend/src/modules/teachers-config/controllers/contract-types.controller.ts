@@ -13,6 +13,7 @@ import { ApiBody } from '@nestjs/swagger';
 import {
   ResponseMessage,
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
 } from 'src/common/decorators';
 import { CreateContractTypeDto } from '../dto/create-contract-type.dto';
@@ -25,7 +26,7 @@ export class ContractTypesController {
   constructor(private readonly contractTypesService: ContractTypesService) {}
 
   @Post()
-  @RequirePermission('create', 'users')
+  @RequirePermission('create', 'contract-types')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de contrato.')
   @ApiBody({
@@ -43,7 +44,8 @@ export class ContractTypesController {
   }
 
   @Get()
-  @RequirePermission('read', 'users')
+  @RequirePermission('read', 'contract-types')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de contrato obtenido correctamente.')
   @ApiCommonResponses({
@@ -64,7 +66,7 @@ export class ContractTypesController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'users')
+  @RequirePermission('read', 'contract-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de contrato obtenido correctamente.')
   @ApiCommonResponses({
@@ -79,7 +81,7 @@ export class ContractTypesController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'users')
+  @RequirePermission('update', 'contract-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de contrato.')
   @ApiBody({
@@ -103,7 +105,7 @@ export class ContractTypesController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'users')
+  @RequirePermission('delete', 'contract-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el tipo de contrato.')
   @ApiCommonResponses({

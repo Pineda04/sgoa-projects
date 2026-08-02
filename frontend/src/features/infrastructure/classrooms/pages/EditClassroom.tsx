@@ -46,6 +46,7 @@ export const EditClassroom = () => {
 			audioEquipmentId: classroom.audioEquipmentId ?? '',
 			conditionId: classroom.conditionId ?? '',
 			digitalBlackboardId: classroom.digitalBlackboardId ?? '',
+			departmentIds: classroom.departments?.map(d => d.id) ?? [],
 		};
 	}, [classroom]);
 

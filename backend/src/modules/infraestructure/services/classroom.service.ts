@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 import { UpdateClassroomDto } from '../dto/update-classroom.dto';
-import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto, TDigitalBlackboardType } from '../types';
+import { TClassroom, TCreateClassroom, TUpdateClassroom, TClassroomWithDepartments, ClassroomScheduleDto} from '../types';
 import { QueryPaginationDto } from 'src/common/dto';
 import { QueryClassroomDto } from '../dto';
 import { isUUID } from 'class-validator';
@@ -14,12 +14,15 @@ import { Prisma } from 'src/generated/prisma/client';
 export class ClassroomService {
   constructor(private prisma: PrismaService) {}
 
-  async create(
-    createClassroomDto: CreateClassroomDto,
-  ): Promise<TCreateClassroom> {
+  async create(createClassroomDto: CreateClassroomDto) {
+    const { departmentIds, ...classroomData } = createClassroomDto;
+
     const newClassroom = await this.prisma.classroom.create({
       data: {
-        ...createClassroomDto,
+        ...classroomData,
+        classroomDepartments: departmentIds?.length
+          ? { create: departmentIds.map(departmentId => ({ departmentId })) }
+          : undefined,
       },
     });
 
@@ -53,28 +56,26 @@ export class ClassroomService {
     const [classrooms, count] = await Promise.all([
       this.prisma.classroom.findMany({
         where,
-        ...paginate(query),
+        include: {
+          classroomDepartments: {
+            include: {
+              department: { select: { id: true, name: true } },
+            },
+          },
+        },
+      ...paginate(query),
       }),
       this.prisma.classroom.count({ where }),
     ]);
-    return paginateOutput<TClassroom>(classrooms, count, query);
+
+    const mapped = classrooms.map(({ classroomDepartments, ...rest }) => ({
+      ...rest,
+      departments: classroomDepartments.map((cd) => cd.department),
+    }));
+
+
+    return paginateOutput<TClassroom>(mapped, count, query);
   }
-
-  async findOneDigitalBlackboard(id: string): Promise<TDigitalBlackboardType> {
-    const digitalBlackboard = await this.prisma.digitalBlackboard.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!digitalBlackboard)
-      throw new NotFoundException(
-        `La pizarra digital con id <${id}> no fue encontrada.`,
-      );
-
-    return digitalBlackboard;
-  }
-
 
  async findOne(id: string): Promise<TClassroomWithDepartments> {
   const classroom = await this.prisma.classroom.findUnique({
@@ -127,7 +128,7 @@ export class ClassroomService {
       ],
     };
 
-    const [results, count] = await Promise.all([
+  const [results, count] = await Promise.all([
       this.prisma.classroom.findMany({
         where,
         ...paginate(query),
@@ -140,6 +141,13 @@ export class ClassroomService {
               name: true,
             },
           },
+          classroomDepartments: {
+            select: {
+              department: {
+                select: { id: true, name: true },
+              },
+            },
+          },
         },
       }),
       this.prisma.classroom.count({
@@ -147,19 +155,29 @@ export class ClassroomService {
       }),
     ]);
 
-    return paginateOutput(results, count, query);
-  }
+    const mapped = results.map(({ classroomDepartments, ...rest }) => ({
+      ...rest,
+      departments: classroomDepartments.map((cd) => cd.department),
+    }));
 
-  async update(
-    id: string,
-    updateClassroomDto: UpdateClassroomDto,
-  ): Promise<TUpdateClassroom> {
+      return paginateOutput(mapped, count, query);
+    }
+
+  //Por como esta hecho, para no tocar la relacion con departamentos, deben no enviar ese campo, enviarlo vacío implica vaciarlo,
+  //además, se deben enviar todas las relaciones que tiene cada que se edita, no solo las nuevas o modificadas, porque las rehace todas.
+  async update(id: string, updateClassroomDto: UpdateClassroomDto) {
+    const { departmentIds, ...classroomData } = updateClassroomDto;
+
     const classroomUpdate = await this.prisma.classroom.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
-        ...updateClassroomDto,
+        ...classroomData,
+        classroomDepartments: departmentIds
+          ? {
+              deleteMany: {},
+              create: departmentIds.map(departmentId => ({ departmentId })),
+            }
+          : undefined,
       },
     });
 

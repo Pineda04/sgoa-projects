@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -25,7 +26,7 @@ export class ConnectivityController {
   constructor(private readonly connectivityService: ConnectivityService) {}
 
   @Post()
-  @RequirePermission('create', 'classrooms')
+  @RequirePermission('create', 'connectivities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una conectividad.')
   @ApiBody({ type: CreateConnectivityDto })
@@ -40,7 +41,8 @@ export class ConnectivityController {
   }
 
   @Get()
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'connectivities')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de conectividades.')
   @ApiCommonResponses({
@@ -52,7 +54,7 @@ export class ConnectivityController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'classrooms')
+  @RequirePermission('read', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de la conectividad.')
   @ApiCommonResponses({
@@ -65,7 +67,7 @@ export class ConnectivityController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'classrooms')
+  @RequirePermission('update', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la conectividad.')
   @ApiBody({ type: UpdateConnectivityDto })
@@ -83,7 +85,7 @@ export class ConnectivityController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'classrooms')
+  @RequirePermission('delete', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la conectividad.')
   @ApiCommonResponses({

@@ -12,6 +12,7 @@ import {
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -24,7 +25,7 @@ export class MonitorTypesController {
   constructor(private readonly monitorTypesService: MonitorTypesService) {}
 
   @Post()
-  @RequirePermission('create', 'pc-equipments')
+  @RequirePermission('create', 'monitor-types')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tipo de monitor creado exitosamente.')
   @ApiBody({
@@ -41,7 +42,8 @@ export class MonitorTypesController {
   }
 
   @Get()
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'monitor-types')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de monitor.')
   @ApiCommonResponses({
@@ -53,7 +55,7 @@ export class MonitorTypesController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'monitor-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor obtenido.')
   @ApiCommonResponses({
@@ -66,7 +68,7 @@ export class MonitorTypesController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'pc-equipments')
+  @RequirePermission('update', 'monitor-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor actualizado.')
   @ApiBody({
@@ -87,7 +89,7 @@ export class MonitorTypesController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'pc-equipments')
+  @RequirePermission('delete', 'monitor-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de monitor eliminado.')
   @ApiCommonResponses({

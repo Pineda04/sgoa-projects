@@ -16,7 +16,7 @@ import {
 } from '@api/users';
 import { TAcademicCommonProps } from '@api/periods';
 import {
-	TOutputTeacherPosition,
+	TOutputTeacher,
 	useGetAllTeacherCategories,
 } from '@api/teachers';
 import { useAbility } from '@config';
@@ -180,7 +180,7 @@ const selectedValueSelect = <T extends TAcademicCommonProps>(
 };
 
 interface IProps {
-	initialData: TOutputTeacherPosition;
+	initialData: TOutputTeacher;
 	isModal?: boolean;
 }
 

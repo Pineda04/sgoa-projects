@@ -17,7 +17,7 @@ import {
 	useSearchCourses,
 } from '@api/courses';
 import { useAbility } from '@config';
-import { useDebounce } from '@shared/hooks';
+import { useDebounce, usePaginationParams } from '@shared/hooks';
 
 interface CourseWithDepartment extends TCourse {
 	department: {
@@ -57,13 +57,12 @@ const createCourseColumns = (
 				</span>
 			),
 	},
-		...(showDepartmentInTable
+	...(showDepartmentInTable
 		? [
 				{
 					key: 'departmentName',
 					header: 'Departamento',
 					mobileLabel: 'Depto.',
-					// hiddenOnMobile: true,
 					render: (row: CourseWithDepartment) => (
 						<span className="font-medium truncate text-center">
 							{row.department.name}
@@ -72,23 +71,23 @@ const createCourseColumns = (
 				},
 			]
 		: []),
-		...(canUpdate
-			? [
-					{
-						key: 'actions' as const,
-						header: 'Acciones',
-						mobileLabel: 'Acciones',
-						render: (row: CourseWithDepartment) => (
-							<Link
-								to={`/academic/courses/edit/${row.id}`}
-								className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
-							>
-								<EyeIcon className="size-5" />
-							</Link>
-						),
-					},
-				]
-			: []),
+	...(canUpdate
+		? [
+				{
+					key: 'actions' as const,
+					header: 'Acciones',
+					mobileLabel: 'Acciones',
+					render: (row: CourseWithDepartment) => (
+						<Link
+							to={`/academic/courses/edit/${row.id}`}
+							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
+						>
+							<EyeIcon className="size-5" />
+						</Link>
+					),
+				},
+			]
+		: []),
 ];
 
 export const CourseList = ({
@@ -101,6 +100,8 @@ export const CourseList = ({
 	const ability = useAbility();
 	const canCreateCourse = ability.can('create', 'courses');
 	const canUpdate = ability.can('update', 'courses');
+
+	const { setPage } = usePaginationParams();
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
 		centerDepartmentId ?? ''
@@ -116,15 +117,24 @@ export const CourseList = ({
 	const [searchTerm, setSearchTerm] = useState('');
 	const { debouncedValue: debValue } = useDebounce(searchTerm, 1500);
 
+	const [activeFilter, setActiveFilter] = useState(''); // '' = Todos, 'true' = Activo, 'false' = Inactivo
+
 	const effectiveCenterDepartmentId = showDepartmentFilter
 		? selectedDepartment || undefined
 		: centerDepartmentId;
 
-	const coursesInfo = useSearchCourses(effectiveCenterDepartmentId, debValue);
+	const activeStatusParam =
+		activeFilter === 'true'
+			? true
+			: activeFilter === 'false'
+				? false
+				: undefined;
 
-	const allCoursesInfo = useGetAllCourses(showDepartmentFilter, debValue);
+	const coursesInfo = useSearchCourses(effectiveCenterDepartmentId, debValue, activeStatusParam);
 
-	const hasFilter = selectedDepartment || searchTerm;
+	const allCoursesInfo = useGetAllCourses(showDepartmentFilter, debValue, activeStatusParam);
+
+	const hasFilter = selectedDepartment || searchTerm || activeFilter;
 
 	const isLoading = hasFilter
 		? coursesInfo.isLoading
@@ -149,71 +159,89 @@ export const CourseList = ({
 		[showDepartmentInTable, canUpdate]
 	);
 
-	if (isLoading) return <Loading />;
-	if (hasError)
-		return (
-			<Error
-				error={
-					(hasFilter ? coursesInfo.error : allCoursesInfo.error)
-						?.message ?? 'Error al cargar las asignaturas'
-				}
-			/>
-		);
-
 	return (
 		<div className="space-y-4">
-			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-x-0 md:gap-x-10 gap-y-5 md:gap-y-0">
-				<div className="w-full col-span-1">
-					<label className="block mb-2 font-semibold text-sm text-foreground">
-						Búsqueda por término
-					</label>
-					<input
-						type="text"
-						placeholder="Buscar por código o nombre..."
-						value={searchTerm}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							setSearchTerm(e.target.value)
-						}
-						className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
-					/>
-        </div>
-         <div className="w-full col-span-2">
-  				{showDepartmentFilter && ability.can('read', 'centers') && (
-  					<CourseDepartmentFilter
-  						value={selectedDepartment}
-  						centerId={centerId}
-  						onChange={setSelectedDepartment}
-  						onCenterChange={handleCenterChange}
-  					/>
-  				)}
-         </div>
-         <div className={`w-full col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}>
-  				{canCreateCourse && (
-  					<div className="flex sm:justify-end justify-start">
-  						<Button
-  							onClick={() => navigate('/academic/courses/new')}
-                className="bg-green-500 text-white p-2 hover:bg-green-600 transition"
-  						>
-  							<Plus className="size-4 mr-1" />
-  							Nueva Clase
-  						</Button>
-  					</div>
-  				)}
+			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4">
+				<div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Búsqueda por término
+						</label>
+						<input
+							type="text"
+							placeholder="Buscar por código o nombre..."
+							value={searchTerm}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setSearchTerm(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						/>
+					</div>
+					<div>
+						<label className="block mb-2 font-semibold text-sm text-foreground">
+							Estado
+						</label>
+						<select
+							value={activeFilter}
+							onChange={e => {
+								setActiveFilter(e.target.value);
+								setPage(1);
+							}}
+							className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
+						>
+							<option value="">Todos</option>
+							<option value="true">Activo</option>
+							<option value="false">Inactivo</option>
+						</select>
+					</div>
+					{showDepartmentFilter && ability.can('read', 'centers') && (
+						<CourseDepartmentFilter
+							value={selectedDepartment}
+							centerId={centerId}
+							onChange={setSelectedDepartment}
+							onCenterChange={handleCenterChange}
+						/>
+					)}
+				</div>
+				<div className={`flex justify-end col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}>
+					{canCreateCourse && (
+						<Button
+							onClick={() => navigate('/academic/courses/new')}
+							className="bg-green-500 text-white p-2 hover:bg-green-600 transition"
+						>
+							<Plus className="size-4 mr-1" />
+							Nueva Clase
+						</Button>
+					)}
 				</div>
 			</div>
 
-			<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">
-				<ResponsiveTable<CourseWithDepartment>
-					columns={columns}
-					data={data as CourseWithDepartment[]}
-					getRowKey={c => c.id}
-					loading={coursesInfo.isLoading}
-					emptyMessage="No hay asignaturas disponibles"
+			{isLoading ? (
+				<Loading />
+			) : hasError ? (
+				<Error
+					error={
+						(hasFilter ? coursesInfo.error : allCoursesInfo.error)
+							?.message ?? 'Error al cargar las asignaturas'
+					}
 				/>
-			</div>
-			<div className="">
-				<Pagination totalPages={meta?.lastPage} />
-			</div>
+			) : (
+				<>
+					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden">
+						<ResponsiveTable<CourseWithDepartment>
+							columns={columns}
+							data={data as CourseWithDepartment[]}
+							getRowKey={c => c.id}
+							loading={isLoading}
+							emptyMessage="No hay asignaturas disponibles"
+						/>
+					</div>
+					<div className="">
+						<Pagination totalPages={meta?.lastPage} />
+					</div>
+				</>
+			)}
 		</div>
 	);
 };

@@ -20,27 +20,51 @@ export const ACTION_LABELS: Record<AssignableActions, string> = {
 
 export const SUBJECT_LABELS: Record<Subjects, string> = {
 	all: 'Todo el sistema',
+	// Académico
 	activities: 'Actividades complementarias',
-	buildings: 'Edificios',
-	centers: 'Centros',
-	classrooms: 'Aulas',
 	courses: 'Cursos',
 	degrees: 'Títulos',
-	departments: 'Departamentos',
-	faculties: 'Facultades',
 	periods: 'Periodos académicos',
-	positions: 'Cargos',
 	planifications: 'Planificaciones',
 	reports: 'Reportes',
+	// Organización
+	centers: 'Centros',
+	departments: 'Departamentos',
+	faculties: 'Facultades',
+	positions: 'Cargos',
+	// Infraestructura
+	buildings: 'Edificios',
+	classrooms: 'Aulas',
+	// Inventario
 	'pc-equipments': 'Equipos de computación',
 	'audio-equipments': 'Equipos de audio',
+	'air-conditioners': 'Aires acondicionados',
+	'digital-blackboards': 'Pizarras digitales',
+	// Catálogos
+	catalog: 'Catálogo',
+	brands: 'Marcas',
+	conditions: 'Condiciones',
+	connectivities: 'Conectividades',
+	'room-types': 'Tipos de aula',
+	'pc-types': 'Tipos de computadora',
+	'monitor-types': 'Tipos de monitor',
+	'monitor-sizes': 'Tamaños de monitor',
+	'contract-types': 'Tipos de contratación',
+	shifts: 'Jornadas',
+	'teacher-categories': 'Categorías docentes',
+	// Monitoreo de cumplimiento de horarios
+	'schedule-compliance-check': 'Verificaciones de horario',
+	'reports-monitor': 'Reportes de monitoreo',
+	// Usuarios
 	users: 'Usuarios',
 	'user-departments': 'Departamentos de usuario',
 	'user-status': 'Estado de usuario',
+	// Vistas
 	home: 'Inicio',
 	help: 'Ayuda',
 	profile: 'Perfil',
 	'dashboard-authorities': 'Dashboard de autoridades',
 	'dashboard-coordinator': 'Dashboard de coordinación',
 	'dashboard-teacher': 'Dashboard de docencia',
+	'dashboard-monitor': 'Dashboard de monitoreo',
 };

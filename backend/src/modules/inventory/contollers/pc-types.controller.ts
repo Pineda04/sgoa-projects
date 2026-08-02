@@ -1,6 +1,7 @@
 import { ApiBody } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -24,7 +25,7 @@ export class PcTypesController {
   constructor(private readonly pcTypesService: PcTypesService) {}
 
   @Post()
-  @RequirePermission('create', 'pc-equipments')
+  @RequirePermission('create', 'pc-types')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Tipo de PC creado exitosamente.')
   @ApiBody({
@@ -41,7 +42,8 @@ export class PcTypesController {
   }
 
   @Get()
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'pc-types')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de PC obtenido correctamente.')
   @ApiCommonResponses({
@@ -54,7 +56,7 @@ export class PcTypesController {
   }
 
   @Get(':id')
-  @RequirePermission('read', 'pc-equipments')
+  @RequirePermission('read', 'pc-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC obtenido correctamente.')
   @ApiCommonResponses({
@@ -67,7 +69,7 @@ export class PcTypesController {
   }
 
   @Patch(':id')
-  @RequirePermission('update', 'pc-equipments')
+  @RequirePermission('update', 'pc-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC actualizado correctamente.')
   @ApiBody({
@@ -88,7 +90,7 @@ export class PcTypesController {
   }
 
   @Delete(':id')
-  @RequirePermission('delete', 'pc-equipments')
+  @RequirePermission('delete', 'pc-types')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Tipo de PC eliminado correctamente.')
   @ApiCommonResponses({

@@ -26,6 +26,13 @@ export type AssignableActions =
 export type Actions = AssignableActions | 'lookup';
 export type Subjects =
 	| 'all'
+	| 'dashboard-authorities'
+	| 'dashboard-coordinator'
+	| 'dashboard-teacher'
+	| 'dashboard-monitor'
+	| 'users'
+	| 'user-departments'
+	| 'user-status'
 	| 'activities'
 	| 'buildings'
 	| 'centers'
@@ -39,16 +46,25 @@ export type Subjects =
 	| 'planifications'
 	| 'reports'
 	| 'pc-equipments'
+	| 'air-conditioners'
+	| 'digital-blackboards'
+	| 'schedule-compliance-check'
+  | 'reports-monitor'
+	| 'catalog'
+	| 'teacher-categories'
+	| 'contract-types'
+	| 'shifts'
+	| 'brands'
+	| 'conditions'
+	| 'connectivities'
+	| 'room-types'
+	| 'pc-types'
 	| 'audio-equipments'
-	| 'users'
-	| 'user-departments'
-	| 'user-status'
+	| 'monitor-types'
+	| 'monitor-sizes'
 	| 'home'
 	| 'help'
-	| 'profile'
-	| 'dashboard-authorities'
-	| 'dashboard-coordinator'
-	| 'dashboard-teacher';
+	| 'profile';
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 

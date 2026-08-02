@@ -45,18 +45,19 @@ model RolePermission {
 }
 
 model User {
-  id                  String               @id @default(uuid()) @db.Uuid
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  name                String
-  email               String?              @unique
-  code                String               @unique
-  hash                String
-  hashedRt            String?
-  activeStatus        Boolean              @default(true)
-  teacher             Teacher?
-  resetPasswordTokens ResetPasswordToken[]
-  userRoles           UserRole[]
+  id                       String                    @id @default(uuid()) @db.Uuid
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  name                     String
+  email                    String?                   @unique
+  code                     String                    @unique
+  hash                     String
+  hashedRt                 String?
+  activeStatus             Boolean                   @default(true)
+  teacher                  Teacher?
+  resetPasswordTokens      ResetPasswordToken[]
+  userRoles                UserRole[]
+  scheduleComplianceChecks ScheduleComplianceCheck[]
 
   @@map("users")
   @@schema("auth")
@@ -136,9 +137,9 @@ model TeacherPostgraduateDegree {
 }
 
 model TeacherCategory {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @unique
-  description String
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
   teachers    Teacher[]
 
   @@map("teacher_categories")
@@ -446,25 +447,48 @@ model PcType {
 }
 
 model CourseClassroom {
-  id                String           @id @default(uuid()) @db.Uuid
-  courseId          String           @db.Uuid
-  classroomId       String           @db.Uuid
-  studentCount      Int
-  modalityId        String           @db.Uuid
-  nearGraduation    Boolean
-  groupCode         String           @default("G1")
-  teachingSessionId String           @db.Uuid
-  days              String
-  section           String
-  observation       String?
-  classroom         Classroom        @relation(fields: [classroomId], references: [id])
-  course            Course           @relation(fields: [courseId], references: [id])
-  modality          Modality         @relation(fields: [modalityId], references: [id])
-  teachingSession   TeachingSession  @relation(fields: [teachingSessionId], references: [id], onDelete: Cascade)
-  courseStadistic   CourseStadistic?
+  id                       String                    @id @default(uuid()) @db.Uuid
+  courseId                 String                    @db.Uuid
+  classroomId              String                    @db.Uuid
+  studentCount             Int
+  modalityId               String                    @db.Uuid
+  nearGraduation           Boolean
+  groupCode                String                    @default("G1")
+  teachingSessionId        String                    @db.Uuid
+  days                     String
+  section                  String
+  observation              String?
+  classroom                Classroom                 @relation(fields: [classroomId], references: [id])
+  course                   Course                    @relation(fields: [courseId], references: [id])
+  modality                 Modality                  @relation(fields: [modalityId], references: [id])
+  teachingSession          TeachingSession           @relation(fields: [teachingSessionId], references: [id], onDelete: Cascade)
+  courseStadistic          CourseStadistic?
+  scheduleComplianceChecks ScheduleComplianceCheck[]
 
   @@unique([courseId, classroomId, teachingSessionId, groupCode])
   @@map("course_classrooms")
+  @@schema("academic")
+}
+
+model ScheduleComplianceCheck {
+  id                String    @id @default(uuid()) @db.Uuid
+  courseClassroomId String    @db.Uuid
+  monitorId         String    @db.Uuid
+  checkDate         DateTime
+  checkTime         String
+  isPresent         Boolean
+  observation       String?
+  offlineId         String?
+  syncedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  courseClassroom CourseClassroom @relation(fields: [courseClassroomId], references: [id], onDelete: Cascade)
+  monitor         User            @relation(fields: [monitorId], references: [id], onDelete: Restrict)
+
+  @@unique([courseClassroomId, checkDate, checkTime])
+  @@index([monitorId, checkDate])
+  @@map("schedule_compliance_checks")
   @@schema("academic")
 }
 

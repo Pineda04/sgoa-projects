@@ -10,29 +10,53 @@ export const PERMISSION_ACTIONS = [
 ] as const;
 
 export const PERMISSION_SUBJECTS = [
+  // Académico
   'activities',
-  'buildings',
-  'centers',
-  'classrooms',
   'courses',
   'degrees',
-  'departments',
-  'faculties',
   'periods',
-  'positions',
   'planifications',
   'reports',
+  // Organización
+  'centers',
+  'departments',
+  'faculties',
+  'positions',
+  // Infraestructura
+  'buildings',
+  'classrooms',
+  // Inventario
   'pc-equipments',
   'audio-equipments',
+  'air-conditioners',
+  'digital-blackboards',
+  // Catálogos: entidades pequeñas que se administran desde la página Catálogo
+  'catalog',
+  'brands',
+  'conditions',
+  'connectivities',
+  'room-types',
+  'pc-types',
+  'monitor-types',
+  'monitor-sizes',
+  'contract-types',
+  'shifts',
+  'teacher-categories',
+  // Monitoreo de cumplimiento de horarios
+  'schedule-compliance-check',
+  'reports-monitor',
+  // Usuarios
   'users',
   'user-departments',
   'user-status',
+  // Vistas
   'home',
   'help',
   'profile',
   'dashboard-authorities',
   'dashboard-coordinator',
   'dashboard-teacher',
+  'dashboard-monitor',
 ] as const;
 
 export type TPermissionAction = (typeof PERMISSION_ACTIONS)[number];

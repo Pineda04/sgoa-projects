@@ -7,3 +7,5 @@ export * from './update-room-type.dto';
 export * from './create-audio-equipment.dto';
 export * from './update-audio-equipment.dto';
 export * from './query-classroom.dto';
+export * from './create-digital-blackboard.dto';
+export * from './update-digital-blackboard.dto';

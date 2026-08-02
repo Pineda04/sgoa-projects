@@ -1,0 +1,27 @@
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@config/lib';
+import { monitorApi } from './monitor.api';
+import { monitorKeys } from './monitor.keys';
+import { alertSuccess } from '@shared';
+
+export const useCreateCheckMutation = () => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: monitorApi.createCheck,
+		onSuccess: async res => {
+			try {
+				await alertSuccess(res);
+			} catch {
+				// Ignore alert errors
+			}
+
+			await queryClient.invalidateQueries({
+				queryKey: monitorKeys.currentAssignments(),
+			});
+		},
+	});
+
+	return {
+		createCheck: mutateAsync,
+		isPendingCreateCheck: isPending,
+	};
+};
