@@ -74,4 +74,14 @@ export class CreateDigitalBlackboardDto {
     IsValidIdsInventoryConfigConstraint,
   )
   conditionId: string;
+
+  @ApiPropertyOptional({
+    description: 'ID del aula asignada (opcional).',
+    example: '65039ef6-1fc5-474c-b4e3-27239c200138',
+  })
+  @IsUUID('all', {
+    message: 'La propiedad <classroomId> debe ser un UUID válido.',
+  })
+  @IsOptional()
+  classroomId?: string;
 }

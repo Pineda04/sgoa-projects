@@ -16,7 +16,7 @@ import { useGetAllRoomTypes } from '@api/room-types';
 import { useGetAllConnectivities } from '@api/connectivities';
 import { useGetAllAudioEquipments } from '@api/audio-equipments';
 import { useGetAllConditions } from '@api/conditions';
-import { useGetDigitalBlackboard } from '@api/digital-blackboards';
+import { useGetAllDigitalBlackboards } from '@api/digital-blackboards';
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllMonitorTypes, useGetAllMonitorSizes } from '@api/pc-equipments';
 import { useGetAirConditioners } from '@api/air-conditioners';
@@ -106,10 +106,7 @@ export const ViewClassroom = () => {
 	const monitorTypes = useGetAllMonitorTypes();
 	const monitorSizes = useGetAllMonitorSizes();
 	const airConditioners = useGetAirConditioners();
-
-	const digitalBlackboard = useGetDigitalBlackboard(
-		classroom?.digitalBlackboardId ?? ''
-	);
+	const digitalBlackboards = useGetAllDigitalBlackboards();
 
 	if (isLoading) return <Loading />;
 	if (isError || !classroom) {
@@ -133,22 +130,10 @@ export const ViewClassroom = () => {
 			ac => ac.classroom?.id === classroom.id
 		) ?? [];
 
-	const digitalBlackboardBrand = digitalBlackboard.data
-		? brands.data?.find(b => b.id === digitalBlackboard.data.brandId)
-		: undefined;
-	const digitalBlackboardMonitorType = digitalBlackboard.data
-		? monitorTypes.data?.find(
-				t => t.id === digitalBlackboard.data.monitorTypeId
-			)
-		: undefined;
-	const digitalBlackboardMonitorSize = digitalBlackboard.data
-		? monitorSizes.data?.find(
-				s => s.id === digitalBlackboard.data.monitorSizeId
-			)
-		: undefined;
-	const digitalBlackboardCondition = digitalBlackboard.data
-		? conditions.data?.find(c => c.id === digitalBlackboard.data.conditionId)
-		: undefined;
+	const classroomDigitalBlackboards =
+		digitalBlackboards.data?.filter(
+			db => db.classroom?.id === classroom.id
+		) ?? [];
 
 	const isVirtual = roomType?.description?.toLowerCase() === 'espacio virtual';
 	const isInactive = !classroom.activeStatus;
@@ -318,39 +303,60 @@ export const ViewClassroom = () => {
 								title="Pizarra digital"
 								icon={<TvIcon className="size-4.5" />}
 							>
-								{!classroom.digitalBlackboardId ? (
-									<EmptyState text="Sin pizarra digital asignada" />
-								) : digitalBlackboard.isLoading ? (
+								{digitalBlackboards.isLoading ? (
 									<p className="text-sm text-muted-foreground">
 										Cargando...
 									</p>
-								) : !digitalBlackboard.data ? (
-									<EmptyState text="No se pudo cargar la pizarra digital" />
+								) : digitalBlackboards.isError ? (
+									<EmptyState text="No se pudieron cargar las pizarras digitales" />
+								) : classroomDigitalBlackboards.length === 0 ? (
+									<EmptyState text="Sin pizarra digital asignada" />
 								) : (
-									<div className="space-y-4">
-										<InfoField
-											label="Descripción"
-											value={
-												digitalBlackboard.data.description?.trim() ||
-												undefined
-											}
-										/>
-										<InfoField
-											label="Marca"
-											value={digitalBlackboardBrand?.name}
-										/>
-										<InfoField
-											label="Tipo de monitor"
-											value={digitalBlackboardMonitorType?.description}
-										/>
-										<InfoField
-											label="Tamaño"
-											value={digitalBlackboardMonitorSize?.description}
-										/>
-										<InfoField
-											label="Condición"
-											value={digitalBlackboardCondition?.status}
-										/>
+									<div className="space-y-3">
+										{classroomDigitalBlackboards.map(db => (
+											<div
+												key={db.id}
+												className="rounded-lg border border-border/60 bg-muted/30 p-3"
+											>
+												<p className="text-sm font-semibold text-foreground">
+													{db.description?.trim() ||
+														`Pizarra digital (${db.id.slice(0, 8)})`}
+												</p>
+												<div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
+													<span>
+														Marca:{' '}
+														<span className="font-medium text-foreground">
+															{brands.data?.find(b => b.id === db.brandId)
+																?.name ?? '—'}
+														</span>
+													</span>
+													<span>
+														Tipo de monitor:{' '}
+														<span className="font-medium text-foreground">
+															{monitorTypes.data?.find(
+																t => t.id === db.monitorTypeId
+															)?.description ?? '—'}
+														</span>
+													</span>
+													<span>
+														Tamaño:{' '}
+														<span className="font-medium text-foreground">
+															{monitorSizes.data?.find(
+																s => s.id === db.monitorSizeId
+															)?.description ?? '—'}
+														</span>
+													</span>
+													<span>
+														Condición:{' '}
+														<span className="font-medium text-foreground">
+															{conditions.data?.find(
+																c => c.id === db.conditionId
+															)?.status ?? '—'}
+														</span>
+													</span>
+												</div>
+											</div>
+										))}
 									</div>
 								)}
 							</SectionCard>

@@ -127,6 +127,12 @@ export const DigitalBlackboardsTable = ({
 			render: row => conditionMap.get(row.conditionId) ?? '—',
 		},
 		{
+			key: 'classroom',
+			header: 'Aula',
+			mobileLabel: 'Aula',
+			render: row => row.classroom?.name ?? 'Sin aula asignada',
+		},
+		{
 			key: 'actions',
 			header: 'Acciones',
 			mobileLabel: 'Acciones',

@@ -4,7 +4,6 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { BuildingService } from '../services/building.service';
-import { DigitalBlackboardService } from '../services/digital-blackboard.service';
 import { ConnectivityService } from '../services/connectivity.service';
 import { AudioEquipmentService } from '../services/audio-equipment.service';
 import { Injectable } from '@nestjs/common';
@@ -18,7 +17,6 @@ export class IsValidIdsClassroomConfigConstraint
 {
   constructor(
     private readonly buildingService: BuildingService,
-    private readonly digitalBlackboardService: DigitalBlackboardService,
     private readonly roomTypeService: RoomTypeService,
     private readonly connectivityService: ConnectivityService,
     private readonly audioEquipmentService: AudioEquipmentService,
@@ -43,13 +41,6 @@ export class IsValidIdsClassroomConfigConstraint
 
       case EClassroomConfig.AUDIO_EQUIPMENT:
         return !!(await this.audioEquipmentService.findOne(id));
-
-      case EClassroomConfig.DIGITAL_BLACKBOARD:
-        try {
-          return !!(await this.digitalBlackboardService.findOne(id));
-        } catch {
-          return false;
-        }
 
       default:
         return false;
@@ -76,10 +67,6 @@ export class IsValidIdsClassroomConfigConstraint
       [EClassroomConfig.AUDIO_EQUIPMENT]: {
         name: 'equipo de audio',
         endpoint: '/audio-equipments',
-      },
-      [EClassroomConfig.DIGITAL_BLACKBOARD]: {
-        name: 'Pizarra digital',
-        endpoint: '/digital_blackboards',
       },
     };
 
