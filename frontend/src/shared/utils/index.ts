@@ -1,3 +1,4 @@
+export * from './confirm';
 export * from './delete-action';
 export * from './errors-formik';
 export * from './format-time';

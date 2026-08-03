@@ -31,6 +31,24 @@ export const monitorApi = {
 	createCheck: (body: TCreateCheck) =>
 		api.post<IResponse<TScheduleComplianceCheck>>('/monitor/checks', body),
 
+	/**
+	 * Sincroniza en bloque los checks registrados localmente sin conexión.
+	 * El endpoint siempre responde 200; los conflictos se reportan en la
+	 * respuesta para que el cliente marque solo los realmente persistidos.
+	 */
+	batchSync: (body: { checks: TCreateCheck[] }) =>
+		api.post<
+			IResponse<{
+				synced: number;
+				conflicts: number;
+				skipped: number;
+				rejected: number;
+				conflictIds: string[];
+				skippedIds: string[];
+				rejectedIds: string[];
+			}>
+		>('/monitor/checks/batch-sync', body),
+
 	getChecks: (page: number, size: number, filters?: TCheckFilters) => {
 		const params = buildCheckFiltersParams(filters);
 		params.set('page', String(page));
