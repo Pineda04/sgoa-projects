@@ -34,6 +34,7 @@ export const CreateUser = () => {
 
 	const canManageRoles = ability.can('manage', 'user-roles');
 	const canManageDepartments = ability.can('manage', 'user-departments');
+	const extraFieldsEnabled = canManageRoles || canManageDepartments;
 
 	const {
 		values,
@@ -48,7 +49,7 @@ export const CreateUser = () => {
 		initialValues: {
 			...initialValuesUser,
 			roles: [],
-			extraFieldsEnabled: canManageRoles,
+			extraFieldsEnabled,
 		},
 		onSubmit: values => handleCreateUser(values),
 		validate: values => {
@@ -76,7 +77,7 @@ export const CreateUser = () => {
 			values: {
 				...initialValuesUser,
 				roles: [],
-				extraFieldsEnabled: canManageRoles,
+				extraFieldsEnabled,
 			},
 		});
 

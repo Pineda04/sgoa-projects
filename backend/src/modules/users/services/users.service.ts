@@ -57,14 +57,24 @@ export class UsersService {
   ) {
     const { sub: userId, roles } = currentUser;
 
-    // Verifica si el usuario no tiene ninguno de los roles DOCENTE o COORDINADOR_AREA, y en ese caso crea el usuario.
-    if (
-      createUserDto.roles.length !== 0 &&
-      !createUserDto.roles.some((role) =>
+    const {
+      categoryId,
+      contractTypeId,
+      shiftId,
+      undergradId,
+      positionId,
+      centerDepartmentId,
+    } = createUserDto;
+
+    // Check if teacher data will be created (based on the same logic as in create method)
+    const willCreateTeacherData =
+      (!!categoryId && !!contractTypeId && !!shiftId && !!undergradId) ||
+      createUserDto.roles.some((role) =>
         [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(role),
-      )
-    )
-      return await this.create(createUserDto);
+      );
+
+    // If no teacher data will be created, skip validation and create user normally
+    if (!willCreateTeacherData) return await this.create(createUserDto);
 
     // Ya existe el decorador... validacion extra
     if (roles.length === 1 && roles.includes(EUserRole.DOCENTE))
@@ -87,7 +97,7 @@ export class UsersService {
     //   createUserDto.centerId = currentUserDepartment.centerDepartment.centerId;
     // }
 
-    if (!createUserDto.centerDepartmentId)
+    if (!centerDepartmentId)
       throw new BadRequestException(
         `Debe ingresar el departamento al que pertenerá el docente.`,
       );
@@ -97,18 +107,18 @@ export class UsersService {
       EPosition.NONE,
     );
 
-    if (roles.includes(EUserRole.DOCENTE) && createUserDto.positionId)
+    if (roles.includes(EUserRole.DOCENTE) && positionId)
       throw new ForbiddenException('Los docentes no pueden asignar un cargo.');
 
     if (
       roles.includes(EUserRole.COORDINADOR_AREA) &&
       !roles.includes(EUserRole.ADMIN) &&
-      createUserDto.positionId !== postionNone.id
+      positionId !== postionNone.id
     ) {
       createUserDto.positionId = postionNone.id;
     }
 
-    if (!createUserDto.positionId)
+    if (!positionId)
       throw new BadRequestException(
         `Debe ingresar el cargo académico <positionId> que tendrá el docente en el departamento.`,
       );
@@ -117,12 +127,12 @@ export class UsersService {
       EPosition.DEPARTMENT_HEAD,
     );
 
-    if (createUserDto.positionId === coordinatorPosition.id) {
+    if (positionId === coordinatorPosition.id) {
       const existingCoordinator =
         await this.prisma.teacherDepartmentPosition.findFirst({
           where: {
-            positionId: createUserDto.positionId,
-            centerDepartmentId: createUserDto.centerDepartmentId,
+            positionId: positionId,
+            centerDepartmentId: centerDepartmentId,
             endDate: null,
           },
           select: { id: true, centerDepartmentId: true },
