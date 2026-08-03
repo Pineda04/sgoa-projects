@@ -64,11 +64,6 @@ const MODULES: ModuleConfig[] = [
 				path: '/admin/positions',
 				subject: 'positions',
 			},
-			{
-				label: 'Roles y Permisos',
-				path: '/admin/roles',
-				superAdminOnly: true,
-			},
 		],
 	},
 	{
