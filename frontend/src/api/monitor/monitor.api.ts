@@ -7,6 +7,7 @@ import {
 	TReportFilters,
 	TScheduleComplianceCheck,
 	TScheduleComplianceCheckDetail,
+	TUpdateCheck,
 } from './monitor.types';
 import { IResponse } from '@shared/interfaces';
 import { api } from '@config/lib';
@@ -30,6 +31,12 @@ export const monitorApi = {
 
 	createCheck: (body: TCreateCheck) =>
 		api.post<IResponse<TScheduleComplianceCheck>>('/monitor/checks', body),
+
+	updateCheck: ({ id, ...body }: TUpdateCheck) =>
+		api.patch<IResponse<TScheduleComplianceCheck>>(
+			`/monitor/checks/${id}`,
+			body
+		),
 
 	getChecks: (page: number, size: number, filters?: TCheckFilters) => {
 		const params = buildCheckFiltersParams(filters);

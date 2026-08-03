@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -7,7 +8,7 @@ import { parseISO, startOfDay } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { paginate, paginateOutput } from 'src/common/utils';
-import { CheckFiltersDto, CreateCheckDto } from '../dto';
+import { CheckFiltersDto, CreateCheckDto, UpdateCheckDto } from '../dto';
 import {
   TScheduleComplianceCheck,
   TScheduleComplianceCheckDetail,
@@ -61,6 +62,36 @@ export class MonitorChecksService {
     });
 
     return newCheck;
+  }
+
+  async update(
+    monitorId: string,
+    id: string,
+    updateCheckDto: UpdateCheckDto,
+  ): Promise<TScheduleComplianceCheck> {
+    const check = await this.prisma.scheduleComplianceCheck.findUnique({
+      where: { id },
+    });
+
+    if (!check)
+      throw new NotFoundException(
+        `La verificación con id <${id}> no fue encontrada.`,
+      );
+
+    if (check.monitorId !== monitorId)
+      throw new ForbiddenException(
+        'No tienes permiso para modificar esta verificación.',
+      );
+
+    return this.prisma.scheduleComplianceCheck.update({
+      where: { id },
+      data: {
+        isPresent: updateCheckDto.isPresent,
+        ...(updateCheckDto.observation !== undefined
+          ? { observation: updateCheckDto.observation.trim() || null }
+          : {}),
+      },
+    });
   }
 
   async findAllWithFilters(

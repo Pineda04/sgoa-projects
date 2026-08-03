@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -16,7 +18,8 @@ import {
   Roles,
 } from 'src/common/decorators';
 import { EUserRole } from 'src/common/enums';
-import { CheckFiltersDto, CreateCheckDto } from '../dto';
+import { ValidateIdPipe } from 'src/common/pipes';
+import { CheckFiltersDto, CreateCheckDto, UpdateCheckDto } from '../dto';
 import { MonitorChecksService } from '../services/monitor-checks.service';
 
 @Controller('monitor/checks')
@@ -45,6 +48,31 @@ export class MonitorChecksController {
     @Body() createCheckDto: CreateCheckDto,
   ) {
     return this.monitorChecksService.create(monitorId, createCheckDto);
+  }
+
+  @Patch(':id')
+  @Roles(EUserRole.MONITOR)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage(
+    'Se ha actualizado la verificación de cumplimiento de horario.',
+  )
+  @ApiBody({
+    type: UpdateCheckDto,
+    description:
+      'Datos a modificar de la verificación de cumplimiento de horario.',
+  })
+  @ApiCommonResponses({
+    summary: 'Actualizar una verificación de cumplimiento de horario',
+    okDescription: 'Verificación actualizada correctamente.',
+    badRequestDescription: 'Datos inválidos.',
+    notFoundDescription: 'La verificación no existe.',
+  })
+  update(
+    @GetCurrentUserId() monitorId: string,
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() updateCheckDto: UpdateCheckDto,
+  ) {
+    return this.monitorChecksService.update(monitorId, id, updateCheckDto);
   }
 
   @Get()

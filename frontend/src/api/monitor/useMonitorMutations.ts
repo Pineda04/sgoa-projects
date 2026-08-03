@@ -25,3 +25,25 @@ export const useCreateCheckMutation = () => {
 		isPendingCreateCheck: isPending,
 	};
 };
+
+export const useUpdateCheckMutation = () => {
+	const { mutateAsync, isPending } = useMutation({
+		mutationFn: monitorApi.updateCheck,
+		onSuccess: async res => {
+			try {
+				await alertSuccess(res);
+			} catch {
+				// Ignore alert errors
+			}
+
+			await queryClient.invalidateQueries({
+				queryKey: monitorKeys.all,
+			});
+		},
+	});
+
+	return {
+		updateCheck: mutateAsync,
+		isPendingUpdateCheck: isPending,
+	};
+};

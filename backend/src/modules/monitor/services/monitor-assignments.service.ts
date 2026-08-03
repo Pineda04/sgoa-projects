@@ -58,9 +58,12 @@ export class MonitorAssignmentsService {
           where: { checkDate: today },
           select: {
             id: true,
+            monitorId: true,
             isPresent: true,
             checkTime: true,
             observation: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
       },
@@ -111,9 +114,12 @@ export class MonitorAssignmentsService {
         check: check
           ? {
               id: check.id,
+              monitorId: check.monitorId,
               isPresent: check.isPresent,
               checkTime: check.checkTime,
               observation: check.observation,
+              createdAt: check.createdAt,
+              updatedAt: check.updatedAt,
             }
           : null,
       });

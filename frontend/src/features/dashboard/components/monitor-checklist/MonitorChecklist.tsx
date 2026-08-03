@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import { useGetCurrentAssignments } from '@api/monitor';
+import { useAuth } from '@config/providers';
 import { SkeletonCard, useLocalStorageState, useModal } from '@shared';
 import { BuildingAccordion } from './BuildingAccordion';
 import { CheckModal } from './CheckModal';
@@ -25,7 +26,8 @@ import {
 
 export const MonitorChecklist = () => {
 	const { data, isLoading, isError } = useGetCurrentAssignments();
-	const { registerCheck, checkOverrides, submittingId, isRegistering } =
+	const { authState } = useAuth();
+	const { registerCheck, editCheck, checkOverrides, submittingId, isRegistering } =
 		useRegisterCheck();
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
@@ -42,11 +44,14 @@ export const MonitorChecklist = () => {
 		new Set()
 	);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [isModalOpen, openModal, closeModal] = useModal();
 
+	const currentUserId = authState.user?.sub;
+
 	const items = useMemo(
-		() => buildChecklistItems(data ?? [], checkOverrides),
-		[data, checkOverrides]
+		() => buildChecklistItems(data ?? [], checkOverrides, currentUserId),
+		[data, checkOverrides, currentUserId]
 	);
 
 	const buildingOptions = useMemo(
@@ -106,11 +111,27 @@ export const MonitorChecklist = () => {
 
 	const handleOpenModal = (item: TChecklistItem) => {
 		setSelectedId(item.id);
+		setModalMode('create');
+		openModal();
+	};
+
+	const handleOpenEditModal = (item: TChecklistItem) => {
+		setSelectedId(item.id);
+		setModalMode('edit');
 		openModal();
 	};
 
 	const handleModalSubmit = (isPresent: boolean, observation: string) => {
 		if (!selectedItem) return Promise.resolve(false);
+
+		if (modalMode === 'edit' && selectedItem.check) {
+			return editCheck({
+				checkId: selectedItem.check.id,
+				courseClassroomId: selectedItem.id,
+				isPresent,
+				observation,
+			});
+		}
 
 		return registerCheck({
 			courseClassroomId: selectedItem.id,
@@ -199,6 +220,7 @@ export const MonitorChecklist = () => {
 							isRegistering={isRegistering}
 							onConfirm={handleQuickConfirm}
 							onOpenModal={handleOpenModal}
+							onEditCheck={handleOpenEditModal}
 						/>
 					))}
 				</div>
@@ -208,6 +230,7 @@ export const MonitorChecklist = () => {
 				isOpen={isModalOpen}
 				onClose={closeModal}
 				item={selectedItem}
+				mode={modalMode}
 				isSubmitting={isRegistering}
 				onSubmit={handleModalSubmit}
 			/>

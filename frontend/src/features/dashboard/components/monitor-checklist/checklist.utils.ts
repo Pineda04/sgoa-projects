@@ -115,6 +115,10 @@ export const getCurrentTimeString = (): string => {
 	return `${hours}:${minutes}`;
 };
 
+export const isCheckEdited = (
+	check: Pick<TMonitorAssignmentCheckStatus, 'createdAt' | 'updatedAt'>
+): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+
 export type TChecklistView = 'COMPACT' | 'DETAILED' | 'GRID';
 export type TStatusFilter = 'ALL' | 'PENDING' | 'VERIFIED';
 
@@ -128,6 +132,7 @@ export interface TChecklistItem {
 	assignment: TMonitorCurrentAssignment;
 	check: TMonitorAssignmentCheckStatus | null;
 	status: TAssignmentStatus;
+	canEditCheck: boolean;
 	buildingId: string;
 	buildingName: string;
 	classroomId: string;
@@ -151,6 +156,7 @@ export interface TAssignmentViewProps {
 	disabled: boolean;
 	onConfirm: (isPresent: boolean) => void;
 	onOpenModal: () => void;
+	onEditCheck: () => void;
 }
 
 export interface TChecklistScope {
@@ -175,7 +181,8 @@ const compareItems = (a: TChecklistItem, b: TChecklistItem): number => {
 
 export const buildChecklistItems = (
 	buildings: TMonitorBuildingAssignments[],
-	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>
+	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>,
+	currentUserId?: string
 ): TChecklistItem[] => {
 	const items = buildings.flatMap(building =>
 		building.classrooms.flatMap(classroom =>
@@ -191,6 +198,7 @@ export const buildChecklistItems = (
 					assignment,
 					check,
 					status: getAssignmentStatus(check),
+					canEditCheck: !!check && check.monitorId === currentUserId,
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,
