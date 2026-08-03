@@ -33,7 +33,7 @@ export class MailService {
 
   async sendMail({
     to,
-    message = 'Email service SPI.',
+    message = 'Email service SGOA.',
     subject = `How to Send Emails with Nodemailer`,
     html,
   }: ISendMail): Promise<SentMessageInfo> {
@@ -42,7 +42,7 @@ export class MailService {
     if (!email) throw new Error('Environment variable EMAIL is not set!');
 
     return await this.mailerService.sendMail({
-      from: `Desarrollo SPI <${email}>`,
+      from: `Desarrollo SGOA <${email}>`,
       to,
       subject,
       text: message,

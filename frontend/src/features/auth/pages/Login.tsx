@@ -150,11 +150,12 @@ export const Login = () => {
 					</div>
 
 					<h1 className="text-3xl md:text-4xl lg:text-5xl font-display text-white mb-3 md:mb-4 tracking-tight">
-						SPI UNAH
+						SGOA UNAH
 					</h1>
 
 					<p className="text-white/80 text-base md:text-lg lg:text-xl font-sans max-w-md leading-relaxed px-4">
-						Sistema de Gestión Académica
+            Sistema de Gestión y <br />
+            Organización Académica
 					</p>
 
 					<div className="mt-6 md:mt-8 flex items-center gap-2 text-white/60 text-xs md:text-sm">
@@ -279,7 +280,7 @@ export const Login = () => {
 					</form>
 
 					<p className="mt-8 text-center text-xs text-muted-foreground">
-						© 2025 Universidad Nacional Autónoma de Honduras
+						© 2025 Centro Universitario Regional de Occidente
 					</p>
 				</div>
 			</div>

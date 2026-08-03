@@ -26,10 +26,10 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   const config = new DocumentBuilder()
-    .setTitle('Sistema de Planificación Integral (SPI)')
+    .setTitle('Sistema de Gestión y Organización Académica (SGOA)')
     .setDescription('Proyecto TE&A')
     .setVersion('1.0')
-    .addTag('spi')
+    .addTag('sgoa')
     .addBearerAuth(
       {
         type: 'http',

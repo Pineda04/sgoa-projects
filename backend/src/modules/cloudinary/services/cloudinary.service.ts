@@ -120,7 +120,7 @@ export class CloudinaryService {
     const extension = filename.split('.').pop();
     const fileName = `${nameWithoutExt}-${timestamp}`;
     const resourceType = this.getResourceType(mimetype);
-    const folder = `SPI/${code}/${subject}`;
+    const folder = `SGOA/${code}/${subject}`;
 
     return new Promise((resolve, reject) => {
       const uploadOptions: UploadApiOptions = {
@@ -164,7 +164,7 @@ export class CloudinaryService {
 
   async getFilesByFolder(code: string, subject: string) {
     try {
-      const folderPath = `SPI/${code}/${subject}`;
+      const folderPath = `SGOA/${code}/${subject}`;
       const [images, documents] = await Promise.all([
         this.getImages(folderPath),
         this.getFiles(folderPath),

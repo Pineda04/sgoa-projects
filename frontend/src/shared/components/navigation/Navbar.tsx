@@ -233,7 +233,7 @@ export const Navbar = () => {
 			<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50">
 				<div className="flex items-center gap-2 md:gap-3">
 					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide">
-						SPI UNAH
+						SGOA UNAH
 					</span>
 				</div>
 				<div className="text-white/60 text-xs md:text-sm animate-pulse">
@@ -248,7 +248,7 @@ export const Navbar = () => {
 			<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50">
 				<div className="flex items-center gap-2 md:gap-3">
 					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide">
-						SPI UNAH
+						SGOA UNAH
 					</span>
 				</div>
 				<Link to="/login">
@@ -275,7 +275,7 @@ export const Navbar = () => {
 					className="flex items-center gap-2 md:gap-3 group"
 				>
 					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
-						SPI UNAH
+						SGOA UNAH
 					</span>
 				</Link>
 			</div>
