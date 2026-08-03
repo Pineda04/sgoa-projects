@@ -1,10 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@config/lib';
+import { useAuth } from '@config/providers';
 import { monitorApi } from './monitor.api';
 import { monitorKeys } from './monitor.keys';
 import { alertSuccess } from '@shared';
 
 export const useCreateCheckMutation = () => {
+	const sessionEmail = useAuth().authState.user?.email;
 	const { mutateAsync, isPending } = useMutation({
 		mutationFn: monitorApi.createCheck,
 		onSuccess: async res => {
@@ -15,7 +17,7 @@ export const useCreateCheckMutation = () => {
 			}
 
 			await queryClient.invalidateQueries({
-				queryKey: monitorKeys.currentAssignments(),
+				queryKey: monitorKeys.currentAssignments(sessionEmail),
 			});
 		},
 	});

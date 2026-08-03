@@ -33,6 +33,15 @@ export const useGetPcEquipment = (id: string) =>
 		select: res => res.data.data,
 	});
 
+export const useGetPcEquipmentsByClassroom = (classroomId: string) =>
+	useQuery({
+		queryKey: pcEquipmentsKeys.byClassroom(classroomId),
+		queryFn: () => pcEquipmentsApi.getPcEquipmentsByClassroom(classroomId),
+		enabled: Boolean(classroomId),
+		staleTime: STALE_TIME.MEDIUM,
+		select: res => res.data.data,
+	});
+
 export const useGetAllPcTypes = () =>
 	useQuery({
 		queryKey: pcTypesKeys.all,

@@ -187,8 +187,14 @@ export const buildChecklistItems = (
 	const items = buildings.flatMap(building =>
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
+				// El check del servidor (assignment.check) es la fuente autoritativa: trae
+				// el id real y el monitorId verdadero. El override local (Dexie) solo se usa
+				// como respaldo mientras el registro no ha sido confirmado por el servidor
+				// (aún PENDING/SYNCING/ERROR), por lo que la edición (que requiere el id real
+				// vía PATCH) solo se habilita cuando existe check del servidor.
+				const serverCheck = assignment.check;
 				const check =
-					checkOverrides[assignment.courseClassroomId] ?? assignment.check;
+					serverCheck ?? checkOverrides[assignment.courseClassroomId] ?? null;
 				const startMinutes = parseStartMinutes(assignment.section);
 				const startTime =
 					startMinutes === null ? null : formatMinutes(startMinutes);
@@ -198,7 +204,8 @@ export const buildChecklistItems = (
 					assignment,
 					check,
 					status: getAssignmentStatus(check),
-					canEditCheck: !!check && check.monitorId === currentUserId,
+					canEditCheck:
+						!!serverCheck && serverCheck.monitorId === currentUserId,
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,

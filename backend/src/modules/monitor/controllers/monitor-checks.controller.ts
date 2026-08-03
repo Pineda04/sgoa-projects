@@ -9,7 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
   ApiPagination,
@@ -19,7 +19,12 @@ import {
 } from 'src/common/decorators';
 import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
-import { CheckFiltersDto, CreateCheckDto, UpdateCheckDto } from '../dto';
+import {
+  BatchSyncChecksDto,
+  CheckFiltersDto,
+  CreateCheckDto,
+  UpdateCheckDto,
+} from '../dto';
 import { MonitorChecksService } from '../services/monitor-checks.service';
 
 @Controller('monitor/checks')
@@ -73,6 +78,96 @@ export class MonitorChecksController {
     @Body() updateCheckDto: UpdateCheckDto,
   ) {
     return this.monitorChecksService.update(monitorId, id, updateCheckDto);
+  }
+
+  @Post('batch-sync')
+  @Roles(EUserRole.MONITOR)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Verificaciones offline sincronizadas correctamente.')
+  @ApiBody({
+    type: BatchSyncChecksDto,
+    description:
+      'Lista de verificaciones registradas localmente sin conexión a internet.',
+  })
+  @ApiCommonResponses({
+    summary: 'Sincronizar verificaciones registradas offline',
+    badRequestDescription: 'El formato del payload es inválido.',
+  })
+  @ApiOkResponse({
+    description:
+      'El endpoint siempre responde 200; la respuesta identifica cada offlineId persistido, en conflicto o fallido para que el cliente marque solo los realmente sincronizados.',
+    schema: {
+      type: 'object',
+      required: [
+        'status',
+        'statusCode',
+        'path',
+        'message',
+        'data',
+        'timestamp',
+      ],
+      properties: {
+        status: { type: 'boolean' },
+        statusCode: { type: 'number' },
+        path: { type: 'string' },
+        message: { type: 'string' },
+        timestamp: { type: 'string', format: 'date-time' },
+        data: {
+          type: 'object',
+          required: [
+            'synced',
+            'conflicts',
+            'skipped',
+            'rejected',
+            'conflictIds',
+            'skippedIds',
+            'rejectedIds',
+          ],
+          properties: {
+            synced: {
+              type: 'number',
+              description:
+                'Cantidad de verificaciones persistidas en el servidor.',
+            },
+            conflicts: {
+              type: 'number',
+              description: 'Claves únicas ya registradas por otro monitor.',
+            },
+            skipped: {
+              type: 'number',
+              description: 'Verificaciones que fallaron y deben reintentarse.',
+            },
+            rejected: {
+              type: 'number',
+              description:
+                'Verificaciones con datos permanentes invÃ¡lidos que no deben reintentarse.',
+            },
+            conflictIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'offlineId de las verificaciones en conflicto.',
+            },
+            skippedIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'offlineId de las verificaciones que fallaron.',
+            },
+            rejectedIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'offlineId de verificaciones rechazadas por un error permanente.',
+            },
+          },
+        },
+      },
+    },
+  })
+  batchSync(
+    @GetCurrentUserId() monitorId: string,
+    @Body() dto: BatchSyncChecksDto,
+  ) {
+    return this.monitorChecksService.batchSync(monitorId, dto);
   }
 
   @Get()

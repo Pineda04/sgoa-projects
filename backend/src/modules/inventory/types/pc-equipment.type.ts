@@ -20,6 +20,35 @@ export type TPcEquipment = {
   // department?: TDepartment;
 };
 
+export type TPcEquipmentWithRelations = {
+  id: string;
+  inventoryNumber: string;
+  processor: string;
+  ram: string;
+  disk: string;
+  classroomId: string | null;
+  brand: {
+    id: string;
+    name: string;
+  } | null;
+  condition: {
+    id: string;
+    status: string;
+  } | null;
+  monitorType: {
+    id: string;
+    description: string;
+  } | null;
+  monitorSize: {
+    id: string;
+    description: string;
+  } | null;
+  pcType: {
+    id: string;
+    description: string;
+  } | null;
+};
+
 // Tipo para la creación
 export type TCreatePcEquipment = Omit<
   TPcEquipment,

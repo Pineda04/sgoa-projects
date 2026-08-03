@@ -1,9 +1,6 @@
 import { useCallback, useState } from 'react';
-import {
-	TMonitorAssignmentCheckStatus,
-	useCreateCheckMutation,
-	useUpdateCheckMutation,
-} from '@api/monitor';
+import { useUpdateCheckMutation } from '@api/monitor';
+import { db } from '@config/lib';
 import { getCurrentTimeString, getTodayDateString } from './checklist.utils';
 
 interface RegisterCheckInput {
@@ -19,52 +16,72 @@ interface EditCheckInput {
 	observation?: string;
 }
 
-export const useRegisterCheck = () => {
-	const { createCheck, isPendingCreateCheck } = useCreateCheckMutation();
-	const { updateCheck, isPendingUpdateCheck } = useUpdateCheckMutation();
+export const useRegisterCheck = (email?: string) => {
+	const { updateCheck } = useUpdateCheckMutation();
 	const [submittingId, setSubmittingId] = useState<string | null>(null);
-	const [checkOverrides, setCheckOverrides] = useState<
-		Record<string, TMonitorAssignmentCheckStatus>
-	>({});
 
 	const registerCheck = useCallback(
 		async ({ courseClassroomId, isPresent, observation }: RegisterCheckInput) => {
 			setSubmittingId(courseClassroomId);
 
 			try {
-				const res = await createCheck({
-					courseClassroomId,
-					checkDate: getTodayDateString(),
-					checkTime: getCurrentTimeString(),
-					isPresent,
-					observation: observation?.trim() || undefined,
+				const offlineId = crypto.randomUUID();
+				const checkDate = getTodayDateString();
+				const checkTime = getCurrentTimeString();
+
+				// Feature: evitar registros duplicados del día (misma clase+curso), que
+				// al sincronizar crearían dos asistencias en el backend. La lectura y la
+				// escritura se envuelven en una transacción para que dos llamadas
+				// concurrentes no inserten dos registros.
+				await db.transaction('rw', db.offlineChecks, async () => {
+					const existing = await db.offlineChecks
+						.where('[email+checkDate]')
+						.equals([email ?? '', checkDate])
+						.filter(check => check.courseClassroomId === courseClassroomId)
+						.first();
+
+					if (existing) {
+						// Si aún no se sincronizó, se corrige en lugar de duplicarlo; si ya
+						// se sincronizó no se toca (el servidor conserva la versión enviada).
+						if (existing.syncStatus === 'PENDING') {
+							await db.offlineChecks.update(existing.offlineId, {
+								isPresent,
+								checkTime,
+								observation: observation?.trim() || undefined,
+							});
+						}
+						return;
+					}
+
+					// 1. Guardar localmente en Dexie
+					await db.offlineChecks.add({
+						offlineId,
+						email: email ?? '',
+						courseClassroomId,
+						checkDate,
+						checkTime,
+						isPresent,
+						observation: observation?.trim() || undefined,
+						syncStatus: 'PENDING',
+						createdAt: Date.now(),
+					});
 				});
 
-				const created = res.data.data;
-				setCheckOverrides(prev => ({
-					...prev,
-					[courseClassroomId]: {
-						id: created.id,
-						monitorId: created.monitorId,
-						isPresent: created.isPresent,
-						checkTime: created.checkTime,
-						observation: created.observation ?? null,
-						createdAt: created.createdAt,
-						updatedAt: created.updatedAt,
-					},
-				}));
-
 				return true;
-			} catch {
-				// El error ya se notifica globalmente
+			} catch (error) {
+				console.error('Error al guardar verificación localmente:', error);
 				return false;
 			} finally {
 				setSubmittingId(null);
 			}
 		},
-		[createCheck]
+		[email]
 	);
 
+	// Feature: a diferencia de registerCheck (que corrige localmente mientras el check
+	// sigue PENDING), editCheck corrige un check que el servidor ya confirmó: requiere
+	// conexión y pasa siempre por el PATCH del backend. useUpdateCheckMutation invalida
+	// las queries de asignaciones al terminar, así que la UI se refresca sola.
 	const editCheck = useCallback(
 		async ({
 			checkId,
@@ -75,25 +92,11 @@ export const useRegisterCheck = () => {
 			setSubmittingId(courseClassroomId);
 
 			try {
-				const res = await updateCheck({
+				await updateCheck({
 					id: checkId,
 					isPresent,
 					observation: observation?.trim() ?? '',
 				});
-
-				const updated = res.data.data;
-				setCheckOverrides(prev => ({
-					...prev,
-					[courseClassroomId]: {
-						id: updated.id,
-						monitorId: updated.monitorId,
-						isPresent: updated.isPresent,
-						checkTime: updated.checkTime,
-						observation: updated.observation ?? null,
-						createdAt: updated.createdAt,
-						updatedAt: updated.updatedAt,
-					},
-				}));
 
 				return true;
 			} catch {
@@ -109,8 +112,7 @@ export const useRegisterCheck = () => {
 	return {
 		registerCheck,
 		editCheck,
-		checkOverrides,
 		submittingId,
-		isRegistering: isPendingCreateCheck || isPendingUpdateCheck,
+		isRegistering: !!submittingId,
 	};
 };
