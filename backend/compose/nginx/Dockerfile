@@ -8,7 +8,7 @@ RUN rm /etc/nginx/conf.d/default.conf
 #         root /usr/share/nginx/html;\n\
 #         index index.html;\n\
 #     }\n\
-# }" > /etc/nginx/conf.d/spi_backend.conf
+# }" > /etc/nginx/conf.d/sgoa_backend.conf
 
 COPY default.conf /etc/nginx/conf.d/
 
