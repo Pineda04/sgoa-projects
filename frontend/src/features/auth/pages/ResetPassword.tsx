@@ -5,9 +5,7 @@ import {
 	EyeIcon,
 	EyeOff,
 	GraduationCap,
-	KeyRound,
 	Lock,
-	ShieldCheck,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import {
@@ -75,7 +73,9 @@ export const ResetPassword = () => {
 		});
 	};
 
-	if (isError) navigate(`/auth/login`);
+	useEffect(() => {
+			if (isError) navigate(`/auth/login`);
+	}, [isError]);
 
 	return (
 		<div className="grid lg:grid-cols-2 h-screen">
