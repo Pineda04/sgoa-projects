@@ -40,6 +40,13 @@ export type TOutputTeacher = {
 		id: string;
 		name: string;
 	}[];
+	roles?: string[];
+	positions?: {
+		centerDepartmentId: string;
+		center: any;
+		department: any;
+		position: TPosition;
+	}[];
 	activeStatus: boolean;
 };
 

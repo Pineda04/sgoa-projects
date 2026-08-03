@@ -215,7 +215,7 @@ export const SelectAccessRoles = ({
 					isMulti
 					isSearchable={false}
 					styles={customStyles}
-					placeholder="Seleccione..."
+					placeholder="Seleccione"
 					onChange={valuesSelected => {
 						const roles = valuesSelected.map(
 							v => (v as { value: string; label: string }).value

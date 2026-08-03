@@ -417,6 +417,18 @@ export class UsersService {
         ? hourToDateUTC(teacher.shiftStart)
         : undefined,
       shiftEnd: teacher.shiftEnd ? hourToDateUTC(teacher.shiftEnd) : undefined,
+      positionHeld:
+        teacher.positionId && teacher.centerDepartmentId
+          ? {
+              deleteMany: {},
+              create: [
+                {
+                  positionId: teacher.positionId,
+                  centerDepartmentId: teacher.centerDepartmentId,
+                },
+              ],
+            }
+          : undefined,
     };
 
     const [updatedUser, updatedTeacher] = await this.prisma.$transaction([

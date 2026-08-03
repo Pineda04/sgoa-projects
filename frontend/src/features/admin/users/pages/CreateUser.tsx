@@ -200,7 +200,7 @@ export const CreateUser = () => {
 								setValues({ ...values, postgradId });
 							}}
 							onBlur={handleBlur}
-							defaultValue={''}
+							defaultValue={'select'}
 						>
 							<option value="select" disabled>
 								Seleccione

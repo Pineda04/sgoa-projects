@@ -28,6 +28,9 @@ import {
 } from '@api/degrees';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useGetAllShifts } from '@api/shifts';
+import { useGetAllPositions } from '@api/positions';
+import { useGetAllCenters, useGetCenterById } from '@api/centers';
+import { EUserRole } from '@shared/constants';
 import { useMemo, useState } from 'react';
 import { userUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
@@ -216,11 +219,20 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		isPending: isPendingDeleteTeacherPostgrad,
 	} = useManageTeacherDegrees(initialData.userId, 'postgrad', 'delete');
 
+	const canManageRoles = ability.can('manage', 'user-roles');
+	const canManageDepartments = ability.can('manage', 'user-departments');
+
 	const undergrads = useGetAllUndergrads();
 	const postgrads = useGetAllPostgrads();
 	const contractTypes = useGetAllContractTypes();
 	const categories = useGetAllTeacherCategories();
 	const shifts = useGetAllShifts();
+	const positions = useGetAllPositions();
+	const centers = useGetAllCenters();
+	const [selectedCenterId, setSelectedCenterId] = useState<string>(
+		initialData.positions?.[0]?.center?.id || ''
+	);
+	const centerInfo = useGetCenterById(selectedCenterId);
 
 	const isLoading = [
 		undergrads,
@@ -228,6 +240,8 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		contractTypes,
 		categories,
 		shifts,
+		positions,
+		centers,
 	].some(q => q.isLoading);
 
 	const [isEdit, setIsEdit] = useState(false);
@@ -243,6 +257,10 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				shiftId: initialData.shiftId,
 				shiftStart: initialData.shiftStart,
 				shiftEnd: initialData.shiftEnd,
+				roles: initialData.roles || [],
+				positionId: initialData.positions?.[0]?.position?.id || '',
+				centerId: initialData.positions?.[0]?.center?.id || '',
+				centerDepartmentId: initialData.positions?.[0]?.centerDepartmentId || '',
 			}) as TUpdateUser,
 		[initialData]
 	);
@@ -486,6 +504,111 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 					</div>
 				),
 			},
+			...(canManageRoles || canManageDepartments
+				? [
+						{
+							label: 'Cargo académico',
+							name: 'positionId' as const,
+							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+							defaultValue: selectedValueSelect(
+								positions.data,
+								formik.values.positionId
+							),
+							options: positions.data
+								? positions.data.map(pos => ({
+										label: pos.name,
+										value: pos.id,
+									}))
+								: [],
+							isMulti: false,
+							handleBlur: formik.handleBlur,
+							handleChange: (newValue: any) => {
+								formik.setFieldValue(
+									'positionId',
+									(newValue as SingleValue<TCustomSelectOption>)?.value
+								);
+							},
+							readOnly: !isEdit,
+						},
+						{
+							label: 'Roles de acceso',
+							name: 'roles' as const,
+							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+							defaultValue: (formik.values.roles || []).map(r => ({
+								label: r,
+								value: r,
+							})),
+							options: [
+								EUserRole.DIRECCION,
+								EUserRole.RRHH,
+								EUserRole.COORDINADOR_AREA,
+								EUserRole.DOCENTE,
+								EUserRole.MONITOR,
+							].map(r => ({ label: r, value: r })),
+							isMulti: true,
+							handleBlur: formik.handleBlur,
+							handleChange: (newValue: any) => {
+								const rolesSelected =
+									(newValue as MultiValue<TCustomSelectOption>)?.map(
+										v => v.value
+									) || [];
+								formik.setFieldValue('roles', rolesSelected);
+							},
+							readOnly: !isEdit,
+						},
+						{
+							label: 'Centro',
+							name: 'centerId' as const,
+							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+							defaultValue: selectedValueSelect(
+								centers.data,
+								formik.values.centerId || selectedCenterId
+							),
+							options: centers.data
+								? centers.data.map(c => ({
+										label: c.name,
+										value: c.id,
+									}))
+								: [],
+							isMulti: false,
+							handleBlur: formik.handleBlur,
+							handleChange: (newValue: any) => {
+								const val =
+									(newValue as SingleValue<TCustomSelectOption>)?.value || '';
+								setSelectedCenterId(val);
+								formik.setFieldValue('centerId', val);
+							},
+							readOnly: !isEdit,
+						},
+						{
+							label: 'Departamento',
+							name: 'centerDepartmentId' as const,
+							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+							defaultValue: selectedValueSelect(
+								centerInfo.data?.departments?.map(d => ({
+									id: d.centerDepartmentId,
+									name: d.name,
+								})),
+								formik.values.centerDepartmentId
+							),
+							options: centerInfo.data?.departments
+								? centerInfo.data.departments.map(d => ({
+										label: d.name,
+										value: d.centerDepartmentId,
+									}))
+								: [],
+							isMulti: false,
+							handleBlur: formik.handleBlur,
+							handleChange: (newValue: any) => {
+								formik.setFieldValue(
+									'centerDepartmentId',
+									(newValue as SingleValue<TCustomSelectOption>)?.value
+								);
+							},
+							readOnly: !isEdit,
+						},
+				  ]
+				: []),
 		],
 		[
 			initialData,
@@ -494,8 +617,14 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 			shifts.data,
 			undergrads.data,
 			postgrads.data,
+			positions.data,
+			centers.data,
+			centerInfo.data,
+			canManageRoles,
+			canManageDepartments,
 			formik,
 			isEdit,
+			selectedCenterId,
 			addUserTeacherUndergrad,
 			deleteUserTeacherUndergrad,
 			addUserTeacherPostgrad,

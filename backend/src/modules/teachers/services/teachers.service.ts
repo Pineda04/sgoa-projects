@@ -39,6 +39,11 @@ export class TeachersService {
           name: true,
           email: true,
           activeStatus: true,
+          userRoles: {
+            include: {
+              role: true,
+            },
+          },
         },
       },
       contractType: true,
@@ -486,6 +491,7 @@ export class TeachersService {
         department: ph.centerDepartment.department,
         position: ph.position,
       })),
+      roles: (teacher.user as any).userRoles?.map((ur: any) => ur.role.name) ?? [],
       activeStatus: teacher.user.activeStatus,
     };
   }
