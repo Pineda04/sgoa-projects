@@ -1,4 +1,9 @@
-import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+import {
+	defaultShouldDehydrateQuery,
+	MutationCache,
+	QueryCache,
+	QueryClient,
+} from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
@@ -59,7 +64,10 @@ persistQueryClient({
 		// (asignaciones y períodos). El resto vive solo en memoria.
 		shouldDehydrateQuery: query => {
 			const scope = query.queryKey[0];
-			return scope === 'monitor' || scope === 'academic-periods';
+			return (
+				defaultShouldDehydrateQuery(query) &&
+				(scope === 'monitor' || scope === 'academic-periods')
+			);
 		},
 	},
 });

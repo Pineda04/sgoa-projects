@@ -54,7 +54,8 @@ export const getCachedAcademicPeriod = async (email: string) => {
 	return record?.period ?? null;
 };
 
-// Limpia las filas de otros usuarios para que no se acumulen datos ajenos en el dispositivo.
+// Limpia solo las caches renovables de otros usuarios. Los checks se conservan
+// por propietario hasta sincronizarse o descartarse expresamente.
 export const clearOtherMonitorsCache = async (email: string) => {
 	const normalized = normalizeEmail(email);
 	try {
@@ -62,13 +63,9 @@ export const clearOtherMonitorsCache = async (email: string) => {
 			'rw',
 			db.monitorAssignments,
 			db.academicPeriods,
-			db.offlineChecks,
 			async () => {
 				await db.monitorAssignments.where('email').notEqual(normalized).delete();
 				await db.academicPeriods.where('email').notEqual(normalized).delete();
-				// Los checks offline también son por email: se descartan los de otros
-				// monitores (incluye huérfanas sin dueño de versiones anteriores).
-				await db.offlineChecks.where('email').notEqual(normalized).delete();
 			}
 		);
 	} catch (error) {

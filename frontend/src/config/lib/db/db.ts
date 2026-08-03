@@ -33,7 +33,15 @@ export interface OfflineCheck {
 	checkTime: string;
 	isPresent: boolean;
 	observation?: string;
-	syncStatus: 'PENDING' | 'SYNCING' | 'SYNCED' | 'ERROR';
+	syncStatus:
+		| 'PENDING'
+		| 'SYNCING'
+		| 'SYNCED'
+		| 'ERROR'
+		| 'CONFLICT'
+		| 'REJECTED'
+		| 'QUARANTINED';
+	syncReason?: string;
 	/** Timestamp Unix para mantener el orden FIFO al sincronizar */
 	createdAt: number;
 }
@@ -98,7 +106,27 @@ class LocalDB extends Dexie {
 					.table('offlineChecks')
 					.toCollection()
 					.filter(check => !check.email)
-					.delete();
+					.modify({
+						syncStatus: 'QUARANTINED',
+						syncReason: 'Registro heredado sin owner verificable.',
+					});
+			});
+		this.version(5)
+			.stores({
+				offlineChecks: 'offlineId, email, [email+checkDate], [email+syncStatus]',
+				credentials: 'email',
+				monitorAssignments: 'email',
+				academicPeriods: 'email',
+			})
+			.upgrade(async tx => {
+				await tx
+					.table('offlineChecks')
+					.toCollection()
+					.filter(check => !check.email)
+					.modify({
+						syncStatus: 'QUARANTINED',
+						syncReason: 'Registro heredado sin owner verificable.',
+					});
 			});
 	}
 }

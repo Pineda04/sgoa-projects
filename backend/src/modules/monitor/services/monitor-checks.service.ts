@@ -4,10 +4,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { parseISO, startOfDay } from 'date-fns';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { paginate, paginateOutput } from 'src/common/utils';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { BatchSyncChecksDto, CheckFiltersDto, CreateCheckDto } from '../dto';
 import {
   TScheduleComplianceCheck,
@@ -31,27 +32,25 @@ export class MonitorChecksService {
 
     if (!courseClassroom)
       throw new NotFoundException(
-        `La sección de asignatura con id <${createCheckDto.courseClassroomId}> no fue encontrada.`,
+        `La seccion de asignatura con id <${createCheckDto.courseClassroomId}> no fue encontrada.`,
       );
 
     const checkDate = startOfDay(parseISO(createCheckDto.checkDate));
-
     const existingCheck = await this.prisma.scheduleComplianceCheck.findUnique({
       where: {
-        courseClassroomId_checkDate_checkTime: {
+        courseClassroomId_checkDate: {
           courseClassroomId: createCheckDto.courseClassroomId,
           checkDate,
-          checkTime: createCheckDto.checkTime,
         },
       },
     });
 
     if (existingCheck)
       throw new BadRequestException(
-        'Ya existe una verificación registrada para esta sección de asignatura en la fecha y hora indicadas.',
+        'Ya existe una verificacion registrada para esta seccion de asignatura en la fecha indicada.',
       );
 
-    const newCheck = await this.prisma.scheduleComplianceCheck.create({
+    return this.prisma.scheduleComplianceCheck.create({
       data: {
         courseClassroomId: createCheckDto.courseClassroomId,
         monitorId,
@@ -62,8 +61,6 @@ export class MonitorChecksService {
         offlineId: createCheckDto.offlineId,
       },
     });
-
-    return newCheck;
   }
 
   async batchSync(
@@ -73,90 +70,86 @@ export class MonitorChecksService {
     synced: number;
     conflicts: number;
     skipped: number;
+    rejected: number;
     conflictIds: string[];
     skippedIds: string[];
+    rejectedIds: string[];
   }> {
     const syncedIds: string[] = [];
     const conflictIds: string[] = [];
     const skippedIds: string[] = [];
+    const rejectedIds: string[] = [];
+    const courseClassroomIds = [
+      ...new Set(dto.checks.map((check) => check.courseClassroomId)),
+    ];
+    const courseClassrooms = await this.prisma.courseClassroom.findMany({
+      where: { id: { in: courseClassroomIds } },
+      select: { id: true },
+    });
+    const validIds = new Set(courseClassrooms.map(({ id }) => id));
+    const checksToProcess = dto.checks.filter((check) => {
+      if (validIds.has(check.courseClassroomId)) return true;
+      if (check.offlineId) rejectedIds.push(check.offlineId);
+      return false;
+    });
 
-    const results = await Promise.allSettled(
-      dto.checks.map(async (check) => {
-        const checkDate = startOfDay(parseISO(check.checkDate));
-        const where = {
-          courseClassroomId_checkDate_checkTime: {
-            courseClassroomId: check.courseClassroomId,
-            checkDate,
-            checkTime: check.checkTime,
-          },
-        };
+    for (let start = 0; start < checksToProcess.length; start += 25) {
+      const batch = checksToProcess.slice(start, start + 25);
+      const results = await Promise.allSettled(
+        batch.map(async (check) => {
+          const checkDate = startOfDay(parseISO(check.checkDate));
+          const rows = await this.prisma.$queryRaw<Array<{ monitorId: string }>>(
+            Prisma.sql`
+              INSERT INTO "academic"."schedule_compliance_checks" (
+                "id", "courseClassroomId", "monitorId", "checkDate", "checkTime",
+                "isPresent", "observation", "offlineId", "syncedAt", "createdAt", "updatedAt"
+              ) VALUES (
+                gen_random_uuid(), ${check.courseClassroomId}::uuid, ${monitorId}::uuid,
+                ${checkDate}, ${check.checkTime}, ${check.isPresent},
+                ${check.observation ?? null}, ${check.offlineId ?? null}, NOW(), NOW(), NOW()
+              )
+              ON CONFLICT ("courseClassroomId", "checkDate") DO UPDATE
+              SET "checkTime" = EXCLUDED."checkTime",
+                  "isPresent" = EXCLUDED."isPresent",
+                  "observation" = EXCLUDED."observation",
+                  "offlineId" = EXCLUDED."offlineId",
+                  "syncedAt" = NOW(),
+                  "updatedAt" = NOW()
+              WHERE "academic"."schedule_compliance_checks"."monitorId" = ${monitorId}::uuid
+              RETURNING "monitorId"
+            `,
+          );
+          return rows.length === 0 ? 'conflict' : 'synced';
+        }),
+      );
 
-        const existing = await this.prisma.scheduleComplianceCheck.findUnique({
-          where,
-          select: { monitorId: true },
-        });
-
-        if (!existing) {
-          await this.prisma.scheduleComplianceCheck.create({
-            data: {
-              courseClassroomId: check.courseClassroomId,
-              monitorId,
-              checkDate,
-              checkTime: check.checkTime,
-              isPresent: check.isPresent,
-              observation: check.observation,
-              offlineId: check.offlineId,
-              syncedAt: new Date(),
-            },
-          });
-
-          return 'synced';
+      results.forEach((result, index) => {
+        const check = batch[index];
+        if (result.status === 'fulfilled') {
+          if (!check.offlineId) return;
+          if (result.value === 'synced') syncedIds.push(check.offlineId);
+          else conflictIds.push(check.offlineId);
+          return;
         }
 
-        if (existing.monitorId === monitorId) {
-          // Mismo monitor: la última verificación registrada prevalece
-          await this.prisma.scheduleComplianceCheck.update({
-            where,
-            data: {
-              isPresent: check.isPresent,
-              observation: check.observation,
-              syncedAt: new Date(),
-            },
-          });
-
-          return 'synced';
-        }
-
-        // Otro monitor ya registró esta clave: no se sobreescribe, se reporta como conflicto
-        return 'conflict';
-      }),
-    );
-
-    results.forEach((result, index) => {
-      const check = dto.checks[index];
-
-      if (result.status === 'fulfilled') {
-        if (!check.offlineId) return;
-
-        if (result.value === 'synced') syncedIds.push(check.offlineId);
-        else conflictIds.push(check.offlineId);
-      } else {
         if (check.offlineId) skippedIds.push(check.offlineId);
         this.logger.warn(
-          `No se pudo sincronizar la verificación offline <${check.offlineId}> del monitor <${monitorId}>.`,
+          `Unable to sync offline check <${check.offlineId}> for monitor <${monitorId}>.`,
           result.reason instanceof Error
             ? result.reason.stack
             : String(result.reason),
         );
-      }
-    });
+      });
+    }
 
     return {
       synced: syncedIds.length,
       conflicts: conflictIds.length,
       skipped: skippedIds.length,
+      rejected: rejectedIds.length,
       conflictIds,
       skippedIds,
+      rejectedIds,
     };
   }
 

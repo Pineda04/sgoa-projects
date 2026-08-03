@@ -43,7 +43,8 @@ Base: **`SGOALocalDB`**, con versionado incremental:
 | v1 | Tabla `offlineChecks` (registros de asistencia locales) |
 | v2 | Tabla `credentials` (credenciales cifradas para login offline) |
 | v3 | Tablas `monitorAssignments` y `academicPeriods` (caché por email) |
-| v4 | `offlineChecks` aislado por email del monitor (índices `[email+checkDate]`, `[email+syncStatus]`); se descartan las filas sin dueño |
+| v4 | `offlineChecks` aislado por email del monitor (índices `[email+checkDate]`, `[email+syncStatus]`) |
+| v5 | Las filas heredadas sin email se conservan en cuarentena (`QUARANTINED`); solo soporte técnico puede eliminarlas explícitamente |
 
 ### Tablas
 
@@ -111,7 +112,7 @@ password ──PBKDF2(600k, SHA-256)──▶ material maestro (256 bits)
 
 ### Flujo de login
 
-1. **Online**: `POST /auth/local/signin` → en segundo plano se guardan las credenciales cifradas (con `version: 2`), se limpia la caché y los checks offline de otros monitores (`clearOtherMonitorsCache`) y se aplica la **retención** de checks sincronizados (`cleanupSyncedChecks`, borra SYNCED con más de 7 días).
+1. **Online**: `POST /auth/local/signin` → en segundo plano se guardan las credenciales cifradas (con `version: 2`), se limpia únicamente la caché renovable de asignaciones/períodos de otros monitores (`clearOtherMonitorsCache`) y se aplica la **retención** de checks sincronizados propios (`cleanupSyncedChecks`, borra SYNCED con más de 7 días).
 2. **Offline** (`!navigator.onLine`): se valida contra las credenciales locales. Si son válidas y el token es de rol `MONITOR`, se construye una sesión local (`buildLocalSessionResponse`) y se continúa sin red. Si no, se muestra el mensaje *"Sin conexión: no hay credenciales guardadas válidas..."*.
 3. **Fallo de red con "red" aparente** (`ERR_NETWORK`): se intenta la validación local antes de mostrar el error.
 4. `networkMode: 'always'` en `useLogin` hace que el login **falle rápido** (error de red) en lugar de quedarse pausado con el Loading infinito (`networkMode 'online'` pausa la mutación sin internet).
@@ -159,7 +160,8 @@ Archivos: `frontend/src/features/dashboard/components/monitor-checklist/useRegis
   3. Aplica la **retención**: borra los registros `SYNCED` con más de 7 días de antigüedad (`cleanupSyncedChecks`).
   4. Invalida la query de asignaciones para refrescarlas desde el servidor.
   5. Si el lote falla, el estado pasa a `ERROR` (las filas siguen `PENDING`) y se reintenta manualmente o al reconectar.
-- Backend (`MonitorChecksService.batchSync`): resuelve por `courseClassroomId + checkDate + checkTime`; crea si no existe, actualiza `isPresent`/`observation` si es el mismo monitor, y reporta conflicto si el registro es de otro monitor (sin sobreescribirlo). La respuesta incluye los `conflictIds`/`skippedIds` para que el cliente reintente de forma selectiva; cada fallo individual se registra en el log del servidor con su `offlineId`.
+- Backend (`MonitorChecksService.batchSync`): resuelve atómicamente por `courseClassroomId + checkDate`, en lotes de 25. Actualiza la hora, presencia y observación solo si el registro pertenece al mismo monitor; si pertenece a otro devuelve conflicto sin sobrescribirlo. La respuesta incluye `conflictIds`, `rejectedIds` (errores permanentes, como una sección inexistente) y `skippedIds` (errores transitorios).
+- El cliente conserva `CONFLICT` y `REJECTED` con su motivo en una lista revisable del checklist; solo se eliminan cuando el monitor los descarta explícitamente. Las filas `QUARANTINED` no se leen ni sincronizan y se atienden por soporte técnico.
 - `SyncIndicator` muestra el estado: `SYNCED` / `OFFLINE` / `SYNCING` / `ERROR` (con botón de reintento). Sus contenedores son regiones vivas (`role="status"` + `aria-live="polite"`) para anunciar los cambios de estado a lectores de pantalla.
 - La **retención** también se aplica al iniciar sesión como monitor (online y offline-restaurado); el histórico definitivo vive en el backend.
 
@@ -204,7 +206,7 @@ Archivo: `frontend/vite.config.ts`.
                     │  registerCheck ──▶ offlineChecks (PENDING)  │
                     │                                             │
    Reconexión ─────▶│  useSyncEngine ─▶ POST batch-sync ──▶ SYNCED│
-                    │               └─▶ conflictos: delete local  │
+                   │               └─▶ conflictos: revisión local │
                     │               └─▶ fallo: ERROR (reintento)  │
                     └─────────────────────────────────────────────┘
 ```
@@ -226,7 +228,7 @@ Preparación: backend y `npm run dev` corriendo, IndexedDB vacío. **No usar el 
 3. **Registro offline y persistencia**
    - Registrar presencia/ausencia en 2-3 clases → la UI refleja "Verificado a las HH:MM".
    - Navegar a otra página y volver al checklist → los registros **siguen visibles** (no vuelven a aparecer como pendientes).
-   - Doble click rápido en Presente/Ausente → solo 1 fila por `(courseClassroomId, checkDate)` en `offlineChecks` (transacción + cerrojo de sync).
+   - Doble click rápido en Presente/Ausente → solo 1 fila por `(courseClassroomId, checkDate)` en `offlineChecks`, garantizada por la transacción y el guard anti-duplicado. El cerrojo de sync se prueba por separado y solo evita envíos concurrentes.
 
 4. **Corrección de un registro pendiente**
    - Registrar una verificación en una clase.
@@ -253,7 +255,7 @@ Preparación: backend y `npm run dev` corriendo, IndexedDB vacío. **No usar el 
    - Cancelar permanece en el dashboard; confirmar limpia los `offlineChecks` del usuario. `credentials`, `monitorAssignments` y `academicPeriods` **persisten**.
 
 9. **Multi-monitor (mismo dispositivo)**
-   - Loguear con otro email → `clearOtherMonitorsCache` elimina las filas de otros monitores, incluidos sus `offlineChecks`.
+   - Loguear con otro email → `clearOtherMonitorsCache` elimina únicamente asignaciones y períodos cacheados de otros monitores; sus `offlineChecks` permanecen aislados por email.
    - Registrar checks offline con el monitor A, cerrar sesión y loguear con el monitor B → el checklist de B **no** muestra los registros de A; al reconectar solo se sincronizan los `PENDING` de B.
    - En IndexedDB, las filas de `offlineChecks` del monitor B tienen su propio `email`.
 

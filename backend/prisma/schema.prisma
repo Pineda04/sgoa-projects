@@ -462,7 +462,7 @@ model ScheduleComplianceCheck {
   courseClassroom CourseClassroom @relation(fields: [courseClassroomId], references: [id], onDelete: Cascade)
   monitor         User            @relation(fields: [monitorId], references: [id], onDelete: Restrict)
 
-  @@unique([courseClassroomId, checkDate, checkTime])
+  @@unique([courseClassroomId, checkDate])
   @@index([monitorId, checkDate])
   @@map("schedule_compliance_checks")
   @@schema("academic")

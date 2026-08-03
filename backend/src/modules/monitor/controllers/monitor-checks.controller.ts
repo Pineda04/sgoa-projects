@@ -58,7 +58,6 @@ export class MonitorChecksController {
   })
   @ApiCommonResponses({
     summary: 'Sincronizar verificaciones registradas offline',
-    okDescription: 'Verificaciones sincronizadas correctamente.',
     badRequestDescription: 'El formato del payload es inválido.',
   })
   @ApiOkResponse({
@@ -66,7 +65,24 @@ export class MonitorChecksController {
       'El endpoint siempre responde 200; la respuesta identifica cada offlineId persistido, en conflicto o fallido para que el cliente marque solo los realmente sincronizados.',
     schema: {
       type: 'object',
-      required: ['synced', 'conflicts', 'skipped', 'conflictIds', 'skippedIds'],
+      required: ['status', 'statusCode', 'path', 'message', 'data', 'timestamp'],
+      properties: {
+        status: { type: 'boolean' },
+        statusCode: { type: 'number' },
+        path: { type: 'string' },
+        message: { type: 'string' },
+        timestamp: { type: 'string', format: 'date-time' },
+        data: {
+          type: 'object',
+      required: [
+        'synced',
+        'conflicts',
+        'skipped',
+        'rejected',
+        'conflictIds',
+        'skippedIds',
+        'rejectedIds',
+      ],
       properties: {
         synced: {
           type: 'number',
@@ -80,6 +96,11 @@ export class MonitorChecksController {
           type: 'number',
           description: 'Verificaciones que fallaron y deben reintentarse.',
         },
+        rejected: {
+          type: 'number',
+          description:
+            'Verificaciones con datos permanentes invÃ¡lidos que no deben reintentarse.',
+        },
         conflictIds: {
           type: 'array',
           items: { type: 'string' },
@@ -89,6 +110,14 @@ export class MonitorChecksController {
           type: 'array',
           items: { type: 'string' },
           description: 'offlineId de las verificaciones que fallaron.',
+        },
+        rejectedIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'offlineId de verificaciones rechazadas por un error permanente.',
+        },
+      },
         },
       },
     },

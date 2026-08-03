@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { CircleCheck } from 'lucide-react';
+import { AlertTriangle, CircleCheck } from 'lucide-react';
 import { useGetCurrentAssignments } from '@api/monitor';
 import { useAuth } from '@config/providers';
+import { db } from '@config/lib';
 import {
 	useCachedAssignments,
 	useIsOnline,
@@ -14,7 +15,10 @@ import { CheckModal } from './CheckModal';
 import { ChecklistProgress } from './ChecklistProgress';
 import { ChecklistToolbar } from './ChecklistToolbar';
 import { useRegisterCheck } from './useRegisterCheck';
-import { useOfflineChecksToday } from './useOfflineChecksToday';
+import {
+	useOfflineChecksToday,
+	useOfflineSyncIssues,
+} from './useOfflineChecksToday';
 import {
 	buildChecklistItems,
 	CHECKLIST_VIEW_STORAGE_KEY,
@@ -48,6 +52,7 @@ export const MonitorChecklist = () => {
 	// registrado. useLiveQuery reacciona a cada add/update/delete, sobrevive a los
 	// desmontajes (navegar a otra página) y evita duplicados al sincronizar.
 	const effectiveOverrides = useOfflineChecksToday(sessionEmail);
+	const syncIssues = useOfflineSyncIssues(sessionEmail);
 	const { registerCheck, submittingId, isRegistering } =
 		useRegisterCheck(sessionEmail);
 
@@ -123,6 +128,10 @@ export const MonitorChecklist = () => {
 		setSearch('');
 	};
 
+	const handleDiscardSyncIssue = (offlineId: string) => {
+		void db.offlineChecks.delete(offlineId);
+	};
+
 	const handleQuickConfirm = (item: TChecklistItem, isPresent: boolean) => {
 		void registerCheck({ courseClassroomId: item.id, isPresent });
 	};
@@ -170,6 +179,43 @@ export const MonitorChecklist = () => {
 
 	return (
 		<div className="space-y-4">
+			{syncIssues.length > 0 && (
+				<section
+					className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40"
+					aria-labelledby="sync-issues-title"
+				>
+					<div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
+						<AlertTriangle className="size-5" />
+						<h3 id="sync-issues-title" className="font-semibold">
+							Verificaciones que requieren revisión
+						</h3>
+					</div>
+					<ul className="mt-3 space-y-2 text-sm">
+						{syncIssues.map(issue => {
+							const item = items.find(
+								check => check.id === issue.courseClassroomId
+							);
+							return (
+								<li
+									key={issue.offlineId}
+									className="flex flex-wrap items-center justify-between gap-2 rounded border border-amber-200 bg-background p-2 dark:border-amber-900"
+								>
+									<span>
+										{item?.assignment.courseName ?? issue.courseClassroomId}: {issue.syncReason}
+									</span>
+									<button
+										type="button"
+										onClick={() => handleDiscardSyncIssue(issue.offlineId)}
+										className="rounded border border-amber-400 px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 dark:text-amber-200"
+									>
+										Descartar
+									</button>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			)}
 			<ChecklistToolbar
 				jornada={jornada}
 				onJornadaChange={setJornada}

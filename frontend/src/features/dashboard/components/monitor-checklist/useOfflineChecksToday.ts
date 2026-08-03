@@ -14,7 +14,11 @@ export const useOfflineChecksToday = (email?: string) =>
 			.equals([email ?? '', getTodayDateString()])
 			.toArray();
 
-		return records.reduce<Record<string, TMonitorAssignmentCheckStatus>>(
+		return records
+			.filter(record =>
+				['PENDING', 'SYNCING', 'SYNCED', 'ERROR'].includes(record.syncStatus)
+			)
+			.reduce<Record<string, TMonitorAssignmentCheckStatus>>(
 			(acc, record) => {
 				acc[record.courseClassroomId] = {
 					id: record.offlineId,
@@ -25,5 +29,20 @@ export const useOfflineChecksToday = (email?: string) =>
 				return acc;
 			},
 			{}
-		);
+			);
 	}, [email], {} as Record<string, TMonitorAssignmentCheckStatus>);
+
+export const useOfflineSyncIssues = (email?: string) =>
+	useLiveQuery(
+		() =>
+			db.offlineChecks
+				.where('email')
+				.equals(email ?? '')
+				.filter(
+					check =>
+						check.syncStatus === 'CONFLICT' || check.syncStatus === 'REJECTED'
+				)
+				.toArray(),
+		[email],
+		[]
+	);

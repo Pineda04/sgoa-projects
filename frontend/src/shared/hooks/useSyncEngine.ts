@@ -11,6 +11,8 @@ export const useSyncEngine = (email?: string) => {
 	const [status, setStatus] = useState<TSyncStatus>(
 		isOnline ? 'SYNCED' : 'OFFLINE'
 	);
+	const statusRef = useRef(status);
+	statusRef.current = status;
 	// Cerrojo síncrono: impide que dos sincronizaciones envíen el mismo lote cuando
 	// useLiveQuery emite antes de que React re-renderice con el nuevo estado.
 	const isSyncingRef = useRef(false);
@@ -58,13 +60,13 @@ export const useSyncEngine = (email?: string) => {
 			const result = (await monitorApi.batchSync({ checks: checksToSync })).data
 				.data;
 
-			// 3. Marcar como SYNCED solo los registros realmente persistidos.
-			//    Los conflictos (otro monitor ya verificó la clave) se eliminan y
-			//    los fallos inesperados se conservan en PENDING para reintentar.
+			// 3. Marcar solo los registros persistidos. Los conflictos y rechazos
+			// se conservan para que el monitor los revise y descarte explícitamente.
 			await db.transaction('rw', db.offlineChecks, async () => {
 				const failedIds = new Set([
 					...result.conflictIds,
 					...result.skippedIds,
+					...result.rejectedIds,
 				]);
 				const idsToSync = pendingChecks
 					.map(check => check.offlineId)
@@ -81,7 +83,22 @@ export const useSyncEngine = (email?: string) => {
 					await db.offlineChecks
 						.where('offlineId')
 						.anyOf(result.conflictIds)
-						.delete();
+						.modify({
+							syncStatus: 'CONFLICT',
+							syncReason:
+								'Otro monitor ya registró esta verificación.',
+						});
+				}
+
+				if (result.rejectedIds.length > 0) {
+					await db.offlineChecks
+						.where('offlineId')
+						.anyOf(result.rejectedIds)
+						.modify({
+							syncStatus: 'REJECTED',
+							syncReason:
+								'La sección ya no existe y no puede sincronizarse.',
+						});
 				}
 			});
 
@@ -103,11 +120,15 @@ export const useSyncEngine = (email?: string) => {
 		}
 	}, [pendingChecks, pendingCount, isOnline, email]);
 
-	// Reaccionar a los cambios de conectividad (useIsOnline es la única fuente de verdad)
+	// La referencia evita reintentar por cada emisión de useLiveQuery.
+	const syncRef = useRef(syncPendingChecks);
+	syncRef.current = syncPendingChecks;
+
+	// Reaccionar únicamente a cambios de conectividad.
 	useEffect(() => {
-		if (isOnline) void syncPendingChecks();
+		if (isOnline && statusRef.current !== 'ERROR') void syncRef.current();
 		else setStatus('OFFLINE');
-	}, [isOnline, syncPendingChecks]);
+	}, [isOnline]);
 
 	// Cuando la cantidad de pendientes cambia y estamos online, intentar sincronizar.
 	// Si quedó en ERROR no se reintenta en bucle: se espera reintento manual o reconexión.

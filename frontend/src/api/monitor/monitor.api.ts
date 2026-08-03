@@ -42,8 +42,10 @@ export const monitorApi = {
 				synced: number;
 				conflicts: number;
 				skipped: number;
+				rejected: number;
 				conflictIds: string[];
 				skippedIds: string[];
+				rejectedIds: string[];
 			}>
 		>('/monitor/checks/batch-sync', body),
 
