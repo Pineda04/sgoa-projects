@@ -22,7 +22,9 @@ export const RoleTable = ({ data, isLoading }: RoleTableProps) => {
 	const [isPermissionsOpen, openPermissions, closePermissions] = useModal();
 	const [selectedRole, setSelectedRole] = useState<TRole | undefined>();
 
-	const { deleteRole, isPendingDelete } = useDeleteRole(selectedRole?.id ?? '');
+	const { deleteRole, isPendingDelete } = useDeleteRole(
+		selectedRole?.id ?? ''
+	);
 
 	const handleOpenCreate = () => {
 		setSelectedRole(undefined);
@@ -102,9 +104,7 @@ export const RoleTable = ({ data, isLoading }: RoleTableProps) => {
 			mobileLabel: 'Acciones',
 			render: role =>
 				role.isSuperAdmin ? (
-					<span className="text-xs text-gray-400">
-						No editable
-					</span>
+					<span className="text-xs text-gray-400">No editable</span>
 				) : (
 					<div className="flex items-center justify-center gap-3">
 						<button
@@ -135,15 +135,26 @@ export const RoleTable = ({ data, isLoading }: RoleTableProps) => {
 
 	return (
 		<>
-			<div className="flex justify-center mb-4">
-				<Button
-					type="button"
-					className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
-					onClick={handleOpenCreate}
-				>
-					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-					<span>Nuevo Rol</span>
-				</Button>
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
+				<div className="min-w-0">
+					<h1 className="text-2xl font-bold text-foreground">
+						Roles y Permisos
+					</h1>
+					<p className="text-muted-foreground mt-1 text-sm sm:text-base">
+						Crea roles y define qué puede hacer cada uno. Luego
+						asígnalos a los usuarios desde la gestión de usuarios.
+					</p>
+				</div>
+				<div className="shrink-0 sm:flex sm:items-end">
+					<Button
+						type="button"
+						className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium shadow-xs transition-all duration-300 hover:shadow-md active:scale-95 group"
+						onClick={handleOpenCreate}
+					>
+						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+						<span>Nuevo Rol</span>
+					</Button>
+				</div>
 			</div>
 
 			<DataTable<TRole>
@@ -155,7 +166,11 @@ export const RoleTable = ({ data, isLoading }: RoleTableProps) => {
 				showRowNumber={false}
 			/>
 
-			<RoleFormModal isOpen={isFormOpen} onClose={handleCloseForm} role={selectedRole} />
+			<RoleFormModal
+				isOpen={isFormOpen}
+				onClose={handleCloseForm}
+				role={selectedRole}
+			/>
 
 			<RolePermissionsModal
 				isOpen={isPermissionsOpen}
