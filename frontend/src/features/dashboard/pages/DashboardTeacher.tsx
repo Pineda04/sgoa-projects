@@ -9,11 +9,13 @@ import { useGetAcademicAssignmentReportsPeriods } from '@api/assignment-reports'
 import {
 	Button,
 	IResponsiveColumn,
+	Loading,
 	ResponsiveTable,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	TagError,
 } from '@shared/components';
 import { useUser } from '@config/providers';
 import { InfoTeacher } from '../components';
@@ -81,6 +83,15 @@ export const DashboardTeacher = () => {
 		},
 		[navigate]
 	);
+
+	// El panel de docente se apoya en la información del usuario autenticado.
+	// Tener el rol no alcanza: el usuario debe estar asociado a un docente.
+	if (currentUser.isLoading) return <Loading />;
+
+	if (currentUser.isError || !currentUser.user)
+		return (
+			<TagError text="Tu rol permite ver el panel de docente, pero tu usuario no está asociado a ningún docente en el sistema. Solicita a un administrador que vincule tu cuenta a un docente." />
+		);
 
 	const courseColumns: IResponsiveColumn<TCourseClassroom>[] = [
 		{ key: 'course.code', header: 'Código', mobileLabel: 'Código' },
