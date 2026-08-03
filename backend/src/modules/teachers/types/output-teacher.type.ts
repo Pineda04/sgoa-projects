@@ -22,10 +22,20 @@ export type TOutputTeacher = {
     id: string;
     name: string;
   }[];
+  roles: {
+    id: string;
+    name: string;
+    isSuperAdmin: boolean;
+  }[];
   activeStatus: boolean;
 };
 
 export type TOutputTeacherCustom = TCustomOmit<
   TOutputTeacher,
-  'categoryName' | 'contractTypeName' | 'shiftName' | 'postgrads' | 'undergrads'
+  | 'categoryName'
+  | 'contractTypeName'
+  | 'shiftName'
+  | 'postgrads'
+  | 'undergrads'
+  | 'roles'
 >;

@@ -7,13 +7,20 @@ import { Loading } from '@shared/components';
 import type { Actions, Subjects } from '@config/lib/casl/ability';
 
 interface ProtectedRouteProps {
-	action: Actions;
-	subject: Subjects | Subjects[];
+	action?: Actions;
+	/** Con varios, basta con poder sobre uno: la ruta de aulas la abre tanto
+	 * `classrooms` como el acceso acotado desde un dashboard. */
+	subject?: Subjects | Subjects[];
+	superAdminOnly?: boolean;
 }
 
-export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+	action,
+	subject,
+	superAdminOnly,
+}: ProtectedRouteProps) => {
 	const {
-		authState: { isAuthenticated, isLoading },
+		authState: { isAuthenticated, isLoading, user },
 	} = useContext(AuthContext);
 	const ability = useAbility();
 
@@ -21,9 +28,16 @@ export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
 
 	if (!isAuthenticated) return <Navigate to="/auth/login/" />;
 
-	const subjects = Array.isArray(subject) ? subject : [subject];
+	if (superAdminOnly && !user?.isSuperAdmin)
+		return <Navigate to="/home" replace />;
 
-	if (!subjects.some(s => ability.can(action, s)))
+	const subjects = subject
+		? Array.isArray(subject)
+			? subject
+			: [subject]
+		: [];
+
+	if (action && subjects.length && !subjects.some(s => ability.can(action, s)))
 		return <Navigate to="/home" replace />;
 
 	return <AppLayout />;

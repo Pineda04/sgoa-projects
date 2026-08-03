@@ -13,8 +13,11 @@ import {
 import { ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { ApiPagination, ResponseMessage, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiPagination,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateCourseDto, UpdateCourseDto } from '../dto';
 import { CoursesService } from '../services/courses.service';
@@ -25,12 +28,7 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'courses')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una asignatura.')
   @ApiBody({
@@ -47,13 +45,7 @@ export class CoursesController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de asignaturas.')
   @ApiPagination({
@@ -69,12 +61,7 @@ export class CoursesController {
   }
 
   @Get('search')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de clases encontrado correctamente')
   @ApiCommonResponses({
@@ -97,12 +84,7 @@ export class CoursesController {
   }
 
   @Get('search/:centerDepartmentId')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de clases del centro-departmento encontradas correctamente',
@@ -133,13 +115,7 @@ export class CoursesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la asignatura.')
   @ApiParam({
@@ -158,13 +134,7 @@ export class CoursesController {
   }
 
   @Get('code/:code')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la asignatura.')
   @ApiCommonResponses({
@@ -177,12 +147,7 @@ export class CoursesController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la asignatura.')
   @ApiParam({
@@ -206,12 +171,7 @@ export class CoursesController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado una asignatura.')
   @ApiParam({

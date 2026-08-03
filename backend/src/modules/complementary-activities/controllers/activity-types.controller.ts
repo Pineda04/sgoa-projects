@@ -12,8 +12,7 @@ import {
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 import { ActivityTypesService } from '../services/activity-types.service';
 import { ApiBody, ApiParam } from '@nestjs/swagger';
-import { Roles, ResponseMessage } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { RequirePermission, ResponseMessage } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateActivityTypeDto, UpdateActivityTypeDto } from '../dto';
 
@@ -22,7 +21,7 @@ export class ActivityTypesController {
   constructor(private readonly activityTypesService: ActivityTypesService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'activities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de actividad.')
   @ApiBody({
@@ -45,7 +44,7 @@ export class ActivityTypesController {
   }
 
   @Get()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de actividades.')
   @ApiCommonResponses({
@@ -61,13 +60,7 @@ export class ActivityTypesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información del tipo de actividad.')
   @ApiParam({
@@ -89,7 +82,7 @@ export class ActivityTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de actividad.')
   @ApiParam({
@@ -119,7 +112,7 @@ export class ActivityTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado un tipo de actividad.')
   @ApiParam({

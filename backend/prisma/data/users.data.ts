@@ -4,7 +4,7 @@ export const usersSeed = (rolesData: Record<string, string>) => [
     email: 'admin@me.com',
     code: '99999',
     hash: '12345',
-    roleIds: [rolesData.ADMIN],
+    roleIds: [rolesData.SUPER_ADMIN],
   },
   {
     name: 'user2',

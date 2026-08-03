@@ -1,37 +1,24 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { DigitalBlackboardService } from '../services/digital-blackboard.service';
 import { CreateDigitalBlackboardDto } from '../dto/create-digital-blackboard.dto';
 import { UpdateDigitalBlackboardDto } from '../dto/update-digital-blackboard.dto';
 
 @Controller('digital-blackboards')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.MONITOR,
-)
 export class DigitalBlackboardController {
   constructor(
     private readonly digitalBlackboardService: DigitalBlackboardService,
   ) {}
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'digital-blackboards')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pizarras digitales.')
   @ApiCommonResponses({
@@ -43,6 +30,8 @@ export class DigitalBlackboardController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'digital-blackboards')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado la pizarra digital.')
   @ApiCommonResponses({
@@ -55,6 +44,7 @@ export class DigitalBlackboardController {
   }
 
   @Post()
+  @RequirePermission('create', 'digital-blackboards')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado la pizarra digital.')
   @ApiCommonResponses({
@@ -66,6 +56,7 @@ export class DigitalBlackboardController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'digital-blackboards')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la pizarra digital.')
   @ApiCommonResponses({
@@ -78,6 +69,7 @@ export class DigitalBlackboardController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'digital-blackboards')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la pizarra digital.')
   @ApiCommonResponses({

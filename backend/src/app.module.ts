@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { AtGuard, RolesGuard } from './common/guards';
+import { AtGuard, PermissionsGuard, SuperAdminGuard } from './common/guards';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import {
@@ -69,12 +69,17 @@ import { MonitorModule } from './modules/monitor/monitor.module';
     {
       // automatic inject reflector
       /*
-       * para controlar el acceso por roles, este cubre toda la app,
+       * para controlar el acceso por permisos, este cubre toda la app,
        * pero de ser necesario se puede hacer en los controllers individuales y eliminar este.
        *
        * */
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: PermissionsGuard,
+    },
+    {
+      // automatic inject reflector
+      provide: APP_GUARD,
+      useClass: SuperAdminGuard,
     },
   ],
   controllers: [AppController],

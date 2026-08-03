@@ -15,9 +15,8 @@ import {
   ApiPagination,
   GetCurrentUserId,
   ResponseMessage,
-  Roles,
+  RequirePermission,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   BatchSyncChecksDto,
@@ -32,7 +31,7 @@ export class MonitorChecksController {
   constructor(private readonly monitorChecksService: MonitorChecksService) {}
 
   @Post()
-  @Roles(EUserRole.MONITOR)
+  @RequirePermission('create', 'schedule-compliance-check')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage(
     'Se ha registrado la verificación de cumplimiento de horario.',
@@ -56,7 +55,7 @@ export class MonitorChecksController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.MONITOR)
+  @RequirePermission('update', 'schedule-compliance-check')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Se ha actualizado la verificación de cumplimiento de horario.',
@@ -81,7 +80,7 @@ export class MonitorChecksController {
   }
 
   @Post('batch-sync')
-  @Roles(EUserRole.MONITOR)
+  @RequirePermission('create', 'schedule-compliance-check')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Verificaciones offline sincronizadas correctamente.')
   @ApiBody({
@@ -171,7 +170,7 @@ export class MonitorChecksController {
   }
 
   @Get()
-  @Roles(EUserRole.MONITOR, EUserRole.ADMIN)
+  @RequirePermission('read', 'schedule-compliance-check')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de verificaciones de cumplimiento de horario.')
   @ApiPagination({

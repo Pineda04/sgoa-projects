@@ -12,28 +12,21 @@ import {
 import { CreateUndergradDto } from '../dto/create-undergrad.dto';
 import { UpdateUndergradDto } from '../dto/update-undergrad.dto';
 import { UndergradsService } from '../services/undergrads.service';
-import { EUserRole } from 'src/common/enums';
 import {
   ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('undergrads')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.RRHH,
-  EUserRole.DIRECCION,
-  EUserRole.DOCENTE,
-  EUserRole.COORDINADOR_AREA,
-)
 export class UndergradsController {
   constructor(private readonly undergradsService: UndergradsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('create', 'degrees')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un pregrado.')
   @ApiBody({
@@ -51,6 +44,8 @@ export class UndergradsController {
   }
 
   @Get()
+  @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pregrados.')
   // @ApiPagination({
@@ -70,7 +65,8 @@ export class UndergradsController {
   }
 
   @Get('array')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('read', 'degrees')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de pregrados en arreglo.')
   @ApiCommonResponses({
@@ -85,7 +81,7 @@ export class UndergradsController {
   }
 
   @Get(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('read', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de un pregrado.')
   @ApiCommonResponses({
@@ -100,7 +96,7 @@ export class UndergradsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('update', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el pregrado.')
   @ApiBody({
@@ -122,7 +118,7 @@ export class UndergradsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('delete', 'degrees')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el pregrado.')
   @ApiCommonResponses({

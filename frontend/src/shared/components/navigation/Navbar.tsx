@@ -21,6 +21,7 @@ interface SectionConfig {
 	label: string;
 	path: string;
 	subject?: Subjects;
+	superAdminOnly?: boolean;
 }
 
 interface ModuleConfig {
@@ -60,7 +61,7 @@ const MODULES: ModuleConfig[] = [
 			},
 			{
 				label: 'Cargos',
-        path: '/admin/positions',
+				path: '/admin/positions',
 				subject: 'positions',
 			},
 		],
@@ -141,7 +142,7 @@ export const Navbar = () => {
 		null
 	);
 	const {
-		authState: { isAuthenticated, isLoading },
+		authState: { isAuthenticated, isLoading, user },
 	} = useAuth();
 	const navbarRef = useRef<HTMLDivElement>(null);
 	const location = useLocation();
@@ -174,12 +175,13 @@ export const Navbar = () => {
 			.map(mod => ({
 				...mod,
 				sections: mod.sections.filter(s => {
+					if (s.superAdminOnly) return !!user?.isSuperAdmin;
 					if (!s.subject) return true;
 					return ability.can('read', s.subject);
 				}),
 			}))
 			.filter(mod => mod.sections.length > 0);
-	}, [isAuthenticated, ability, modulesWithSections]);
+	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {

@@ -10,26 +10,22 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateConditionDto, UpdateConditionDto } from '../dto';
 import { ConditionsService } from '../services/conditions.service';
 
 @Controller('conditions')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.MONITOR,
-)
 export class ConditionsController {
   constructor(private readonly conditionService: ConditionsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'conditions')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Condición creada exitosamente.')
   @ApiBody({
@@ -46,14 +42,8 @@ export class ConditionsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'conditions')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de condiciones.')
   @ApiCommonResponses({
@@ -65,13 +55,7 @@ export class ConditionsController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición obtenida.')
   @ApiCommonResponses({
@@ -84,7 +68,7 @@ export class ConditionsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición actualizada.')
   @ApiBody({
@@ -105,7 +89,7 @@ export class ConditionsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'conditions')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Condición eliminada.')
   @ApiCommonResponses({

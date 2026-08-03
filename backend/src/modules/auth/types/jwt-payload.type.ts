@@ -1,1 +1,7 @@
-export type TJwtPayload = { sub: string; email: string; roles: string[] };
+export type TJwtPayload = {
+  sub: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
+  isSuperAdmin: boolean;
+};

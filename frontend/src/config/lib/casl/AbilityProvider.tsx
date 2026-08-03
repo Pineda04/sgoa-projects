@@ -25,7 +25,10 @@ export const Can = ({ children, action, subject, not }: CanProps) => {
 export const AbilityProvider = ({ children }: { children: ReactNode }) => {
 	const { authState } = useAuth();
 
-	const ability = useMemo(() => defineAbilityFor(authState.user?.roles ?? []), [authState.user?.roles]);
+	const ability = useMemo(
+		() => defineAbilityFor(authState.user?.permissions ?? [], authState.user?.isSuperAdmin ?? false),
+		[authState.user?.permissions, authState.user?.isSuperAdmin]
+	);
 
 	return (
 		<AbilityContext.Provider value={ability}>

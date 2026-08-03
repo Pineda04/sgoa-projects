@@ -32,6 +32,9 @@ export type TTeacherJoin = TCustomOmit<
   contractType: TContractType;
   user: TCustomPick<TUser, 'id' | 'code' | 'name' | 'activeStatus'> & {
     email?: string;
+    userRoles: {
+      role: { id: string; name: string; isSuperAdmin: boolean };
+    }[];
   };
   undergradDegrees: {
     teacherId: string;

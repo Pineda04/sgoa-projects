@@ -39,6 +39,13 @@ export class TeachersService {
           name: true,
           email: true,
           activeStatus: true,
+          userRoles: {
+            select: {
+              role: {
+                select: { id: true, name: true, isSuperAdmin: true },
+              },
+            },
+          },
         },
       },
       contractType: true,
@@ -479,6 +486,7 @@ export class TeachersService {
         id: u.postgraduate.id,
         name: u.postgraduate.name,
       })),
+      roles: teacher.user.userRoles.map((ur) => ur.role),
       positions: teacher.positionHeld.map((ph) => ({
         // ...ph,
         centerDepartmentId: ph.centerDepartment.id,

@@ -12,25 +12,23 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiPagination, ResponseMessage, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  ApiPagination,
+  LookupSource,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { PcEquipmentsService } from '../services/pc-equipments.service';
 import { CreatePcEquipmentDto, UpdatePcEquipmentDto } from '../dto';
 import { QueryPaginationDto } from 'src/common/dto';
 
 @Controller('pc-equipments')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class PcEquipmentsController {
   constructor(private readonly pcEquipmentsService: PcEquipmentsService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'pc-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Equipo de computo creado exitosamente.')
   @ApiBody({
@@ -47,6 +45,8 @@ export class PcEquipmentsController {
   }
 
   @Get()
+  @RequirePermission('read', 'pc-equipments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de computo.')
   @ApiCommonResponses({
@@ -62,14 +62,8 @@ export class PcEquipmentsController {
   }
 
   @Get('by-classroom/:classroomId')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'pc-equipments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de computo del aula.')
   @ApiCommonResponses({
@@ -83,6 +77,7 @@ export class PcEquipmentsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Equipo de computo obtenido.')
   @ApiCommonResponses({
@@ -95,7 +90,7 @@ export class PcEquipmentsController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Equipo de computo actualizado.')
   @ApiBody({
@@ -116,7 +111,7 @@ export class PcEquipmentsController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'pc-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Equipo de computo eliminado.')
   @ApiCommonResponses({

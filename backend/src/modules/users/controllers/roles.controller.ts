@@ -15,17 +15,16 @@ import { ResponseMessage } from 'src/common/decorators';
 import { RolesService } from '../services/roles.service';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
+import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { ValidateIdPipe } from 'src/common/pipes';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from '../../../common/enums';
+import { RequirePermission, SuperAdminOnly } from 'src/common/decorators';
 
 @Controller('roles')
-@Roles(EUserRole.ADMIN)
-// @UseGuards(RolesGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Rol creado exitosamente.')
   @ApiBody({
@@ -45,6 +44,7 @@ export class RolesController {
   }
 
   @Get()
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de roles.')
   @ApiCommonResponses({
@@ -57,7 +57,23 @@ export class RolesController {
     return this.rolesService.findAll();
   }
 
+  @Get('permissions/catalog')
+  @SuperAdminOnly()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Catálogo de permisos.')
+  @ApiCommonResponses({
+    summary: 'Obtener catálogo de permisos',
+    description:
+      'Obtiene el catálogo completo de permisos (acción × módulo) disponible para armar roles.',
+    okDescription: 'Catálogo de permisos obtenido correctamente.',
+    internalErrorDescription: 'Error interno al obtener el catálogo de permisos.',
+  })
+  findAllPermissions() {
+    return this.rolesService.findAllPermissions();
+  }
+
   @Get(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del rol obtenida.')
   @ApiCommonResponses({
@@ -68,10 +84,11 @@ export class RolesController {
     notFoundDescription: 'No se encontró el rol solicitado.',
   })
   findOne(@Param('id', ValidateIdPipe) id: string) {
-    return this.rolesService.findOne(id);
+    return this.rolesService.findOneWithPermissions(id);
   }
 
   @Patch(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Rol actualizado correctamente.')
   @ApiBody({
@@ -92,7 +109,31 @@ export class RolesController {
     return this.rolesService.update(id, updateRoleDto);
   }
 
+  @Patch(':id/permissions')
+  @SuperAdminOnly()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Permisos del rol actualizados correctamente.')
+  @ApiBody({
+    type: UpdateRolePermissionsDto,
+    description: 'Set completo de permisos que tendrá el rol',
+    required: true,
+  })
+  @ApiCommonResponses({
+    summary: 'Actualizar permisos de un rol',
+    description:
+      'Reemplaza el set de permisos asignado a un rol (no aplica al rol de super administrador).',
+    internalErrorDescription: 'Error interno al actualizar los permisos del rol.',
+    notFoundDescription: 'No se encontró el rol solicitado.',
+  })
+  updatePermissions(
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() updateRolePermissionsDto: UpdateRolePermissionsDto,
+  ) {
+    return this.rolesService.updatePermissions(id, updateRolePermissionsDto);
+  }
+
   @Delete(':id')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Rol eliminado correctamente.')
   @ApiCommonResponses({

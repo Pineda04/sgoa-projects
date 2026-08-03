@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload } from '@shared/interfaces';
+import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload, IUser } from '@shared/interfaces';
 import { authApi, IAuthLogin, ITokens, useLogin } from '@api/auth';
 import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
 import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache, cleanupSyncedChecks } from '@config/lib';
@@ -19,13 +19,25 @@ const initialState: IAuthStateProps = {
 const OFFLINE_NO_CREDENTIALS_MESSAGE =
 	'Sin conexión: no hay credenciales guardadas válidas para este usuario en este dispositivo.';
 
+// El modo offline pertenece al checklist de monitoreo, así que se decide por
+// permiso y no por nombre de rol: cualquier rol dinámico que pueda registrar
+// verificaciones lo habilita.
+const canCheckOffline = (
+	user?: Pick<IUser, 'permissions' | 'isSuperAdmin'> | null
+) =>
+	!!user?.isSuperAdmin ||
+	(user?.permissions ?? []).some(
+		p =>
+			p === 'manage:schedule-compliance-check' ||
+			p === 'create:schedule-compliance-check'
+	);
+
 const checkSessionToken = async (token: string) => {
 	let decoded = jwtDecode<ITokenPayload>(token);
 	const currentTime = Date.now() / 1000;
 
-	//Si no hay internet y es monitor, omitir el refresh y usar el token cacheado
-	const isMonitor = Array.isArray(decoded.roles) && decoded.roles.includes('MONITOR');
-	if (!navigator.onLine && isMonitor) {
+	//Si no hay internet y puede registrar verificaciones, omitir el refresh y usar el token cacheado
+	if (!navigator.onLine && canCheckOffline(decoded)) {
 		console.log('Modo offline detectado para Monitor: saltando refresh de token.');
 		return decoded;
 	}
@@ -53,13 +65,17 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 	): IResponse<ITokens> | null => {
 		const info = jwtDecode<ITokenPayload>(accessToken);
 
-		if (!Array.isArray(info.roles) || !info.roles.includes('MONITOR')) return null;
+		if (!canCheckOffline(info)) return null;
 
 		setAuthState({
 			isAuthenticated: true,
 			user: {
 				email: info.email,
-				roles: info.roles,
+				roles: info.roles ?? [],
+				// Sin estos dos, CASL arrancaría sin permisos y el checklist
+				// offline se vería vacío.
+				permissions: info.permissions ?? [],
+				isSuperAdmin: info.isSuperAdmin ?? false,
 				sub: info.sub,
 			},
 			isLoading: false,
@@ -124,6 +140,8 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
+					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
 				isLoading: false,
@@ -188,8 +206,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 	const logout = async () => {
 		try {
 			//Prevenir pérdida de datos si hay checks sin sincronizar
-			if (authState.user?.roles.includes('MONITOR')) {
-				const email = authState.user.email;
+			const currentUser = authState.user;
+			if (currentUser && canCheckOffline(currentUser)) {
+				const email = currentUser.email;
 
 				const pendingCount = await db.offlineChecks
 					.where('[email+syncStatus]')
@@ -263,6 +282,8 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
+					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
 				isLoading: false,

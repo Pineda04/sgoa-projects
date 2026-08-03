@@ -10,23 +10,25 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { ResponseMessage, ApiCommonResponses } from 'src/common/decorators';
+import {
+  ResponseMessage,
+  ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
+} from 'src/common/decorators';
 import { CreateTeacherCategoryDto } from '../dto/create-teacher-category.dto';
 import { UpdateTeacherCategoryDto } from '../dto/update-teacher-category.dto';
 import { TeacherCategoriesService } from '../services/teacher-categories.service';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('teacher-categories')
-@Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
 export class TeacherCategoriesController {
   constructor(
     private readonly teacherCategoriesService: TeacherCategoriesService,
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('create', 'teacher-categories')
   @HttpCode(HttpStatus.CREATED) // Cambiado a CREATED (201)
   @ResponseMessage('Se ha creado una categoría de docente.')
   @ApiBody({
@@ -45,13 +47,8 @@ export class TeacherCategoriesController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'teacher-categories')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de categorías de docente.')
   @ApiCommonResponses({
@@ -68,6 +65,7 @@ export class TeacherCategoriesController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'teacher-categories')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de una categoría de docente.')
   @ApiCommonResponses({
@@ -83,7 +81,7 @@ export class TeacherCategoriesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('update', 'teacher-categories')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la categoría de docente.')
   @ApiBody({
@@ -107,7 +105,7 @@ export class TeacherCategoriesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('delete', 'teacher-categories')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la categoría de docente.')
   @ApiCommonResponses({

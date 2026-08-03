@@ -1,11 +1,10 @@
 import { Controller, Post, Get, Body } from '@nestjs/common';
-import { EUserRole } from 'src/common/enums';
-import { Roles } from 'src/common/decorators';
+import { SuperAdminOnly } from 'src/common/decorators';
 import { MailService } from '../services/mail.service';
 import { EmailDto } from '../dto/email.dto';
 
 @Controller('mail')
-@Roles(EUserRole.ADMIN)
+@SuperAdminOnly()
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 

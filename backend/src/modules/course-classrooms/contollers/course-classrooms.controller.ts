@@ -19,10 +19,9 @@ import { CourseClassroomsService } from '../services/course-classrooms.service';
 import {
   ApiPagination,
   GetCurrentUserId,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
@@ -35,12 +34,7 @@ export class CourseClassroomsController {
   ) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'courses')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una sección de asignatura.')
   @ApiBody({
@@ -57,13 +51,7 @@ export class CourseClassroomsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de secciones de asignatura.')
   @ApiCommonResponses({
@@ -80,13 +68,7 @@ export class CourseClassroomsController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la sección de asignatura.')
   @ApiParam({
@@ -105,13 +87,7 @@ export class CourseClassroomsController {
   }
 
   @Get('my/current-period')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de las asignaturas del usuario autenticado')
   @ApiCommonResponses({
@@ -126,7 +102,7 @@ export class CourseClassroomsController {
   }
 
   @Get('coordinator/center-department/:centerDepartmentId/periods/:periodId')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Detalle de asignaturas para el periodo especificado en un center-department.',
@@ -164,7 +140,7 @@ export class CourseClassroomsController {
   }
 
   @Get('authority/center-department/:centerDepartmentId/periods/:periodId')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Detalle de asignaturas para el periodo especificado en un center-department',
@@ -201,12 +177,7 @@ export class CourseClassroomsController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la sección de asignatura.')
   @ApiParam({
@@ -230,12 +201,7 @@ export class CourseClassroomsController {
   }
 
   @Patch(':id/:teacherId')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La clase ha sido reasignada a otro docente.')
   @ApiParam({
@@ -264,12 +230,7 @@ export class CourseClassroomsController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado una sección de asignatura.')
   @ApiParam({

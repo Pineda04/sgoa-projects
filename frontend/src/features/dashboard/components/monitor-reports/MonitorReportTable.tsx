@@ -16,7 +16,7 @@ import {
 } from '@shared/components';
 import { useModal } from '@shared/hooks';
 import { ESwalIcons, formatHondurasDateTime, genericAlert } from '@shared/utils';
-import { EUserRole } from '@shared/constants';
+import { useAbility } from '@config';
 import { EditCheckModal } from './EditCheckModal';
 import {
 	buildExportRows,
@@ -125,6 +125,7 @@ export const MonitorReportTable = ({
 	summary,
 }: MonitorReportTableProps) => {
 	const { authState } = useAuth();
+	const ability = useAbility();
 	const [exportingFormat, setExportingFormat] = useState<TExportFormat | null>(
 		null
 	);
@@ -132,11 +133,13 @@ export const MonitorReportTable = ({
 		useState<TScheduleComplianceCheckDetail | null>(null);
 	const [isEditModalOpen, openEditModal, closeEditModal] = useModal();
 
-	const isMonitor = (authState.user?.roles ?? []).includes(EUserRole.MONITOR);
+	// Editar es una capacidad, no un nombre de rol: cualquier rol con el permiso
+	// puede corregir sus propias verificaciones.
+	const canEditChecks = ability.can('update', 'schedule-compliance-check');
 	const currentUserId = authState.user?.sub;
 
 	const canEditRow = (row: TScheduleComplianceCheckDetail) =>
-		isMonitor && row.monitor.id === currentUserId;
+		canEditChecks && row.monitor.id === currentUserId;
 
 	const handleOpenEdit = (row: TScheduleComplianceCheckDetail) => {
 		setEditingCheck(row);
