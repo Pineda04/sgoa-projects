@@ -10,6 +10,7 @@ import {
 	useModal,
 } from '@shared/hooks';
 import { SkeletonCard } from '@shared';
+import { askConfirm } from '@shared/utils';
 import { BuildingAccordion } from './BuildingAccordion';
 import { CheckModal } from './CheckModal';
 import { ChecklistProgress } from './ChecklistProgress';
@@ -128,7 +129,13 @@ export const MonitorChecklist = () => {
 		setSearch('');
 	};
 
-	const handleDiscardSyncIssue = (offlineId: string) => {
+	const handleDiscardSyncIssue = async (offlineId: string) => {
+		const confirmed = await askConfirm(
+			'Esta verificación se eliminará de este dispositivo y no se podrá recuperar. ¿Deseas descartarla?',
+			'Descartar'
+		);
+		if (!confirmed) return;
+
 		void db.offlineChecks.delete(offlineId);
 	};
 
