@@ -8,7 +8,7 @@ import type { Actions, Subjects } from '@config/lib/casl/ability';
 
 interface ProtectedRouteProps {
 	action: Actions;
-	subject: Subjects;
+	subject: Subjects | Subjects[];
 }
 
 export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
@@ -21,7 +21,10 @@ export const ProtectedRoute = ({ action, subject }: ProtectedRouteProps) => {
 
 	if (!isAuthenticated) return <Navigate to="/auth/login/" />;
 
-	if (!ability.can(action, subject)) return <Navigate to="/home" replace />;
+	const subjects = Array.isArray(subject) ? subject : [subject];
+
+	if (!subjects.some(s => ability.can(action, s)))
+		return <Navigate to="/home" replace />;
 
 	return <AppLayout />;
 };

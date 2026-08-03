@@ -45,7 +45,6 @@ export const classroomSchema = z.object({
 	connectivityId: optionalUuidField('La conectividad'),
 	audioEquipmentId: optionalUuidField('El equipo de audio'),
 	conditionId: optionalUuidField('La condición'),
-	digitalBlackboardId: optionalUuidField('La pizarra digital'),
 	departmentIds: z.array(z.string().uuid()).optional(),
 });
 
@@ -68,7 +67,6 @@ export const initialClassroomValues: TClassroomFormValues = {
 	connectivityId: '',
 	audioEquipmentId: '',
 	conditionId: '',
-	digitalBlackboardId: '',
 	departmentIds: [],
 };
 
@@ -91,6 +89,5 @@ export const buildClassroomBody = (
 	connectivityId: values.connectivityId || null,
 	audioEquipmentId: values.audioEquipmentId || null,
 	conditionId: values.conditionId || null,
-	digitalBlackboardId: values.digitalBlackboardId || null,
 	departmentIds: values.departmentIds ?? [],
 });

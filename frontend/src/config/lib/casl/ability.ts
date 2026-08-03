@@ -18,6 +18,7 @@ export type Subjects =
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher'
 	| 'dashboard-monitor'
+	| 'dashboard-tab-classrooms'
 	| 'users'
 	| 'user-roles'
 	| 'user-departments'
@@ -76,6 +77,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
     can('manage', 'dashboard-authorities');
+    can('manage', 'profile');
 
     // Usuarios
 		can('manage', 'users');
@@ -116,7 +118,8 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
-		can('manage', 'dashboard-authorities');
+    can('manage', 'dashboard-authorities');
+		can('manage', 'profile');
 
 		// Usuarios
     can('manage', 'users');
@@ -147,37 +150,38 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('manage', 'dashboard-coordinator');
+    can('manage', 'dashboard-coordinator');
+		can('manage', 'profile');
 
 		// Usuarios
     can('manage', 'users');
 
     // Modulos/Secciones
-		can('manage', 'reports');
+    can('manage', 'reports');
 		can('manage', 'planifications');
 		can('read', 'courses');
-		can('read', 'classrooms');
 	}
 
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
-		can('manage', 'dashboard-teacher');
+    can('manage', 'dashboard-teacher');
+    can('read', 'dashboard-tab-classrooms');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
     can('read', 'courses');
 		can('read', 'reports');
 		can('read', 'planifications');
-		can('read', 'classrooms');
 	}
 
 	// =================== MONITOR ==================
 	if (roles.includes(EUserRole.MONITOR)) {
-		can('manage', 'dashboard-monitor');
+    can('manage', 'dashboard-monitor');
+    can('read', 'dashboard-tab-classrooms');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
     can('manage', 'schedule-compliance-check');
-		can('read', 'classrooms');
-		can('read', 'buildings');
 		can('read', 'reports-monitor');
 	}
 

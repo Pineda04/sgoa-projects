@@ -23,7 +23,11 @@ import {
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 import { ClassroomAvailabilityModal, DeleteClassroomModal } from '../components';
 
-export const ListClassrooms = () => {
+interface ListClassroomsProps {
+	showHeader?: boolean;
+}
+
+export const ListClassrooms = ({ showHeader = true }: ListClassroomsProps) => {
 	const navigate = useNavigate();
 	const ability = useAbility();
 	const canCreate = ability.can('create', 'classrooms');
@@ -201,31 +205,33 @@ export const ListClassrooms = () => {
 		},
 	];
 
-	return (
+		return (
 		<div className="pb-8 sm:pb-12">
-			<div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-				<div>
-					<h1 className="text-2xl font-bold text-foreground">
-						Gestión de Aulas
-					</h1>
-					<p className="text-muted-foreground mt-1">
-						Administración de las aulas y sus recursos físicos.
-					</p>
-				</div>
+			{showHeader && (
+				<div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+					<div>
+						<h1 className="text-2xl font-bold text-foreground">
+							Gestión de Aulas
+						</h1>
+						<p className="text-muted-foreground mt-1">
+							Administración de las aulas y sus recursos físicos.
+						</p>
+					</div>
 
-				{canCreate && (
-					<Button
-						type="button"
-						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-						onClick={() =>
-							navigate('/infrastructure/classrooms/new')
-						}
-					>
-						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-						<span>Nueva aula</span>
-					</Button>
-				)}
-			</div>
+					{canCreate && (
+						<Button
+							type="button"
+							className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+							onClick={() =>
+								navigate('/infrastructure/classrooms/new')
+							}
+						>
+							<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+							<span>Nueva aula</span>
+						</Button>
+					)}
+				</div>
+			)}
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 				<div>

@@ -23,6 +23,7 @@ export const digitalBlackboardSchema = z.object({
 		.string()
 		.min(1, 'La condición es requerida')
 		.uuid('La condición debe ser un identificador válido'),
+	classroomId: z.string().min(1, 'El aula es requerida'),
 });
 
 export type TDigitalBlackboardFormValues = z.infer<
@@ -35,6 +36,7 @@ export const initialDigitalBlackboardValues: TDigitalBlackboardFormValues = {
 	monitorTypeId: '',
 	monitorSizeId: '',
 	conditionId: '',
+	classroomId: '',
 };
 
 export const buildDigitalBlackboardBody = (
@@ -45,4 +47,5 @@ export const buildDigitalBlackboardBody = (
 	monitorTypeId: values.monitorTypeId,
 	monitorSizeId: values.monitorSizeId,
 	conditionId: values.conditionId,
+	classroomId: values.classroomId || undefined,
 });

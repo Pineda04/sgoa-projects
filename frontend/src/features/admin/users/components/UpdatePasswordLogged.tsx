@@ -7,11 +7,21 @@ import { useShowPassword } from '@shared/hooks';
 import { errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
 import { EyeIcon, EyeOff } from 'lucide-react';
+import { FiSave } from 'react-icons/fi';
 
-export const UpdatePasswordLogged = ({ onCancel, }: { onCancel: () => void; }) => {
-	const { authState: { user }	} = useAuth();
+export const UpdatePasswordLogged = ({
+	onCancel,
+}: {
+	onCancel: () => void;
+}) => {
+	const {
+		authState: { user },
+	} = useAuth();
 	const { updateUser, isPendingUpdate } = useUpdateUser(user!.sub);
-	const { showPassword, handleShowPassword } = useShowPassword({ password: false,	passwordConfirm: false,	});
+	const { showPassword, handleShowPassword } = useShowPassword({
+		password: false,
+		passwordConfirm: false,
+	});
 
 	const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
 		useFormik<TResetPassword>({
@@ -93,20 +103,18 @@ export const UpdatePasswordLogged = ({ onCancel, }: { onCancel: () => void; }) =
 					</>
 				))}
 				<div className="flex flex-col sm:flex-row sm:justify-end md:col-span-2 mx-auto sm:mx-0">
-					<Button
-						type="submit"
-						className="bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition gap-2 duration-500 cursor-pointer sm:mr-2 w-fit"
-						disabled={!errors}
-						// variant="unstyled"
-					>
-						Realizar el cambio
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
 					</Button>
 					<Button
-						type="button"
-						className="bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition gap-2 duration-500 cursor-pointer w-fit mx-auto sm:mx-0"
-						onClick={onCancel}
-					>
-						Cancelar
+						type="submit"
+						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
+						disabled={!errors}
+          >
+            <FiSave className="size-4" />
+            <span>
+              Actualizar Contraseña
+						</span>
 					</Button>
 				</div>
 			</form>

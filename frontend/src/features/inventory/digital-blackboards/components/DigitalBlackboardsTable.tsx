@@ -110,8 +110,8 @@ export const DigitalBlackboardsTable = ({
 		},
 		{
 			key: 'monitorTypeId',
-			header: 'Tipo de Monitor',
-			mobileLabel: 'Tipo de Monitor',
+			header: 'Tipo',
+			mobileLabel: 'Tipo',
 			render: row => monitorTypeMap.get(row.monitorTypeId) ?? '—',
 		},
 		{
@@ -125,6 +125,12 @@ export const DigitalBlackboardsTable = ({
 			header: 'Condición',
 			mobileLabel: 'Condición',
 			render: row => conditionMap.get(row.conditionId) ?? '—',
+		},
+		{
+			key: 'classroom',
+			header: 'Aula',
+			mobileLabel: 'Aula',
+			render: row => row.classroom?.name ?? 'Sin aula asignada',
 		},
 		{
 			key: 'actions',

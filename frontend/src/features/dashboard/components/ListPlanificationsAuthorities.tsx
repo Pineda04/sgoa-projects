@@ -69,8 +69,8 @@ export const ListPlanificationsAuthorities = () => {
 		},
 		{
 			key: 'actions',
-			header: 'Ver contenido',
-			mobileLabel: 'Ver',
+			header: 'Acciones',
+			mobileLabel: 'Acciones',
 			render: (row: TPlanificationAuthorityRow) => (
 				<Link
 					className="flex justify-center items-center p-1 w-full"

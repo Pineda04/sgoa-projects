@@ -24,6 +24,7 @@ import {
 	TrashIcon,
 	PencilIcon,
 } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from 'lucide-react';
 
 export const CreatePlanification = () => {
 	const navigate = useNavigate();
@@ -158,7 +159,7 @@ export const CreatePlanification = () => {
 
 	return (
 		<>
-			<div className="mt-10 flex flex-col items-center">
+			<div className="flex flex-col items-center">
 				<p className="text-2xl font-semibold">
 					{currentCenter?.center.name ?? 'UNAH Campus Copán'}
 				</p>
@@ -172,7 +173,15 @@ export const CreatePlanification = () => {
 				</p>
 			</div>
 
-			<div className="mb-6 mt-6 flex justify-center gap-4">
+      <div className="mb-6 mt-6 flex justify-center gap-4">
+        <Button
+          onClick={() => navigate(-1)}
+          variant="outline"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          Volver
+        </Button>
+
 				<Button
 					onClick={openAdd}
 					className="flex items-center justify-center gap-2 bg-[#5BC85C] text-white px-4 py-2 hover:bg-green-300 transition duration-300 cursor-pointer"
