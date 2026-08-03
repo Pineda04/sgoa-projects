@@ -1,4 +1,4 @@
-import LogoUNAH from '/logo-unah-2.webp';
+import LogoUNAH from '/logo-unah-4.png';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -142,17 +142,12 @@ export const Login = () => {
 					</svg>
 				</div>
 
-				<div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-					<div className="absolute -top-20 -left-20 w-64 h-64 md:w-96 md:h-96 bg-white/5 rounded-full blur-3xl"></div>
-					<div className="absolute bottom-0 right-0 w-56 h-56 md:w-80 md:h-80 bg-accent/10 rounded-full blur-3xl"></div>
-				</div>
-
 				<div className="relative z-10 flex flex-col items-center text-center p-6 md:p-8 animate-in slide-up">
 					<div className="mb-4 md:mb-6 p-3 md:p-4">
 						<img
 							src={LogoUNAH}
 							alt="Logo UNAH"
-							className="w-20 h-auto md:w-28 object-contain"
+							className="w-20 h-auto md:w-35 object-contain"
 						/>
 					</div>
 

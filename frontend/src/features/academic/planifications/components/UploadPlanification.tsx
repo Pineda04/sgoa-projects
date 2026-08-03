@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
-import { TPlanification, TPlanificationWithErrors, useViewAcademicAssignmentMutation } from '@api/assignment-reports';
+import { DocumentArrowDownIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import { TPlanification, TPlanificationWithErrors, useViewAcademicAssignmentMutation, academicAssignmentReportsApi } from '@api/assignment-reports';
 import { ESwalIcons, genericAlert } from '@shared/utils';
 import { Button } from '@shared/components';
 
@@ -86,6 +86,31 @@ export const UploadPlanification = ({
 		);
 	};
 
+	const handleDownloadTemplate = async () => {
+		try {
+			const response =
+				await academicAssignmentReportsApi.getAcademicAssignmentTemplate();
+
+			const blob = new Blob([response.data], {
+				type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			});
+
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = 'plantilla-planificacion-academica.xlsx';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+		} catch {
+			genericAlert(
+				'No se pudo descargar la plantilla',
+				ESwalIcons.ERROR
+			);
+		}
+	};
+
 	return (
 		<>
 			<h2 className="text-2xl font-semibold text-center py-10">
@@ -124,8 +149,20 @@ export const UploadPlanification = ({
 
 			<Button
 				type="button"
+				onClick={handleDownloadTemplate}
+				className="mx-auto w-fit justify-center mt-6
+         text-[#C40C54] border border-[#C40C54] p-2 hover:bg-pink-50
+         transition flex flex-row gap-2 duration-500"
+				variant="unstyled"
+			>
+				<DocumentArrowDownIcon className="size-6" />
+				Descargar plantilla
+			</Button>
+
+			<Button
+				type="button"
 				onClick={handleUpload}
-				className="mx-auto w-fit justify-center mt-10 mb-50
+				className="mx-auto w-fit justify-center mt-5 mb-10
          bg-[#C40C54] text-white p-2 hover:bg-pink-500
          transition flex flex-row gap-2 duration-500"
 				variant="unstyled"
