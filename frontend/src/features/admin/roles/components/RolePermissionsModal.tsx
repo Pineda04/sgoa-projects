@@ -37,6 +37,54 @@ const ACTIONS_ORDER: AssignableActions[] = [
 	'delete',
 ];
 
+// Orden de importancia: los módulos de alto impacto (dashboards, académico,
+// organización) van arriba; los catálogos y vistas de bajo impacto al final.
+const SUBJECTS_ORDER: Subjects[] = [
+	'dashboard-authorities',
+	'dashboard-coordinator',
+	'dashboard-teacher',
+	'dashboard-monitor',
+	'courses',
+	'planifications',
+	'reports',
+	'periods',
+	'degrees',
+	'activities',
+	'users',
+	'user-departments',
+	'user-status',
+	'faculties',
+	'departments',
+	'positions',
+	'centers',
+	'schedule-compliance-check',
+	'reports-monitor',
+	'buildings',
+	'classrooms',
+	'pc-equipments',
+	'audio-equipments',
+	'air-conditioners',
+	'digital-blackboards',
+	'catalog',
+	'teacher-categories',
+	'contract-types',
+	'shifts',
+	'brands',
+	'conditions',
+	'connectivities',
+	'room-types',
+	'pc-types',
+	'monitor-types',
+	'monitor-sizes',
+	'home',
+	'help',
+	'profile',
+];
+
+const SUBJECT_INDEX = new Map(
+	SUBJECTS_ORDER.map((subject, index) => [subject, index])
+);
+
 export const RolePermissionsModal = ({
 	isOpen,
 	onClose,
@@ -64,6 +112,16 @@ export const RolePermissionsModal = ({
 		}
 		return map;
 	}, [catalog]);
+
+	const orderedSubjects = useMemo(
+		() =>
+			Array.from(bySubject.keys()).sort(
+				(a, b) =>
+					(SUBJECT_INDEX.get(a) ?? SUBJECTS_ORDER.length) -
+					(SUBJECT_INDEX.get(b) ?? SUBJECTS_ORDER.length)
+			),
+		[bySubject]
+	);
 
 	const impliedPermissions = catalog?.impliedPermissions ?? {};
 
@@ -103,17 +161,17 @@ export const RolePermissionsModal = ({
 					<Loading />
 				) : (
 					<form onSubmit={handleSubmit} className="space-y-5">
-						<div className="overflow-x-auto border border-gray-100 rounded-lg">
+						<div className="overflow-auto max-h-[60vh] rounded-lg border border-gray-100">
 							<table className="w-full text-sm">
 								<thead className="bg-gray-50">
 									<tr>
-										<th className="text-left px-3 py-2 font-semibold text-gray-700">
+										<th className="sticky top-0 left-0 z-30 bg-gray-50 text-left px-3 py-2 font-semibold text-gray-700 border-b border-gray-200">
 											Módulo
 										</th>
 										{ACTIONS_ORDER.map(action => (
 											<th
 												key={action}
-												className="px-3 py-2 font-semibold text-gray-700 text-center whitespace-nowrap"
+												className="sticky top-0 z-20 bg-gray-50 px-3 py-2 font-semibold text-gray-700 text-center whitespace-nowrap border-b border-gray-200"
 											>
 												{ACTION_LABELS[action]}
 											</th>
@@ -121,19 +179,21 @@ export const RolePermissionsModal = ({
 									</tr>
 								</thead>
 								<tbody>
-									{Array.from(bySubject.entries()).map(
-										([subject, permissions]) => (
+									{orderedSubjects.map(subject => {
+										const permissions = bySubject.get(subject);
+										return (
 											<tr
 												key={subject}
 												className="border-t border-gray-100"
 											>
-												<td className="px-3 py-2 text-gray-700">
+												<td className="sticky left-0 z-10 bg-white px-3 py-2 text-gray-700 border-r border-gray-100">
 													<span>
 														{SUBJECT_LABELS[subject] ??
 															subject}
 													</span>
-													{!!impliedPermissions[subject]
-														?.length && (
+													{!!impliedPermissions[
+														subject
+													]?.length && (
 														<span className="block text-[11px] text-green-700">
 															Incluye:{' '}
 															{impliedPermissions[
@@ -179,35 +239,42 @@ export const RolePermissionsModal = ({
 													);
 												})}
 											</tr>
-										)
-									)}
+										);
+									})}
 								</tbody>
 							</table>
 						</div>
 
-						<div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={onClose}
-								disabled={isPendingUpdatePermissions}
-							>
-								Cancelar
-							</Button>
-							<Button
-								type="submit"
-								className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-								disabled={isPendingUpdatePermissions}
-							>
-								{!isPendingUpdatePermissions && (
-									<FiSave className="size-4" />
-								)}
-								<span>
-									{isPendingUpdatePermissions
-										? 'Guardando...'
-										: 'Guardar Permisos'}
-								</span>
-							</Button>
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
+							<p className="text-sm text-gray-500">
+								{selected.size} de{' '}
+								{catalog?.permissions.length ?? 0} permisos
+								marcados
+							</p>
+							<div className="flex justify-end gap-3">
+								<Button
+									type="button"
+									variant="outline"
+									onClick={onClose}
+									disabled={isPendingUpdatePermissions}
+								>
+									Cancelar
+								</Button>
+								<Button
+									type="submit"
+									className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+									disabled={isPendingUpdatePermissions}
+								>
+									{!isPendingUpdatePermissions && (
+										<FiSave className="size-4" />
+									)}
+									<span>
+										{isPendingUpdatePermissions
+											? 'Guardando...'
+											: 'Guardar Permisos'}
+									</span>
+								</Button>
+							</div>
 						</div>
 					</form>
 				)}
