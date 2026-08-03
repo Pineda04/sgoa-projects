@@ -77,7 +77,7 @@ export const ListCenters = () => {
 	const columns: IDataTableColumn<TCenter>[] = [
 		{
 			key: 'name',
-			header: 'Nombre del Centro',
+			header: 'Nombre',
 			className: 'text-gray-800 font-normal p-4',
 		},
 		...(canUpdate || canDelete

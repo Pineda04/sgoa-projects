@@ -28,8 +28,8 @@ export const ListPlanificationsTable = ({
 		},
 		{
 			key: 'actions',
-			header: 'Ver contenido',
-			mobileLabel: 'Ver',
+			header: 'Acciones',
+			mobileLabel: 'Acciones',
 			render: (row: TPlanificationRow) => (
 				<Link
 					className="flex justify-center items-center p-1 w-full"

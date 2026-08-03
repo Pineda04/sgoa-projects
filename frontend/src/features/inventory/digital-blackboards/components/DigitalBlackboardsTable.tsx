@@ -110,8 +110,8 @@ export const DigitalBlackboardsTable = ({
 		},
 		{
 			key: 'monitorTypeId',
-			header: 'Tipo de Monitor',
-			mobileLabel: 'Tipo de Monitor',
+			header: 'Tipo',
+			mobileLabel: 'Tipo',
 			render: row => monitorTypeMap.get(row.monitorTypeId) ?? '—',
 		},
 		{

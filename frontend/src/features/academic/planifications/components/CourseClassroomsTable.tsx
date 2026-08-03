@@ -28,6 +28,7 @@ import {
 } from '@shared/components';
 import { DeleteCourseClassroomModal } from './DeleteCourseClassroomModal';
 import { EditCourseClassroomForm } from './EditCourseClassroomForm';
+import { FiSave } from 'react-icons/fi';
 
 const useTeachersSearch = (st: string) => useGetTeachersBySearchTerm(st);
 
@@ -66,8 +67,9 @@ export const CourseClassroomsTable = ({
 
 	const [isShowModalDelete, handleShowModalDelete, handleCloseModalDelete] =
 		useModal();
-	const [courseClassroomToDelete, setCourseClassroomToDelete] =
-		useState<CourseClassroomData | undefined>();
+	const [courseClassroomToDelete, setCourseClassroomToDelete] = useState<
+		CourseClassroomData | undefined
+	>();
 
 	const { deleteCourseClassroom, isPendingDeleteCourseClassroom } =
 		useDeleteCourseClassroom();
@@ -224,7 +226,8 @@ export const CourseClassroomsTable = ({
 			header: 'Observación',
 			mobileLabel: 'Obs.',
 			hiddenOnMobile: true,
-			className: 'max-w-[50ch] whitespace-normal break-words text-left align-top',
+			className:
+				'max-w-[50ch] whitespace-normal break-words text-left align-top',
 		},
 	];
 
@@ -326,24 +329,27 @@ export const CourseClassroomsTable = ({
 					</form>
 					<div className="md:col-span-2 flex justify-end mt-3">
 						<Button
-							type="submit"
-							form="change-teacher"
-							className="w-50 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition flex flex-row gap-2 duration-500 cursor-pointer mr-2 disabled:opacity-60 disabled:cursor-not-allowed"
-							disabled={isPendingChangeTeacherCourseClassroom}
-							variant="unstyled"
-						>
-							{isPendingChangeTeacherCourseClassroom
-								? 'Guardando...'
-								: 'Realizar el cambio'}
-						</Button>
-						<Button
 							type="button"
-							className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition flex flex-row gap-2 duration-500 cursor-pointer"
 							onClick={handleCloseModalChangeTeacher}
 							disabled={isPendingChangeTeacherCourseClassroom}
-							variant="unstyled"
+							variant="outline"
 						>
 							Cancelar
+						</Button>
+						<Button
+							type="submit"
+							form="change-teacher"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
+							disabled={isPendingChangeTeacherCourseClassroom}
+						>
+							{!isPendingChangeTeacherCourseClassroom && (
+								<FiSave className="size-4" />
+							)}
+							<span>
+								{isPendingChangeTeacherCourseClassroom
+									? 'Guardando...'
+									: 'Actualizar Docente'}
+							</span>
 						</Button>
 					</div>
 				</div>
