@@ -5,6 +5,7 @@ import {
 	TMonitorSize,
 	TMonitorType,
 	TPcEquipment,
+	TPcEquipmentWithRelations,
 	TPcType,
 	TUpdatePcEquipment,
 } from './pc-equipments.types';
@@ -17,6 +18,11 @@ export const pcEquipmentsApi = {
 
 	getOnePcEquipment: (id: string) =>
 		api.get<IResponse<TPcEquipment>>(`/pc-equipments/${id}`),
+
+	getPcEquipmentsByClassroom: (classroomId: string) =>
+		api.get<IResponse<TPcEquipmentWithRelations[]>>(
+			`/pc-equipments/by-classroom/${classroomId}`
+		),
 
 	createPcEquipment: (body: TCreatePcEquipment) =>
 		api.post<IResponse<TPcEquipment>>(`/pc-equipments`, body),
