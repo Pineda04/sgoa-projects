@@ -18,6 +18,7 @@ export type Subjects =
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher'
 	| 'dashboard-monitor'
+	| 'dashboard-tab-classrooms'
 	| 'users'
 	| 'user-roles'
 	| 'user-departments'
@@ -38,7 +39,7 @@ export type Subjects =
 	| 'air-conditioners'
 	| 'digital-blackboards'
 	| 'schedule-compliance-check'
-  | 'reports-monitor'
+	| 'reports-monitor'
 	| 'catalog'
 	| 'teacher-categories'
 	| 'contract-types'
@@ -75,15 +76,16 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 
 	// ================== DIRECCION ==================
 	if (roles.includes(EUserRole.DIRECCION)) {
-    can('manage', 'dashboard-authorities');
+		can('manage', 'dashboard-authorities');
+		can('manage', 'profile');
 
-    // Usuarios
+		// Usuarios
 		can('manage', 'users');
 		can('manage', 'user-roles');
-    can('manage', 'user-status');
+		can('manage', 'user-status');
 		can('manage', 'user-departments');
 
-    // Modulos/Secciones
+		// Modulos/Secciones
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'pc-equipments');
@@ -95,11 +97,11 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'positions');
 		can('manage', 'air-conditioners');
 		can('manage', 'digital-blackboards');
-    can('manage', 'periods');
+		can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
 
-    // Catalogo
+		// Catalogo
 		can('manage', 'catalog');
 		can('manage', 'teacher-categories');
 		can('manage', 'contract-types');
@@ -117,14 +119,15 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 	// ==================== RRHH ====================
 	if (roles.includes(EUserRole.RRHH)) {
 		can('manage', 'dashboard-authorities');
+		can('manage', 'profile');
 
 		// Usuarios
-    can('manage', 'users');
+		can('manage', 'users');
 		can('manage', 'user-roles');
 		can('manage', 'user-status');
-    can('manage', 'user-departments');
+		can('manage', 'user-departments');
 
-    // Modulos/Secciones
+		// Modulos/Secciones
 		can('manage', 'courses');
 		can('manage', 'departments');
 		can('manage', 'buildings');
@@ -132,7 +135,7 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'degrees');
 		can('manage', 'faculties');
 		can('manage', 'positions');
-    can('manage', 'periods');
+		can('manage', 'periods');
 		can('read', 'reports');
 		can('read', 'planifications');
 
@@ -141,44 +144,46 @@ export function defineAbilityFor(roles: string[]): AppAbility {
 		can('manage', 'teacher-categories');
 		can('manage', 'contract-types');
 		can('manage', 'shifts');
-    can('manage', 'connectivities');
-    can('manage', 'room-types');
+		can('manage', 'connectivities');
+		can('manage', 'room-types');
 	}
 
 	// ============== COORDINADOR_AREA ==============
 	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
 		can('manage', 'dashboard-coordinator');
+		can('manage', 'profile');
 
 		// Usuarios
 		can('manage', 'users');
 		can('manage', 'user-departments');
 
+
 		// Modulos/Secciones
 		can('manage', 'reports');
 		can('manage', 'planifications');
 		can('read', 'courses');
-		can('read', 'classrooms');
 	}
 
 	// =================== DOCENTE ==================
 	if (roles.includes(EUserRole.DOCENTE)) {
 		can('manage', 'dashboard-teacher');
+		can('read', 'dashboard-tab-classrooms');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
-    can('read', 'courses');
+		can('read', 'courses');
 		can('read', 'reports');
 		can('read', 'planifications');
-		can('read', 'classrooms');
 	}
 
 	// =================== MONITOR ==================
 	if (roles.includes(EUserRole.MONITOR)) {
 		can('manage', 'dashboard-monitor');
+		can('read', 'dashboard-tab-classrooms');
+		can('manage', 'profile');
 
 		// Modulos/Secciones
-    can('manage', 'schedule-compliance-check');
-		can('read', 'classrooms');
-		can('read', 'buildings');
+		can('manage', 'schedule-compliance-check');
 		can('read', 'reports-monitor');
 	}
 

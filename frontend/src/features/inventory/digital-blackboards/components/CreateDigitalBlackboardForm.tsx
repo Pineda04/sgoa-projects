@@ -9,6 +9,7 @@ import {
 	TDigitalBlackboardFormValues,
 } from '../schemas';
 import { DigitalBlackboardFormInputs } from './DigitalBlackboardFormInputs';
+import { FiSave } from 'react-icons/fi';
 
 interface CreateDigitalBlackboardFormProps {
 	onCancel: () => void;
@@ -64,22 +65,25 @@ export const CreateDigitalBlackboardForm = ({
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					form="create-digital-blackboard-form"
-					disabled={createMutation.isPending}
-					className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
-				>
-					{createMutation.isPending ? 'Guardando...' : 'Guardar'}
-				</Button>
-				<Button
 					type="button"
 					onClick={onCancel}
 					disabled={createMutation.isPending}
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+					form="create-digital-blackboard-form"
+					disabled={createMutation.isPending}
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+				>
+          {!createMutation.isPending && <FiSave className="size-4" />}
+					<span>
+						{createMutation.isPending
+							? 'Guardando...'
+							: 'Guardar Pizarra Digital'}
+					</span>
 				</Button>
 			</div>
 		</div>

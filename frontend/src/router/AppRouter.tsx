@@ -8,7 +8,6 @@ import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
 import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } from '@features/admin';
-import { coursesRoutes } from '@features/academic/courses/routes';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
@@ -96,12 +95,6 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/courses/*',
-			element: <ProtectedRoute action="read" subject="courses" />,
-			children: coursesRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
 			path: 'academic/planifications/*',
 			element: <ProtectedRoute action="read" subject="planifications" />,
 			children: planificationsRoutes,
@@ -169,7 +162,12 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'infrastructure/classrooms/*',
-			element: <ProtectedRoute action="read" subject="classrooms" />,
+			element: (
+				<ProtectedRoute
+					action="read"
+					subject={['classrooms', 'dashboard-tab-classrooms']}
+				/>
+			),
 			children: classroomsRoutes,
 			errorElement: <div>404</div>,
 		},

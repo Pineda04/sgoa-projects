@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, Plus } from 'lucide-react';
 import { CourseDepartmentFilter } from './CourseDepartmentFilter';
+import { CreateCourseModal } from './CreateCourseModal';
+import { CourseViewModal } from './CourseViewModal';
 import {
 	Button,
 	Error,
@@ -17,7 +18,7 @@ import {
 	useSearchCourses,
 } from '@api/courses';
 import { useAbility } from '@config';
-import { useDebounce, usePaginationParams } from '@shared/hooks';
+import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 
 interface CourseWithDepartment extends TCourse {
 	department: {
@@ -28,7 +29,8 @@ interface CourseWithDepartment extends TCourse {
 
 const createCourseColumns = (
 	showDepartmentInTable: boolean,
-	canUpdate: boolean
+	canUpdate: boolean,
+	onView: (id: string) => void
 ): IResponsiveColumn<CourseWithDepartment>[] => [
 	{ key: 'code', header: 'Código', mobileLabel: 'Cod.' },
 	{
@@ -77,13 +79,16 @@ const createCourseColumns = (
 					key: 'actions' as const,
 					header: 'Acciones',
 					mobileLabel: 'Acciones',
-					render: (row: CourseWithDepartment) => (
-						<Link
-							to={`/academic/courses/edit/${row.id}`}
-							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
-						>
-							<EyeIcon className="size-5" />
-						</Link>
+        render: (row: CourseWithDepartment) => (
+            <div className='flex items-center justify-center'>
+  						<button
+  							onClick={() => onView(row.id)}
+  							title="Ver / Editar clase"
+  							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
+  						>
+  							<EyeIcon className="size-5" />
+  						</button>
+            </div>
 					),
 				},
 			]
@@ -96,12 +101,20 @@ export const CourseList = ({
 	showDepartmentFilter = false,
 	showDepartmentInTable = false,
 }: ICoursesListProps) => {
-	const navigate = useNavigate();
 	const ability = useAbility();
 	const canCreateCourse = ability.can('create', 'courses');
 	const canUpdate = ability.can('update', 'courses');
 
 	const { setPage } = usePaginationParams();
+
+	const [isCreateOpen, openCreate, closeCreate] = useModal();
+	const [isViewOpen, openView, closeView] = useModal();
+	const [viewCourseId, setViewCourseId] = useState<string | null>(null);
+
+	const handleCloseView = () => {
+		closeView();
+		setViewCourseId(null);
+	};
 
 	const [selectedDepartment, setSelectedDepartment] = useState(
 		centerDepartmentId ?? ''
@@ -155,8 +168,16 @@ export const CourseList = ({
 		: allCoursesInfo.data?.meta;
 
 	const columns = useMemo(
-		() => createCourseColumns(!!showDepartmentInTable, canUpdate),
-		[showDepartmentInTable, canUpdate]
+		() =>
+			createCourseColumns(
+				!!showDepartmentInTable,
+				canUpdate,
+				id => {
+					setViewCourseId(id);
+					openView();
+				}
+			),
+		[showDepartmentInTable, canUpdate, openView]
 	);
 
 	return (
@@ -207,7 +228,7 @@ export const CourseList = ({
 				<div className={`flex justify-end col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}>
 					{canCreateCourse && (
 						<Button
-							onClick={() => navigate('/academic/courses/new')}
+							onClick={openCreate}
 							className="bg-green-500 text-white p-2 hover:bg-green-600 transition"
 						>
 							<Plus className="size-4 mr-1" />
@@ -242,6 +263,14 @@ export const CourseList = ({
 					</div>
 				</>
 			)}
+
+			<CreateCourseModal isOpen={isCreateOpen} onClose={closeCreate} />
+
+			<CourseViewModal
+				isOpen={isViewOpen}
+				onClose={handleCloseView}
+				courseId={viewCourseId}
+			/>
 		</div>
 	);
 };

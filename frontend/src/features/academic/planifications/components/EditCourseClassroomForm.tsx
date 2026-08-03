@@ -28,6 +28,7 @@ import {
 	genericAlert,
 } from '@shared/utils';
 import { ClassroomAvailabilityModal } from '@features/infrastructure/classrooms/components/ClassroomAvailabilityModal';
+import { FiSave } from 'react-icons/fi';
 
 interface IEditCourseClassroomFormProps {
 	courseClassroomId: string;
@@ -411,22 +412,21 @@ export const EditCourseClassroomForm = ({
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					form="form-editar-planificacion"
-					disabled={isPending}
-					className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
-				>
-					Guardar
-				</Button>
-				<Button
 					type="button"
 					onClick={onCancel}
 					disabled={isPending}
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+					form="form-editar-planificacion"
+					disabled={isPending}
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+				>
+					<FiSave className="size-4" />
+					<span>Actualizar Asignación</span>
 				</Button>
 			</div>
 		</div>

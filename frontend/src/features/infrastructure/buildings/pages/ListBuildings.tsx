@@ -84,12 +84,12 @@ export const ListBuildings = () => {
 	const columns: IDataTableColumn<TBuilding>[] = [
 		{
 			key: 'name',
-			header: 'Nombre del Edificio',
+			header: 'Nombre',
 			className: 'text-gray-800 font-normal p-4',
 		},
 		{
 			key: 'color',
-			header: 'Color Distintivo',
+			header: 'Color',
 			className: 'text-gray-800 font-normal p-4 text-center',
 			render: (building: TBuilding) => {
 				const baseColor = building.color || '#e2e8f0';
@@ -119,7 +119,7 @@ export const ListBuildings = () => {
 		},
 		{
 			key: 'center',
-			header: 'Centro Vinculado',
+			header: 'Centro',
 			className: 'text-gray-800 font-normal p-4',
 			render: (building: TBuilding) => {
 				const matchedCenter = centers?.find(

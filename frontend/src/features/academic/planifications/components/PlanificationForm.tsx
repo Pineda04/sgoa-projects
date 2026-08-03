@@ -20,6 +20,7 @@ import { useModal } from '@shared/hooks';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
 import { ClassroomAvailabilityModal } from '@features/infrastructure/classrooms/components/ClassroomAvailabilityModal';
+import { FiSave } from 'react-icons/fi';
 
 interface IPlanificationFormProps {
 	centerDepartmentId: string;
@@ -590,20 +591,21 @@ export const PlanificationForm = ({
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					form="form-planificacion"
-					variant="unstyled"
-				>
-					Guardar
-				</Button>
-				<Button
 					type="button"
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
 					onClick={onCancel}
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+          className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+          form="form-planificacion"
+				>
+				  <FiSave className="size-4" />
+          <span>
+            Guardar Asignación
+          </span>
 				</Button>
 			</div>
 		</div>

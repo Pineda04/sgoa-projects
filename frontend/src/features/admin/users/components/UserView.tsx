@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { PencilIcon, Save, XCircle } from 'lucide-react';
+import { PencilIcon, Save } from 'lucide-react';
 import { IoWarningOutline } from 'react-icons/io5';
 import { askDel } from '@shared/utils/delete-action';
 import Select, {
@@ -188,7 +188,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		authState: { user },
 	} = useAuth();
 	const ability = useAbility();
-	const canUpdate = ability.can('update', 'users');
+	const canUpdate =
+		ability.can('update', 'users') ||
+		ability.can('update', 'profile');
 
 	const { updateUser, isPendingUpdate } = useUpdateUser(initialData.userId);
 	const { changeStatusActiveUser, isPendingChangeStatusActive } =
@@ -366,51 +368,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				readOnly: !isEdit,
 			},
 			{
-				label: 'Jornada laboral',
-				name: 'workingDay',
-				type: FIELD_TYPE_TAG.CUSTOM,
-				element: (
-					<div key={'workingDay'} className="grid grid-cols-2 gap-2">
-						{(
-							[
-								{
-									label: 'Hora de inicio',
-									name: 'shiftStart',
-									type: FIELD_TYPE_TAG.TIME_SELECT,
-									value: String(
-										formik.values.shiftStart ?? ''
-									),
-									placeholder: '15:00',
-									handleBlur: formik.handleBlur,
-									handleChange: formik.handleChange,
-									readOnly: !isEdit,
-								},
-								{
-									label: 'Hora final',
-									name: 'shiftEnd',
-									type: FIELD_TYPE_TAG.TIME_SELECT,
-									value: String(formik.values.shiftEnd ?? ''),
-									placeholder: '20:00',
-									handleBlur: formik.handleBlur,
-									handleChange: formik.handleChange,
-									readOnly: !isEdit,
-								},
-							] as TFieldConfig[]
-						).map(field => (
-							<div
-								key={field.name}
-								className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
-							>
-								<label className="mb-2 sm:whitespace-break-spaces lg:whitespace-nowrap">
-									{field.label}
-								</label>
-								{genElement(field)}
-							</div>
-						))}
-					</div>
-				),
-			},
-			{
 				label: 'Pregados',
 				name: 'undergradId',
 				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
@@ -448,7 +405,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				readOnly: !isEdit,
 			},
 			{
-				label: 'Postgrados',
+				label: 'Posgrados',
 				name: 'postgradId',
 				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
 				defaultValue: initialData.postgrads.map(u => ({
@@ -483,6 +440,51 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 					handleEdit();
 				},
 				readOnly: !isEdit,
+			},
+			{
+				label: 'Jornada laboral',
+				name: 'workingDay',
+				type: FIELD_TYPE_TAG.CUSTOM,
+				element: (
+					<div key={'workingDay'} className="grid grid-cols-2 gap-2">
+						{(
+							[
+								{
+									label: 'Inicio',
+									name: 'shiftStart',
+									type: FIELD_TYPE_TAG.TIME_SELECT,
+									value: String(
+										formik.values.shiftStart ?? ''
+									),
+									placeholder: '15:00',
+									handleBlur: formik.handleBlur,
+									handleChange: formik.handleChange,
+									readOnly: !isEdit,
+								},
+								{
+									label: 'Fin',
+									name: 'shiftEnd',
+									type: FIELD_TYPE_TAG.TIME_SELECT,
+									value: String(formik.values.shiftEnd ?? ''),
+									placeholder: '20:00',
+									handleBlur: formik.handleBlur,
+									handleChange: formik.handleChange,
+									readOnly: !isEdit,
+								},
+							] as TFieldConfig[]
+						).map(field => (
+							<div
+								key={field.name}
+								className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
+							>
+								<label className="mb-2 sm:whitespace-break-spaces lg:whitespace-nowrap">
+									{field.label}
+								</label>
+								{genElement(field)}
+							</div>
+						))}
+					</div>
+				),
 			},
 		],
 		[
@@ -530,7 +532,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 	return (
 		<div className={`${!isModal ? 'min-h-screen ' : ''}px-4 py-4`}>
 			<div
-				className={`sticky z-20 mb-5 ${isModal ? 'bg-white' : 'bg-gray-50 top-14.25'}`}
+				className={`mr-6 sticky z-20 mb-5 ${isModal ? 'bg-white' : 'bg-gray-50 top-14.25'}`}
 			>
 				<div className="flex flex-col justify-start items-center py-5 md:flex-row md:justify-between md:items-center md:py-0 w-full">
 					<h1 className="text-2xl font-semibold">
@@ -555,7 +557,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
+							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-[#144C74]/90 transition duration-500 cursor-pointer"
 							hidden={isEdit || !canUpdate}
 							onClick={handleEdit}
 							variant="unstyled"
@@ -565,17 +567,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#5BC85C] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-green-300 transition duration-500 cursor-pointer"
-							hidden={!isEdit}
-							onClick={() => formik.handleSubmit()}
-							variant="unstyled"
-						>
-							<Save className="size-5" />
-							Guardar
-						</Button>
-						<Button
-							type="button"
-							className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-red-400 transition duration-500 cursor-pointer"
 							hidden={!isEdit}
 							onClick={() => {
 								handleEdit();
@@ -583,10 +574,19 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 									values: initialValues,
 								});
 							}}
+							variant="outline"
+						>
+							Cancelar
+						</Button>
+						<Button
+							type="button"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
+							hidden={!isEdit}
+							onClick={() => formik.handleSubmit()}
 							variant="unstyled"
 						>
-							<XCircle className="size-5" />
-							Cancelar
+							<Save className="size-5" />
+							Guardar
 						</Button>
 					</div>
 				</div>
