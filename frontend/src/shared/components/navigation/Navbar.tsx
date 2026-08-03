@@ -267,7 +267,7 @@ export const Navbar = () => {
 	return (
 		<nav
 			ref={navbarRef}
-			className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
+			className="relative flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
 		>
 			<div>
 				<Link
@@ -282,7 +282,7 @@ export const Navbar = () => {
 
 			{visibleModules.length > 0 && (
 				<>
-					<div className="hidden lg:flex items-center gap-1">
+					<div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
 						{visibleModules.map(mod => (
 							<div key={mod.id} className="relative">
 								<button
