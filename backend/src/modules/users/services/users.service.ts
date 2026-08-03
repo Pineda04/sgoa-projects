@@ -62,9 +62,9 @@ export class UsersService {
       contractTypeId,
       shiftId,
       undergradId,
-      positionId,
       centerDepartmentId,
     } = createUserDto;
+    let { positionId } = createUserDto;
 
     // Check if teacher data will be created (based on the same logic as in create method)
     const willCreateTeacherData =
@@ -115,6 +115,7 @@ export class UsersService {
       !roles.includes(EUserRole.ADMIN) &&
       positionId !== postionNone.id
     ) {
+      positionId = postionNone.id;
       createUserDto.positionId = postionNone.id;
     }
 
@@ -430,14 +431,14 @@ export class UsersService {
       positionHeld:
         teacher.positionId && teacher.centerDepartmentId
           ? {
-              deleteMany: {},
-              create: [
-                {
-                  positionId: teacher.positionId,
-                  centerDepartmentId: teacher.centerDepartmentId,
-                },
-              ],
-            }
+            deleteMany: {},
+            create: [
+              {
+                positionId: teacher.positionId,
+                centerDepartmentId: teacher.centerDepartmentId,
+              },
+            ],
+          }
           : undefined,
     };
 

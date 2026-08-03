@@ -82,7 +82,7 @@ export class TeachersService {
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     // private readonly teachersUndergradService: TeachersUndergradService,
-  ) {}
+  ) { }
 
   // para crear un perfil de docente para un usuario ya creado, siempre y cuando el rol, sea: DOCENTE, COORDINADOR_CARRERA
   async create(createTeacherDto: CreateTeacherDto) {
@@ -109,9 +109,9 @@ export class TeachersService {
         shiftId,
         ...(shiftStart && shiftEnd
           ? {
-              shiftStart: hourToDateUTC(shiftStart),
-              shiftEnd: hourToDateUTC(shiftEnd),
-            }
+            shiftStart: hourToDateUTC(shiftStart),
+            shiftEnd: hourToDateUTC(shiftEnd),
+          }
           : {}),
         undergradDegrees: {
           create: [
@@ -122,30 +122,30 @@ export class TeachersService {
         },
         ...(postgradId
           ? {
-              undergradDegrees: {
-                create: [
-                  {
-                    undergraduate: { connect: { id: undergradId } },
-                  },
-                ],
-              },
-            }
+            undergradDegrees: {
+              create: [
+                {
+                  undergraduate: { connect: { id: undergradId } },
+                },
+              ],
+            },
+          }
           : {}),
         ...(positionId && centerDepartmentId
           ? {
-              positionHeld: {
-                create: [
-                  {
-                    position: { connect: { id: positionId } },
-                    centerDepartment: {
-                      connect: {
-                        id: centerDepartmentId,
-                      },
+            positionHeld: {
+              create: [
+                {
+                  position: { connect: { id: positionId } },
+                  centerDepartment: {
+                    connect: {
+                      id: centerDepartmentId,
                     },
                   },
-                ],
-              },
-            }
+                },
+              ],
+            },
+          }
           : {}),
       },
     });
@@ -454,12 +454,12 @@ export class TeachersService {
   private mapTeacher(teacher: TTeacherJoin):
     | TOutputTeacher
     | (TOutputTeacher & {
-        positions: {
-          department: TDepartmentJoin;
-          center: TCenter;
-          position: TPosition;
-        }[];
-      }) {
+      positions: {
+        department: TDepartmentJoin;
+        center: TCenter;
+        position: TPosition;
+      }[];
+    }) {
     return {
       id: teacher.id,
       name: teacher.user.name,

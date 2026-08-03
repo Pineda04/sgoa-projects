@@ -37,7 +37,7 @@ export const SelectCenterDepartments = ({
 				}));
 			}
 		}
-	}, [uniqueCenters, centerSelected]);
+	}, [uniqueCenters, centerSelected, values.centerId, setValues]);
 
 	useEffect(() => {
 		if (positionsByCenter && positionsByCenter.length > 0) {
@@ -52,8 +52,7 @@ export const SelectCenterDepartments = ({
 				}));
 			}
 		}
-	}, [positionsByCenter]);
-
+	}, [positionsByCenter, values.centerDepartmentId, setValues]);
 	if (isLoading) return <Loading />;
 
 	const selectedCenterIndex =

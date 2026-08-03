@@ -258,7 +258,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				shiftStart: initialData.shiftStart,
 				shiftEnd: initialData.shiftEnd,
 				roles: initialData.roles || [],
-				positionId: initialData.positions?.[0]?.position?.id || '',
+				positionId: initialData.positions?.[0]?.position?.position || '',
 				centerId: initialData.positions?.[0]?.center?.id || '',
 				centerDepartmentId: initialData.positions?.[0]?.centerDepartmentId || '',
 			}) as TUpdateUser,
@@ -323,9 +323,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: categories.data
 					? categories.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -347,9 +347,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: contractTypes.data
 					? contractTypes.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -371,9 +371,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: shifts.data
 					? shifts.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -395,9 +395,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				})),
 				options: undergrads.data
 					? undergrads.data.map(u => ({
-							label: u.name,
-							value: u.id,
-						}))
+						label: u.name,
+						value: u.id,
+					}))
 					: [],
 				isMulti: true,
 				handleBlur: formik.handleBlur,
@@ -432,9 +432,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				})),
 				options: postgrads.data
 					? postgrads.data.map(u => ({
-							label: u.name,
-							value: u.id,
-						}))
+						label: u.name,
+						value: u.id,
+					}))
 					: [],
 				isMulti: true,
 				handleBlur: formik.handleBlur,
@@ -504,110 +504,118 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 					</div>
 				),
 			},
-			...(canManageRoles || canManageDepartments
+			...(canManageRoles
 				? [
-						{
-							label: 'Cargo académico',
-							name: 'positionId' as const,
-							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
-							defaultValue: selectedValueSelect(
-								positions.data,
-								formik.values.positionId
-							),
-							options: positions.data
-								? positions.data.map(pos => ({
-										label: pos.name,
-										value: pos.id,
-									}))
-								: [],
-							isMulti: false,
-							handleBlur: formik.handleBlur,
-							handleChange: (newValue: any) => {
-								formik.setFieldValue(
-									'positionId',
-									(newValue as SingleValue<TCustomSelectOption>)?.value
-								);
-							},
-							readOnly: !isEdit,
+					{
+						label: 'Cargo académico',
+						name: 'positionId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							positions.data,
+							formik.values.positionId
+						),
+						options: positions.data
+							? positions.data.map(pos => ({
+								label: pos.name,
+								value: pos.id,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							formik.setFieldValue(
+								'positionId',
+								(newValue as SingleValue<TCustomSelectOption>)?.value
+							);
 						},
-						{
-							label: 'Roles de acceso',
-							name: 'roles' as const,
-							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
-							defaultValue: (formik.values.roles || []).map(r => ({
-								label: r,
-								value: r,
+						readOnly: !isEdit,
+					},
+					{
+						label: 'Roles de acceso',
+						name: 'roles' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: (formik.values.roles || []).map(r => ({
+							label: r,
+							value: r,
+						})),
+						options: [
+							EUserRole.DIRECCION,
+							EUserRole.RRHH,
+							EUserRole.COORDINADOR_AREA,
+							EUserRole.DOCENTE,
+							EUserRole.MONITOR,
+						].map(r => ({ label: r, value: r })),
+						isMulti: true,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							const rolesSelected =
+								(newValue as MultiValue<TCustomSelectOption>)?.map(v => v.value) || [];
+							formik.setFieldValue('roles', rolesSelected);
+						},
+						readOnly: !isEdit,
+					},
+				]
+				: []),
+
+			// 2. Campos que requieren permiso de departamentos
+			...(canManageDepartments
+				? [
+					{
+						label: 'Centro',
+						name: 'centerId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							centers.data,
+							formik.values.centerId || selectedCenterId
+						),
+						options: centers.data
+							? centers.data.map(c => ({
+								label: c.name,
+								value: c.id,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							const val = (newValue as SingleValue<TCustomSelectOption>)?.value || '';
+							setSelectedCenterId(val);
+							formik.setValues(prev => ({
+								...prev,
+								CenterId: val,
+								centerDepartmentId: '',
+							}));
+							formik.setFieldValue('centerDepartmentId', '');
+						},
+						readOnly: !isEdit,
+					},
+					{
+						label: 'Departamento',
+						name: 'centerDepartmentId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							centerInfo.data?.departments?.map(d => ({
+								id: d.centerDepartmentId,
+								name: d.name,
 							})),
-							options: [
-								EUserRole.DIRECCION,
-								EUserRole.RRHH,
-								EUserRole.COORDINADOR_AREA,
-								EUserRole.DOCENTE,
-								EUserRole.MONITOR,
-							].map(r => ({ label: r, value: r })),
-							isMulti: true,
-							handleBlur: formik.handleBlur,
-							handleChange: (newValue: any) => {
-								const rolesSelected =
-									(newValue as MultiValue<TCustomSelectOption>)?.map(
-										v => v.value
-									) || [];
-								formik.setFieldValue('roles', rolesSelected);
-							},
-							readOnly: !isEdit,
+							formik.values.centerDepartmentId
+						),
+						options: centerInfo.data?.departments
+							? centerInfo.data.departments.map(d => ({
+								label: d.name,
+								value: d.centerDepartmentId,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							formik.setFieldValue(
+								'centerDepartmentId',
+								(newValue as SingleValue<TCustomSelectOption>)?.value
+							);
 						},
-						{
-							label: 'Centro',
-							name: 'centerId' as const,
-							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
-							defaultValue: selectedValueSelect(
-								centers.data,
-								formik.values.centerId || selectedCenterId
-							),
-							options: centers.data
-								? centers.data.map(c => ({
-										label: c.name,
-										value: c.id,
-									}))
-								: [],
-							isMulti: false,
-							handleBlur: formik.handleBlur,
-							handleChange: (newValue: any) => {
-								const val =
-									(newValue as SingleValue<TCustomSelectOption>)?.value || '';
-								setSelectedCenterId(val);
-								formik.setFieldValue('centerId', val);
-							},
-							readOnly: !isEdit,
-						},
-						{
-							label: 'Departamento',
-							name: 'centerDepartmentId' as const,
-							type: FIELD_TYPE_TAG.CUSTOM_SELECT,
-							defaultValue: selectedValueSelect(
-								centerInfo.data?.departments?.map(d => ({
-									id: d.centerDepartmentId,
-									name: d.name,
-								})),
-								formik.values.centerDepartmentId
-							),
-							options: centerInfo.data?.departments
-								? centerInfo.data.departments.map(d => ({
-										label: d.name,
-										value: d.centerDepartmentId,
-									}))
-								: [],
-							isMulti: false,
-							handleBlur: formik.handleBlur,
-							handleChange: (newValue: any) => {
-								formik.setFieldValue(
-									'centerDepartmentId',
-									(newValue as SingleValue<TCustomSelectOption>)?.value
-								);
-							},
-							readOnly: !isEdit,
-						},
-				  ]
+						readOnly: !isEdit,
+					},
+				]
 				: []),
 		],
 		[
