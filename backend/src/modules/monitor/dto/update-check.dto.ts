@@ -1,18 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsString, ValidateIf } from 'class-validator';
 
 export class UpdateCheckDto {
   @ApiPropertyOptional({
     description: 'Indica si el docente se encontraba presente en el aula',
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsBoolean()
   isPresent?: boolean;
 
   @ApiPropertyOptional({
     description: 'Observación adicional registrada por el monitor',
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   observation?: string;
 }
