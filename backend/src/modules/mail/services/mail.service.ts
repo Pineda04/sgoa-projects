@@ -51,7 +51,7 @@ export class MailService {
   }
 
   async sendResetPassword(to: string, token: string): Promise<SentMessageInfo> {
-    const resetPasswordLink = `${envs.feUrl}/auth/recuperar?token=${token}`;
+    const resetPasswordLink = `${envs.feUrl}/auth/reset-password?token=${token}`;
 
     return await this.sendMail({
       to,

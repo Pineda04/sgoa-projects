@@ -19,8 +19,8 @@ export const ResetPassword = () => {
 	const token = params.get('token');
 
 	useEffect(() => {
-		// if (!params.get("token")) navigate(`auth/login`);
-		if (!token) navigate(`auth/login`);
+		// if (!params.get("token")) navigate(`/auth/login`);
+		if (!token) navigate(`/auth/login`);
 	}, [params]);
 
 	const {
@@ -47,14 +47,14 @@ export const ResetPassword = () => {
 	});
 
 	const onSubmitting = async (values: TResetPassword) => {
-		if (!token) return navigate(`auth/login`);
+		if (!token) return navigate(`/auth/login`);
 
 		await mutateAsync({
 			...values,
 			token,
 		});
 
-		navigate(`auth/login`);
+		navigate(`/auth/login`);
 
 		setValues({
 			password: '',
@@ -62,7 +62,7 @@ export const ResetPassword = () => {
 		});
 	};
 
-	if (isError) navigate(`auth/login`);
+	if (isError) navigate(`/auth/login`);
 
 	return (
 		<div className="flex h-screen">
