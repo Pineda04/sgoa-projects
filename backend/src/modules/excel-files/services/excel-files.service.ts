@@ -2,6 +2,16 @@ import * as XlsxPopulate from 'xlsx-populate';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ExcelResponseDto } from '../dto/excel-response.dto';
 
+const HEADER_FIRST_COLUMN_TOKENS = [
+  '#',
+  'ID',
+  'id',
+  'NoEmpleado',
+  'numeroEmpleado',
+];
+
+type TExcelFileFormat = 'template' | 'legacy';
+
 @Injectable()
 export class ExcelFilesService<Type, Dto> {
   // para que sea reutilizable
@@ -71,12 +81,18 @@ export class ExcelFilesService<Type, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      const headers = this.getHeaders(sheet);
-      const records = this.getData(sheet, headers);
+      const format = this.detectFormat(sheet);
+      const headerRow = format === 'template' ? 1 : 4;
+      const firstDataRow = format === 'template' ? 2 : 5;
+
+      const headers = this.getHeaders(sheet, headerRow);
+      const records = this.getData(sheet, headers, firstDataRow);
+
+      const isLegacy = format === 'legacy';
 
       return {
-        title: '',
-        subtitle: '',
+        title: isLegacy ? sheet.cell('A1').value()?.toString() || '' : '',
+        subtitle: isLegacy ? sheet.cell('A2').value()?.toString() || '' : '',
         totalRecords: records.length,
         data: records,
       };
@@ -87,20 +103,45 @@ export class ExcelFilesService<Type, Dto> {
     }
   }
 
-  private getHeaders(sheet: XlsxPopulate.Sheet): string[] {
+  private detectFormat(sheet: XlsxPopulate.Sheet): TExcelFileFormat {
+    const firstRowFirstCell =
+      sheet.cell(1, 1).value()?.toString().trim() ?? '';
+    const fourthRowFirstCell =
+      sheet.cell(4, 1).value()?.toString().trim() ?? '';
+
+    if (HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
+      return 'template';
+    }
+
+    if (HEADER_FIRST_COLUMN_TOKENS.includes(fourthRowFirstCell)) {
+      return 'legacy';
+    }
+
+    return 'legacy';
+  }
+
+  private getHeaders(
+    sheet: XlsxPopulate.Sheet,
+    headerRow: number,
+  ): string[] {
     const headers: string[] = [];
 
     for (let column = 1; column <= 14; column++) {
-      const cellValue = sheet.cell(1, column).value()?.toString().trim() || '';
+      const cellValue =
+        sheet.cell(headerRow, column).value()?.toString().trim() || '';
       headers.push(cellValue);
     }
 
     return headers;
   }
 
-  private getData(sheet: XlsxPopulate.Sheet, headers: string[]): Dto[] {
+  private getData(
+    sheet: XlsxPopulate.Sheet,
+    headers: string[],
+    firstDataRow: number,
+  ): Dto[] {
     const records: Dto[] = [];
-    let row = 2;
+    let row = firstDataRow;
 
     while (true) {
       const firstCell = sheet.cell(row, 1).value();
