@@ -39,6 +39,12 @@ export type TOutputTeacher = {
   shiftName: string;
   undergrads: { id: string; name: string }[];
   postgrads: { id: string; name: string }[];
+  positions?: {
+    centerDepartmentId: string;
+    center: TCenter;
+    department: TDepartmentJoin;
+    position: TPosition;
+  }[];
   roles?: string[];
   activeStatus: boolean;
 };

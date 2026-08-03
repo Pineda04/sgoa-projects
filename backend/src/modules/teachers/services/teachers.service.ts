@@ -451,15 +451,7 @@ export class TeachersService {
     return where;
   }
 
-  private mapTeacher(teacher: TTeacherJoin):
-    | TOutputTeacher
-    | (TOutputTeacher & {
-      positions: {
-        department: TDepartmentJoin;
-        center: TCenter;
-        position: TPosition;
-      }[];
-    }) {
+  private mapTeacher(teacher: TTeacherJoin): TOutputTeacher {
     return {
       id: teacher.id,
       name: teacher.user.name,
