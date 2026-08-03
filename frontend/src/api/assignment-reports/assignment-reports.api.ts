@@ -50,6 +50,11 @@ export const academicAssignmentReportsApi = {
 	getAcademicAssignment: () =>
 		api.get<IResponse<TAssignmentReport[]>>(`/academic-assignment-reports/coordinator`),
 
+	getAcademicAssignmentTemplate: () =>
+		api.get('/academic-assignment-reports/template', {
+			responseType: 'blob',
+		}),
+
 	getAcademicAssignmentOnlyPeriods: (
 		page: number = 1,
 		size: number = 10,
