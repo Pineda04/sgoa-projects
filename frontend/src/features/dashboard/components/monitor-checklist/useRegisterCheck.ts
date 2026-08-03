@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useUpdateCheckMutation } from '@api/monitor';
 import { db } from '@config/lib';
 import { getCurrentTimeString, getTodayDateString } from './checklist.utils';
 
@@ -8,7 +9,15 @@ interface RegisterCheckInput {
 	observation?: string;
 }
 
+interface EditCheckInput {
+	checkId: string;
+	courseClassroomId: string;
+	isPresent: boolean;
+	observation?: string;
+}
+
 export const useRegisterCheck = (email?: string) => {
+	const { updateCheck } = useUpdateCheckMutation();
 	const [submittingId, setSubmittingId] = useState<string | null>(null);
 
 	const registerCheck = useCallback(
@@ -69,8 +78,40 @@ export const useRegisterCheck = (email?: string) => {
 		[email]
 	);
 
+	// Feature: a diferencia de registerCheck (que corrige localmente mientras el check
+	// sigue PENDING), editCheck corrige un check que el servidor ya confirmó: requiere
+	// conexión y pasa siempre por el PATCH del backend. useUpdateCheckMutation invalida
+	// las queries de asignaciones al terminar, así que la UI se refresca sola.
+	const editCheck = useCallback(
+		async ({
+			checkId,
+			courseClassroomId,
+			isPresent,
+			observation,
+		}: EditCheckInput) => {
+			setSubmittingId(courseClassroomId);
+
+			try {
+				await updateCheck({
+					id: checkId,
+					isPresent,
+					observation: observation?.trim() ?? '',
+				});
+
+				return true;
+			} catch {
+				// El error ya se notifica globalmente
+				return false;
+			} finally {
+				setSubmittingId(null);
+			}
+		},
+		[updateCheck]
+	);
+
 	return {
 		registerCheck,
+		editCheck,
 		submittingId,
 		isRegistering: !!submittingId,
 	};

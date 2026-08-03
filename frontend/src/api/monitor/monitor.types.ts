@@ -1,8 +1,11 @@
 export type TMonitorAssignmentCheckStatus = {
 	id: string;
+	monitorId: string;
 	isPresent: boolean;
 	checkTime: string;
 	observation: string | null;
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type TMonitorCurrentAssignment = {
@@ -38,6 +41,12 @@ export type TCreateCheck = {
 	isPresent: boolean;
 	observation?: string;
 	offlineId?: string;
+};
+
+export type TUpdateCheck = {
+	id: string;
+	isPresent?: boolean;
+	observation?: string;
 };
 
 export type TScheduleComplianceCheck = {

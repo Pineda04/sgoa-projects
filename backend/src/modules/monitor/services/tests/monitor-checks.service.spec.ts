@@ -34,16 +34,17 @@ describe('MonitorChecksService.batchSync', () => {
   it('rejects checks whose classroom no longer exists', async () => {
     prisma.courseClassroom.findMany.mockResolvedValue([]);
 
-    await expect(service.batchSync(monitorId, { checks: [check('missing')] }))
-      .resolves.toEqual({
-        synced: 0,
-        conflicts: 0,
-        skipped: 0,
-        rejected: 1,
-        conflictIds: [],
-        skippedIds: [],
-        rejectedIds: ['missing'],
-      });
+    await expect(
+      service.batchSync(monitorId, { checks: [check('missing')] }),
+    ).resolves.toEqual({
+      synced: 0,
+      conflicts: 0,
+      skipped: 0,
+      rejected: 1,
+      conflictIds: [],
+      skippedIds: [],
+      rejectedIds: ['missing'],
+    });
     expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });
 
@@ -51,16 +52,19 @@ describe('MonitorChecksService.batchSync', () => {
     prisma.courseClassroom.findMany.mockResolvedValue([{ id: classroomId }]);
     prisma.$queryRaw.mockResolvedValue([]);
 
-    await expect(service.batchSync(monitorId, { checks: [check('conflict')] }))
-      .resolves.toMatchObject({
-        synced: 0,
-        conflicts: 1,
-        conflictIds: ['conflict'],
-      });
+    await expect(
+      service.batchSync(monitorId, { checks: [check('conflict')] }),
+    ).resolves.toMatchObject({
+      synced: 0,
+      conflicts: 1,
+      conflictIds: ['conflict'],
+    });
   });
 
   it('processes every check and keeps individual successful ids', async () => {
-    const checks = Array.from({ length: 26 }, (_, index) => check(`id-${index}`));
+    const checks = Array.from({ length: 26 }, (_, index) =>
+      check(`id-${index}`),
+    );
     prisma.courseClassroom.findMany.mockResolvedValue([{ id: classroomId }]);
     prisma.$queryRaw.mockResolvedValue([{ monitorId }]);
 

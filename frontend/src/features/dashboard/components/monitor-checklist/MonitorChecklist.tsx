@@ -39,7 +39,8 @@ import {
 export const MonitorChecklist = () => {
 	const isOnline = useIsOnline();
 	// Feature: email de la sesión (JWT) como clave de la caché Dexie; disponible offline.
-	const sessionEmail = useAuth().authState.user?.email;
+	const { authState } = useAuth();
+	const sessionEmail = authState.user?.email;
 	const { data, isLoading, isError } = useGetCurrentAssignments({
 		enabled: isOnline,
 		email: sessionEmail,
@@ -49,12 +50,13 @@ export const MonitorChecklist = () => {
 	// cuando la fuente nueva aún no se resolvió (fetch remoto o lectura asíncrona de Dexie).
 	const cachedAssignments = useCachedAssignments(sessionEmail);
 	const sourceData = data ?? cachedAssignments;
-	// Feature: los registros locales (Dexie) del día son la fuente única del estado
-	// registrado. useLiveQuery reacciona a cada add/update/delete, sobrevive a los
-	// desmontajes (navegar a otra página) y evita duplicados al sincronizar.
+	// Feature: los registros locales (Dexie) del día son la fuente de respaldo del estado
+	// registrado mientras el servidor no confirme el check (aún no sincronizado). useLiveQuery
+	// reacciona a cada add/update/delete, sobrevive a los desmontajes (navegar a otra página)
+	// y evita duplicados al sincronizar.
 	const effectiveOverrides = useOfflineChecksToday(sessionEmail);
 	const syncIssues = useOfflineSyncIssues(sessionEmail);
-	const { registerCheck, submittingId, isRegistering } =
+	const { registerCheck, editCheck, submittingId, isRegistering } =
 		useRegisterCheck(sessionEmail);
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
@@ -71,11 +73,14 @@ export const MonitorChecklist = () => {
 		new Set()
 	);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [isModalOpen, openModal, closeModal] = useModal();
 
+	const currentUserId = authState.user?.sub;
+
 	const items = useMemo(
-		() => buildChecklistItems(sourceData ?? [], effectiveOverrides),
-		[sourceData, effectiveOverrides]
+		() => buildChecklistItems(sourceData ?? [], effectiveOverrides, currentUserId),
+		[sourceData, effectiveOverrides, currentUserId]
 	);
 
 	const buildingOptions = useMemo(
@@ -145,11 +150,27 @@ export const MonitorChecklist = () => {
 
 	const handleOpenModal = (item: TChecklistItem) => {
 		setSelectedId(item.id);
+		setModalMode('create');
+		openModal();
+	};
+
+	const handleOpenEditModal = (item: TChecklistItem) => {
+		setSelectedId(item.id);
+		setModalMode('edit');
 		openModal();
 	};
 
 	const handleModalSubmit = (isPresent: boolean, observation: string) => {
 		if (!selectedItem) return Promise.resolve(false);
+
+		if (modalMode === 'edit' && selectedItem.check) {
+			return editCheck({
+				checkId: selectedItem.check.id,
+				courseClassroomId: selectedItem.id,
+				isPresent,
+				observation,
+			});
+		}
 
 		return registerCheck({
 			courseClassroomId: selectedItem.id,
@@ -275,6 +296,7 @@ export const MonitorChecklist = () => {
 							isRegistering={isRegistering}
 							onConfirm={handleQuickConfirm}
 							onOpenModal={handleOpenModal}
+							onEditCheck={handleOpenEditModal}
 						/>
 					))}
 				</div>
@@ -284,6 +306,7 @@ export const MonitorChecklist = () => {
 				isOpen={isModalOpen}
 				onClose={closeModal}
 				item={selectedItem}
+				mode={modalMode}
 				isSubmitting={isRegistering}
 				onSubmit={handleModalSubmit}
 			/>

@@ -1,8 +1,11 @@
 export type TMonitorAssignmentCheckStatus = {
   id: string;
+  monitorId: string;
   isPresent: boolean;
   checkTime: string;
   observation: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type TMonitorCurrentAssignment = {

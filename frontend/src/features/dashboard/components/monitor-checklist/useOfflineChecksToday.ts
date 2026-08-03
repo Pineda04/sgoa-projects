@@ -20,11 +20,20 @@ export const useOfflineChecksToday = (email?: string) =>
 			)
 			.reduce<Record<string, TMonitorAssignmentCheckStatus>>(
 			(acc, record) => {
+				// monitorId/createdAt/updatedAt son placeholders: un check aún no
+				// confirmado por el servidor no tiene esos datos reales, y
+				// buildChecklistItems solo habilita la edición (que los necesita)
+				// cuando existe el check del servidor (assignment.check), nunca a
+				// partir de este override local.
+				const recordedAt = new Date(record.createdAt).toISOString();
 				acc[record.courseClassroomId] = {
 					id: record.offlineId,
+					monitorId: '',
 					isPresent: record.isPresent,
 					checkTime: record.checkTime,
 					observation: record.observation ?? null,
+					createdAt: recordedAt,
+					updatedAt: recordedAt,
 				};
 				return acc;
 			},

@@ -22,6 +22,7 @@ interface AssignmentListProps {
 	isRegistering: boolean;
 	onConfirm: (item: TChecklistItem, isPresent: boolean) => void;
 	onOpenModal: (item: TChecklistItem) => void;
+	onEditCheck: (item: TChecklistItem) => void;
 }
 
 export const AssignmentList = ({
@@ -31,6 +32,7 @@ export const AssignmentList = ({
 	isRegistering,
 	onConfirm,
 	onOpenModal,
+	onEditCheck,
 }: AssignmentListProps) => {
 	const Renderer = VIEW_RENDERERS[view];
 
@@ -44,6 +46,7 @@ export const AssignmentList = ({
 					disabled={isRegistering && submittingId !== item.id}
 					onConfirm={isPresent => onConfirm(item, isPresent)}
 					onOpenModal={() => onOpenModal(item)}
+					onEditCheck={() => onEditCheck(item)}
 				/>
 			))}
 		</ul>

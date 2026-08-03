@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -9,7 +10,12 @@ import { parseISO, startOfDay } from 'date-fns';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { paginate, paginateOutput } from 'src/common/utils';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BatchSyncChecksDto, CheckFiltersDto, CreateCheckDto } from '../dto';
+import {
+  BatchSyncChecksDto,
+  CheckFiltersDto,
+  CreateCheckDto,
+  UpdateCheckDto,
+} from '../dto';
 import {
   TScheduleComplianceCheck,
   TScheduleComplianceCheckDetail,
@@ -98,7 +104,9 @@ export class MonitorChecksService {
       const results = await Promise.allSettled(
         batch.map(async (check) => {
           const checkDate = startOfDay(parseISO(check.checkDate));
-          const rows = await this.prisma.$queryRaw<Array<{ monitorId: string }>>(
+          const rows = await this.prisma.$queryRaw<
+            Array<{ monitorId: string }>
+          >(
             Prisma.sql`
               INSERT INTO "academic"."schedule_compliance_checks" (
                 "id", "courseClassroomId", "monitorId", "checkDate", "checkTime",
@@ -151,6 +159,36 @@ export class MonitorChecksService {
       skippedIds,
       rejectedIds,
     };
+  }
+
+  async update(
+    monitorId: string,
+    id: string,
+    updateCheckDto: UpdateCheckDto,
+  ): Promise<TScheduleComplianceCheck> {
+    const check = await this.prisma.scheduleComplianceCheck.findUnique({
+      where: { id },
+    });
+
+    if (!check)
+      throw new NotFoundException(
+        `La verificación con id <${id}> no fue encontrada.`,
+      );
+
+    if (check.monitorId !== monitorId)
+      throw new ForbiddenException(
+        'No tienes permiso para modificar esta verificación.',
+      );
+
+    return this.prisma.scheduleComplianceCheck.update({
+      where: { id },
+      data: {
+        isPresent: updateCheckDto.isPresent,
+        ...(updateCheckDto.observation !== undefined
+          ? { observation: updateCheckDto.observation.trim() || null }
+          : {}),
+      },
+    });
   }
 
   async findAllWithFilters(
