@@ -40,7 +40,12 @@ export class UsersController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.RRHH,
+    EUserRole.DIRECCION,
+  )
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Usuario creado exitosamente. Por favor, revise su correo.')
   @ApiBody({
@@ -73,12 +78,12 @@ export class UsersController {
 
     if (
       createUserDto.roles.includes(EUserRole.COORDINADOR_AREA) &&
-      ![EUserRole.ADMIN, EUserRole.RRHH].some((role) =>
+      ![EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION].some((role) =>
         currentUser.roles.includes(role),
       )
     )
       throw new ForbiddenException(
-        'Solo RRHH o Admin pueden asignar el rol de COORDINADOR_AREA.',
+        'Solo RRHH, Dirección o Admin pueden asignar el rol de COORDINADOR_AREA.',
       );
 
     return this.usersService.createUserWithDeptAndPosition(
@@ -210,7 +215,12 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.RRHH,
+    EUserRole.DIRECCION,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({

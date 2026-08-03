@@ -37,7 +37,12 @@ export class TeachersController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.RRHH,
+    EUserRole.DIRECCION,
+  )
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un perfil de docente.')
   @ApiBody({
@@ -228,7 +233,12 @@ export class TeachersController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.RRHH,
+    EUserRole.DIRECCION,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Docente actualizado exitosamente.')
   @ApiBody({
@@ -248,7 +258,12 @@ export class TeachersController {
 
   // Cambiar el active status del usuario a false, para no eliminar el registro físicamente
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(
+    EUserRole.ADMIN,
+    EUserRole.COORDINADOR_AREA,
+    EUserRole.RRHH,
+    EUserRole.DIRECCION,
+  )
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Cambio de active status cambiado exitosamente.')
   @ApiCommonResponses({

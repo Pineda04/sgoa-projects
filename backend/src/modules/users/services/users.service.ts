@@ -49,7 +49,7 @@ export class UsersService {
     private readonly mailService: MailService,
     @Inject(forwardRef(() => PositionsService))
     private readonly positionsService: PositionsService,
-  ) {}
+  ) { }
 
   async createUserWithDeptAndPosition(
     createUserDto: CreateUserDto,
@@ -199,55 +199,57 @@ export class UsersService {
       },
     };
 
-    const hasTeacherRole = roleEntities.some((role) =>
-      [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(
-        role.name as EUserRole,
-      ),
-    );
+    const hasTeacherRole =
+      (!!categoryId && !!contractTypeId && !!shiftId && !!undergradId) ||
+      roleEntities.some((role) =>
+        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(
+          role.name as EUserRole,
+        ),
+      );
 
     // Crear aca toda la relacion, por si ocurre un problema...
     // ...al momento de crear el perfil de teacher, no sea en teachersService.
     const data = hasTeacherRole
       ? {
-          ...baseData,
-          teacher: {
-            create: {
-              category: { connect: { id: categoryId } },
-              contractType: { connect: { id: contractTypeId } },
-              shift: { connect: { id: shiftId } },
-              undergradDegrees: {
-                create: [
-                  {
-                    undergraduate: { connect: { id: undergradId } },
-                  },
-                ],
-              },
-              ...(postgradId
-                ? {
-                    undergradDegrees: {
-                      create: [
-                        {
-                          undergraduate: { connect: { id: undergradId } },
-                        },
-                      ],
-                    },
-                  }
-                : {}),
-              ...(positionId && centerDepartmentId
-                ? {
-                    positionHeld: {
-                      create: [
-                        {
-                          positionId,
-                          centerDepartmentId,
-                        },
-                      ],
-                    },
-                  }
-                : {}),
+        ...baseData,
+        teacher: {
+          create: {
+            category: { connect: { id: categoryId } },
+            contractType: { connect: { id: contractTypeId } },
+            shift: { connect: { id: shiftId } },
+            undergradDegrees: {
+              create: [
+                {
+                  undergraduate: { connect: { id: undergradId } },
+                },
+              ],
             },
+            ...(postgradId
+              ? {
+                postgraduateDegrees: {
+                  create: [
+                    {
+                      postgraduate: { connect: { id: postgradId } },
+                    },
+                  ],
+                },
+              }
+              : {}),
+            ...(positionId && centerDepartmentId
+              ? {
+                positionHeld: {
+                  create: [
+                    {
+                      positionId,
+                      centerDepartmentId,
+                    },
+                  ],
+                },
+              }
+              : {}),
           },
-        }
+        },
+      }
       : baseData;
 
     const newUser = await this.prisma.user.create({
@@ -258,12 +260,17 @@ export class UsersService {
 
     if (!newUser) throw new BadRequestException('Error al crear el usuario.');
 
-    if (isTempPass)
-      await this.mailService.sendMail({
-        to: newUser.email!,
-        subject: 'Contraseña temporal.',
-        html: TEMPLATE_TEMP_PASSWORD(password),
-      });
+    if (isTempPass) {
+      try {
+        await this.mailService.sendMail({
+          to: newUser.email!,
+          subject: 'Contraseña temporal.',
+          html: TEMPLATE_TEMP_PASSWORD(password),
+        });
+      } catch (error) {
+        console.error('Error al enviar correo con contraseña temporal:', error);
+      }
+    }
 
     return newUser;
   }
