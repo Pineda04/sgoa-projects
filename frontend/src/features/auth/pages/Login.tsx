@@ -2,7 +2,14 @@ import LogoUNAH from '/logo-unah-2.webp';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
-import { EyeIcon, EyeOff, GraduationCap } from 'lucide-react';
+import {
+	EyeIcon,
+	EyeOff,
+	GraduationCap,
+	Lock,
+	LogIn,
+	Mail,
+} from 'lucide-react';
 import { loginSchema } from '../schemas';
 import { IAuthLogin, useForgotPassword } from '@api/auth';
 import { useAuth } from '@config';
@@ -109,7 +116,7 @@ export const Login = () => {
 	}, [authState.isAuthenticated]);
 
 	return (
-		<div className="grid lg:grid-cols-2 md:grid-cols-1 h-screen">
+		<div className="grid lg:grid-cols-2 h-screen">
 			<div className="relative flex items-center justify-center overflow-hidden bg-linear-to-br from-primary via-[#1a5c8a] to-[#0d3556] min-h-[40vh] lg:min-h-auto">
 				<div className="absolute inset-0 opacity-10">
 					<svg
@@ -154,8 +161,8 @@ export const Login = () => {
 					</h1>
 
 					<p className="text-white/80 text-base md:text-lg lg:text-xl font-sans max-w-md leading-relaxed px-4">
-            Sistema de Gestión y <br />
-            Organización Académica
+						Sistema de Gestión y <br />
+						Organización Académica
 					</p>
 
 					<div className="mt-6 md:mt-8 flex items-center gap-2 text-white/60 text-xs md:text-sm">
@@ -169,119 +176,131 @@ export const Login = () => {
 			</div>
 
 			<div className="bg-background flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-				<div className="w-full max-w-sm animate-in slide-up stagger-2">
-					<div className="mb-8 text-center">
-						<h2 className="text-2xl sm:text-3xl font-display text-foreground mb-2">
-							¡Bienvenido!
-						</h2>
-						<p className="text-muted-foreground text-sm">
-							Ingresa tus credenciales para continuar
-						</p>
-					</div>
-
-					<form onSubmit={handleSubmit} className="space-y-5">
-						<div className="space-y-2">
-							<label
-								htmlFor="email"
-								className="text-sm font-medium text-foreground ml-1"
-							>
-								Correo electrónico
-							</label>
-							<input
-								id="email"
-								name="email"
-								className="w-full h-11 px-4 bg-card border border-border rounded-lg
-									outline-none text-foreground placeholder:text-muted-foreground/60
-									font-medium transition-all duration-200
-									focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-lg focus:shadow-primary/10
-									hover:border-border-strong"
-								placeholder="correo@unah.hn"
-								type="text"
-								value={values.email}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								required
-							/>
-							{touched.email && errors.email && (
-								<Error
-									error={errors.email}
-									className="text-destructive ml-1 text-sm"
-								/>
-							)}
+				<div className="w-full max-w-md animate-in slide-up stagger-2">
+					<div className="p-6 sm:p-8">
+						<div className="my-8 text-center">
+							<h2 className="text-2xl sm:text-3xl font-display text-foreground mb-2">
+								¡Bienvenido!
+							</h2>
+							<p className="text-muted-foreground text-sm">
+								Ingresa tus credenciales para continuar
+							</p>
 						</div>
 
-						<div className="space-y-2">
-							<label
-								htmlFor="password"
-								className="text-sm font-medium text-foreground ml-1"
-							>
-								Contraseña
-							</label>
-							<div className="relative">
-								<input
-									id="password"
-									name="password"
-									className="w-full h-11 px-4 pr-12 bg-card border border-border rounded-lg
-										outline-none text-foreground placeholder:text-muted-foreground/60
-										font-medium transition-all duration-200
-										focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-lg focus:shadow-primary/10
-										hover:border-border-strong"
-									placeholder="••••••••"
-									type={
-										showPassword.password
-											? 'text'
-											: 'password'
-									}
-									value={values.password}
-									onChange={handleChange}
-									onBlur={handleBlur}
-									required
-								/>
+						<form onSubmit={handleSubmit} className="space-y-2">
+							<div className="space-y-1.5">
+								<label
+									htmlFor="email"
+									className="text-sm font-medium text-foreground"
+								>
+									Correo electrónico
+								</label>
+								<div className="relative">
+									<Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
+									<input
+										id="email"
+										name="email"
+										className="w-full h-11 pl-10 pr-4 bg-card border border-border rounded-lg
+											outline-none text-foreground placeholder:text-muted-foreground/60
+											font-medium transition-all duration-200
+											focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-lg focus:shadow-primary/10
+											hover:border-border-strong"
+										placeholder="correo@unah.hn"
+										type="text"
+										autoComplete="email"
+										value={values.email}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										required
+									/>
+								</div>
+								{touched.email && errors.email && (
+									<Error
+										error={errors.email}
+										breakLine={false}
+										className="text-destructive ml-1 text-xs"
+									/>
+								)}
+							</div>
+
+							<div className="space-y-1.5">
+								<label
+									htmlFor="password"
+									className="text-sm font-medium text-foreground"
+								>
+									Contraseña
+								</label>
+								<div className="relative">
+									<Lock className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
+									<input
+										id="password"
+										name="password"
+										className="w-full h-11 pl-10 pr-12 bg-card border border-border rounded-lg
+											outline-none text-foreground placeholder:text-muted-foreground/60
+											font-medium transition-all duration-200
+											focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-lg focus:shadow-primary/10
+											hover:border-border-strong"
+										placeholder="••••••••"
+										type={
+											showPassword.password
+												? 'text'
+												: 'password'
+										}
+										autoComplete="current-password"
+										value={values.password}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										required
+									/>
+									<Button
+										type="button"
+										onClick={() =>
+											handleShowPassword('password')
+										}
+										className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+										variant="ghost"
+										size="icon"
+									>
+										{showPassword.password ? (
+											<EyeOff className="w-4 h-4" />
+										) : (
+											<EyeIcon className="w-4 h-4" />
+										)}
+									</Button>
+								</div>
+								{touched.password && errors.password && (
+									<Error
+										error={errors.password}
+										breakLine={false}
+										className="text-destructive ml-1 text-xs"
+									/>
+								)}
+							</div>
+
+							<div className="flex justify-center">
 								<Button
 									type="button"
-									onClick={() =>
-										handleShowPassword('password')
-									}
-									className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+									onClick={() => askEmail(mutateAsync)}
+									className="text-muted-foreground hover:text-primary text-sm font-normal px-2 -mr-2"
 									variant="ghost"
-									size="icon"
 								>
-									{showPassword.password ? (
-										<EyeOff className="w-4 h-4" />
-									) : (
-										<EyeIcon className="w-4 h-4" />
-									)}
+									¿Olvidaste tu contraseña?
 								</Button>
 							</div>
-							{touched.password && errors.password && (
-								<Error
-									error={errors.password}
-									className="text-destructive ml-1 text-sm"
-								/>
-							)}
-						</div>
 
-						<Button
-							type="button"
-							onClick={() => askEmail(mutateAsync)}
-							className="text-muted-foreground hover:text-primary text-sm font-normal"
-							variant="ghost"
-						>
-							¿Olvidaste tu contraseña?
-						</Button>
-
-						<Button
-							type="submit"
-							className="w-full h-11 mt-2 bg-primary hover:bg-primary-hover hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0"
-							variant="default"
-						>
-							Iniciar Sesión
-						</Button>
-					</form>
-
-					<p className="mt-8 text-center text-xs text-muted-foreground">
-						© 2025 Centro Universitario Regional de Occidente
-					</p>
+							<Button
+								type="submit"
+								className="w-full h-11 mt-1 bg-primary hover:bg-primary-hover hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 text-base"
+								variant="default"
+							>
+								<LogIn className="size-4" />
+								Iniciar Sesión
+							</Button>
+						</form>
+						<p className="mt-8 text-center text-xs text-muted-foreground">
+							© 2025 Centro Universitario Regional de Occidente
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
