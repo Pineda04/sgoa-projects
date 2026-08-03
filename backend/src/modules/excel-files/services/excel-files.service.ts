@@ -23,6 +23,44 @@ export class ExcelFilesService<Type, Dto> {
     return file;
   }
 
+  async generateTemplate(
+    headers: string[],
+    rowCount: number = 20,
+  ): Promise<Buffer> {
+    const workbook = await XlsxPopulate.fromBlankAsync();
+    const sheet = workbook.sheet(0);
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1);
+      cell.value(header).style({
+        bold: true,
+        fontColor: 'FFFFFF',
+        fill: { type: 'solid', color: '144C74' },
+        border: { color: '000000', style: 'thin' },
+        verticalAlignment: 'center',
+        horizontalAlignment: 'center',
+        wrapText: true,
+      });
+    });
+
+    // Rango vacío para que el coordinador escriba los datos.
+    const firstDataRow = 2;
+    const lastRow = firstDataRow + rowCount - 1;
+    const lastColumn = headers.length;
+    const emptyRange = sheet.range(firstDataRow, 1, lastRow, lastColumn);
+    emptyRange.style({
+      border: { color: 'BFBFBF', style: 'thin' },
+    });
+
+    for (let column = 1; column <= lastColumn; column++) {
+      sheet.column(column).width(18);
+    }
+
+    return Buffer.from(
+      (await workbook.outputAsync()) as ArrayBuffer | Uint8Array,
+    );
+  }
+
   async processFile(
     properties: Type,
     buffer: Buffer,
@@ -33,15 +71,12 @@ export class ExcelFilesService<Type, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      const title: string = sheet.cell('A1').value()?.toString() || '';
-      const subtitle: string = sheet.cell('A2').value()?.toString() || '';
-
       const headers = this.getHeaders(sheet);
       const records = this.getData(sheet, headers);
 
       return {
-        title,
-        subtitle,
+        title: '',
+        subtitle: '',
         totalRecords: records.length,
         data: records,
       };
@@ -56,7 +91,7 @@ export class ExcelFilesService<Type, Dto> {
     const headers: string[] = [];
 
     for (let column = 1; column <= 14; column++) {
-      const cellValue = sheet.cell(4, column).value()?.toString().trim() || '';
+      const cellValue = sheet.cell(1, column).value()?.toString().trim() || '';
       headers.push(cellValue);
     }
 
@@ -65,7 +100,7 @@ export class ExcelFilesService<Type, Dto> {
 
   private getData(sheet: XlsxPopulate.Sheet, headers: string[]): Dto[] {
     const records: Dto[] = [];
-    let row = 5;
+    let row = 2;
 
     while (true) {
       const firstCell = sheet.cell(row, 1).value();
