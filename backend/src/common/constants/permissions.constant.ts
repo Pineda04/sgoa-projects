@@ -50,9 +50,6 @@ export const PERMISSION_SUBJECTS = [
   'user-departments',
   'user-status',
   // Vistas
-  'home',
-  'help',
-  'profile',
   'dashboard-authorities',
   'dashboard-coordinator',
   'dashboard-teacher',
@@ -64,3 +61,15 @@ export const PERMISSION_SUBJECTS = [
 
 export type TPermissionAction = (typeof PERMISSION_ACTIONS)[number];
 export type TPermissionSubject = (typeof PERMISSION_SUBJECTS)[number];
+
+/**
+ * Pantallas que todo usuario autenticado tiene por definición: inicio, ayuda y
+ * su propio perfil. No son asignables (quedan fuera de PERMISSION_SUBJECTS, así
+ * que no se siembran ni aparecen en la matriz de roles); el backend las agrega
+ * al set de permisos de cada usuario al emitir el JWT.
+ */
+export const DEFAULT_PERMISSIONS = [
+  'manage:home',
+  'manage:help',
+  'manage:profile',
+] as const;

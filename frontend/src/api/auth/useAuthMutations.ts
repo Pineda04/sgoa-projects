@@ -7,6 +7,9 @@ import { genericAlert } from '@shared';
 export const useLogin = () =>
 	useMutation({
 		mutationFn: (credentials: IAuthLogin) => authApi.login(credentials),
+		// Fix: 'always' hace que el login falle rápido (error de red) en lugar de quedar pausado
+		// indefinidamente con el Loading (networkMode 'online' pausa la mutación sin internet).
+		networkMode: 'always',
 	});
 
 export const useResetPassword = () =>

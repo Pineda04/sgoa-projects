@@ -12,7 +12,9 @@ import {
   UseInterceptors,
   Query,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AcademicAssignmentReportsService } from '../services/academic-assignment-reports.service';
 import {
   AcademicAssignmentArrayDto,
@@ -41,6 +43,23 @@ import { ExcelFilesService } from 'src/modules/excel-files/services/excel-files.
 import { FileInterceptor } from '@nestjs/platform-express';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
+
+const ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS = [
+  '#',
+  'Código docente',
+  'Nombre del docente',
+  'Código de asignatura',
+  'Nombre de asignatura',
+  'Sección',
+  'UV',
+  'Días',
+  'Número de alumnos',
+  'Aula',
+  'Departamento',
+  'Coordinador',
+  'Centro',
+  'Observaciones',
+];
 
 @Controller('academic-assignment-reports')
 export class AssignmentReportsController {
@@ -407,6 +426,36 @@ export class AssignmentReportsController {
       filters.departmentId,
       filters.centerId,
     );
+  }
+
+  @Get('template')
+  @RequirePermission('create', 'planifications')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Plantilla de asignación académica descargada correctamente.')
+  @ApiOperation({
+    summary: 'Descargar plantilla Excel de asignación académica',
+    description:
+      'Genera y descarga una plantilla Excel (.xlsx) con el formato esperado para cargar planificaciones académicas.',
+  })
+  @ApiCommonResponses({
+    summary: 'Descargar plantilla Excel',
+    okDescription: 'Plantilla Excel descargada correctamente.',
+    internalErrorDescription: 'Error interno al generar la plantilla.',
+  })
+  async downloadTemplate(@Res() res: Response) {
+    const buffer = await this.excelFilesService.generateTemplate(
+      ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS,
+    );
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition':
+        'attachment; filename="plantilla-planificacion-academica.xlsx"',
+      'Content-Length': buffer.length.toString(),
+    });
+
+    res.send(buffer);
   }
 
   @Get(':id')

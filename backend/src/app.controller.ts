@@ -14,7 +14,7 @@ export class AppController {
   @HttpCode(HttpStatus.OK)
   index() {
     throw new HttpException(
-      `Bienvenido a la API de SPI, si desea ver la documentación, ingrese a: /api`,
+      `Bienvenido a la API de SGOA, si desea ver la documentación, ingrese a: /api`,
       HttpStatus.OK,
     );
   }

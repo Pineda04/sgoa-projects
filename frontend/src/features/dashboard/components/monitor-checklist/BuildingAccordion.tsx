@@ -23,6 +23,7 @@ interface BuildingAccordionProps {
 	isRegistering: boolean;
 	onConfirm: (item: TChecklistItem, isPresent: boolean) => void;
 	onOpenModal: (item: TChecklistItem) => void;
+	onEditCheck: (item: TChecklistItem) => void;
 }
 
 export const BuildingAccordion = ({
@@ -34,6 +35,7 @@ export const BuildingAccordion = ({
 	isRegistering,
 	onConfirm,
 	onOpenModal,
+	onEditCheck,
 }: BuildingAccordionProps) => {
 	const { total, verified } = summarizeItems(group.items);
 	const panelId = `building-panel-${group.buildingId}`;
@@ -83,6 +85,7 @@ export const BuildingAccordion = ({
 						isRegistering={isRegistering}
 						onConfirm={onConfirm}
 						onOpenModal={onOpenModal}
+						onEditCheck={onEditCheck}
 					/>
 			</div>
 		</section>

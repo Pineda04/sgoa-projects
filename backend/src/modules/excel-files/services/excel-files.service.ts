@@ -2,6 +2,16 @@ import * as XlsxPopulate from 'xlsx-populate';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ExcelResponseDto } from '../dto/excel-response.dto';
 
+const HEADER_FIRST_COLUMN_TOKENS = [
+  '#',
+  'ID',
+  'id',
+  'NoEmpleado',
+  'numeroEmpleado',
+];
+
+type TExcelFileFormat = 'template' | 'legacy';
+
 @Injectable()
 export class ExcelFilesService<Type, Dto> {
   // para que sea reutilizable
@@ -23,6 +33,44 @@ export class ExcelFilesService<Type, Dto> {
     return file;
   }
 
+  async generateTemplate(
+    headers: string[],
+    rowCount: number = 20,
+  ): Promise<Buffer> {
+    const workbook = await XlsxPopulate.fromBlankAsync();
+    const sheet = workbook.sheet(0);
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1);
+      cell.value(header).style({
+        bold: true,
+        fontColor: 'FFFFFF',
+        fill: { type: 'solid', color: '144C74' },
+        border: { color: '000000', style: 'thin' },
+        verticalAlignment: 'center',
+        horizontalAlignment: 'center',
+        wrapText: true,
+      });
+    });
+
+    // Rango vacío para que el coordinador escriba los datos.
+    const firstDataRow = 2;
+    const lastRow = firstDataRow + rowCount - 1;
+    const lastColumn = headers.length;
+    const emptyRange = sheet.range(firstDataRow, 1, lastRow, lastColumn);
+    emptyRange.style({
+      border: { color: 'BFBFBF', style: 'thin' },
+    });
+
+    for (let column = 1; column <= lastColumn; column++) {
+      sheet.column(column).width(18);
+    }
+
+    return Buffer.from(
+      (await workbook.outputAsync()) as ArrayBuffer | Uint8Array,
+    );
+  }
+
   async processFile(
     properties: Type,
     buffer: Buffer,
@@ -33,15 +81,18 @@ export class ExcelFilesService<Type, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      const title: string = sheet.cell('A1').value()?.toString() || '';
-      const subtitle: string = sheet.cell('A2').value()?.toString() || '';
+      const format = this.detectFormat(sheet);
+      const headerRow = format === 'template' ? 1 : 4;
+      const firstDataRow = format === 'template' ? 2 : 5;
 
-      const headers = this.getHeaders(sheet);
-      const records = this.getData(sheet, headers);
+      const headers = this.getHeaders(sheet, headerRow);
+      const records = this.getData(sheet, headers, firstDataRow);
+
+      const isLegacy = format === 'legacy';
 
       return {
-        title,
-        subtitle,
+        title: isLegacy ? sheet.cell('A1').value()?.toString() || '' : '',
+        subtitle: isLegacy ? sheet.cell('A2').value()?.toString() || '' : '',
         totalRecords: records.length,
         data: records,
       };
@@ -52,20 +103,45 @@ export class ExcelFilesService<Type, Dto> {
     }
   }
 
-  private getHeaders(sheet: XlsxPopulate.Sheet): string[] {
+  private detectFormat(sheet: XlsxPopulate.Sheet): TExcelFileFormat {
+    const firstRowFirstCell =
+      sheet.cell(1, 1).value()?.toString().trim() ?? '';
+    const fourthRowFirstCell =
+      sheet.cell(4, 1).value()?.toString().trim() ?? '';
+
+    if (HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
+      return 'template';
+    }
+
+    if (HEADER_FIRST_COLUMN_TOKENS.includes(fourthRowFirstCell)) {
+      return 'legacy';
+    }
+
+    return 'legacy';
+  }
+
+  private getHeaders(
+    sheet: XlsxPopulate.Sheet,
+    headerRow: number,
+  ): string[] {
     const headers: string[] = [];
 
     for (let column = 1; column <= 14; column++) {
-      const cellValue = sheet.cell(4, column).value()?.toString().trim() || '';
+      const cellValue =
+        sheet.cell(headerRow, column).value()?.toString().trim() || '';
       headers.push(cellValue);
     }
 
     return headers;
   }
 
-  private getData(sheet: XlsxPopulate.Sheet, headers: string[]): Dto[] {
+  private getData(
+    sheet: XlsxPopulate.Sheet,
+    headers: string[],
+    firstDataRow: number,
+  ): Dto[] {
     const records: Dto[] = [];
-    let row = 5;
+    let row = firstDataRow;
 
     while (true) {
       const firstCell = sheet.cell(row, 1).value();

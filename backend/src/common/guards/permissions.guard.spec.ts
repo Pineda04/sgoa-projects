@@ -5,6 +5,8 @@ import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
 import { LOOKUP_SOURCE_KEY } from '../decorators/lookup-source.decorator';
 import {
   expandImpliedPermissions,
+  DEFAULT_PERMISSIONS,
+  PERMISSION_SUBJECTS,
   TPermissionAction,
   TPermissionSubject,
 } from '../constants';
@@ -105,9 +107,14 @@ describe('Permisos implícitos', () => {
   });
 
   it('un lookup no arrastra nada: es lectura de catálogo, no acceso al módulo', () => {
-    expect(expandImpliedPermissions(['lookup:departments'])).toEqual([
+    const expanded = expandImpliedPermissions(['lookup:departments']);
+
+    // Solo el lookup pedido; lo demás son los permisos por defecto de todos.
+    const byDefault: readonly string[] = DEFAULT_PERMISSIONS;
+    expect(expanded.filter((p) => !byDefault.includes(p))).toEqual([
       'lookup:departments',
     ]);
+    expect(expanded).not.toContain('lookup:faculties');
   });
 
   describe('dashboards: el permiso concede lo que hacen sus pestañas', () => {
@@ -178,6 +185,50 @@ describe('Permisos implícitos', () => {
       expect(monitor).not.toContain('read:classrooms');
     });
 
+    it('el monitor edita y sincroniza sus verificaciones offline', () => {
+      const monitor = expandImpliedPermissions(['manage:dashboard-monitor']);
+
+      // PATCH /monitor/checks/:id y POST /monitor/checks/batch-sync
+      const editar = buildGuard({
+        permission: { action: 'update', subject: 'schedule-compliance-check' },
+      });
+      const sincronizar = buildGuard({
+        permission: { action: 'create', subject: 'schedule-compliance-check' },
+      });
+
+      expect(editar.canActivate(buildContext(monitor))).toBe(true);
+      expect(sincronizar.canActivate(buildContext(monitor))).toBe(true);
+    });
+
+    it('la ficha de aula lista las computadoras del aula sin abrir inventario', () => {
+      const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
+
+      const equiposDelAula = buildGuard({
+        permission: { action: 'read', subject: 'pc-equipments' },
+        isLookupSource: true,
+      });
+      const editarEquipo = buildGuard({
+        permission: { action: 'update', subject: 'pc-equipments' },
+      });
+
+      expect(equiposDelAula.canActivate(buildContext(teacher))).toBe(true);
+      expect(editarEquipo.canActivate(buildContext(teacher))).toBe(false);
+    });
+
+    it('la plantilla de planificación queda para quien puede crearlas', () => {
+      const coordinator = expandImpliedPermissions([
+        'manage:dashboard-coordinator',
+      ]);
+      const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
+
+      const plantilla = buildGuard({
+        permission: { action: 'create', subject: 'planifications' },
+      });
+
+      expect(plantilla.canActivate(buildContext(coordinator))).toBe(true);
+      expect(plantilla.canActivate(buildContext(teacher))).toBe(false);
+    });
+
     it('el docente abre la ficha de aula sin quedarse con el módulo Aulas', () => {
       const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
 
@@ -244,6 +295,23 @@ describe('Permisos implícitos', () => {
         expect(listado.canActivate(buildContext(classroomManager))).toBe(true);
         expect(alta.canActivate(buildContext(classroomManager))).toBe(false);
       }
+    });
+  });
+
+  describe('inicio, ayuda y perfil: implícitos para todos', () => {
+    it('los recibe cualquier usuario, incluso uno sin permisos asignados', () => {
+      expect(expandImpliedPermissions([])).toEqual(
+        expect.arrayContaining([
+          'manage:home',
+          'manage:help',
+          'manage:profile',
+        ]),
+      );
+    });
+
+    it('no son asignables: quedan fuera del catálogo de la matriz', () => {
+      for (const subject of ['home', 'help', 'profile'])
+        expect(PERMISSION_SUBJECTS).not.toContain(subject);
     });
   });
 

@@ -26,6 +26,11 @@ export const formatCheckDate = (isoDate: string): string => {
 	return dateFormatter.format(new Date(isoDate));
 };
 
+export const isCheckEdited = (check: {
+	createdAt: string;
+	updatedAt: string;
+}): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+
 export const STATUS_BADGE_CONFIG = {
 	PRESENT: {
 		label: 'Presente',

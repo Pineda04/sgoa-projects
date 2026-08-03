@@ -7,3 +7,4 @@ export * from './ListPlanificationsCoordinator';
 export * from './UsersCoordinator';
 export * from './monitor-checklist';
 export * from './monitor-reports';
+export * from './SyncIndicator';

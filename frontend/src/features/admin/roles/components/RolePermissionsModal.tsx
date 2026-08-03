@@ -76,9 +76,6 @@ const SUBJECTS_ORDER: Subjects[] = [
 	'pc-types',
 	'monitor-types',
 	'monitor-sizes',
-	'home',
-	'help',
-	'profile',
 ];
 
 const SUBJECT_INDEX = new Map(

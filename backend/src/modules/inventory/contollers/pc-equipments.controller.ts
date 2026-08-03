@@ -61,6 +61,21 @@ export class PcEquipmentsController {
     return this.pcEquipmentsService.findAllWithPagination(query);
   }
 
+  @Get('by-classroom/:classroomId')
+  @RequirePermission('read', 'pc-equipments')
+  @LookupSource()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Listado de equipos de computo del aula.')
+  @ApiCommonResponses({
+    summary: 'Listar equipos de computo de un aula',
+    okDescription: 'Listado de equipos de computo del aula obtenido.',
+  })
+  findAllByClassroom(
+    @Param('classroomId', ValidateIdPipe) classroomId: string,
+  ) {
+    return this.pcEquipmentsService.findAllByClassroom(classroomId);
+  }
+
   @Get(':id')
   @RequirePermission('read', 'pc-equipments')
   @HttpCode(HttpStatus.OK)

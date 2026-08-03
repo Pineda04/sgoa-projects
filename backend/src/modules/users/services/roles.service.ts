@@ -9,7 +9,10 @@ import { UpdateRoleDto } from '../dto/update-role.dto';
 import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TPermissionsCatalog, TRole, TRoleWithPermissions } from '../types';
-import { SUBJECT_IMPLIED_PERMISSIONS } from 'src/common/constants';
+import {
+  PERMISSION_SUBJECTS,
+  SUBJECT_IMPLIED_PERMISSIONS,
+} from 'src/common/constants';
 
 @Injectable()
 export class RolesService {
@@ -105,7 +108,12 @@ export class RolesService {
   }
 
   async findAllPermissions(): Promise<TPermissionsCatalog> {
-    const permissions = await this.prisma.permission.findMany();
+    // El catálogo del código manda: la siembra usa skipDuplicates y no poda, así
+    // que la tabla puede conservar filas de módulos que dejaron de ser
+    // asignables (inicio, ayuda y perfil, hoy implícitos para todos).
+    const permissions = await this.prisma.permission.findMany({
+      where: { subject: { in: [...PERMISSION_SUBJECTS] } },
+    });
 
     return {
       permissions,

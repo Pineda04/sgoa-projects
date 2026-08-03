@@ -1,4 +1,4 @@
-import { TPermissionSubject } from './permissions.constant';
+import { DEFAULT_PERMISSIONS, TPermissionSubject } from './permissions.constant';
 
 /**
  * Acción implícita de "lectura de referencia". No es asignable: nunca se
@@ -170,11 +170,12 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
 
 /**
  * Expande un set de permisos asignados agregando, de forma transitiva, los que
- * cada módulo arrastra. Los `lookup:` no propagan nada: son una lectura de
- * catálogo, no el permiso de operar el módulo.
+ * cada módulo arrastra, más los que todo usuario tiene por defecto. Los
+ * `lookup:` no propagan nada: son una lectura de catálogo, no el permiso de
+ * operar el módulo.
  */
 export const expandImpliedPermissions = (permissions: string[]): string[] => {
-  const expanded = new Set(permissions);
+  const expanded = new Set([...permissions, ...DEFAULT_PERMISSIONS]);
   const pending = [...permissions];
 
   while (pending.length) {
