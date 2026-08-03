@@ -2,17 +2,19 @@ import { exportPlanification } from '../utils';
 import { CourseClassroomsTable } from '../components';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@config/providers';
 import { EPdfFont } from '@config/lib';
 import { useGetAllCoursesAuthorityByPeriod } from '@api/courses';
 import { TPlanification } from '@api/assignment-reports';
 import { Button, Loading } from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
+import { ArrowLeftIcon } from 'lucide-react';
 
 export const PlanificationAuthority = () => {
 	const { periodId, centerDepartmentId, year, pac } = useParams();
 	const currentUser = useUser();
+	const navigate = useNavigate();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
 	const coursesInfo = useGetAllCoursesAuthorityByPeriod(
@@ -56,11 +58,19 @@ export const PlanificationAuthority = () => {
 				</h2>
 			</div>
 
-			<div className="flex flex-row gap-10 justify-center pt-10">
+			<div className="flex flex-row gap-2 justify-center pt-5">
+				<Button
+					onClick={() => navigate(-1)}
+					variant="outline"
+				>
+					<ArrowLeftIcon className="size-5" />
+					Volver
+				</Button>
 				<Button
 					onClick={() => {
 						const userDepartment =
-							coursesInfo.data?.[0]?.centerDepartment.department.name ?? 'Autoridades';
+							coursesInfo.data?.[0]?.centerDepartment.department
+								.name ?? 'Autoridades';
 
 						exportPlanification(
 							planificationData,
@@ -80,7 +90,7 @@ export const PlanificationAuthority = () => {
 					Descargar PDF
 				</Button>
 				<PdfFontSelector
-					onChange={(font) => {
+					onChange={font => {
 						setSelectedFont(font);
 					}}
 				/>

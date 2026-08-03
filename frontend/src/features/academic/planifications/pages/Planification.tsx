@@ -2,18 +2,20 @@ import { exportPlanification } from '../utils';
 import { CourseClassroomsTable } from '../components';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@config/providers';
 import { EPdfFont } from '@config/lib';
 import { useGetAllCoursesCoordinatorByPeriod } from '@api/courses';
 import { TPlanification } from '@api/assignment-reports';
 import { Button, Loading } from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
+import { ArrowLeftIcon } from 'lucide-react';
 
 // FIX: Segmentar segun el rol
 export const Planification = () => {
 	const { periodId, centerDepartmentId, year, pac } = useParams();
-	const currentUser = useUser();
+  const currentUser = useUser();
+	const navigate = useNavigate();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
 	const isCoordinatorHere = Boolean(
@@ -63,35 +65,39 @@ export const Planification = () => {
 				</h2>
 			</div>
 
-			<div className="flex flex-row gap-10 justify-center pt-10">
-					<Button
-						onClick={() => {
-							const userDepartment =
-								currentUser.headPositions.find(
-									p => p.centerDepartmentId === centerDepartmentId
-								)?.department.name ?? '';
+      <div className="flex flex-row gap-2 justify-center pt-5">
+        <Button onClick={() => navigate(-1)} variant="outline">
+          <ArrowLeftIcon className="size-5" />
+          Volver
+				</Button>
+				<Button
+					onClick={() => {
+						const userDepartment =
+							currentUser.headPositions.find(
+								p => p.centerDepartmentId === centerDepartmentId
+							)?.department.name ?? '';
 
-							exportPlanification(
-								planificationData,
-								Number(pac),
-								Number(year),
-								currentUser.user?.name ?? '',
-								userDepartment,
-								selectedFont
-							);
-						}}
-						className="bg-[#C40C54] text-white px-4 py-2 shadow hover:bg-[#e61766]"
-						variant="unstyled"
-						size="default"
-					>
-						<DocumentArrowDownIcon className="size-6" />
-						Descargar PDF
-					</Button>
-					<PdfFontSelector
-						onChange={(font) => {
-							setSelectedFont(font);
-						}}
-					/>
+						exportPlanification(
+							planificationData,
+							Number(pac),
+							Number(year),
+							currentUser.user?.name ?? '',
+							userDepartment,
+							selectedFont
+						);
+					}}
+					className="bg-[#C40C54] text-white px-4 py-2 shadow hover:bg-[#e61766]"
+					variant="unstyled"
+					size="default"
+				>
+					<DocumentArrowDownIcon className="size-6" />
+					Descargar PDF
+				</Button>
+				<PdfFontSelector
+					onChange={font => {
+						setSelectedFont(font);
+					}}
+				/>
 			</div>
 
 			<CourseClassroomsTable

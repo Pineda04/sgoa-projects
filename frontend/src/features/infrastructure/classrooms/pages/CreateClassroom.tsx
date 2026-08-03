@@ -10,6 +10,7 @@ import {
 	TClassroomFormValues,
 } from '../schemas';
 import { ClassroomFormInputs } from '../components';
+import { FiSave } from 'react-icons/fi';
 
 export const CreateClassroom = () => {
 	const navigate = useNavigate();
@@ -50,23 +51,24 @@ export const CreateClassroom = () => {
 
 				<div className="flex justify-end gap-2 mt-4 md:col-span-2">
 					<Button
-						type="submit"
-						disabled={isPendingCreate}
-						className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-						variant="unstyled"
-					>
-						{isPendingCreate ? 'Guardando...' : 'Guardar'}
-					</Button>
-					<Button
 						type="button"
+						variant="outline"
 						onClick={() =>
 							navigate('/infrastructure/classrooms')
 						}
 						disabled={isPendingCreate}
-						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-						variant="unstyled"
 					>
 						Cancelar
+					</Button>
+					<Button
+						type="submit"
+						disabled={isPendingCreate}
+						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+					>
+            {!isPendingCreate && <FiSave className="size-4" />}
+							<span>
+								{isPendingCreate ? 'Guardando...' : 'Guardar Aula'}
+							</span>
 					</Button>
 				</div>
 			</form>
