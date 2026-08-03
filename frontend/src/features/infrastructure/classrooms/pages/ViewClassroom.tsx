@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
 	BuildingOffice2Icon,
 	CalendarDaysIcon,
+	ComputerDesktopIcon,
 	InboxIcon,
 	PencilSquareIcon,
 	TvIcon,
@@ -18,7 +19,11 @@ import { useGetAllAudioEquipments } from '@api/audio-equipments';
 import { useGetAllConditions } from '@api/conditions';
 import { useGetAllDigitalBlackboards } from '@api/digital-blackboards';
 import { useGetAllBrands } from '@api/brands';
-import { useGetAllMonitorTypes, useGetAllMonitorSizes } from '@api/pc-equipments';
+import {
+	useGetAllMonitorTypes,
+	useGetAllMonitorSizes,
+	useGetPcEquipmentsByClassroom,
+} from '@api/pc-equipments';
 import { useGetAirConditioners } from '@api/air-conditioners';
 import { useAbility, cn } from '@config';
 import { Button, Loading, TagError } from '@shared/components';
@@ -107,6 +112,7 @@ export const ViewClassroom = () => {
 	const monitorSizes = useGetAllMonitorSizes();
 	const airConditioners = useGetAirConditioners();
 	const digitalBlackboards = useGetAllDigitalBlackboards();
+	const pcEquipments = useGetPcEquipmentsByClassroom(id);
 
 	if (isLoading) return <Loading />;
 	if (isError || !classroom) {
@@ -405,6 +411,72 @@ export const ViewClassroom = () => {
 							</SectionCard>
 						</div>
 					</div>
+
+					<SectionCard
+						title="Computadoras"
+						icon={<ComputerDesktopIcon className="size-4.5" />}
+						action={
+							<span className="px-2.5 py-1 rounded-full bg-muted text-xs font-semibold text-foreground shrink-0">
+								{pcEquipments.data?.length ?? 0} equipo
+								{pcEquipments.data?.length === 1 ? '' : 's'}
+							</span>
+						}
+					>
+						{pcEquipments.isLoading ? (
+							<p className="text-sm text-muted-foreground">
+								Cargando...
+							</p>
+						) : pcEquipments.isError ? (
+							<EmptyState text="No se pudieron cargar las computadoras" />
+						) : !pcEquipments.data || pcEquipments.data.length === 0 ? (
+							<EmptyState text="Sin computadoras asignadas" />
+						) : (
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+								{pcEquipments.data.map(pc => (
+									<div
+										key={pc.id}
+										className="rounded-lg border border-border/60 bg-muted/30 p-3"
+									>
+										<p className="text-sm font-semibold text-foreground truncate">
+											{pc.inventoryNumber}
+										</p>
+										<div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
+											<span>
+												Tipo:{' '}
+												<span className="font-medium text-foreground">
+													{pc.pcType?.description ?? '—'}
+												</span>
+											</span>
+											<span>
+												Marca:{' '}
+												<span className="font-medium text-foreground">
+													{pc.brand?.name ?? '—'}
+												</span>
+											</span>
+											<span>
+												RAM:{' '}
+												<span className="font-medium text-foreground">
+													{pc.ram || '—'}
+												</span>
+											</span>
+											<span>
+												Disco:{' '}
+												<span className="font-medium text-foreground">
+													{pc.disk || '—'}
+												</span>
+											</span>
+											<span>
+												Condición:{' '}
+												<span className="font-medium text-foreground">
+													{pc.condition?.status ?? '—'}
+												</span>
+											</span>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</SectionCard>
 				</div>
 			</article>
 
