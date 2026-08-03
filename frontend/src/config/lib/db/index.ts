@@ -12,4 +12,5 @@ export {
 	saveCurrentAcademicPeriod,
 	getCachedAcademicPeriod,
 	clearOtherMonitorsCache,
+	cleanupSyncedChecks,
 } from './monitor-cache';

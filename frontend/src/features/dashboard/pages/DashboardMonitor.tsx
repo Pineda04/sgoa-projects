@@ -22,12 +22,12 @@ export const DashboardMonitor = () => {
 		enabled: isOnline,
 		email: sessionEmail,
 	});
-	// Feature: leer el período vigente desde Dexie cuando no hay red.
+	// Feature: leer el período vigente desde Dexie cuando no hay red. Fallback encadenado:
+	// conserva el título ya cargado mientras la fuente nueva aún se está resolviendo.
 	const cachedAcademicPeriod = useCachedAcademicPeriod(sessionEmail);
-	const periodTitle = isOnline
-		? academicPeriodInfo.data?.title
-		: cachedAcademicPeriod?.title;
-	const { status, pendingCount } = useSyncEngine();
+	const periodTitle =
+		academicPeriodInfo.data?.title ?? cachedAcademicPeriod?.title;
+	const { status, pendingCount, forceSync } = useSyncEngine(sessionEmail);
 
 	return (
 		<div className="pb-8 sm:pb-12">
@@ -38,9 +38,13 @@ export const DashboardMonitor = () => {
 					</h2>
 					<p className="text-sm">{currentUser.user?.name}</p>
 					<p className="text-sm">{currentUser.user?.code}</p>
-					<p className="text-sm">{currentUser.user?.email || ''}</p>
+					<p className="text-sm">{sessionEmail}</p>
 				</div>
-				<SyncIndicator status={status} pendingCount={pendingCount} />
+				<SyncIndicator
+					status={status}
+					pendingCount={pendingCount}
+					onRetry={forceSync}
+				/>
 			</div>
 
 			<Tabs

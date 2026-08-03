@@ -4,7 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload } from '@shared/interfaces';
 import { authApi, IAuthLogin, ITokens, useLogin } from '@api/auth';
 import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
-import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache } from '@config/lib';
+import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache, cleanupSyncedChecks } from '@config/lib';
+import { askConfirm } from '@shared/utils';
 import { clear as clearIdb } from 'idb-keyval';
 
 const initialState: IAuthStateProps = {
@@ -68,7 +69,13 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 		setAccessToken(accessToken);
 
 		// Feature: dejar solo la caché local (asignaciones/período) de este monitor.
-		void clearOtherMonitorsCache(info.email);
+		void clearOtherMonitorsCache(info.email).catch(err =>
+			console.error('No se pudo limpiar la caché de otros monitores:', err)
+		);
+		// Política de retención: descartar checks SYNCED antiguos del monitor.
+		void cleanupSyncedChecks(info.email).catch(err =>
+			console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+		);
 
 		return {
 			status: true,
@@ -131,10 +138,18 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				email: userCredentials.email,
 				password: userCredentials.password,
 				accessToken: data.data.access_token,
-			});
+			}).catch(err =>
+				console.error('No se pudieron guardar las credenciales locales:', err)
+			);
 
 			// Feature: descartar la caché local de otros monitores del dispositivo.
-			void clearOtherMonitorsCache(userCredentials.email);
+			void clearOtherMonitorsCache(userCredentials.email).catch(err =>
+				console.error('No se pudo limpiar la caché de otros monitores:', err)
+			);
+			// Política de retención: descartar checks SYNCED antiguos del monitor.
+			void cleanupSyncedChecks(userCredentials.email).catch(err =>
+				console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+			);
 
 			return data;
 		} catch (error: unknown) {
@@ -174,20 +189,23 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 		try {
 			//Prevenir pérdida de datos si hay checks sin sincronizar
 			if (authState.user?.roles.includes('MONITOR')) {
+				const email = authState.user.email;
+
 				const pendingCount = await db.offlineChecks
-					.where('syncStatus')
-					.equals('PENDING')
+					.where('[email+syncStatus]')
+					.equals([email, 'PENDING'])
 					.count();
 
 				if (pendingCount > 0) {
-					const confirmLogout = window.confirm(
-						`Tienes ${pendingCount} reporte(s) sin sincronizar. Si cierras sesión ahora, SE PERDERÁN PARA SIEMPRE. ¿Estás seguro de que deseas continuar?`
+					const confirmLogout = await askConfirm(
+						`Tienes ${pendingCount} reporte(s) sin sincronizar. Si cierras sesión ahora, SE PERDERÁN PARA SIEMPRE. ¿Estás seguro de que deseas continuar?`,
+						'Cerrar sesión'
 					);
 					if (!confirmLogout) return; // Abortar cierre de sesión
 				}
 
-				// Limpiar base de datos local al salir
-				await db.offlineChecks.clear();
+				// Limpiar los registros locales del usuario al salir
+				await db.offlineChecks.where('email').equals(email).delete();
 				await clearIdb();
 			}
 

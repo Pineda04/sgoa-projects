@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
   ApiPagination,
@@ -60,6 +60,38 @@ export class MonitorChecksController {
     summary: 'Sincronizar verificaciones registradas offline',
     okDescription: 'Verificaciones sincronizadas correctamente.',
     badRequestDescription: 'El formato del payload es inválido.',
+  })
+  @ApiOkResponse({
+    description:
+      'El endpoint siempre responde 200; la respuesta identifica cada offlineId persistido, en conflicto o fallido para que el cliente marque solo los realmente sincronizados.',
+    schema: {
+      type: 'object',
+      required: ['synced', 'conflicts', 'skipped', 'conflictIds', 'skippedIds'],
+      properties: {
+        synced: {
+          type: 'number',
+          description: 'Cantidad de verificaciones persistidas en el servidor.',
+        },
+        conflicts: {
+          type: 'number',
+          description: 'Claves únicas ya registradas por otro monitor.',
+        },
+        skipped: {
+          type: 'number',
+          description: 'Verificaciones que fallaron y deben reintentarse.',
+        },
+        conflictIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'offlineId de las verificaciones en conflicto.',
+        },
+        skippedIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'offlineId de las verificaciones que fallaron.',
+        },
+      },
+    },
   })
   batchSync(
     @GetCurrentUserId() monitorId: string,

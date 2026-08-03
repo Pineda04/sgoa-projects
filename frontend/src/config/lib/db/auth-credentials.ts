@@ -14,7 +14,14 @@ interface SaveCredentialsInput extends CredentialsInput {
 	accessToken: string;
 }
 
-const PBKDF2_ITERATIONS = 150_000;
+const PBKDF2_ITERATIONS = 600_000;
+// Versión del esquema de derivación: se incrementa al cambiar salt/iteraciones/info.
+// Los registros con version distinta no son legibles y se descartan en verifyCredentials.
+const CREDENTIALS_VERSION = 2;
+// Salt público fijo para HKDF; la separación de dominios la dan los `info`.
+const HKDF_SALT = new TextEncoder().encode('sgoa-offline-credentials');
+const VERIFY_INFO = new TextEncoder().encode('offline.verify');
+const AES_INFO = new TextEncoder().encode('offline.aes');
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -31,25 +38,10 @@ const fromBase64 = (value: string) => {
 	return bytes;
 };
 
-const deriveKey = async (password: string, salt: Uint8Array) => {
-	const baseKey = await crypto.subtle.importKey(
-		'raw',
-		encoder.encode(password),
-		'PBKDF2',
-		false,
-		['deriveKey']
-	);
-
-	return crypto.subtle.deriveKey(
-		{ name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
-		baseKey,
-		{ name: 'AES-GCM', length: 256 },
-		false,
-		['encrypt', 'decrypt']
-	);
-};
-
-const deriveHash = async (password: string, salt: Uint8Array) => {
+// Material maestro: PBKDF2(password, salt). Con este mismo material se derivan,
+// vía HKDF con `info` distintos, la clave AES-GCM y el hash de verificación, de
+// modo que el hash almacenado no pueda descifrar el token (separación de dominio).
+const deriveMasterBits = async (password: string, salt: Uint8Array) => {
 	const baseKey = await crypto.subtle.importKey(
 		'raw',
 		encoder.encode(password),
@@ -58,13 +50,47 @@ const deriveHash = async (password: string, salt: Uint8Array) => {
 		['deriveBits']
 	);
 
-	const bits = await crypto.subtle.deriveBits(
+	return crypto.subtle.deriveBits(
 		{ name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
 		baseKey,
 		256
 	);
+};
+
+const deriveVerifyHash = async (masterBits: ArrayBuffer) => {
+	const hkdfKey = await crypto.subtle.importKey(
+		'raw',
+		masterBits,
+		'HKDF',
+		false,
+		['deriveBits']
+	);
+
+	const bits = await crypto.subtle.deriveBits(
+		{ name: 'HKDF', hash: 'SHA-256', salt: HKDF_SALT, info: VERIFY_INFO },
+		hkdfKey,
+		256
+	);
 
 	return new Uint8Array(bits);
+};
+
+const deriveCryptoKey = async (masterBits: ArrayBuffer) => {
+	const hkdfKey = await crypto.subtle.importKey(
+		'raw',
+		masterBits,
+		'HKDF',
+		false,
+		['deriveKey']
+	);
+
+	return crypto.subtle.deriveKey(
+		{ name: 'HKDF', hash: 'SHA-256', salt: HKDF_SALT, info: AES_INFO },
+		hkdfKey,
+		{ name: 'AES-GCM', length: 256 },
+		false,
+		['encrypt', 'decrypt']
+	);
 };
 
 const timingSafeEqual = (a: Uint8Array, b: Uint8Array) => {
@@ -88,8 +114,9 @@ export const saveCredentials = async ({
 
 		const salt = crypto.getRandomValues(new Uint8Array(16));
 		const iv = crypto.getRandomValues(new Uint8Array(12));
-		const key = await deriveKey(password, salt);
-		const hash = await deriveHash(password, salt);
+		const masterBits = await deriveMasterBits(password, salt);
+		const hash = await deriveVerifyHash(masterBits);
+		const key = await deriveCryptoKey(masterBits);
 
 		const encryptedToken = new Uint8Array(
 			await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoder.encode(accessToken))
@@ -101,6 +128,7 @@ export const saveCredentials = async ({
 			passwordHash: toBase64(hash),
 			iv: toBase64(iv),
 			encryptedToken: toBase64(encryptedToken),
+			version: CREDENTIALS_VERSION,
 			updatedAt: Date.now(),
 		});
 
@@ -121,13 +149,21 @@ export const verifyCredentials = async ({
 		const record = await db.credentials.get(email.toLowerCase());
 		if (!record) return null;
 
+		// Registros del esquema anterior no son legibles con la derivación actual:
+		// se descartan y se re-guardan en el próximo login online.
+		if (record.version !== CREDENTIALS_VERSION) {
+			await db.credentials.delete(record.email);
+			return null;
+		}
+
 		const salt = fromBase64(record.salt);
+		const masterBits = await deriveMasterBits(password, salt);
+		const actualHash = await deriveVerifyHash(masterBits);
 		const expectedHash = fromBase64(record.passwordHash);
-		const actualHash = await deriveHash(password, salt);
 
 		if (!timingSafeEqual(actualHash, expectedHash)) return null;
 
-		const key = await deriveKey(password, salt);
+		const key = await deriveCryptoKey(masterBits);
 		const decrypted = await crypto.subtle.decrypt(
 			{ name: 'AES-GCM', iv: fromBase64(record.iv) },
 			key,

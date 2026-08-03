@@ -11,7 +11,7 @@ El monitor puede trabajar sin conexión a internet en el flujo diario de verific
 3. Registra las verificaciones de asistencia **localmente** (`offlineChecks`) y las **sincroniza** en lote al recuperar la conexión.
 4. Conserva el estado registrado aunque se navegue entre páginas, evitando registros duplicados.
 
-El caché de datos es **por email**: cada monitor tiene su propia fila, de modo que varios monitores en el mismo dispositivo no mezclan información.
+El caché de datos es **por email**: cada monitor tiene su propia fila, de modo que varios monitores en el mismo dispositivo no mezclan información. Los registros de asistencia offline (`offlineChecks`) también se etiquetan con el email del monitor y solo se leen/sincronizan los del usuario activo.
 
 ## Alcance
 
@@ -23,7 +23,7 @@ El caché de datos es **por email**: cada monitor tiene su propia fila, de modo 
 | Registro de asistencia | Guardado local + sync en lote | Guardado local (`offlineChecks`) con estado reflejado en la UI |
 | Sincronización | — | En lote al reconectar (`POST /monitor/checks/batch-sync`) |
 
-> **Fuera de alcance:** la pestaña de Reportes del monitor no es offline (usa `GET /monitor/checks/report`). El nombre/código del header del dashboard provienen de `GET /teachers/current` y pueden no cargar sin conexión.
+> **Fuera de alcance:** la pestaña de Reportes del monitor no es offline (usa `GET /monitor/checks/report`). El nombre/código del header del dashboard provienen de `GET /teachers/current`; sin conexión **no se muestran** (el email sí, siempre desde el JWT de la sesión).
 
 ## Dependencias
 
@@ -43,14 +43,16 @@ Base: **`SGOALocalDB`**, con versionado incremental:
 | v1 | Tabla `offlineChecks` (registros de asistencia locales) |
 | v2 | Tabla `credentials` (credenciales cifradas para login offline) |
 | v3 | Tablas `monitorAssignments` y `academicPeriods` (caché por email) |
+| v4 | `offlineChecks` aislado por email del monitor (índices `[email+checkDate]`, `[email+syncStatus]`); se descartan las filas sin dueño |
 
 ### Tablas
 
-**`offlineChecks`** — verificaciones de asistencia registradas localmente. Índices: `offlineId, courseClassroomId, checkDate, checkTime, syncStatus`.
+**`offlineChecks`** — verificaciones de asistencia registradas localmente. Índices: `offlineId, email, [email+checkDate], [email+syncStatus]`.
 
 | Campo | Tipo | Descripción |
 | --- | --- | --- |
 | `offlineId` | string | UUID generado en el frontend (`crypto.randomUUID()`) |
+| `email` | string | Email del monitor dueño (normalizado a minúsculas) |
 | `courseClassroomId` | string | Id de la sección de asignatura verificada |
 | `checkDate` | string | Fecha en formato `YYYY-MM-DD` |
 | `checkTime` | string | Hora en formato `HH:MM` |
@@ -68,6 +70,7 @@ Base: **`SGOALocalDB`**, con versionado incremental:
 | `passwordHash` | string (base64) | Hash de verificación derivado de la contraseña (256 bits) |
 | `iv` | string (base64) | IV de AES-GCM (12 bytes) |
 | `encryptedToken` | string (base64) | Access token cifrado con AES-GCM |
+| `version` | number | Versión del esquema de derivación (actual: `2`); los registros con otra versión se descartan en `verifyCredentials` |
 | `updatedAt` | number | Timestamp Unix de la última actualización |
 
 **`monitorAssignments`** — caché de asignaciones del día. Clave primaria: `email`.
@@ -92,22 +95,23 @@ Archivos: `frontend/src/config/lib/db/auth-credentials.ts`, `frontend/src/config
 
 ### Cifrado de credenciales
 
-La contraseña **nunca se guarda en texto plano**. Al loguear online se deriva una clave PBKDF2 (150,000 iteraciones, SHA-256) y se cifra el access token con **AES-GCM (256 bits)**:
+La contraseña **nunca se guarda en texto plano**. Al loguear online se deriva un **material maestro** con PBKDF2 (600,000 iteraciones, SHA-256) y, desde ese material, dos subclaves independientes mediante **HKDF-SHA256** con `info` distintos: la clave **AES-GCM (256 bits)** de cifrado y el **hash de verificación**. La separación de dominios garantiza que el hash almacenado no sirva para descifrar el token.
 
-```
-password ──PBKDF2(150k, SHA-256)──▶ clave AES-GCM
-                    │
-                    ├──▶ hash de verificación (deriveBits, 256 bits)
-                    └──▶ encrypt(token) ──▶ encryptedToken
+```text
+password ──PBKDF2(600k, SHA-256)──▶ material maestro (256 bits)
+                     │
+                     ├──HKDF(info: offline.aes)──────▶ clave AES-GCM ──▶ encrypt(token)
+                     └──HKDF(info: offline.verify)────▶ hash de verificación (256 bits)
 ```
 
-- `saveCredentials({ email, password, accessToken })`: guarda la fila cifrada.
-- `verifyCredentials({ email, password })`: re-deriva la clave, compara el hash (tiempo constante) y descifra el token.
+- `saveCredentials({ email, password, accessToken })`: guarda la fila cifrada con `version: 2`.
+- `verifyCredentials({ email, password })`: re-deriva el material, compara el hash (tiempo constante) y descifra el token.
+- **Migración**: los registros con `version` distinta a la actual no son legibles y se **descartan** en `verifyCredentials`; se re-guardan en el próximo login online.
 - `crypto.subtle` solo existe en **contextos seguros** (localhost/HTTPS); si no está disponible se degrada sin romper (no se guarda ni se verifica localmente).
 
 ### Flujo de login
 
-1. **Online**: `POST /auth/local/signin` → en segundo plano se guardan las credenciales cifradas y se limpia la caché de otros monitores (`clearOtherMonitorsCache`).
+1. **Online**: `POST /auth/local/signin` → en segundo plano se guardan las credenciales cifradas (con `version: 2`), se limpia la caché y los checks offline de otros monitores (`clearOtherMonitorsCache`) y se aplica la **retención** de checks sincronizados (`cleanupSyncedChecks`, borra SYNCED con más de 7 días).
 2. **Offline** (`!navigator.onLine`): se valida contra las credenciales locales. Si son válidas y el token es de rol `MONITOR`, se construye una sesión local (`buildLocalSessionResponse`) y se continúa sin red. Si no, se muestra el mensaje *"Sin conexión: no hay credenciales guardadas válidas..."*.
 3. **Fallo de red con "red" aparente** (`ERR_NETWORK`): se intenta la validación local antes de mostrar el error.
 4. `networkMode: 'always'` en `useLogin` hace que el login **falle rápido** (error de red) en lugar de quedarse pausado con el Loading infinito (`networkMode 'online'` pausa la mutación sin internet).
@@ -120,7 +124,7 @@ Archivos: `frontend/src/config/lib/db/monitor-cache.ts`, `frontend/src/api/monit
 ### Escritura (sobreescritura en cada fetch exitoso)
 
 - `useGetCurrentAssignments({ enabled, email })` y `useGetCurrentAcademicPeriod({ enabled, email })` aceptan opciones; tras una respuesta exitosa **sobreescriben** la fila de Dexie del email (`saveCurrentAssignments` / `saveCurrentAcademicPeriod`).
-- Quienes llaman sin opciones (Home, reportes, etc.) se comportan igual que antes y no escriben en Dexie (sin `email` no aplica).
+- Si no se pasa `email`, los hooks lo derivan de la sesión (`useAuth().authState.user?.email`), de modo que la caché se escribe para el usuario activo incluso en quienes llaman sin opciones (Home, reportes, etc.).
 - Incluye el refetch automático de 60s de `current-assignments`, por lo que la caché se mantiene al día mientras el monitor usa la app.
 
 ### Lectura (offline sin llamar al backend)
@@ -131,8 +135,9 @@ Archivos: `frontend/src/config/lib/db/monitor-cache.ts`, `frontend/src/api/monit
 | `useCachedAssignments(email)` | `useLiveQuery` → asignaciones cacheadas (default `[]`) |
 | `useCachedAcademicPeriod(email)` | `useLiveQuery` → período vigente cacheado (default `null`) |
 
-- **`DashboardMonitor`**: `periodTitle = isOnline ? data?.title : cached?.title`. La query del período se deshabilita offline (`enabled: isOnline`).
-- **`MonitorChecklist`**: `sourceData = isOnline ? data : cachedAssignments`. El email de sesión (del JWT) se usa como clave; está disponible incluso sin red.
+- **`DashboardMonitor`**: `periodTitle = data?.title ?? cached?.title` (**fallback encadenado**). La query del período se deshabilita offline (`enabled: isOnline`).
+- **`MonitorChecklist`**: `sourceData = data ?? cachedAssignments` (**fallback encadenado**). El email de sesión (del JWT) se usa como clave; está disponible incluso sin red.
+- El fallback encadenado conserva los datos ya cargados durante la transición de red: si la fuente nueva (fetch remoto o lectura asíncrona de Dexie) aún no se resolvió, la interfaz no retrocede a un estado vacío.
 - El `refetchInterval` de `current-assignments` devuelve `false` cuando la query está deshabilitada u offline.
 
 ## Registro de asistencias offline y sincronización
@@ -141,18 +146,22 @@ Archivos: `frontend/src/features/dashboard/components/monitor-checklist/useRegis
 
 ### Registro local
 
-- `registerCheck` genera un `offlineId`, guarda la fila `PENDING` en `offlineChecks` y refleja el estado en la UI al instante (override en memoria).
-- **Guard anti-duplicado**: si ya existe un registro local para el mismo `(courseClassroomId, checkDate)`, no crea otro (evita dos asistencias del mismo día al sincronizar).
-- **`useOfflineChecksToday`**: expone los registros locales del día (Dexie) como overrides **durables**. Esto resuelve el caso de desmontaje (navegar a otra página y volver): el estado registrado persiste aunque los overrides en memoria se pierdan, y no parece "pendiente" para re-registrarlo.
-- Precedencia del estado mostrado: override en memoria (recién registrado) → registro local del día (Dexie) → check del servidor/caché.
+- `registerCheck` genera un `offlineId` y guarda la fila `PENDING` en `offlineChecks` (etiquetada con el email del monitor). La lectura anti-duplicado y la escritura se hacen dentro de una **transacción Dexie**, de modo que dos llamadas concurrentes no inserten dos registros.
+- **Guard anti-duplicado**: si ya existe un registro local del mismo monitor para el mismo `(courseClassroomId, checkDate)`, no crea otro (evita dos asistencias del mismo día al sincronizar).
+- **Corrección de un PENDING**: si el registro existente aún está `PENDING`, se **actualiza** (`isPresent`, `checkTime`, `observation`) en lugar de descartar la corrección del usuario. Si ya está `SYNCED` no se toca (el servidor conserva la versión enviada).
+- **`useOfflineChecksToday(email)`** es la **fuente única** del estado registrado en la UI: expone de forma reactiva (`useLiveQuery`) los registros locales del día del monitor. Reacciona a cada `add`/`update`/`delete` y sobrevive a los desmontajes (navegar a otra página y volver), sin copias en memoria que puedan quedar obsoletas.
 
 ### Sincronización
 
-- `useSyncEngine` observa la red y los pendientes:
-  1. Con pendientes y online, envía el lote a `POST /monitor/checks/batch-sync`.
-  2. Si responde OK, marca los registros como `SYNCED` y **invalida** la query de asignaciones para refrescarlas desde el servidor.
-- Backend (`MonitorChecksService.batchSync`): procesa cada check con `upsert` sobre `courseClassroomId + checkDate + checkTime`, devolviendo `{ synced, skipped }` (los ya existentes solo actualizan `syncedAt`).
-- `SyncIndicator` muestra el estado: `SYNCED` / `OFFLINE` / `SYNCING`.
+- `useSyncEngine(email)` observa la red y los pendientes **del monitor actual** (solo `PENDING` con su email):
+  1. Con pendientes y online, envía el lote a `POST /monitor/checks/batch-sync`. Un cerrojo síncrono (`isSyncingRef`) impide que dos sincronizaciones concurrentes envíen el mismo lote cuando `useLiveQuery` emite antes de que React re-renderice.
+  2. Con la respuesta `{ synced, conflicts, skipped, conflictIds, skippedIds }` marca `SYNCED` **solo los registros realmente persistidos**. Los **conflictos** (otro monitor ya verificó esa clave) se eliminan localmente y los `skipped` (error inesperado) se conservan `PENDING` para reintentar.
+  3. Aplica la **retención**: borra los registros `SYNCED` con más de 7 días de antigüedad (`cleanupSyncedChecks`).
+  4. Invalida la query de asignaciones para refrescarlas desde el servidor.
+  5. Si el lote falla, el estado pasa a `ERROR` (las filas siguen `PENDING`) y se reintenta manualmente o al reconectar.
+- Backend (`MonitorChecksService.batchSync`): resuelve por `courseClassroomId + checkDate + checkTime`; crea si no existe, actualiza `isPresent`/`observation` si es el mismo monitor, y reporta conflicto si el registro es de otro monitor (sin sobreescribirlo). La respuesta incluye los `conflictIds`/`skippedIds` para que el cliente reintente de forma selectiva; cada fallo individual se registra en el log del servidor con su `offlineId`.
+- `SyncIndicator` muestra el estado: `SYNCED` / `OFFLINE` / `SYNCING` / `ERROR` (con botón de reintento). Sus contenedores son regiones vivas (`role="status"` + `aria-live="polite"`) para anunciar los cambios de estado a lectores de pantalla.
+- La **retención** también se aplica al iniciar sesión como monitor (online y offline-restaurado); el histórico definitivo vive en el backend.
 
 ## TanStack Query
 
@@ -181,7 +190,7 @@ Archivo: `frontend/vite.config.ts`.
 
 ## Flujo offline → online
 
-```
+```text
                     ┌─────────────────────────────────────────────┐
                     │                 Frontend                    │
                     │                                             │
@@ -195,13 +204,14 @@ Archivo: `frontend/vite.config.ts`.
                     │  registerCheck ──▶ offlineChecks (PENDING)  │
                     │                                             │
    Reconexión ─────▶│  useSyncEngine ─▶ POST batch-sync ──▶ SYNCED│
-                    │               └─▶ invalidar asignaciones    │
+                    │               └─▶ conflictos: delete local  │
+                    │               └─▶ fallo: ERROR (reintento)  │
                     └─────────────────────────────────────────────┘
 ```
 
 ## Guía de pruebas manuales
 
-Preparación: backend y `npm run dev` corriendo, IndexedDB vacío. **No usar el botón de refrescar del navegador** (en dev no hay service worker); navegar solo por la UI.
+Preparación: backend y `npm run dev` corriendo, IndexedDB vacío. **No usar el botón de refrescar del navegador** (en dev no hay service worker); navegar solo por la UI. No existen pruebas automatizadas del módulo monitor: la verificación es manual, vía DevTools (Network, Application → IndexedDB → `SGOALocalDB`) y el backend.
 
 1. **Login online + llenado de caché**
    - Ingresar con un monitor → el checklist muestra las clases del día.
@@ -211,22 +221,50 @@ Preparación: backend y `npm run dev` corriendo, IndexedDB vacío. **No usar el 
    - Network → Offline → cerrar sesión → re-ingresar las mismas credenciales → login OK.
    - En Network no debe aparecer `current-assignments` ni `academic-periods/current`.
    - El dashboard muestra las mismas asignaciones y el título del período desde Dexie.
+   - El header del dashboard **oculta** nombre y código (dependen de `GET /teachers/current`, sin red no cargan) y muestra el **email** (desde el JWT).
 
 3. **Registro offline y persistencia**
    - Registrar presencia/ausencia en 2-3 clases → la UI refleja "Verificado a las HH:MM".
    - Navegar a otra página y volver al checklist → los registros **siguen visibles** (no vuelven a aparecer como pendientes).
-   - Doble click rápido en Presente/Ausente → solo 1 fila por `(courseClassroomId, checkDate)` en `offlineChecks`.
+   - Doble click rápido en Presente/Ausente → solo 1 fila por `(courseClassroomId, checkDate)` en `offlineChecks` (transacción + cerrojo de sync).
 
-4. **Sincronización**
+4. **Corrección de un registro pendiente**
+   - Registrar una verificación en una clase.
+   - Volver a verificar la **misma** clase con el valor contrario y una observación.
+   - DevTools → IndexedDB: sigue habiendo **una sola fila** (mismo `offlineId`) y su `isPresent`/`observation` se actualizaron (la corrección no se descarta).
+   - Tras sincronizar (paso 5), el backend guarda la **última** corrección, no dos asistencias.
+
+5. **Sincronización**
    - Network → Online → `SyncIndicator` pasa por SYNCING → SYNCED; las filas quedan `SYNCED`.
    - Las asistencias aparecen en el backend y las asignaciones se refrescan (nueva `fetchedAt`).
+   - Registrar otra verificación offline y volver a reconectar → se sincroniza en lote sin duplicar las ya enviadas.
 
-5. **Logout con pendientes**
+6. **Error y reintento**
+   - Registrar checks offline y **detener el backend** (o bloquear `POST /monitor/checks/batch-sync`) con la red activa.
+   - `SyncIndicator` pasa a **ERROR** ("Error al sincronizar X registro(s)"); las filas **siguen `PENDING`** en IndexedDB (no se marcan como sincronizadas).
+   - Reiniciar el backend → pulsar **Reintentar** → SYNCING → SYNCED; las filas quedan `SYNCED`.
+
+7. **Transición de red (fallback encadenado)**
+   - Estando en el checklist con asignaciones cargadas, alternar Network → Offline y → Online.
+   - En la conmutación, el checklist **no** debe mostrar "No hay asignaciones para el día de hoy" ni el título del período retroceder a "…": se conserva el último dato visible mientras la fuente nueva (fetch remoto o lectura de Dexie) se resuelve.
+
+8. **Logout con pendientes**
    - Registrar un check offline y cerrar sesión → confirm "Tienes X reporte(s) sin sincronizar...".
-   - Cancelar permanece en el dashboard; confirmar limpia `offlineChecks`. `credentials`, `monitorAssignments` y `academicPeriods` **persisten**.
+   - Cancelar permanece en el dashboard; confirmar limpia los `offlineChecks` del usuario. `credentials`, `monitorAssignments` y `academicPeriods` **persisten**.
 
-6. **Multi-monitor (mismo dispositivo)**
-   - Loguear con otro email → `clearOtherMonitorsCache` elimina las filas del monitor anterior.
+9. **Multi-monitor (mismo dispositivo)**
+   - Loguear con otro email → `clearOtherMonitorsCache` elimina las filas de otros monitores, incluidos sus `offlineChecks`.
+   - Registrar checks offline con el monitor A, cerrar sesión y loguear con el monitor B → el checklist de B **no** muestra los registros de A; al reconectar solo se sincronizan los `PENDING` de B.
+   - En IndexedDB, las filas de `offlineChecks` del monitor B tienen su propio `email`.
+
+10. **Retención (política de 7 días)**
+    - Tener una fila `SYNCED` en `offlineChecks`.
+    - DevTools → IndexedDB → editar su `createdAt` a una fecha de hace más de 7 días.
+    - Cerrar sesión y volver a loguear (o forzar una sincronización) → la fila antigua **desaparece**; una fila `SYNCED` reciente se conserva.
+
+11. **Migración de credenciales (esquema `version: 2`)**
+    - Con un registro de `credentials` del esquema antiguo (sin `version` o `version` distinta), probar login offline → falla con *"Sin conexión: no hay credenciales guardadas válidas..."* y el registro se **descarta**.
+    - Loguear **online** una vez → se re-guarda la fila con `version: 2` → el login offline vuelve a funcionar.
 
 ## Archivos clave
 

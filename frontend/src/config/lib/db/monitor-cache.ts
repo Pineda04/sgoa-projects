@@ -9,6 +9,11 @@ import type { TCurrentAcademicPeriod } from '@api/periods';
 
 const normalizeEmail = (email: string) => email.toLowerCase();
 
+// Retención de los checks ya sincronizados: se conservan unos días por si se necesita
+// auditar localmente y luego se descartan para que la tabla no crezca sin límite.
+// El histórico definitivo vive en el backend.
+const SYNCED_RETENTION_MS = 7 * 24 * 60 * 60 * 1000; // 7 días
+
 export const saveCurrentAssignments = async (
 	email: string,
 	buildings: TMonitorBuildingAssignments[]
@@ -53,11 +58,35 @@ export const getCachedAcademicPeriod = async (email: string) => {
 export const clearOtherMonitorsCache = async (email: string) => {
 	const normalized = normalizeEmail(email);
 	try {
-		await db.transaction('rw', db.monitorAssignments, db.academicPeriods, async () => {
-			await db.monitorAssignments.where('email').notEqual(normalized).delete();
-			await db.academicPeriods.where('email').notEqual(normalized).delete();
-		});
+		await db.transaction(
+			'rw',
+			db.monitorAssignments,
+			db.academicPeriods,
+			db.offlineChecks,
+			async () => {
+				await db.monitorAssignments.where('email').notEqual(normalized).delete();
+				await db.academicPeriods.where('email').notEqual(normalized).delete();
+				// Los checks offline también son por email: se descartan los de otros
+				// monitores (incluye huérfanas sin dueño de versiones anteriores).
+				await db.offlineChecks.where('email').notEqual(normalized).delete();
+			}
+		);
 	} catch (error) {
 		console.warn('No se pudo limpiar la caché de otros monitores:', error);
+	}
+};
+
+// Política de retención de offlineChecks: borra los registros SYNCED con más de 7 días
+// de antigüedad (createdAt). Los pendientes no se tocan; se reintenta o se corrigen.
+export const cleanupSyncedChecks = async (email?: string) => {
+	const cutoff = Date.now() - SYNCED_RETENTION_MS;
+	try {
+		await db.offlineChecks
+			.where('[email+syncStatus]')
+			.equals([normalizeEmail(email ?? ''), 'SYNCED'])
+			.filter(check => check.createdAt < cutoff)
+			.delete();
+	} catch (error) {
+		console.warn('No se pudo limpiar los checks sincronizados antiguos:', error);
 	}
 };

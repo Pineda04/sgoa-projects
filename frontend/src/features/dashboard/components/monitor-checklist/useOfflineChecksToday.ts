@@ -3,15 +3,15 @@ import { TMonitorAssignmentCheckStatus } from '@api/monitor';
 import { db } from '@config/lib';
 import { getTodayDateString } from './checklist.utils';
 
-// Feature: expone de forma reactiva los registros locales (Dexie) del día como un
-// mapa courseClassroomId -> estado de verificación. Esto conserva la asistencia
-// registrada offline aunque MonitorChecklist se desmonte (navegar a otra página),
-// evitando que parezca pendiente y se generen registros duplicados al sincronizar.
-export const useOfflineChecksToday = () =>
+// Feature: expone de forma reactiva los registros locales (Dexie) del día del monitor
+// actual como un mapa courseClassroomId -> estado de verificación. Esto conserva la
+// asistencia registrada offline aunque MonitorChecklist se desmonte (navegar a otra
+// página), evitando que parezca pendiente y se generen registros duplicados al sincronizar.
+export const useOfflineChecksToday = (email?: string) =>
 	useLiveQuery(async () => {
 		const records = await db.offlineChecks
-			.where('checkDate')
-			.equals(getTodayDateString())
+			.where('[email+checkDate]')
+			.equals([email ?? '', getTodayDateString()])
 			.toArray();
 
 		return records.reduce<Record<string, TMonitorAssignmentCheckStatus>>(
@@ -26,4 +26,4 @@ export const useOfflineChecksToday = () =>
 			},
 			{}
 		);
-	}, []);
+	}, [email], {} as Record<string, TMonitorAssignmentCheckStatus>);

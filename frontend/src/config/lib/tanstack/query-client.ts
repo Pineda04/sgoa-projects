@@ -54,4 +54,12 @@ persistQueryClient({
 	queryClient,
 	persister: indexedDBPersister,
 	maxAge: 1000 * 60 * 60 * 24, // 24 horas
+	dehydrateOptions: {
+		// Solo persisten las queries relevantes para el modo offline del monitor
+		// (asignaciones y períodos). El resto vive solo en memoria.
+		shouldDehydrateQuery: query => {
+			const scope = query.queryKey[0];
+			return scope === 'monitor' || scope === 'academic-periods';
+		},
+	},
 });

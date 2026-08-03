@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { TMonitorAssignmentCheckStatus } from '@api/monitor';
 import { db } from '@config/lib';
 import { getCurrentTimeString, getTodayDateString } from './checklist.utils';
 
@@ -9,11 +8,8 @@ interface RegisterCheckInput {
 	observation?: string;
 }
 
-export const useRegisterCheck = () => {
+export const useRegisterCheck = (email?: string) => {
 	const [submittingId, setSubmittingId] = useState<string | null>(null);
-	const [checkOverrides, setCheckOverrides] = useState<
-		Record<string, TMonitorAssignmentCheckStatus>
-	>({});
 
 	const registerCheck = useCallback(
 		async ({ courseClassroomId, isPresent, observation }: RegisterCheckInput) => {
@@ -25,37 +21,42 @@ export const useRegisterCheck = () => {
 				const checkTime = getCurrentTimeString();
 
 				// Feature: evitar registros duplicados del día (misma clase+curso), que
-				// al sincronizar crearían dos asistencias en el backend.
-				const existing = await db.offlineChecks
-					.where('courseClassroomId')
-					.equals(courseClassroomId)
-					.filter(check => check.checkDate === checkDate)
-					.first();
+				// al sincronizar crearían dos asistencias en el backend. La lectura y la
+				// escritura se envuelven en una transacción para que dos llamadas
+				// concurrentes no inserten dos registros.
+				await db.transaction('rw', db.offlineChecks, async () => {
+					const existing = await db.offlineChecks
+						.where('[email+checkDate]')
+						.equals([email ?? '', checkDate])
+						.filter(check => check.courseClassroomId === courseClassroomId)
+						.first();
 
-				if (existing) return true;
+					if (existing) {
+						// Si aún no se sincronizó, se corrige en lugar de duplicarlo; si ya
+						// se sincronizó no se toca (el servidor conserva la versión enviada).
+						if (existing.syncStatus === 'PENDING') {
+							await db.offlineChecks.update(existing.offlineId, {
+								isPresent,
+								checkTime,
+								observation: observation?.trim() || undefined,
+							});
+						}
+						return;
+					}
 
-				// 1. Guardar localmente en Dexie
-				await db.offlineChecks.add({
-					offlineId,
-					courseClassroomId,
-					checkDate,
-					checkTime,
-					isPresent,
-					observation: observation?.trim() || undefined,
-					syncStatus: 'PENDING',
-					createdAt: Date.now(),
-				});
-
-				// 2. Reflejar inmediatamente en la UI local
-				setCheckOverrides(prev => ({
-					...prev,
-					[courseClassroomId]: {
-						id: offlineId, // se usa offlineId como ID temporal
-						isPresent,
+					// 1. Guardar localmente en Dexie
+					await db.offlineChecks.add({
+						offlineId,
+						email: email ?? '',
+						courseClassroomId,
+						checkDate,
 						checkTime,
-						observation: observation?.trim() || null,
-					},
-				}));
+						isPresent,
+						observation: observation?.trim() || undefined,
+						syncStatus: 'PENDING',
+						createdAt: Date.now(),
+					});
+				});
 
 				return true;
 			} catch (error) {
@@ -65,12 +66,11 @@ export const useRegisterCheck = () => {
 				setSubmittingId(null);
 			}
 		},
-		[]
+		[email]
 	);
 
 	return {
 		registerCheck,
-		checkOverrides,
 		submittingId,
 		isRegistering: !!submittingId,
 	};

@@ -24,6 +24,8 @@ export interface AcademicPeriodCache {
 export interface OfflineCheck {
 	/** UUID generado en el frontend con crypto.randomUUID() */
 	offlineId: string;
+	/** Email del monitor dueño del registro (normalizado a minúsculas) */
+	email: string;
 	courseClassroomId: string;
 	/** Fecha en formato ISO string: YYYY-MM-DD */
 	checkDate: string;
@@ -47,6 +49,8 @@ export interface StoredCredential {
 	iv: string;
 	/** Access token cifrado con AES-GCM usando clave derivada de la contraseña (base64) */
 	encryptedToken: string;
+	/** Versión del esquema de derivación; los registros antiguos se descartan en verify */
+	version?: number;
 	updatedAt: number;
 }
 
@@ -78,6 +82,24 @@ class LocalDB extends Dexie {
 			monitorAssignments: 'email',
 			academicPeriods: 'email',
 		});
+		this.version(4)
+			.stores({
+				// Feature: v4 aísla offlineChecks por email del monitor (dispositivo
+				// compartido). Índices compuestos para lecturas/sync por usuario.
+				offlineChecks: 'offlineId, email, [email+checkDate], [email+syncStatus]',
+				credentials: 'email',
+				monitorAssignments: 'email',
+				academicPeriods: 'email',
+			})
+			.upgrade(async tx => {
+				// Las filas previas (v3) no tienen email: huérfanas e inasociables,
+				// se descartan para no mezclar registros entre monitores.
+				await tx
+					.table('offlineChecks')
+					.toCollection()
+					.filter(check => !check.email)
+					.delete();
+			});
 	}
 }
 

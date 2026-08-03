@@ -40,18 +40,16 @@ export const MonitorChecklist = () => {
 		email: sessionEmail,
 	});
 	// Feature: leer las asignaciones desde Dexie cuando no hay red (sin llamar al endpoint).
+	// Fallback encadenado: conserva los datos ya cargados durante la transición de red,
+	// cuando la fuente nueva aún no se resolvió (fetch remoto o lectura asíncrona de Dexie).
 	const cachedAssignments = useCachedAssignments(sessionEmail);
-	const sourceData = isOnline ? data : cachedAssignments;
-	// Feature: registros locales (Dexie) del día como overrides durables, para que el
-	// estado registrado sobreviva a desmontajes (navegar a otra página) y se eviten
-	// duplicados al sincronizar. Los overrides en memoria tienen mayor prioridad.
-	const localChecksMap = useOfflineChecksToday();
-	const { registerCheck, checkOverrides, submittingId, isRegistering } =
-		useRegisterCheck();
-	const effectiveOverrides = useMemo(
-		() => ({ ...localChecksMap, ...checkOverrides }),
-		[localChecksMap, checkOverrides]
-	);
+	const sourceData = data ?? cachedAssignments;
+	// Feature: los registros locales (Dexie) del día son la fuente única del estado
+	// registrado. useLiveQuery reacciona a cada add/update/delete, sobrevive a los
+	// desmontajes (navegar a otra página) y evita duplicados al sincronizar.
+	const effectiveOverrides = useOfflineChecksToday(sessionEmail);
+	const { registerCheck, submittingId, isRegistering } =
+		useRegisterCheck(sessionEmail);
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
 		CHECKLIST_VIEW_STORAGE_KEY,
@@ -144,7 +142,7 @@ export const MonitorChecklist = () => {
 		});
 	};
 
-	if (isLoading && !data) {
+	if (isLoading && !sourceData) {
 		return (
 			<div className="space-y-3">
 				<SkeletonCard fields={5} />
@@ -154,7 +152,7 @@ export const MonitorChecklist = () => {
 		);
 	}
 
-	if (isError && !data) {
+	if (isError && !sourceData) {
 		return (
 			<p className="text-sm text-destructive">
 				Error al cargar las asignaciones del día. Intenta nuevamente.

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { parseISO, startOfDay } from 'date-fns';
@@ -16,6 +17,8 @@ import { buildCheckWhere } from '../utils/build-check-where.util';
 
 @Injectable()
 export class MonitorChecksService {
+  private readonly logger = new Logger(MonitorChecksService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
@@ -66,47 +69,95 @@ export class MonitorChecksService {
   async batchSync(
     monitorId: string,
     dto: BatchSyncChecksDto,
-  ): Promise<{ synced: number; skipped: number }> {
-    let synced = 0;
-    let skipped = 0;
+  ): Promise<{
+    synced: number;
+    conflicts: number;
+    skipped: number;
+    conflictIds: string[];
+    skippedIds: string[];
+  }> {
+    const syncedIds: string[] = [];
+    const conflictIds: string[] = [];
+    const skippedIds: string[] = [];
 
-    for (const check of dto.checks) {
-      try {
+    const results = await Promise.allSettled(
+      dto.checks.map(async (check) => {
         const checkDate = startOfDay(parseISO(check.checkDate));
-
-        await this.prisma.scheduleComplianceCheck.upsert({
-          where: {
-            courseClassroomId_checkDate_checkTime: {
-              courseClassroomId: check.courseClassroomId,
-              checkDate,
-              checkTime: check.checkTime,
-            },
-          },
-          create: {
+        const where = {
+          courseClassroomId_checkDate_checkTime: {
             courseClassroomId: check.courseClassroomId,
-            monitorId,
             checkDate,
             checkTime: check.checkTime,
-            isPresent: check.isPresent,
-            observation: check.observation,
-            offlineId: check.offlineId,
-            syncedAt: new Date(),
           },
-          update: {
-            // Si el registro ya existía (creado por otro monitor), solo
-            // se actualiza syncedAt para registrar el intento de sincronización.
-            syncedAt: new Date(),
-          },
+        };
+
+        const existing = await this.prisma.scheduleComplianceCheck.findUnique({
+          where,
+          select: { monitorId: true },
         });
 
-        synced++;
-      } catch {
-        // Error inesperado en un registro individual, continuar con los demás
-        skipped++;
-      }
-    }
+        if (!existing) {
+          await this.prisma.scheduleComplianceCheck.create({
+            data: {
+              courseClassroomId: check.courseClassroomId,
+              monitorId,
+              checkDate,
+              checkTime: check.checkTime,
+              isPresent: check.isPresent,
+              observation: check.observation,
+              offlineId: check.offlineId,
+              syncedAt: new Date(),
+            },
+          });
 
-    return { synced, skipped };
+          return 'synced';
+        }
+
+        if (existing.monitorId === monitorId) {
+          // Mismo monitor: la última verificación registrada prevalece
+          await this.prisma.scheduleComplianceCheck.update({
+            where,
+            data: {
+              isPresent: check.isPresent,
+              observation: check.observation,
+              syncedAt: new Date(),
+            },
+          });
+
+          return 'synced';
+        }
+
+        // Otro monitor ya registró esta clave: no se sobreescribe, se reporta como conflicto
+        return 'conflict';
+      }),
+    );
+
+    results.forEach((result, index) => {
+      const check = dto.checks[index];
+
+      if (result.status === 'fulfilled') {
+        if (!check.offlineId) return;
+
+        if (result.value === 'synced') syncedIds.push(check.offlineId);
+        else conflictIds.push(check.offlineId);
+      } else {
+        if (check.offlineId) skippedIds.push(check.offlineId);
+        this.logger.warn(
+          `No se pudo sincronizar la verificación offline <${check.offlineId}> del monitor <${monitorId}>.`,
+          result.reason instanceof Error
+            ? result.reason.stack
+            : String(result.reason),
+        );
+      }
+    });
+
+    return {
+      synced: syncedIds.length,
+      conflicts: conflictIds.length,
+      skipped: skippedIds.length,
+      conflictIds,
+      skippedIds,
+    };
   }
 
   async findAllWithFilters(

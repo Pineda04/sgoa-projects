@@ -1,26 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, queryClient } from '@config/lib';
+import { db, queryClient, cleanupSyncedChecks } from '@config/lib';
 import { monitorApi, monitorKeys } from '@api/monitor';
+import { useIsOnline } from './useIsOnline';
 
-export type TSyncStatus = 'SYNCED' | 'OFFLINE' | 'SYNCING';
+export type TSyncStatus = 'SYNCED' | 'OFFLINE' | 'SYNCING' | 'ERROR';
 
-export const useSyncEngine = () => {
+export const useSyncEngine = (email?: string) => {
+	const isOnline = useIsOnline();
 	const [status, setStatus] = useState<TSyncStatus>(
-		navigator.onLine ? 'SYNCED' : 'OFFLINE'
+		isOnline ? 'SYNCED' : 'OFFLINE'
 	);
+	// Cerrojo síncrono: impide que dos sincronizaciones envíen el mismo lote cuando
+	// useLiveQuery emite antes de que React re-renderice con el nuevo estado.
+	const isSyncingRef = useRef(false);
 
-	// Escuchar cambios reactivos en los checks pendientes
+	// Escuchar cambios reactivos en los checks pendientes del monitor actual
 	const pendingChecks = useLiveQuery(
-		() => db.offlineChecks.where('syncStatus').equals('PENDING').sortBy('createdAt'),
-		[],
+		() =>
+			db.offlineChecks
+				.where('[email+syncStatus]')
+				.equals([email ?? '', 'PENDING'])
+				.sortBy('createdAt'),
+		[email],
 		[] // valor inicial
 	);
 
 	const pendingCount = pendingChecks.length;
 
 	const syncPendingChecks = useCallback(async () => {
-		if (!navigator.onLine) {
+		if (!isOnline) {
 			setStatus('OFFLINE');
 			return;
 		}
@@ -30,6 +39,8 @@ export const useSyncEngine = () => {
 			return;
 		}
 
+		if (isSyncingRef.current) return;
+		isSyncingRef.current = true;
 		setStatus('SYNCING');
 
 		try {
@@ -44,50 +55,72 @@ export const useSyncEngine = () => {
 			}));
 
 			// 2. Enviar lote al backend
-			await monitorApi.batchSync({ checks: checksToSync });
+			const result = (await monitorApi.batchSync({ checks: checksToSync })).data
+				.data;
 
-			// 3. Si fue exitoso (200 OK), marcar como SYNCED en local
+			// 3. Marcar como SYNCED solo los registros realmente persistidos.
+			//    Los conflictos (otro monitor ya verificó la clave) se eliminan y
+			//    los fallos inesperados se conservan en PENDING para reintentar.
 			await db.transaction('rw', db.offlineChecks, async () => {
-				const idsToUpdate = pendingChecks.map(c => c.offlineId);
-				await db.offlineChecks
-					.where('offlineId')
-					.anyOf(idsToUpdate)
-					.modify({ syncStatus: 'SYNCED' });
+				const failedIds = new Set([
+					...result.conflictIds,
+					...result.skippedIds,
+				]);
+				const idsToSync = pendingChecks
+					.map(check => check.offlineId)
+					.filter(id => !failedIds.has(id));
+
+				if (idsToSync.length > 0) {
+					await db.offlineChecks
+						.where('offlineId')
+						.anyOf(idsToSync)
+						.modify({ syncStatus: 'SYNCED' });
+				}
+
+				if (result.conflictIds.length > 0) {
+					await db.offlineChecks
+						.where('offlineId')
+						.anyOf(result.conflictIds)
+						.delete();
+				}
 			});
 
 			setStatus('SYNCED');
 
-			// 4. Invalidar la query de asignaciones para refrescar los datos desde el servidor
+			// 4. Limpieza: descartar SYNCED antiguos (política de retención)
+			await cleanupSyncedChecks(email);
+
+			// 5. Invalidar la query de asignaciones para refrescar los datos desde el servidor
 			await queryClient.invalidateQueries({
-				queryKey: monitorKeys.currentAssignments(),
+				queryKey: monitorKeys.currentAssignments(email),
 			});
 		} catch (error) {
 			console.error('Error durante la sincronización masiva:', error);
-			// Si falla por red u otro motivo, se quedan en PENDING
-			setStatus(navigator.onLine ? 'SYNCED' : 'OFFLINE');
+			// Las filas se conservan en PENDING; se reintenta manualmente o al reconectar
+			setStatus('ERROR');
+		} finally {
+			isSyncingRef.current = false;
 		}
-	}, [pendingChecks, pendingCount]);
+	}, [pendingChecks, pendingCount, isOnline, email]);
 
-	// Observar cambios en la red (Online / Offline)
+	// Reaccionar a los cambios de conectividad (useIsOnline es la única fuente de verdad)
 	useEffect(() => {
-		const handleOnline = () => syncPendingChecks();
-		const handleOffline = () => setStatus('OFFLINE');
+		if (isOnline) void syncPendingChecks();
+		else setStatus('OFFLINE');
+	}, [isOnline, syncPendingChecks]);
 
-		window.addEventListener('online', handleOnline);
-		window.addEventListener('offline', handleOffline);
-
-		return () => {
-			window.removeEventListener('online', handleOnline);
-			window.removeEventListener('offline', handleOffline);
-		};
-	}, [syncPendingChecks]);
-
-	// Cuando la cantidad de pendientes cambia y estamos online, intentar sincronizar
+	// Cuando la cantidad de pendientes cambia y estamos online, intentar sincronizar.
+	// Si quedó en ERROR no se reintenta en bucle: se espera reintento manual o reconexión.
 	useEffect(() => {
-		if (pendingCount > 0 && navigator.onLine && status !== 'SYNCING') {
+		if (
+			pendingCount > 0 &&
+			isOnline &&
+			!isSyncingRef.current &&
+			status !== 'ERROR'
+		) {
 			syncPendingChecks();
 		}
-	}, [pendingCount, syncPendingChecks, status]);
+	}, [pendingCount, syncPendingChecks, status, isOnline]);
 
 	return { status, pendingCount, forceSync: syncPendingChecks };
 };
