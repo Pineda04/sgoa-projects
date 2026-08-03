@@ -5,6 +5,8 @@ export const pcEquipmentsKeys = {
 		[...pcEquipmentsKeys.lists(), { page, size }] as const,
 	details: () => [...pcEquipmentsKeys.all, 'detail'] as const,
 	detail: (id: string) => [...pcEquipmentsKeys.details(), id] as const,
+	byClassroom: (classroomId: string) =>
+		[...pcEquipmentsKeys.all, 'by-classroom', classroomId] as const,
 };
 
 export const pcTypesKeys = {

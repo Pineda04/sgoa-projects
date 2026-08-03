@@ -1,14 +1,77 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from 'src/generated/prisma/client';
 import { CreatePcEquipmentDto, UpdatePcEquipmentDto } from '../dto';
-import { TCreatePcEquipment, TPcEquipment, TUpdatePcEquipment } from '../types';
+import {
+  TCreatePcEquipment,
+  TPcEquipment,
+  TPcEquipmentWithRelations,
+  TUpdatePcEquipment,
+} from '../types';
 import { IPaginateOutput } from 'src/common/interfaces';
 import { QueryPaginationDto } from 'src/common/dto';
 import { paginate, paginateOutput } from 'src/common/utils';
 
+const pcEquipmentInclude = {
+  brand: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+  condition: {
+    select: {
+      id: true,
+      status: true,
+    },
+  },
+  monitorType: {
+    select: {
+      id: true,
+      description: true,
+    },
+  },
+  monitorSize: {
+    select: {
+      id: true,
+      description: true,
+    },
+  },
+  pcType: {
+    select: {
+      id: true,
+      description: true,
+    },
+  },
+} satisfies Prisma.PcEquipmentInclude;
+
+type TPcEquipmentWithRelationsPayload = Prisma.PcEquipmentGetPayload<{
+  include: typeof pcEquipmentInclude;
+}>;
+
 @Injectable()
 export class PcEquipmentsService {
   constructor(private prisma: PrismaService) {}
+
+  private readonly pcEquipmentInclude = pcEquipmentInclude;
+
+  private mapToPcEquipmentWithRelations(
+    pcEquipment: TPcEquipmentWithRelationsPayload,
+  ): TPcEquipmentWithRelations {
+    return {
+      id: pcEquipment.id,
+      inventoryNumber: pcEquipment.inventoryNumber,
+      processor: pcEquipment.processor,
+      ram: pcEquipment.ram,
+      disk: pcEquipment.disk,
+      classroomId: pcEquipment.classroomId,
+      brand: pcEquipment.brand,
+      condition: pcEquipment.condition,
+      monitorType: pcEquipment.monitorType,
+      monitorSize: pcEquipment.monitorSize,
+      pcType: pcEquipment.pcType,
+    };
+  }
 
   async create(
     createPcEquipmentDto: CreatePcEquipmentDto,
@@ -26,6 +89,17 @@ export class PcEquipmentsService {
     const pcEquipments = await this.prisma.pcEquipment.findMany();
 
     return pcEquipments;
+  }
+
+  async findAllByClassroom(
+    classroomId: string,
+  ): Promise<TPcEquipmentWithRelations[]> {
+    const pcEquipments = await this.prisma.pcEquipment.findMany({
+      where: { classroomId },
+      include: this.pcEquipmentInclude,
+    });
+
+    return pcEquipments.map(pc => this.mapToPcEquipmentWithRelations(pc));
   }
 
   async findAllWithPagination(
