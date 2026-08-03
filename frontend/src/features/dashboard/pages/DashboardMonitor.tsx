@@ -3,9 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { MonitorChecklist, MonitorReports } from '../components';
+import { ListClassrooms } from '@features/infrastructure';
 
 export const DashboardMonitor = () => {
-	const validTabs = ['0', '1'];
+	const validTabs = ['0', '1', '2'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const currentUser = useUser();
@@ -14,7 +15,7 @@ export const DashboardMonitor = () => {
 		<div className="pb-8 sm:pb-12">
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold mb-2">
-					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
+					UNAH PAC {academicPeriodInfo.data?.title ?? '...'}
 				</h2>
 				<p className="text-sm">{currentUser.user?.name}</p>
 				<p className="text-sm">{currentUser.user?.code}</p>
@@ -27,11 +28,23 @@ export const DashboardMonitor = () => {
 				className="mt-4 sm:mt-8"
 			>
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
-					<TabsTrigger value="0" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
+					<TabsTrigger
+						value="0"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
 						Checklist
 					</TabsTrigger>
-					<TabsTrigger value="1" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
+					<TabsTrigger
+						value="1"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
 						Reportes
+					</TabsTrigger>
+					<TabsTrigger
+						value="2"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
+						Aulas
 					</TabsTrigger>
 				</TabsList>
 
@@ -45,6 +58,10 @@ export const DashboardMonitor = () => {
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-4 sm:p-6">
 						<MonitorReports />
 					</div>
+				</TabsContent>
+
+				<TabsContent value="2">
+					<ListClassrooms showHeader={false} />
 				</TabsContent>
 			</Tabs>
 		</div>

@@ -31,6 +31,7 @@ export class DigitalBlackboardController {
 
   @Get(':id')
   @RequirePermission('read', 'digital-blackboards')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado la pizarra digital.')
   @ApiCommonResponses({

@@ -12,11 +12,14 @@ export const useTabWithReset = (
 		: defaultTab;
 
 	const setTab = (value: string) => {
-		setSearchParams(prev => {
-			prev.set('tab', value);
-			prev.set('page', '1');
-			return prev;
-		});
+		setSearchParams(
+			prev => {
+				prev.set('tab', value);
+				prev.set('page', '1');
+				return prev;
+			},
+			{ replace: true }
+		);
 	};
 
 	return { currentTab, setTab };

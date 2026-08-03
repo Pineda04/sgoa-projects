@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiPagination,
+  LookupSource,
   RequirePermission,
   ResponseMessage,
 } from 'src/common/decorators';
@@ -45,6 +46,7 @@ export class PcEquipmentsController {
 
   @Get()
   @RequirePermission('read', 'pc-equipments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de computo.')
   @ApiCommonResponses({

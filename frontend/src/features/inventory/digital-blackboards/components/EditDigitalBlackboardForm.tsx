@@ -13,6 +13,7 @@ import {
 	TDigitalBlackboardFormValues,
 } from '../schemas';
 import { DigitalBlackboardFormInputs } from './DigitalBlackboardFormInputs';
+import { FiSave } from 'react-icons/fi';
 
 interface EditDigitalBlackboardFormProps {
 	digitalBlackboardId: string;
@@ -48,6 +49,7 @@ export const EditDigitalBlackboardForm = ({
 			monitorTypeId: digitalBlackboard.monitorTypeId,
 			monitorSizeId: digitalBlackboard.monitorSizeId,
 			conditionId: digitalBlackboard.conditionId,
+			classroomId: digitalBlackboard.classroom?.id ?? '',
 		});
 	}, [digitalBlackboard]);
 
@@ -75,6 +77,13 @@ export const EditDigitalBlackboardForm = ({
 	if (isLoading) return <Loading />;
 	if (isError || !digitalBlackboard) return <TagError />;
 
+	const classroomDefaultOption = digitalBlackboard.classroom
+		? {
+				value: digitalBlackboard.classroom.id,
+				label: digitalBlackboard.classroom.name,
+			}
+		: null;
+
 	return (
 		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
 			<h1 className="text-xl font-bold mb-1 shrink-0">
@@ -93,27 +102,31 @@ export const EditDigitalBlackboardForm = ({
 				<DigitalBlackboardFormInputs
 					formik={formik}
 					disabled={isPendingUpdate}
+					classroomDefaultOption={classroomDefaultOption}
 				/>
 			</form>
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					form="edit-digital-blackboard-form"
-					disabled={isPendingUpdate}
-					className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
-				>
-					{isPendingUpdate ? 'Guardando...' : 'Actualizar'}
-				</Button>
-				<Button
 					type="button"
 					onClick={onCancel}
 					disabled={isPendingUpdate}
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+					form="edit-digital-blackboard-form"
+					disabled={isPendingUpdate}
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+				>
+          {!isPendingUpdate && <FiSave className="size-4" />}
+					<span>
+						{isPendingUpdate
+							? 'Guardando...'
+							: 'Actualizar Pizarra Digital'}
+					</span>
 				</Button>
 			</div>
 		</div>

@@ -14,6 +14,7 @@ import {
 	TClassroomFormValues,
 } from '../schemas';
 import { ClassroomFormInputs } from '../components';
+import { FiSave } from 'react-icons/fi';
 
 export const EditClassroom = () => {
 	const { id = '' } = useParams();
@@ -45,7 +46,6 @@ export const EditClassroom = () => {
 			connectivityId: classroom.connectivityId ?? '',
 			audioEquipmentId: classroom.audioEquipmentId ?? '',
 			conditionId: classroom.conditionId ?? '',
-			digitalBlackboardId: classroom.digitalBlackboardId ?? '',
 			departmentIds: classroom.departments?.map(d => d.id) ?? [],
 		};
 	}, [classroom]);
@@ -90,23 +90,24 @@ export const EditClassroom = () => {
 
 				<div className="flex justify-end gap-2 mt-4 md:col-span-2">
 					<Button
-						type="submit"
-						disabled={isPendingUpdate}
-						className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-						variant="unstyled"
-					>
-						{isPendingUpdate ? 'Guardando...' : 'Actualizar'}
-					</Button>
-					<Button
 						type="button"
 						onClick={() =>
 							navigate('/infrastructure/classrooms')
 						}
 						disabled={isPendingUpdate}
-						className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-						variant="unstyled"
+						variant="outline"
 					>
 						Cancelar
+					</Button>
+					<Button
+						type="submit"
+						disabled={isPendingUpdate}
+						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+					>
+					  {!isPendingUpdate && <FiSave className="size-4" />}
+            <span>
+             	{isPendingUpdate ? 'Guardando...' : 'Actualizar Aula'}
+            </span>
 					</Button>
 				</div>
 			</form>

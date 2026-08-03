@@ -178,6 +178,35 @@ describe('Permisos implícitos', () => {
       expect(monitor).not.toContain('read:classrooms');
     });
 
+    it('el docente abre la ficha de aula sin quedarse con el módulo Aulas', () => {
+      const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
+
+      // Abre la ruta protegida de la ficha...
+      expect(teacher).toContain('read:dashboard-tab-classrooms');
+      // ...y llega a los datos que la ficha muestra...
+      expect(teacher).toEqual(
+        expect.arrayContaining([
+          'lookup:classrooms',
+          'lookup:pc-equipments',
+          'lookup:air-conditioners',
+          'lookup:digital-blackboards',
+        ]),
+      );
+      // ...pero el módulo Aulas sigue fuera del menú y del mantenimiento.
+      expect(teacher).not.toContain('read:classrooms');
+
+      const fichaDeAula = buildGuard({
+        permission: { action: 'read', subject: 'classrooms' },
+        isLookupSource: true,
+      });
+      const editarAula = buildGuard({
+        permission: { action: 'update', subject: 'classrooms' },
+      });
+
+      expect(fichaDeAula.canActivate(buildContext(teacher))).toBe(true);
+      expect(editarAula.canActivate(buildContext(teacher))).toBe(false);
+    });
+
     it('la página Catálogo concede las entidades que administra', () => {
       const catalog = expandImpliedPermissions(['manage:catalog']);
 

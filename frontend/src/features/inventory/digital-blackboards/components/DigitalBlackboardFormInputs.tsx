@@ -2,11 +2,19 @@ import type { FormikProps } from 'formik';
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
 import { useGetAllMonitorSizes, useGetAllMonitorTypes } from '@api/pc-equipments';
+import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import { SearchAsyncSelect } from '@shared/components';
+import { customOptionsReactSelect } from '@shared/utils';
 import { TDigitalBlackboardFormValues } from '../schemas';
 
 export interface DigitalBlackboardFormInputsProps {
 	formik: FormikProps<TDigitalBlackboardFormValues>;
 	disabled?: boolean;
+	classroomDefaultOption?: {
+		value: string;
+		label: string;
+		data?: TClassroomSearch;
+	} | null;
 }
 
 const inputClassName =
@@ -68,11 +76,15 @@ const SelectField = ({
 export const DigitalBlackboardFormInputs = ({
 	formik,
 	disabled = false,
+	classroomDefaultOption = null,
 }: DigitalBlackboardFormInputsProps) => {
 	const brands = useGetAllBrands();
 	const conditions = useGetAllConditions();
 	const monitorTypes = useGetAllMonitorTypes();
 	const monitorSizes = useGetAllMonitorSizes();
+
+	const handleClassroomInfo = (classroom: TClassroomSearch) =>
+		formik.setFieldValue('classroomId', classroom.id);
 
 	const selectFields: SelectFieldProps[] = [
 		{
@@ -159,6 +171,32 @@ export const DigitalBlackboardFormInputs = ({
 			{selectFields.map(field => (
 				<SelectField key={field.id} {...field} />
 			))}
+
+			{/* Buscador de aulas */}
+			<div className="space-y-2">
+				<label className="text-sm font-medium text-foreground">
+					Aula
+				</label>
+				<SearchAsyncSelect<TClassroomSearch>
+					hook={useGetClassroomsBySearchTerm}
+					handleChange={handleClassroomInfo}
+					getOptionValue={c => c.id}
+					getOptionLabel={c => c.name}
+					formatOptionLabel={(data, { context }) =>
+						customOptionsReactSelect(
+							data.label,
+							data.data?.building?.name ?? '',
+							context,
+						)
+					}
+					defaultOption={classroomDefaultOption}
+				/>
+				{formik.touched.classroomId && formik.errors.classroomId ? (
+					<p className="text-xs text-destructive">
+						{formik.errors.classroomId}
+					</p>
+				) : null}
+			</div>
 		</>
 	);
 };

@@ -102,6 +102,7 @@ export class ClassroomController {
 
   @Get(':id')
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el aula.')
   @ApiCommonResponses({

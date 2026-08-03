@@ -20,6 +20,7 @@ import {
 import { useUser } from '@config/providers';
 import { InfoTeacher } from '../components';
 import { DocumentPlusIcon } from '@heroicons/react/24/outline';
+import { ListClassrooms } from '@features/infrastructure';
 
 interface ReportPeriod {
 	id: string;
@@ -34,7 +35,7 @@ interface ReportPeriod {
 
 export const DashboardTeacher = () => {
 	const navigate = useNavigate();
-	const validTabs = ['0', '1'];
+	const validTabs = ['0', '1', '2'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
 	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
@@ -189,15 +190,23 @@ export const DashboardTeacher = () => {
 			>
 				{/* TabsList */}
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
-					<TabsTrigger value="0" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
-						<span className="hidden xs:inline">
-							Clases asignadas
-						</span>
-						<span className="xs:hidden">Clases</span>
+					<TabsTrigger
+						value="0"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
+						<span>Clases</span>
 					</TabsTrigger>
-					<TabsTrigger value="1" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
-						<span className="hidden xs:inline">Informes</span>
-						<span className="xs:hidden">Informes</span>
+					<TabsTrigger
+						value="1"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
+						<span>Informes</span>
+					</TabsTrigger>
+					<TabsTrigger
+						value="2"
+						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
+					>
+						<span>Aulas</span>
 					</TabsTrigger>
 				</TabsList>
 
@@ -208,7 +217,9 @@ export const DashboardTeacher = () => {
 							columns={courseColumns}
 							data={filteredCourses}
 							getRowKey={c => c.id}
-							loading={coursesInfo.isLoading || currentUser.isLoading}
+							loading={
+								coursesInfo.isLoading || currentUser.isLoading
+							}
 							emptyMessage="No hay clases asignadas"
 						/>
 					</div>
@@ -216,42 +227,41 @@ export const DashboardTeacher = () => {
 
 				{/* Informes */}
 				<TabsContent value="1">
-          <div>
-            {academicPeriodInfo.isLoading ||
-             academicAssignmentReportsPeriodsInfo.isLoading ? null :
-             !currentPeriodReport?.reportId ?
-            (
-              <div className='flex items-center justify-center'>
-                <div className='flex py-3 px-4 rounded-md bg-yellow-500'>
-      						<span className='text-1xl font-semibold'>Sin asignación académica para el periodo actual</span>
-                </div>
-              </div>
-            ) : (
-            <div className='flex items-center justify-center'>
-  						<Button
-  							onClick={() =>
-  								handleView(
-  									currentPeriodReport?.reportId ?? '',
-  									'edit'
-  								)
-  							}
-  							disabled={
-  								!currentPeriodReport?.reportId
-  							}
-  							className="w-full cursor-pointer disabled:cursor-not-allowed md:w-auto text-xs sm:text-sm bg-[#C40C54] hover:bg-[#AC0647] hover:shadow-xl hover:shadow-[#C40C54]/20 hover:-translate-y-0.5"
-  							variant="default"
-  						>
-   							<DocumentPlusIcon className="size-3 sm:size-4.5" />
-  							<span className="hidden sm:inline">
-  								Informe de asignación académica del periodo
-  								actual
-  							</span>
-  							<span className="sm:hidden">
-  								Ver informe actual
-  							</span>
-  						</Button>
-            </div>
-            )}
+					<div>
+						{academicPeriodInfo.isLoading ||
+						academicAssignmentReportsPeriodsInfo.isLoading ? null : !currentPeriodReport?.reportId ? (
+							<div className="flex items-center justify-center">
+								<div className="flex py-3 px-4 rounded-md bg-yellow-500">
+									<span className="text-1xl font-semibold">
+										Sin asignación académica para el periodo
+										actual
+									</span>
+								</div>
+							</div>
+						) : (
+							<div className="flex items-center justify-center">
+								<Button
+									onClick={() =>
+										handleView(
+											currentPeriodReport?.reportId ?? '',
+											'edit'
+										)
+									}
+									disabled={!currentPeriodReport?.reportId}
+									className="w-full cursor-pointer disabled:cursor-not-allowed md:w-auto text-xs sm:text-sm bg-[#C40C54] hover:bg-[#AC0647] hover:shadow-xl hover:shadow-[#C40C54]/20 hover:-translate-y-0.5"
+									variant="default"
+								>
+									<DocumentPlusIcon className="size-3 sm:size-4.5" />
+									<span className="hidden sm:inline">
+										Informe de asignación académica del
+										periodo actual
+									</span>
+									<span className="sm:hidden">
+										Ver informe actual
+									</span>
+								</Button>
+							</div>
+						)}
 
 						<div className="mt-4 sm:mt-6 bg-white">
 							<ResponsiveTable<ReportPeriod>
@@ -266,6 +276,11 @@ export const DashboardTeacher = () => {
 							/>
 						</div>
 					</div>
+				</TabsContent>
+
+				{/* Aulas */}
+        <TabsContent value="2">
+          <ListClassrooms showHeader={false} />
 				</TabsContent>
 			</Tabs>
 		</div>

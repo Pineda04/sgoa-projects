@@ -3,6 +3,7 @@
 // repetir acá los catálogos que alimentan los selectores de cada formulario.
 export const rolePermissionsSeed: Record<string, string[]> = {
   DIRECCION: [
+    'manage:profile',
     'manage:dashboard-authorities',
     'manage:users',
     'manage:user-status',
@@ -26,6 +27,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'read:planifications',
   ],
   RRHH: [
+    'manage:profile',
     'manage:dashboard-authorities',
     'manage:users',
     'manage:user-status',
@@ -44,6 +46,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'read:planifications',
   ],
   COORDINADOR_AREA: [
+    'manage:profile',
     'manage:dashboard-coordinator',
     'manage:reports',
     'manage:planifications',
@@ -56,6 +59,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'read:degrees',
   ],
   DOCENTE: [
+    'manage:profile',
     'manage:dashboard-teacher',
     'manage:activities',
     'read:courses',
@@ -66,6 +70,7 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'read:degrees',
   ],
   MONITOR: [
+    'manage:profile',
     'manage:dashboard-monitor',
     'manage:schedule-compliance-check',
     'read:reports-monitor',

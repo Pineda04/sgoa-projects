@@ -1,6 +1,5 @@
 import React from 'react';
 import { type RouteObject } from 'react-router-dom';
-import { UserProfile } from '../pages';
 
 const CreateUserLazy = React.lazy(() =>
   import('../pages/CreateUser').then(module => ({
@@ -16,9 +15,5 @@ export const usersRoutes: RouteObject[] = [
         <CreateUserLazy />
       </React.Suspense>
     ),
-  },
-  {
-    path: 'profile',
-    element: <UserProfile />,
   },
 ];

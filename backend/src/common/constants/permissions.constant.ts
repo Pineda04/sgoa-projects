@@ -57,6 +57,9 @@ export const PERMISSION_SUBJECTS = [
   'dashboard-coordinator',
   'dashboard-teacher',
   'dashboard-monitor',
+  // Acceso acotado a la ficha de aula desde un dashboard, sin abrir el módulo
+  // Aulas ni mostrarlo en el menú.
+  'dashboard-tab-classrooms',
 ] as const;
 
 export type TPermissionAction = (typeof PERMISSION_ACTIONS)[number];

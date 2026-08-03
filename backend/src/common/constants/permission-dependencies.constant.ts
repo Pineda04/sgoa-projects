@@ -41,6 +41,8 @@ export const LOOKUP_SUBJECTS = [
   'contract-types',
   'shifts',
   'teacher-categories',
+  'air-conditioners',
+  'pc-equipments',
 ] as const;
 
 export type TLookupSubject = (typeof LOOKUP_SUBJECTS)[number];
@@ -105,6 +107,21 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
   planifications: lookup('classrooms', 'periods'),
 
   // --- Vistas compuestas: conceden lo que dejan hacer sus secciones -------
+  // Ficha de aula abierta desde un dashboard: solo consulta. Trae los catálogos
+  // que muestra la página de detalle (equipamiento, conectividad, inventario).
+  'dashboard-tab-classrooms': lookup(
+    'classrooms',
+    'buildings',
+    'room-types',
+    'conditions',
+    'connectivities',
+    'audio-equipments',
+    'digital-blackboards',
+    'air-conditioners',
+    'brands',
+    'pc-equipments',
+  ),
+
   // La página Catálogo administra en un solo lugar todas las entidades chicas.
   catalog: grant(
     'manage',
@@ -138,6 +155,7 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     ...grant('read', 'courses', 'reports', 'planifications'),
     ...grant('update', 'planifications'),
     ...grant('manage', 'activities'),
+    ...grant('read', 'dashboard-tab-classrooms'),
     ...lookup('periods'),
   ],
   // Checklist de cumplimiento de horarios: el monitor registra y consulta sus
@@ -145,6 +163,7 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
   'dashboard-monitor': [
     ...grant('manage', 'schedule-compliance-check'),
     ...grant('read', 'reports-monitor'),
+    ...grant('read', 'dashboard-tab-classrooms'),
     ...lookup('classrooms', 'buildings'),
   ],
 };

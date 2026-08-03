@@ -30,6 +30,7 @@ export type Subjects =
 	| 'dashboard-coordinator'
 	| 'dashboard-teacher'
 	| 'dashboard-monitor'
+	| 'dashboard-tab-classrooms'
 	| 'users'
 	| 'user-departments'
 	| 'user-status'

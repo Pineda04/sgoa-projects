@@ -67,4 +67,5 @@ export const SUBJECT_LABELS: Record<Subjects, string> = {
 	'dashboard-coordinator': 'Dashboard de coordinación',
 	'dashboard-teacher': 'Dashboard de docencia',
 	'dashboard-monitor': 'Dashboard de monitoreo',
+	'dashboard-tab-classrooms': 'Ficha de aula (desde dashboard)',
 };

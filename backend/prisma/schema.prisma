@@ -271,8 +271,9 @@ model DigitalBlackboard {
   monitorTypeId String      @db.Uuid
   monitorSizeId String      @db.Uuid
   conditionId   String      @db.Uuid
-  classrooms    Classroom[]
+  classroomId   String?     @db.Uuid
   brand         Brand       @relation(fields: [brandId], references: [id])
+  classroom     Classroom?  @relation(fields: [classroomId], references: [id])
   condition     Condition   @relation(fields: [conditionId], references: [id])
   monitorSize   MonitorSize @relation(fields: [monitorSizeId], references: [id])
   monitorType   MonitorType @relation(fields: [monitorTypeId], references: [id])
@@ -312,16 +313,15 @@ model Classroom {
   conditionId          String?               @db.Uuid
   maxCapacity          Int?
   activeStatus         Boolean               @default(true)
-  digitalBlackboardId  String?               @db.Uuid
   courseClassrooms     CourseClassroom[]
   audioEquipment       AudioEquipment?       @relation(fields: [audioEquipmentId], references: [id])
   building             Building              @relation(fields: [buildingId], references: [id])
   condition            Condition?            @relation(fields: [conditionId], references: [id])
   connectivity         Connectivity?         @relation(fields: [connectivityId], references: [id])
-  digitalBlackboard    DigitalBlackboard?    @relation(fields: [digitalBlackboardId], references: [id])
   roomType             RoomType              @relation(fields: [roomTypeId], references: [id])
   classroomDepartments ClassroomDepartment[]
   airConditioners      AirConditioner[]
+  digitalBlackboards   DigitalBlackboard[]
   pcEquipments         PcEquipment[]
   classroomInfoView    ClassroomInfoView?
 

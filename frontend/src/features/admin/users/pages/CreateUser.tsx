@@ -12,6 +12,7 @@ import { errorsFormik, setOptions } from '@shared/utils';
 import { Button, Error, Loading } from '@shared/components';
 import { TAcademicCommonProps } from '@api/periods';
 import { SelectAccessRoles, SelectCenterDepartments } from '../components';
+import { FiSave } from 'react-icons/fi';
 
 export const CreateUser = () => {
 	const ability = useAbility();
@@ -336,19 +337,22 @@ export const CreateUser = () => {
 						/>
 					)}
 
-					<div className="col-span-1 md:col-span-2 flex justify-center items-center gap-4 mt-6 flex-col sm:flex-row">
+					<div className="col-span-1 md:col-span-2 flex justify-end items-center gap-4 mt-6 flex-col sm:flex-row">
 						<Button
-							type="submit"
-							className="bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-500"
-						>
-							Guardar Cambios
-						</Button>
-						<Button
-							onClick={handleCancel}
 							type="button"
-							className="bg-[#DC3545] text-white p-2 hover:bg-red-300 transition duration-500"
+							variant="outline"
+							onClick={handleCancel}
 						>
 							Cancelar
+						</Button>
+						<Button
+							type="submit"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            >
+              <FiSave className="size-4" />
+              <span>
+                Guardar Usuario
+              </span>
 						</Button>
 					</div>
 				</form>
