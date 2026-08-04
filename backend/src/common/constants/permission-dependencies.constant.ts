@@ -130,8 +130,12 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     ...lookup('departments'),
   ],
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Consolidado.
+  // El coordinador consulta y edita las clases de su departamento, pero solo
+  // la autoridad crea (y elimina) el catálogo de clases.
   'dashboard-coordinator': [
-    ...grant('manage', 'planifications', 'reports', 'users', 'courses'),
+    ...grant('manage', 'planifications', 'reports', 'users'),
+    ...grant('read', 'courses'),
+    ...grant('update', 'courses'),
     ...lookup('departments', 'periods'),
   ],
   // Pestañas: Clases asignadas e Informes, ambas acotadas al propio docente.

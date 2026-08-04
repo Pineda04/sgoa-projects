@@ -229,6 +229,30 @@ describe('Permisos implícitos', () => {
       expect(plantilla.canActivate(buildContext(teacher))).toBe(false);
     });
 
+    it('el coordinador consulta y edita clases, pero solo la autoridad las crea', () => {
+      const coordinator = expandImpliedPermissions([
+        'manage:dashboard-coordinator',
+      ]);
+
+      expect(coordinator).toContain('read:courses');
+      expect(coordinator).toContain('update:courses');
+      expect(coordinator).not.toContain('manage:courses');
+
+      const crearClase = buildGuard({
+        permission: { action: 'create', subject: 'courses' },
+      });
+      const borrarClase = buildGuard({
+        permission: { action: 'delete', subject: 'courses' },
+      });
+      const editarClase = buildGuard({
+        permission: { action: 'update', subject: 'courses' },
+      });
+
+      expect(crearClase.canActivate(buildContext(coordinator))).toBe(false);
+      expect(borrarClase.canActivate(buildContext(coordinator))).toBe(false);
+      expect(editarClase.canActivate(buildContext(coordinator))).toBe(true);
+    });
+
     it('el docente abre la ficha de aula sin quedarse con el módulo Aulas', () => {
       const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
 
