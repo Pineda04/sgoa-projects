@@ -254,8 +254,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		roles,
 	].some(q => q.isLoading);
 
-	// Solo el super admin puede modificar los roles de un usuario existente.
-	const canUpdateRoles = !!user?.isSuperAdmin;
+	const canUpdateRoles = ability.can('manage', 'user-roles');
 	const assignableRoles = (roles.data ?? []).filter(
 		role => !role.isSuperAdmin || user?.isSuperAdmin
 	);

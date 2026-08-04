@@ -140,16 +140,27 @@ export class UsersService {
     return await this.create(createUserDto);
   }
 
+  private canAssignRoles(currentUser: TJwtPayload): boolean {
+    return (
+      currentUser.isSuperAdmin ||
+      currentUser.permissions.includes('manage:user-roles')
+    );
+  }
+
   normalizeRolesForCreate(
     roleNames: string[],
     currentUser: TJwtPayload,
   ): string[] {
-    if (currentUser.isSuperAdmin) return roleNames;
+    if (!this.canAssignRoles(currentUser)) return [ROLE_NAMES.DOCENTE];
 
-    return [ROLE_NAMES.DOCENTE];
+    if (!currentUser.isSuperAdmin && roleNames.includes(ROLE_NAMES.SUPER_ADMIN))
+      throw new ForbiddenException(
+        'Solo un super administrador puede asignar el rol de super administrador.',
+      );
+
+    return roleNames;
   }
 
-  // Solo el super admin puede modificar los roles de un usuario existente.
   // El formulario de edición reenvía <roles> aunque el usuario no lo haya
   // tocado (es un campo más de formik), así que solo se bloquea si el
   // conjunto de roles enviado realmente difiere del actual.
@@ -159,7 +170,13 @@ export class UsersService {
     currentUser: TJwtPayload,
   ) {
     if (roleNames === undefined) return;
-    if (currentUser.isSuperAdmin) return;
+
+    if (!currentUser.isSuperAdmin && roleNames.includes(ROLE_NAMES.SUPER_ADMIN))
+      throw new ForbiddenException(
+        'Solo un super administrador puede asignar el rol de super administrador.',
+      );
+
+    if (this.canAssignRoles(currentUser)) return;
 
     const targetUser = await this.findOne(id);
     const currentRoleNames = targetUser.userRoles.map((ur) => ur.role.name);
@@ -171,7 +188,7 @@ export class UsersService {
     if (isSameRoles) return;
 
     throw new ForbiddenException(
-      'Solo un super administrador puede modificar los roles de un usuario.',
+      'No tiene permiso para modificar los roles de un usuario.',
     );
   }
 
