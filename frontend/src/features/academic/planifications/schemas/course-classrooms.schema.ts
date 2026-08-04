@@ -1,4 +1,5 @@
 import z from 'zod';
+import { isValidScheduleRange } from '@shared/utils';
 
 // Update CourseClassroom
 export const courseClassroomSchema = z.object({
@@ -24,14 +25,17 @@ export const editCourseClassroomSchema = z.object({
 		error: 'Debe seleccionar un aula válida.',
 	}),
 	classroomName: z.string().min(1),
-	section: z.string().min(1, { message: 'La sección es obligatoria.' }),
+	section: z.string().refine(isValidScheduleRange, {
+		message: 'Seleccione un rango de horas válido.',
+	}),
 	days: z.string().min(2, { message: 'Seleccione un día válido.' }),
 	studentCount: z
 		.number()
-		.min(1, { message: 'Debe haber al menos un alumno.' })
+		.min(0, { message: 'El número de alumnos no puede ser negativo.' })
 		.max(100, {
 			message: 'El número de alumnos no puede ser mayor a 100.',
-		}),
+		})
+		.nullable(),
 	nearGraduation: z.boolean(),
 	observation: z
 		.string()

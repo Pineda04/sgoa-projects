@@ -36,4 +36,24 @@ describe('ExcelFilesService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('studentCount conversion', () => {
+    const convertStudentCount = (value: string, rawValue?: number | string) =>
+      (service as any).convertValue(value, 8, rawValue);
+
+    it('preserves an empty cell as null', () => {
+      expect(convertStudentCount('')).toBeNull();
+    });
+
+    it('preserves an explicit zero as zero', () => {
+      expect(convertStudentCount('0', 0)).toBe(0);
+    });
+
+    it.each(['12.5', '12 estudiantes', 'sin dato'])(
+      'leaves invalid value %s for assignment validation',
+      (value) => {
+        expect(convertStudentCount(value, value)).toBe(value);
+      },
+    );
+  });
 });

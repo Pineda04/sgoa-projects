@@ -1,8 +1,11 @@
+import { DigitalBlackboardUseStatus } from 'src/generated/prisma/client';
+
 export type TMonitorAssignmentCheckStatus = {
   id: string;
   isPresent: boolean;
   checkTime: string;
   observation: string | null;
+  digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null;
 };
 
 export type TMonitorCurrentAssignment = {
@@ -12,6 +15,7 @@ export type TMonitorCurrentAssignment = {
   groupCode: string;
   section: string;
   days: string;
+  hasDigitalBlackboard: boolean;
   teacher: {
     id: string;
     name: string;

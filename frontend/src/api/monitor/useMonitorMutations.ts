@@ -7,16 +7,17 @@ import { alertSuccess } from '@shared';
 export const useCreateCheckMutation = () => {
 	const { mutateAsync, isPending } = useMutation({
 		mutationFn: monitorApi.createCheck,
-		onSuccess: async res => {
+			onSuccess: async res => {
 			try {
 				await alertSuccess(res);
 			} catch {
 				// Ignore alert errors
 			}
 
-			await queryClient.invalidateQueries({
-				queryKey: monitorKeys.currentAssignments(),
-			});
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: monitorKeys.all }),
+				queryClient.invalidateQueries({ queryKey: ['analytics'] }),
+			]);
 		},
 	});
 

@@ -72,7 +72,13 @@ export async function exportMonitorReportExcel({
 		{ label: 'Total chequeos', value: summary.totalChecks },
 		{ label: 'Presentes', value: summary.present },
 		{ label: 'Ausentes', value: summary.absent },
-		{ label: '% Cumplimiento', value: `${summary.complianceRate.toFixed(1)}%` },
+		{
+			label: '% Cumplimiento',
+			value:
+				summary.complianceRate === null
+					? 'No calculable'
+					: `${summary.complianceRate.toFixed(1)}%`,
+		},
 	]);
 
 	const buffer = await workbook.xlsx.writeBuffer();

@@ -7,4 +7,6 @@ export const usersKeys = {
 	detail: (id: string) => [...usersKeys.details(), id] as const,
 	search: (searchTerm: string, page: number) =>
 		[...usersKeys.all, 'search', searchTerm, page] as const,
+	monitorBuildings: (userId: string) =>
+		[...usersKeys.detail(userId), 'monitor-buildings'] as const,
 };

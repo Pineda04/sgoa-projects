@@ -12,6 +12,7 @@ import {
   Inject,
   ForbiddenException,
   Query,
+  Put,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
@@ -30,6 +31,8 @@ import { EUserRole } from '../../../common/enums';
 import { TeachersService } from 'src/modules/teachers/services/teachers.service';
 import { TJwtPayload } from 'src/modules/auth/types';
 import { QueryPaginationDto } from 'src/common/dto';
+import { SetMonitorBuildingAssignmentsDto } from '../dto/set-monitor-building-assignments.dto';
+import { UpdateMyUserDto } from '../dto/update-my-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -59,27 +62,20 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
     @GetCurrentUser() currentUser: TJwtPayload,
   ) {
-    if (
-      createUserDto.roles.some((rol) =>
-        [EUserRole.RRHH, EUserRole.ADMIN, EUserRole.DIRECCION].includes(rol),
-      ) &&
-      [EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE].some((rol) =>
-        currentUser.roles.includes(rol),
-      )
-    )
-      throw new ForbiddenException(
-        'Coordinadores de área o docentes no pueden asignar roles de RRHH, ADMIN o DIRECCIÓN.',
-      );
+    const allowedRoles = currentUser.roles.includes(EUserRole.ADMIN)
+      ? new Set(Object.values(EUserRole))
+      : currentUser.roles.includes(EUserRole.RRHH)
+        ? new Set([EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA])
+        : new Set([EUserRole.DOCENTE]);
+    const requestedRoles = createUserDto.roles.length
+      ? createUserDto.roles
+      : [EUserRole.DOCENTE];
 
-    if (
-      createUserDto.roles.includes(EUserRole.COORDINADOR_AREA) &&
-      ![EUserRole.ADMIN, EUserRole.RRHH].some((role) =>
-        currentUser.roles.includes(role),
-      )
-    )
+    if (requestedRoles.some((role) => !allowedRoles.has(role))) {
       throw new ForbiddenException(
-        'Solo RRHH o Admin pueden asignar el rol de COORDINADOR_AREA.',
+        'No tiene permiso para asignar uno o más de los roles solicitados.',
       );
+    }
 
     return this.usersService.createUserWithDeptAndPosition(
       createUserDto,
@@ -192,7 +188,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({
-    type: UpdateUserDto,
+    type: UpdateMyUserDto,
     description: 'Datos para actualizar usuario autenticado',
     required: true,
   })
@@ -204,13 +200,35 @@ export class UsersController {
   })
   updateMy(
     @GetCurrentUserId() userId: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateMyUserDto,
   ) {
     return this.usersService.update(userId, updateUserDto);
   }
 
+  @Get(':id/monitor-buildings')
+  @Roles(EUserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Asignaciones de edificios obtenidas correctamente.')
+  findMonitorBuildingAssignments(@Param('id', ValidateIdPipe) id: string) {
+    return this.usersService.findMonitorBuildingAssignments(id);
+  }
+
+  @Put(':id/monitor-buildings')
+  @Roles(EUserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Asignaciones de edificios actualizadas correctamente.')
+  replaceMonitorBuildingAssignments(
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() dto: SetMonitorBuildingAssignmentsDto,
+  ) {
+    return this.usersService.replaceMonitorBuildingAssignments(
+      id,
+      dto.buildingIds,
+    );
+  }
+
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @Roles(EUserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({
@@ -227,17 +245,7 @@ export class UsersController {
   update(
     @Param('id', ValidateIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @GetCurrentUser() currentUser: TJwtPayload,
   ) {
-    if (
-      currentUser.roles.length === 1 &&
-      currentUser.roles.includes(EUserRole.DOCENTE) &&
-      currentUser.sub !== id
-    )
-      throw new ForbiddenException(
-        'No tiene permiso para actualizar registros de otro usuario.',
-      );
-
     return this.usersService.update(id, updateUserDto);
   }
 

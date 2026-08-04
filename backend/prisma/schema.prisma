@@ -21,19 +21,20 @@ model Role {
 }
 
 model User {
-  id                       String                    @id @default(uuid()) @db.Uuid
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  name                     String
-  email                    String?                   @unique
-  code                     String                    @unique
-  hash                     String
-  hashedRt                 String?
-  activeStatus             Boolean                   @default(true)
-  teacher                  Teacher?
-  resetPasswordTokens      ResetPasswordToken[]
-  userRoles                UserRole[]
-  scheduleComplianceChecks ScheduleComplianceCheck[]
+  id                         String                      @id @default(uuid()) @db.Uuid
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  name                       String
+  email                      String?                     @unique
+  code                       String                      @unique
+  hash                       String
+  hashedRt                   String?
+  activeStatus               Boolean                     @default(true)
+  teacher                    Teacher?
+  resetPasswordTokens        ResetPasswordToken[]
+  userRoles                  UserRole[]
+  scheduleComplianceChecks   ScheduleComplianceCheck[]
+  monitorBuildingAssignments MonitorBuildingAssignment[]
 
   @@map("users")
   @@schema("auth")
@@ -113,8 +114,8 @@ model TeacherPostgraduateDegree {
 }
 
 model TeacherCategory {
-  id          String     @id @default(uuid()) @db.Uuid
-  name        String     @unique
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique
   description String?
   teachers    Teacher[]
 
@@ -228,16 +229,30 @@ model Position {
 }
 
 model Building {
-  id         String      @id @default(uuid()) @db.Uuid
-  name       String
-  color      String?
-  floors     String?
-  centerId   String      @db.Uuid
-  center     Center      @relation(fields: [centerId], references: [id])
-  classrooms Classroom[]
+  id                       String                      @id @default(uuid()) @db.Uuid
+  name                     String
+  color                    String?
+  floors                   String?
+  centerId                 String                      @db.Uuid
+  center                   Center                      @relation(fields: [centerId], references: [id])
+  classrooms               Classroom[]
+  monitorAssignments       MonitorBuildingAssignment[]
+  scheduleComplianceChecks ScheduleComplianceCheck[]
 
   @@map("buildings")
   @@schema("infraestructure")
+}
+
+model MonitorBuildingAssignment {
+  monitorId  String   @db.Uuid
+  buildingId String   @db.Uuid
+  monitor    User     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+
+  @@id([monitorId, buildingId])
+  @@index([buildingId])
+  @@map("monitor_building_assignments")
+  @@schema("auth")
 }
 
 model DigitalBlackboard {
@@ -426,7 +441,7 @@ model CourseClassroom {
   id                       String                    @id @default(uuid()) @db.Uuid
   courseId                 String                    @db.Uuid
   classroomId              String                    @db.Uuid
-  studentCount             Int
+  studentCount             Int?
   modalityId               String                    @db.Uuid
   nearGraduation           Boolean
   groupCode                String                    @default("G1")
@@ -447,24 +462,37 @@ model CourseClassroom {
 }
 
 model ScheduleComplianceCheck {
-  id                String    @id @default(uuid()) @db.Uuid
-  courseClassroomId String    @db.Uuid
-  monitorId         String    @db.Uuid
-  checkDate         DateTime
-  checkTime         String
-  isPresent         Boolean
-  observation       String?
-  offlineId         String?
-  syncedAt          DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                         String                      @id @default(uuid()) @db.Uuid
+  courseClassroomId          String                      @db.Uuid
+  monitorId                  String                      @db.Uuid
+  buildingId                 String                      @db.Uuid
+  checkDate                  DateTime
+  checkTime                  String
+  isPresent                  Boolean
+  digitalBlackboardUseStatus DigitalBlackboardUseStatus?
+  observation                String?
+  offlineId                  String?
+  syncedAt                   DateTime?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
 
   courseClassroom CourseClassroom @relation(fields: [courseClassroomId], references: [id], onDelete: Cascade)
   monitor         User            @relation(fields: [monitorId], references: [id], onDelete: Restrict)
+  building        Building        @relation(fields: [buildingId], references: [id], onDelete: Restrict)
 
-  @@unique([courseClassroomId, checkDate, checkTime])
+  @@unique([courseClassroomId, checkDate])
+  @@unique([monitorId, offlineId])
   @@index([monitorId, checkDate])
+  @@index([buildingId, checkDate])
   @@map("schedule_compliance_checks")
+  @@schema("academic")
+}
+
+enum DigitalBlackboardUseStatus {
+  USED
+  NOT_USED
+  UNKNOWN
+
   @@schema("academic")
 }
 

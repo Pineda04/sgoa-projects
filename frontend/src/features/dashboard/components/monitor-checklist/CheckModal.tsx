@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { Button, ModalBase } from '@shared';
+import type { DigitalBlackboardUseStatus } from '@api/monitor';
 import { TChecklistItem } from './checklist.utils';
 
 interface CheckModalProps {
@@ -8,8 +9,21 @@ interface CheckModalProps {
 	onClose: () => void;
 	item: TChecklistItem | null;
 	isSubmitting: boolean;
-	onSubmit: (isPresent: boolean, observation: string) => Promise<boolean>;
+	onSubmit: (
+		isPresent: boolean,
+		observation: string,
+		digitalBlackboardUseStatus?: DigitalBlackboardUseStatus
+	) => Promise<boolean>;
 }
+
+const BLACKBOARD_USE_OPTIONS = [
+	{ value: 'USED', label: 'Usada' },
+	{ value: 'NOT_USED', label: 'No usada' },
+	{ value: 'UNKNOWN', label: 'No se pudo determinar' },
+] satisfies readonly {
+	value: DigitalBlackboardUseStatus;
+	label: string;
+}[];
 
 export const CheckModal = ({
 	isOpen,
@@ -20,11 +34,14 @@ export const CheckModal = ({
 }: CheckModalProps) => {
 	const [isPresent, setIsPresent] = useState<boolean | null>(null);
 	const [observation, setObservation] = useState('');
+	const [blackboardUse, setBlackboardUse] =
+		useState<DigitalBlackboardUseStatus | null>(null);
 
 	useEffect(() => {
 		if (isOpen) {
 			setIsPresent(null);
 			setObservation('');
+			setBlackboardUse(null);
 		}
 	}, [isOpen, item?.id]);
 
@@ -32,9 +49,19 @@ export const CheckModal = ({
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isPresent === null) return;
+		if (
+			isPresent === null ||
+			(isPresent && item.assignment.hasDigitalBlackboard && !blackboardUse)
+		)
+			return;
 
-		const wasRegistered = await onSubmit(isPresent, observation);
+		const wasRegistered = await onSubmit(
+			isPresent,
+			observation,
+			isPresent && item.assignment.hasDigitalBlackboard
+				? blackboardUse ?? undefined
+				: undefined
+		);
 		if (wasRegistered) onClose();
 	};
 
@@ -130,6 +157,31 @@ export const CheckModal = ({
 						</div>
 					</fieldset>
 
+					{isPresent && item.assignment.hasDigitalBlackboard ? (
+						<fieldset>
+							<legend className="mb-2 text-sm font-semibold text-foreground">
+								¿Se utilizó la pizarra digital?
+							</legend>
+							<div className="grid gap-2 sm:grid-cols-3">
+								{BLACKBOARD_USE_OPTIONS.map(option => (
+									<label
+										key={option.value}
+										className={`cursor-pointer rounded-lg border px-3 py-2 text-center text-sm ${blackboardUse === option.value ? 'border-primary bg-primary-light text-primary' : 'border-border text-muted-foreground'}`}
+									>
+										<input
+											type="radio"
+											name="blackboardUse"
+											className="sr-only"
+											checked={blackboardUse === option.value}
+											onChange={() => setBlackboardUse(option.value)}
+										/>
+										{option.label}
+									</label>
+								))}
+							</div>
+						</fieldset>
+					) : null}
+
 					<div>
 						<label
 							htmlFor="check-observation"
@@ -159,7 +211,13 @@ export const CheckModal = ({
 						</Button>
 						<Button
 							type="submit"
-							disabled={isPresent === null || isSubmitting}
+							disabled={
+								isPresent === null ||
+								(isPresent &&
+									item.assignment.hasDigitalBlackboard &&
+									!blackboardUse) ||
+								isSubmitting
+							}
 						>
 							{isSubmitting ? 'Guardando...' : 'Guardar'}
 						</Button>

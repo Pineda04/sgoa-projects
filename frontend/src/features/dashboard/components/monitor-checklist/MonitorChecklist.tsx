@@ -25,8 +25,14 @@ import {
 
 export const MonitorChecklist = () => {
 	const { data, isLoading, isError } = useGetCurrentAssignments();
-	const { registerCheck, checkOverrides, submittingId, isRegistering } =
-		useRegisterCheck();
+	const {
+		registerCheck,
+		checkOverrides,
+		submittingId,
+		isRegistering,
+		pendingSyncCount,
+		synchronize,
+	} = useRegisterCheck();
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
 		CHECKLIST_VIEW_STORAGE_KEY,
@@ -101,6 +107,10 @@ export const MonitorChecklist = () => {
 	};
 
 	const handleQuickConfirm = (item: TChecklistItem, isPresent: boolean) => {
+		if (isPresent && item.assignment.hasDigitalBlackboard) {
+			handleOpenModal(item);
+			return;
+		}
 		void registerCheck({ courseClassroomId: item.id, isPresent });
 	};
 
@@ -109,13 +119,18 @@ export const MonitorChecklist = () => {
 		openModal();
 	};
 
-	const handleModalSubmit = (isPresent: boolean, observation: string) => {
+	const handleModalSubmit = (
+		isPresent: boolean,
+		observation: string,
+		digitalBlackboardUseStatus?: 'USED' | 'NOT_USED' | 'UNKNOWN'
+	) => {
 		if (!selectedItem) return Promise.resolve(false);
 
 		return registerCheck({
 			courseClassroomId: selectedItem.id,
 			isPresent,
 			observation,
+			digitalBlackboardUseStatus,
 		});
 	};
 
@@ -147,6 +162,22 @@ export const MonitorChecklist = () => {
 
 	return (
 		<div className="space-y-4">
+			{pendingSyncCount > 0 ? (
+				<div className="flex flex-col gap-3 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+					<p>
+						{pendingSyncCount} verificación
+						{pendingSyncCount === 1 ? '' : 'es'} pendiente
+						{pendingSyncCount === 1 ? '' : 's'} de sincronización.
+					</p>
+					<button
+						type="button"
+						className="font-semibold text-primary"
+						onClick={() => void synchronize()}
+					>
+						Sincronizar ahora
+					</button>
+				</div>
+			) : null}
 			<ChecklistToolbar
 				jornada={jornada}
 				onJornadaChange={setJornada}

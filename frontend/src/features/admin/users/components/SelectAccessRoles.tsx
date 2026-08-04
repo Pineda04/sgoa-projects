@@ -7,8 +7,14 @@ import { useGetAllCenters, useGetCenterById } from '@api/centers';
 import { Error, Loading } from '@shared/components';
 import { setOptions } from '@shared/utils';
 import { TAcademicCommonProps } from '@api/periods';
+import { useAuth } from '@config';
 
-const customStyles: StylesConfig = {
+type TRoleOption = {
+	value: EUserRole;
+	label: EUserRole;
+};
+
+const customStyles: StylesConfig<TRoleOption, true> = {
 	control: (base, state) => ({
 		...base,
 		backgroundColor: '#f3f4f6', // bg-gray-100
@@ -72,17 +78,6 @@ const customStyles: StylesConfig = {
 	}),
 };
 
-const rolesAvailables = [
-	EUserRole.DIRECCION,
-	EUserRole.RRHH,
-	EUserRole.COORDINADOR_AREA,
-	EUserRole.DOCENTE,
-	EUserRole.MONITOR,
-].map(r => ({
-	value: r,
-	label: r,
-}));
-
 export const SelectAccessRoles = ({
 	touched,
 	values,
@@ -90,6 +85,11 @@ export const SelectAccessRoles = ({
 	errors,
 	handleBlur,
 }: ICreateUserProps) => {
+	const { authState } = useAuth();
+	const allowedRoles = authState.user?.roles.includes(EUserRole.ADMIN)
+		? Object.values(EUserRole)
+		: [EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE];
+	const roleOptions = allowedRoles.map(role => ({ value: role, label: role }));
 	const positions = useGetAllPositions();
 	const centers = useGetAllCenters();
 	const [centerId, setCenterId] = useState<string>('');
@@ -209,17 +209,15 @@ export const SelectAccessRoles = ({
 				<label className="block mb-2 font-bold" htmlFor="roles">
 					Roles de accesso
 				</label>
-				<Select
+				<Select<TRoleOption, true>
 					name="roles"
-					options={rolesAvailables}
+					options={roleOptions}
 					isMulti
 					isSearchable={false}
 					styles={customStyles}
 					placeholder="Seleccione..."
 					onChange={valuesSelected => {
-						const roles = valuesSelected.map(
-							v => (v as { value: string; label: string }).value
-						);
+						const roles = valuesSelected.map(role => role.value);
 
 						setValues({
 							...values,

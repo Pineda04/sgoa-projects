@@ -28,6 +28,7 @@ import { buildingsRoutes } from '@features/infrastructure/buildings/routes/Build
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
 import { catalogRoutes } from '@features/others';
+import { analyticsRoutes } from '@features/analytics';
 
 
 
@@ -93,6 +94,12 @@ const router = createBrowserRouter(
 			path: 'dashboard/monitor',
 			element: <ProtectedRoute action="read" subject="dashboard-monitor" />,
 			children: [{ index: true, element: <DashboardMonitor /> }],
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'analytics',
+			element: <ProtectedRoute action="read" subject="analytics" />,
+			children: analyticsRoutes,
 			errorElement: <div>404</div>,
 		},
 		{

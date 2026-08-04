@@ -82,7 +82,7 @@ export class CourseStadisticsService {
 
     const valuesToSum = [ABD, APB, NSP, RPB].filter((v) => this.isNumber(v));
 
-    if (valuesToSum.length > 0) {
+    if (studentCount !== null && valuesToSum.length > 0) {
       const total = valuesToSum.reduce((acc, val) => acc + val, 0);
       if (total !== studentCount) {
         throw new BadRequestException(
@@ -242,6 +242,8 @@ export class CourseStadisticsService {
       ({ courseClassroom: cc, ABD, APB, NSP, RPB }) => {
         const final = ABD + RPB + APB;
         const initial = cc.studentCount;
+        const percentage = (value: number): number | null =>
+          initial !== null && initial > 0 ? (value * 100) / initial : null;
 
         return {
           courseCode: cc.course.code,
@@ -257,15 +259,19 @@ export class CourseStadisticsService {
           teacherName: cc.teachingSession.assignmentReport.teacher.user.name,
           department: cc.course.department.name,
           modality: cc.modality.name,
-          indexABD: (ABD * 100) / initial,
-          indexNSP: (NSP * 100) / initial,
-          indexRPB: (RPB * 100) / initial,
-          indexAPB: (APB * 100) / initial,
+          indexABD: percentage(ABD),
+          indexNSP: percentage(NSP),
+          indexRPB: percentage(RPB),
+          indexAPB: percentage(APB),
           finalSummatoryInconsistency:
             final === ABD + RPB + APB ? 'Correcto' : 'Error',
           initialSummatoryInconsistency:
-            initial === ABD + NSP + RPB + APB ? 'Correcto' : 'Incorrecto',
-          terminalEfficiency: (APB * 100) / initial,
+            initial === null
+              ? null
+              : initial === ABD + NSP + RPB + APB
+                ? 'Correcto'
+                : 'Incorrecto',
+          terminalEfficiency: percentage(APB),
           pac: cc.teachingSession.assignmentReport.period.pac,
           year: cc.teachingSession.assignmentReport.period.year,
         };

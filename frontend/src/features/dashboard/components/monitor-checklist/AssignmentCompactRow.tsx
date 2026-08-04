@@ -14,8 +14,8 @@ export const AssignmentCompactRow = ({
 	return (
 		<li className="flex flex-col gap-2.5 px-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4">
 			<div className="flex min-w-0 flex-1 items-start gap-3">
-				<span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-foreground">
-					{item.startTime ?? '—'}
+				<span className="w-28 shrink-0 text-sm font-semibold tabular-nums text-foreground">
+					{item.timeRange ?? '—'}
 				</span>
 
 				<div className="min-w-0 flex-1">

@@ -194,6 +194,8 @@ export const CourseClassroomsTable = ({
 			key: 'studentCount',
 			header: 'No. Alumnos',
 			mobileLabel: 'Alum.',
+			render: (row: CourseClassroomData) =>
+				row.studentCount ?? 'Sin información',
 		},
 		{
 			key: 'classroom.name',

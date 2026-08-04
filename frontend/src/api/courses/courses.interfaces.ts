@@ -19,7 +19,7 @@ export interface IUpdateCourseClassroom {
 	classroomId?: string;
 	section?: string;
 	days?: string;
-	studentCount?: number;
+	studentCount?: number | null;
 	nearGraduation?: boolean;
 	observation?: string;
 }

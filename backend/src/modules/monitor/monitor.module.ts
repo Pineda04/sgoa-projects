@@ -7,6 +7,7 @@ import { MonitorReportsController } from './controllers/monitor-reports.controll
 import { MonitorAssignmentsService } from './services/monitor-assignments.service';
 import { MonitorChecksService } from './services/monitor-checks.service';
 import { MonitorReportsService } from './services/monitor-reports.service';
+import { MonitorAccessService } from './services/monitor-access.service';
 
 @Module({
   imports: [PrismaModule, TeachingAssignmentModule],
@@ -19,6 +20,8 @@ import { MonitorReportsService } from './services/monitor-reports.service';
     MonitorAssignmentsService,
     MonitorChecksService,
     MonitorReportsService,
+    MonitorAccessService,
   ],
+  exports: [MonitorAccessService, MonitorChecksService, MonitorReportsService],
 })
 export class MonitorModule {}

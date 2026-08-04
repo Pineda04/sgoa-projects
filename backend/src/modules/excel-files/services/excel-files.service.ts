@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ExcelResponseDto } from '../dto/excel-response.dto';
 
 @Injectable()
-export class ExcelFilesService<Type, Dto> {
+export class ExcelFilesService<Type extends Record<number, string>, Dto> {
   // para que sea reutilizable
   private properties: Type;
 
@@ -45,10 +45,10 @@ export class ExcelFilesService<Type, Dto> {
         totalRecords: records.length,
         data: records,
       };
-    } catch (error) {
-      throw new BadRequestException(
-        `Error al procesar el archivo: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      throw new BadRequestException(`Error al procesar el archivo: ${message}`);
     }
   }
 
@@ -122,15 +122,23 @@ export class ExcelFilesService<Type, Dto> {
   private convertValue(
     value: string,
     columnIndex: number,
-    rawValue?: string | number | boolean | Date | null | undefined,
-  ): string | number {
+    rawValue?: string | number | boolean | Date | null,
+  ): string | number | null {
     //seccion
     if (columnIndex === 5) {
       return this.parseTimeValue(value, rawValue);
     }
 
-    // id, uv, días, numero de alumnos, numero de aula
-    const numericColumns = [0, 6, 7, 8, 9];
+    // Una matrícula vacía es desconocida; cualquier valor no entero se conserva
+    // para que la validación de asignación académica pueda rechazarlo.
+    if (columnIndex === 8) {
+      if (value === '') return null;
+
+      return /^-?\d+$/.test(value) ? Number(value) : value;
+    }
+
+    // id, uv, días, numero de aula
+    const numericColumns = [0, 6, 7, 9];
     const number = parseInt(value);
     return numericColumns.includes(columnIndex) && !isNaN(number)
       ? number
@@ -139,7 +147,7 @@ export class ExcelFilesService<Type, Dto> {
 
   private parseTimeValue(
     value: string,
-    rawValue?: string | number | boolean | Date | null | undefined,
+    rawValue?: string | number | boolean | Date | null,
   ): string {
     if (typeof rawValue === 'number') {
       return this.convertExcelTimeToString(rawValue);

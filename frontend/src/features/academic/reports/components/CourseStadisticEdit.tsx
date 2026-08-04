@@ -24,7 +24,15 @@ export const CourseStadisticEdit = ({
 	const { updateCourseStadistic } = useUpdateCourseStadistic(reportId);
 	const [isInputsActive, setIsInputsActive] = useState<boolean>(false);
 
-	const { values, touched, errors, handleChange, handleBlur, resetForm } =
+	const {
+		values,
+		touched,
+		errors,
+		handleChange,
+		handleBlur,
+		resetForm,
+		submitForm,
+	} =
 		useFormik<TCourseStadisticOmit>({
 			initialValues: {
 				APB: infoCourseClassroom.courseStadistic.APB,
@@ -47,7 +55,10 @@ export const CourseStadisticEdit = ({
 	const onSubmitting = async (values: TCourseStadisticOmit) => {
 
 		const total = values.APB + values.RPB + values.NSP + values.ABD;
-		if (total !== infoCourseClassroom.studentCount) {
+		if (
+			infoCourseClassroom.studentCount !== null &&
+			total !== infoCourseClassroom.studentCount
+		) {
 			setShowSumError(true);
 			setTimeout(() => setShowSumError(false), 5000);
 			return;
@@ -137,16 +148,17 @@ export const CourseStadisticEdit = ({
 					/>
 				</td>
 				<td className="py-fit border">
-					{infoCourseClassroom.studentCount}
+					{infoCourseClassroom.studentCount ?? 'Sin información'}
 				</td>
 				{mode === 'edit' && (
 					<td className="py-fit border">
 						{isInputsActive ? (
 							<div className="flex gap-2 justify-center">
-								<Button
-									type="button"
-									className="cursor-pointer"
-									onClick={() => onSubmitting(values)} variant="unstyled"
+				<Button
+					type="button"
+					className="cursor-pointer"
+					onClick={submitForm}
+					variant="unstyled"
 								>
 									<CheckCircleIcon className="my-1 size-6 text-[#144C74] hover:text-[#5BC85C] transition duration-250" />
 								</Button>
@@ -193,7 +205,7 @@ export const CourseStadisticEdit = ({
 							"0".
 						</label>
 					)}
-					{showSumError && (
+					{showSumError && infoCourseClassroom.studentCount !== null && (
 						<label className="text-sm text-[#DC3545] block">
 							*La suma de los campos 'APB, RPB, NSP, ABD' debe ser
 							igual a {infoCourseClassroom.studentCount}.

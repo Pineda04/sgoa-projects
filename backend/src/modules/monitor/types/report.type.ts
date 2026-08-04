@@ -2,7 +2,7 @@ export type TMonitorReportSummary = {
   totalChecks: number;
   present: number;
   absent: number;
-  complianceRate: number;
+  complianceRate: number | null;
 };
 
 export type TMonitorReportGroup = TMonitorReportSummary & {

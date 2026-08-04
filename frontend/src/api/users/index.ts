@@ -3,3 +3,4 @@ export * from './users.interfaces';
 export * from './users.keys';
 export * from './users.types';
 export * from './useUsersMutations';
+export * from './useUsersQueries';

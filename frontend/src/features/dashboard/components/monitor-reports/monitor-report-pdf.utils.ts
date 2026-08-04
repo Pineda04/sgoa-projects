@@ -75,7 +75,12 @@ export async function exportMonitorReportPdf({
 			['Total chequeos', String(summary.totalChecks)],
 			['Presentes', String(summary.present)],
 			['Ausentes', String(summary.absent)],
-			['% Cumplimiento', `${summary.complianceRate.toFixed(1)}%`],
+			[
+				'% Cumplimiento',
+				summary.complianceRate === null
+					? 'No calculable'
+					: `${summary.complianceRate.toFixed(1)}%`,
+			],
 		],
 		styles: { fontSize: 10, font: jsPdfFont },
 		headStyles: { fillColor: [20, 76, 116], textColor: 255 },

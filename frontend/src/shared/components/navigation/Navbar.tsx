@@ -31,6 +31,8 @@ interface ModuleConfig {
 	disabled?: boolean;
 }
 
+type DashboardConfig = SectionConfig & { subject: Subjects };
+
 const MODULES: ModuleConfig[] = [
 	{
 		id: 'dashboard',
@@ -111,24 +113,29 @@ const MODULES: ModuleConfig[] = [
 	},
 ];
 
-const DASHBOARD_CONFIG = [
+const DASHBOARD_CONFIG: DashboardConfig[] = [
 	{
-		subject: 'dashboard-authorities' as const,
+		subject: 'analytics',
+		path: '/analytics',
+		label: 'Analíticas',
+	},
+	{
+		subject: 'dashboard-authorities',
 		path: '/dashboard/authorities',
 		label: 'Autoridades',
 	},
 	{
-		subject: 'dashboard-coordinator' as const,
+		subject: 'dashboard-coordinator',
 		path: '/dashboard/coordinator',
 		label: 'Coordinación',
 	},
 	{
-		subject: 'dashboard-teacher' as const,
+		subject: 'dashboard-teacher',
 		path: '/dashboard/teacher',
 		label: 'Docencia',
 	},
 	{
-		subject: 'dashboard-monitor' as const,
+		subject: 'dashboard-monitor',
 		path: '/dashboard/monitor',
 		label: 'Monitoreo',
 	},
@@ -183,9 +190,10 @@ export const Navbar = () => {
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
+			if (!(e.target instanceof Node)) return;
 			if (
 				navbarRef.current &&
-				!navbarRef.current.contains(e.target as Node)
+				!navbarRef.current.contains(e.target)
 			) {
 				setOpenDropdownId(null);
 			}

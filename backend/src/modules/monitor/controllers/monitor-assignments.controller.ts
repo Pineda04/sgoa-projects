@@ -1,6 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  GetCurrentUserId,
   ResponseMessage,
   Roles,
 } from 'src/common/decorators';
@@ -23,8 +24,8 @@ export class MonitorAssignmentsController {
     summary: 'Obtener las asignaciones de hoy para el monitor',
     okDescription: 'Listado de asignaciones obtenido correctamente.',
   })
-  findCurrentAssignments() {
-    return this.monitorAssignmentsService.findCurrentAssignments();
+  findCurrentAssignments(@GetCurrentUserId() monitorId: string) {
+    return this.monitorAssignmentsService.findCurrentAssignments(monitorId);
   }
 
   @Get('buildings')
@@ -34,7 +35,7 @@ export class MonitorAssignmentsController {
     summary: 'Obtener los edificios disponibles para el monitor',
     okDescription: 'Listado de edificios obtenido correctamente.',
   })
-  findBuildings() {
-    return this.monitorAssignmentsService.findBuildings();
+  findBuildings(@GetCurrentUserId() monitorId: string) {
+    return this.monitorAssignmentsService.findBuildings(monitorId);
   }
 }

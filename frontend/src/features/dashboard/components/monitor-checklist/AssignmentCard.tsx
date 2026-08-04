@@ -31,7 +31,7 @@ export const AssignmentCard = ({
 			<div className="mt-3 flex items-center gap-2 text-sm">
 				<span className="flex shrink-0 items-center gap-1.5 rounded-lg bg-muted px-2 py-1 font-semibold tabular-nums text-foreground">
 					<Clock className="size-3.5 text-muted-foreground" />
-					{item.startTime ?? '—'}
+					{item.timeRange ?? '—'}
 				</span>
 				<span
 					className="truncate font-medium text-foreground"

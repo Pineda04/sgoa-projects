@@ -28,7 +28,7 @@ export interface IPlanification {
 	section: string;
 	uv: number;
 	days: string;
-	studentCount: number;
+	studentCount: number | null;
 	classroomName: string;
 	departmentName: string;
 	coordinator: string;
@@ -45,7 +45,7 @@ export const EMPTY_ROW: IPlanification = {
 	section: '',
 	uv: 0,
 	days: '',
-	studentCount: 0,
+	studentCount: null,
 	classroomName: '',
 	departmentName: '',
 	coordinator: '',

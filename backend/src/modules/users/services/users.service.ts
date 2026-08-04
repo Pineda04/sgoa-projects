@@ -55,7 +55,7 @@ export class UsersService {
     createUserDto: CreateUserDto,
     currentUser: TJwtPayload,
   ) {
-    const { sub: userId, roles } = currentUser;
+    const { roles } = currentUser;
 
     // Verifica si el usuario no tiene ninguno de los roles DOCENTE o COORDINADOR_AREA, y en ese caso crea el usuario.
     if (
@@ -345,7 +345,74 @@ export class UsersService {
     return paginateOutput(results, count, query);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<TUser> {
+  async findMonitorBuildingAssignments(userId: string) {
+    await this.assertActiveMonitor(userId);
+
+    const assignments = await this.prisma.monitorBuildingAssignment.findMany({
+      where: { monitorId: userId },
+      select: {
+        building: {
+          select: {
+            id: true,
+            name: true,
+            centerId: true,
+            center: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: [{ building: { name: 'asc' } }, { buildingId: 'asc' }],
+    });
+
+    return {
+      userId,
+      buildings: assignments.map(({ building }) => ({
+        id: building.id,
+        name: building.name,
+        centerId: building.centerId,
+        centerName: building.center.name,
+      })),
+    };
+  }
+
+  async replaceMonitorBuildingAssignments(
+    userId: string,
+    buildingIds: string[],
+  ) {
+    await this.assertActiveMonitor(userId);
+
+    const buildings = await this.prisma.building.findMany({
+      where: { id: { in: buildingIds } },
+      select: { id: true },
+    });
+
+    if (buildings.length !== buildingIds.length) {
+      throw new BadRequestException(
+        'Uno o más edificios seleccionados no existen.',
+      );
+    }
+
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.monitorBuildingAssignment.deleteMany({
+        where: { monitorId: userId },
+      });
+
+      if (buildingIds.length) {
+        await transaction.monitorBuildingAssignment.createMany({
+          data: buildingIds.map((buildingId) => ({
+            monitorId: userId,
+            buildingId,
+          })),
+        });
+      }
+    });
+
+    return this.findMonitorBuildingAssignments(userId);
+  }
+
+  async update(
+    id: string,
+    updateUserDto: Partial<UpdateUserDto>,
+  ): Promise<TUser> {
     const {
       name,
       code,
@@ -361,6 +428,8 @@ export class UsersService {
       roles && roles.length
         ? await this.roleService.findManyByNames(roles)
         : [];
+    const shouldClearMonitorAssignments =
+      roles !== undefined && !roles.includes(EUserRole.MONITOR);
 
     const userData: Partial<Prisma.UserUpdateInput> = {
       name,
@@ -389,14 +458,21 @@ export class UsersService {
       };
     }
 
-    if (!Object.values(teacher).filter((el) => el).length)
-      return await this.prisma.user.update({
-        where: {
-          id,
-        },
-        data: userData,
-        select: this.selectPropsUser,
+    if (!Object.values(teacher).filter((el) => el).length) {
+      return this.prisma.$transaction(async (transaction) => {
+        const updatedUser = await transaction.user.update({
+          where: { id },
+          data: userData,
+          select: this.selectPropsUser,
+        });
+        if (shouldClearMonitorAssignments) {
+          await transaction.monitorBuildingAssignment.deleteMany({
+            where: { monitorId: id },
+          });
+        }
+        return updatedUser;
       });
+    }
 
     const teacherData: Prisma.TeacherUpdateInput = {
       category: teacher.categoryId
@@ -412,19 +488,42 @@ export class UsersService {
       shiftEnd: teacher.shiftEnd ? hourToDateUTC(teacher.shiftEnd) : undefined,
     };
 
-    const [updatedUser, updatedTeacher] = await this.prisma.$transaction([
-      this.prisma.user.update({
+    const updatedUser = await this.prisma.$transaction(async (transaction) => {
+      const user = await transaction.user.update({
         where: { id },
         data: userData,
         select: this.selectPropsUser,
-      }),
-      this.prisma.teacher.update({
+      });
+      await transaction.teacher.update({
         where: { userId: id },
         data: teacherData,
-      }),
-    ]);
+      });
+      if (shouldClearMonitorAssignments) {
+        await transaction.monitorBuildingAssignment.deleteMany({
+          where: { monitorId: id },
+        });
+      }
+      return user;
+    });
 
     return updatedUser;
+  }
+
+  private async assertActiveMonitor(userId: string): Promise<void> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        activeStatus: true,
+        userRoles: { some: { role: { name: EUserRole.MONITOR } } },
+      },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException(
+        'El usuario debe estar activo y tener el rol MONITOR.',
+      );
+    }
   }
 
   async remove(id: string): Promise<boolean> {

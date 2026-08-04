@@ -19,7 +19,12 @@ import {
 import { Prisma } from 'src/generated/prisma/client';
 import { AcademicPeriodsService } from 'src/modules/teaching-assignment/services/academic-periods.service';
 import { IPaginateOutput } from 'src/common/interfaces';
-import { paginate, paginateOutput } from 'src/common/utils';
+import {
+  normalizeCourseClassroomDays,
+  normalizeCourseClassroomSection,
+  paginate,
+  paginateOutput,
+} from 'src/common/utils';
 import { TTeachingSession } from 'src/modules/teaching-assignment/types';
 import { formatISO } from 'date-fns';
 import { TeacherDepartmentPositionService } from 'src/modules/teachers/services/teacher-department-position.service';
@@ -42,26 +47,12 @@ export class CourseClassroomsService {
   async create(
     createCourseClassroomDto: CreateCourseClassroomDto,
   ): Promise<TCreateCourseClassroom> {
-    //Quitae la opcion de subir los horarios como números ya que no se para que o como serviria la distinción
-    if (!/^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/.test(createCourseClassroomDto.days)) {
-      throw new BadRequestException(
-        'La propiedad <days> debe ser una combinación válida de días (ej. LuMaMi).',
-      );
-    }
-
-    if (
-      !/^(?:[01]\d|2[0-3]):[0-5]\d - (?:[01]\d|2[0-3]):[0-5]\d$/.test(
-        createCourseClassroomDto.section,
-      )
-    ) {
-      throw new BadRequestException(
-        'La propiedad "section" debe tener el formato HH:mm - HH:mm (ej. 10:00 - 12:00).',
-      );
-    }
+    const schedule = this.normalizeSchedule(createCourseClassroomDto);
 
     const newCourseClassroom = await this.prisma.courseClassroom.create({
       data: {
         ...createCourseClassroomDto,
+        ...schedule,
       },
     });
 
@@ -550,16 +541,37 @@ export class CourseClassroomsService {
     id: string,
     updateCourseClassroomDto: UpdateCourseClassroomDto,
   ): Promise<TUpdateCourseClassroom> {
+    const schedule = this.normalizeSchedule(updateCourseClassroomDto);
     const courseClassroomUpdate = await this.prisma.courseClassroom.update({
       where: {
         id,
       },
       data: {
         ...updateCourseClassroomDto,
+        ...schedule,
       },
     });
 
     return courseClassroomUpdate;
+  }
+
+  private normalizeSchedule({
+    days,
+    section,
+  }: {
+    days?: string;
+    section?: string;
+  }): { days?: string; section?: string } {
+    try {
+      return {
+        ...(days !== undefined && { days: normalizeCourseClassroomDays(days) }),
+        ...(section !== undefined && {
+          section: normalizeCourseClassroomSection(section),
+        }),
+      };
+    } catch (error) {
+      throw new BadRequestException((error as Error).message);
+    }
   }
 
   // CurrentPeriod
@@ -580,7 +592,7 @@ export class CourseClassroomsService {
         `No puede cambiar una clase que no sea del periodo <${academicPeriodTitle}>.`,
       );
 
-    const { course, teachingSession, ...dataToCreate } = courseClassroomData;
+    const { course, teachingSession } = courseClassroomData;
 
     const currentDate = formatISO(new Date().toISOString());
 

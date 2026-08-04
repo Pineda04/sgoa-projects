@@ -6,19 +6,27 @@ interface Props {
 	totalPages?: number;
 }
 
-export const Pagination = ({ totalPages = 0 }: Props) => {
-	const { page, setPage } = usePaginationParams();
+interface PaginationControlsProps {
+	page: number;
+	totalPages?: number;
+	onPageChange: (page: number) => void;
+}
 
+export const PaginationControls = ({
+	page,
+	totalPages = 0,
+	onPageChange,
+}: PaginationControlsProps) => {
 	const handlePageChange = (newPage: number) => {
 		if (newPage < 1 || newPage > totalPages) return;
-		setPage(newPage);
+		onPageChange(newPage);
 	};
 
 	if (!totalPages || totalPages <= 1) return null;
 
 	const getPageNumbers = () => {
 		const pages: (number | 'ellipsis')[] = [];
-		const maxVisible = 6;
+		const maxVisible = 5;
 
 		if (totalPages <= maxVisible) {
 			for (let i = 1; i <= totalPages; i++) {
@@ -56,13 +64,14 @@ export const Pagination = ({ totalPages = 0 }: Props) => {
 	const pageNumbers = getPageNumbers();
 
 	return (
-		<div className="flex items-center justify-center gap-1 mt-4">
+		<div className="mt-4 flex items-center justify-center gap-1">
 			<Button
+				aria-label="Ir a la página anterior"
 				variant="ghost"
 				size="sm"
 				disabled={page === 1}
 				onClick={() => handlePageChange(page - 1)}
-				className="gap-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:hover:bg-transparent"
+				className="gap-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:hover:bg-transparent"
 			>
 				<ChevronLeft className="h-4 w-4" />
 				<span className="hidden sm:inline">Previa</span>
@@ -73,20 +82,23 @@ export const Pagination = ({ totalPages = 0 }: Props) => {
 					pn === 'ellipsis' ? (
 						<span
 							key={`ellipsis-${idx}`}
-							className="flex items-center justify-center w-9 h-9 text-slate-400"
+							aria-hidden="true"
+							className="hidden size-9 items-center justify-center text-muted-foreground sm:flex"
 						>
 							<MoreHorizontal className="h-4 w-4" />
 						</span>
 					) : (
 						<Button
 							key={pn}
+							aria-label={`Ir a la página ${pn}`}
+							aria-current={page === pn ? 'page' : undefined}
 							variant={page === pn ? 'default' : 'ghost'}
 							size="sm"
 							onClick={() => handlePageChange(pn)}
-							className={`min-w-9 h-9 px-0 ${
+							className={`h-9 min-w-9 px-0 ${
 								page === pn
-									? 'bg-[#144c74] hover:bg-[#0d436d] text-white font-medium shadow-sm'
-									: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+									? 'bg-primary font-medium text-primary-foreground shadow-sm hover:bg-primary-hover'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground'
 							}`}
 						>
 							{pn}
@@ -96,15 +108,28 @@ export const Pagination = ({ totalPages = 0 }: Props) => {
 			</div>
 
 			<Button
+				aria-label="Ir a la página siguiente"
 				variant="ghost"
 				size="sm"
 				disabled={page === totalPages}
 				onClick={() => handlePageChange(page + 1)}
-				className="gap-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:hover:bg-transparent"
+				className="gap-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:hover:bg-transparent"
 			>
 				<span className="hidden sm:inline">Siguiente</span>
 				<ChevronRight className="h-4 w-4" />
 			</Button>
 		</div>
+	);
+};
+
+export const Pagination = ({ totalPages = 0 }: Props) => {
+	const { page, setPage } = usePaginationParams();
+
+	return (
+		<PaginationControls
+			page={page}
+			totalPages={totalPages}
+			onPageChange={setPage}
+		/>
 	);
 };

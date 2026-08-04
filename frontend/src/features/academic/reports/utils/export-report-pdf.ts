@@ -271,7 +271,7 @@ export async function exportReportActivities(
 				d.courseStadistic.RPB,
 				d.courseStadistic.NSP,
 				d.courseStadistic.ABD,
-				d.studentCount,
+				d.studentCount ?? 'Sin información',
 			]
 		),
 		//al final de la tabla para los horarios de consulta y tutoria

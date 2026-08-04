@@ -39,7 +39,7 @@ export const careersSeed = [
     name: 'Licenciatura en Administración de Empresas',
   },
   {
-    id: '4adef393-707e-4bae-9e0b-43b58f4a6ed0',
+    id: 'b29c8608-ce79-465e-b57b-23feaf6e3086',
     name: 'Licenciatura en Administración de Empresas Agropecuarias',
   },
   {

@@ -85,6 +85,8 @@ export class CourseStadisticsController {
   @ApiPagination({
     summary:
       'Obtener estadísticas consolidadas de asignaturas filtradas por los parámetros proporcionados.',
+    description:
+      'Si la matrícula es desconocida o cero, los índices y la eficiencia que requieren división se devuelven como null.',
   })
   generateConsolidated(
     @Query() query: QueryPaginationDto,

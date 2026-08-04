@@ -51,19 +51,22 @@ const ComplianceByGroupChart = ({
 			<div className="flex h-32 items-end gap-1.5 overflow-x-auto sm:h-40 sm:gap-2">
 				{sortedGroups.map(group => {
 					const label = formatGroupLabel(group);
+					const complianceRate = group.complianceRate ?? 0;
 					return (
 						<div
 							key={group.groupKey}
 							className="flex h-full min-w-9 flex-1 flex-col items-center justify-end gap-1 sm:min-w-10 sm:gap-1.5"
-							title={`${label}: ${group.complianceRate.toFixed(1)}% (${group.present}/${group.totalChecks})`}
+							title={`${label}: ${group.complianceRate === null ? 'No calculable' : `${group.complianceRate.toFixed(1)}%`} (${group.present}/${group.totalChecks})`}
 						>
 							<span className="text-[11px] font-medium text-muted-foreground">
-								{group.complianceRate.toFixed(0)}%
+								{group.complianceRate === null
+									? 'N/D'
+									: `${group.complianceRate.toFixed(0)}%`}
 							</span>
 							<div
 								className="w-full rounded-t-md bg-primary/80 transition-all"
 								style={{
-									height: `${Math.max(group.complianceRate, 2)}%`,
+									height: `${Math.max(complianceRate, 2)}%`,
 								}}
 							/>
 							<span className="w-full truncate text-center text-[10px] text-muted-foreground">
@@ -124,7 +127,11 @@ export const MonitorReportSummary = ({
 				/>
 				<SummaryCard
 					label="% Cumplimiento"
-					value={`${report.complianceRate.toFixed(1)}%`}
+					value={
+						report.complianceRate === null
+							? 'No calculable'
+							: `${report.complianceRate.toFixed(1)}%`
+					}
 					icon={<Percent className="size-5 text-accent" />}
 					accentClassName="bg-accent/10"
 				/>

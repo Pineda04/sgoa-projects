@@ -1,9 +1,30 @@
-import { TCreateUser, TUpdateUser } from './users.types';
+import {
+	TCreateUser,
+	TMonitorBuildingAssignmentResult,
+	TUpdateUser,
+	TUserListItem,
+} from './users.types';
 import { TOutputTeacherPosition } from '../teachers';
 import { api } from '@config';
 import { IResponse } from '@shared';
 
 export const usersApi = {
+	getAll: () => api.get<IResponse<TUserListItem[]>>('/users'),
+	getMonitorBuildings: (userId: string) =>
+		api.get<IResponse<TMonitorBuildingAssignmentResult>>(
+			`/users/${userId}/monitor-buildings`
+		),
+	replaceMonitorBuildings: ({
+		userId,
+		buildingIds,
+	}: {
+		userId: string;
+		buildingIds: string[];
+	}) =>
+		api.put<IResponse<TMonitorBuildingAssignmentResult>>(
+			`/users/${userId}/monitor-buildings`,
+			{ buildingIds }
+		),
 	createUser: (body: TCreateUser) =>
 		api.post<IResponse<TOutputTeacherPosition>>(`/users`, body),
 

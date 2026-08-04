@@ -1,8 +1,20 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsISO8601, IsOptional, IsUUID } from 'class-validator';
+import { IsISO8601, IsOptional, IsUUID, Matches } from 'class-validator';
 import { QueryPaginationDto } from 'src/common/dto';
 
 export class CheckFiltersDto extends QueryPaginationDto {
+  @IsOptional()
+  @Matches(/^[1-9]\d{0,5}$/, {
+    message: 'La propiedad <page> debe ser un entero entre 1 y 999999.',
+  })
+  declare page?: string;
+
+  @IsOptional()
+  @Matches(/^(?:[1-9]|[1-9]\d|100)$/, {
+    message: 'La propiedad <size> debe ser un entero entre 1 y 100.',
+  })
+  declare size?: string;
+
   @ApiPropertyOptional({
     description: 'Fecha inicial del rango de búsqueda (ISO 8601)',
     example: '2026-07-01',
@@ -41,4 +53,14 @@ export class CheckFiltersDto extends QueryPaginationDto {
   @IsOptional()
   @IsUUID()
   centerId?: string;
+
+  @ApiPropertyOptional({ description: 'Filtrar por período académico' })
+  @IsOptional()
+  @IsUUID()
+  periodId?: string;
+
+  @ApiPropertyOptional({ description: 'Filtrar por centro-departamento' })
+  @IsOptional()
+  @IsUUID()
+  centerDepartmentId?: string;
 }

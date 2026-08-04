@@ -30,7 +30,21 @@ interface CheckResultProps {
 
 export const CheckResult = ({ check, className = '' }: CheckResultProps) => (
 	<div className={`min-w-0 text-xs text-muted-foreground ${className}`}>
-		<p>Verificado a las {check.checkTime}</p>
+		<p>
+			{check.syncStatus === 'pending'
+				? `Pendiente de sincronización · ${check.checkTime}`
+				: `Verificado a las ${check.checkTime}`}
+		</p>
+		{check.digitalBlackboardUseStatus ? (
+			<p>
+				Pizarra:{' '}
+				{check.digitalBlackboardUseStatus === 'USED'
+					? 'usada'
+					: check.digitalBlackboardUseStatus === 'NOT_USED'
+						? 'no usada'
+						: 'no se pudo determinar'}
+			</p>
+		) : null}
 		{check.observation && (
 			<p className="line-clamp-2 italic" title={check.observation}>
 				“{check.observation}”

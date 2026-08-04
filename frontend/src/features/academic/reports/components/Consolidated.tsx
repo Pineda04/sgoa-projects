@@ -41,6 +41,8 @@ const columns = [
 		key: 'initial',
 		header: 'Matrícula Inicial',
 		mobileLabel: 'Inicial',
+		render: (row: TOutputConsolidated) =>
+			row.initial ?? 'Sin información',
 	},
 	{
 		key: 'final',
@@ -61,25 +63,37 @@ const columns = [
 		key: 'indexABD',
 		header: '% ABD',
 		mobileLabel: '% ABD',
-		render: (row: TOutputConsolidated) => `${row.indexABD.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexABD === null
+				? 'Sin información'
+				: `${row.indexABD.toFixed(2)}%`,
 	},
 	{
 		key: 'indexNSP',
 		header: '% NSP',
 		mobileLabel: '% NSP',
-		render: (row: TOutputConsolidated) => `${row.indexNSP.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexNSP === null
+				? 'Sin información'
+				: `${row.indexNSP.toFixed(2)}%`,
 	},
 	{
 		key: 'indexRPB',
 		header: '% RPB',
 		mobileLabel: '% RPB',
-		render: (row: TOutputConsolidated) => `${row.indexRPB.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexRPB === null
+				? 'Sin información'
+				: `${row.indexRPB.toFixed(2)}%`,
 	},
 	{
 		key: 'indexAPB',
 		header: '% APB',
 		mobileLabel: '% APB',
-		render: (row: TOutputConsolidated) => `${row.indexAPB.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexAPB === null
+				? 'Sin información'
+				: `${row.indexAPB.toFixed(2)}%`,
 	},
 ];
 

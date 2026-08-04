@@ -6,6 +6,9 @@ import {
   IsUUID,
   Length,
   IsOptional,
+  IsDefined,
+  Min,
+  ValidateIf,
 } from 'class-validator';
 import { ValidatorConstraintDecorator } from 'src/common/decorators';
 import { EInventoryConfig } from 'src/modules/inventory/enums';
@@ -82,8 +85,7 @@ export class CreateCourseClassroomDto {
   section: string;
 
   @ApiProperty({
-    description:
-      'Días de clase, es una abreviatura, ej: LuMaMi, LuMaMiJu.',
+    description: 'Días de clase, es una abreviatura, ej: LuMaMi, LuMaMiJu.',
     example: 'LuMaMi',
     required: true,
   })
@@ -98,13 +100,22 @@ export class CreateCourseClassroomDto {
   days: string;
 
   @ApiProperty({
-    description: 'Cantidad de estudiantes inscritos.',
+    description:
+      'Cantidad de estudiantes inscritos. Null indica que la matrícula es desconocida.',
     example: 30,
     required: true,
+    nullable: true,
   })
+  @IsDefined({
+    message:
+      'La propiedad <studentCount> es obligatoria; use null cuando sea desconocida.',
+  })
+  @ValidateIf((_, value) => value !== null)
   @IsInt({ message: 'La propiedad <studentCount> debe ser un número entero.' })
-  @IsNotEmpty({ message: 'La propiedad <studentCount> no debe estar vacía.' })
-  studentCount: number;
+  @Min(0, {
+    message: 'La propiedad <studentCount> debe ser mayor o igual a cero.',
+  })
+  studentCount: number | null;
 
   @ApiProperty({
     description: 'UUID de la modalidad.',

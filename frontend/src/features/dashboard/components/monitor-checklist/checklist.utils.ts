@@ -3,6 +3,7 @@ import {
 	TMonitorBuildingAssignments,
 	TMonitorCurrentAssignment,
 } from '@api/monitor';
+import { formatScheduleRange } from '@shared/utils';
 
 const DAY_LABELS: Record<string, string> = {
 	Do: 'Domingo',
@@ -134,6 +135,7 @@ export interface TChecklistItem {
 	classroomName: string;
 	startMinutes: number | null;
 	startTime: string | null;
+	timeRange: string | null;
 	jornada: TJornada | null;
 	schedule: string;
 	searchText: string;
@@ -180,11 +182,15 @@ export const buildChecklistItems = (
 	const items = buildings.flatMap(building =>
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
+				const override = checkOverrides[assignment.courseClassroomId];
 				const check =
-					checkOverrides[assignment.courseClassroomId] ?? assignment.check;
+					override?.syncStatus === 'pending' && assignment.check
+						? assignment.check
+						: override ?? assignment.check;
 				const startMinutes = parseStartMinutes(assignment.section);
 				const startTime =
 					startMinutes === null ? null : formatMinutes(startMinutes);
+				const timeRange = formatScheduleRange(assignment.section);
 
 				return {
 					id: assignment.courseClassroomId,
@@ -197,8 +203,9 @@ export const buildChecklistItems = (
 					classroomName: classroom.classroomName,
 					startMinutes,
 					startTime,
+					timeRange,
 					jornada: getJornadaFromMinutes(startMinutes),
-					schedule: `${formatDays(assignment.days)}${startTime ? ` · ${startTime}` : ''}`,
+					schedule: `${formatDays(assignment.days)}${timeRange ? ` · ${timeRange}` : ''}`,
 					searchText: [
 						assignment.courseName,
 						assignment.courseCode,

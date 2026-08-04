@@ -1,6 +1,13 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  Min,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
 export class AcademicAssignmentDto {
   @ApiProperty({
@@ -73,10 +80,16 @@ export class AcademicAssignmentDto {
   @ApiProperty({
     example: 35,
     required: true,
-    description: 'Cantidad de estudiantes inscritos.',
+    nullable: true,
+    description:
+      'Cantidad de estudiantes inscritos. Null indica que la matrícula es desconocida.',
   })
-  @IsNotEmpty({ message: 'La propiedad <studentCount> no debe estar vacía.' })
-  studentCount: number;
+  @ValidateIf((_, value) => value !== null)
+  @IsInt({ message: 'La propiedad <studentCount> debe ser un número entero.' })
+  @Min(0, {
+    message: 'La propiedad <studentCount> debe ser mayor o igual a cero.',
+  })
+  studentCount: number | null;
 
   @ApiProperty({
     example: 'Edificio C, Aula 302',
