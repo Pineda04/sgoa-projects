@@ -57,7 +57,7 @@ export const MonitorChecklist = () => {
 	const effectiveOverrides = useOfflineChecksToday(sessionEmail);
 	const syncIssues = useOfflineSyncIssues(sessionEmail);
 	const { registerCheck, editCheck, submittingId, isRegistering } =
-		useRegisterCheck(sessionEmail);
+		useRegisterCheck(sessionEmail, isOnline);
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
 		CHECKLIST_VIEW_STORAGE_KEY,
@@ -169,6 +169,8 @@ export const MonitorChecklist = () => {
 				courseClassroomId: selectedItem.id,
 				isPresent,
 				observation,
+				checkTime: selectedItem.check.checkTime,
+				isLocalOnly: selectedItem.checkSource === 'LOCAL',
 			});
 		}
 
