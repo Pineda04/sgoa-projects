@@ -407,6 +407,9 @@ export const EditCourseClassroomForm = ({
 					onClose={closeAvail}
 					classroomId={formik.values.classroomId}
 					classroomName={formik.values.classroomName}
+					defaultPeriodId={
+						courseClassroom.teachingSession.assignmentReport.periodId
+					}
 				/>
 			)}
 
