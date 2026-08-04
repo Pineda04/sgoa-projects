@@ -258,6 +258,22 @@ describe('Permisos implícitos', () => {
       expect(editarAula.canActivate(buildContext(teacher))).toBe(false);
     });
 
+    it('la disponibilidad del aula se abre desde la ficha y la planificación', () => {
+      // Quien gestiona planificaciones depende de lookup:classrooms (no read).
+      const planner = expandImpliedPermissions(['manage:planifications']);
+
+      const disponibilidad = buildGuard({
+        permission: { action: 'read', subject: 'classrooms' },
+        isLookupSource: true,
+      });
+      const mutarAula = buildGuard({
+        permission: { action: 'update', subject: 'classrooms' },
+      });
+
+      expect(disponibilidad.canActivate(buildContext(planner))).toBe(true);
+      expect(mutarAula.canActivate(buildContext(planner))).toBe(false);
+    });
+
     it('el formulario de aula alcanza sus catálogos sin abrirles el módulo', () => {
       const classroomManager = expandImpliedPermissions(['manage:classrooms']);
 
