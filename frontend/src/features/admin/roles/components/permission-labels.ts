@@ -41,7 +41,6 @@ export const SUBJECT_LABELS: Record<Subjects, string> = {
 	'air-conditioners': 'Aires acondicionados',
 	'digital-blackboards': 'Pizarras digitales',
 	// Catálogos
-	catalog: 'Catálogo',
 	brands: 'Marcas',
 	conditions: 'Condiciones',
 	connectivities: 'Conectividades',

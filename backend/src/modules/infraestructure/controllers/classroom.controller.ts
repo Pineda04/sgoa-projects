@@ -47,6 +47,7 @@ export class ClassroomController {
   @Get('availability/:id')
   @HttpCode(HttpStatus.OK)
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
   @ApiCommonResponses({
     summary: 'Obtener disponibilidad de un aula',
@@ -81,6 +82,7 @@ export class ClassroomController {
 
   @Get('search')
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas encontrado correctamente.')
   @ApiCommonResponses({

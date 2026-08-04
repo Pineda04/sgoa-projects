@@ -17,7 +17,8 @@ import {
 import { AuthContext, useAuth, useUser } from '@config/providers';
 import { useModal } from '@shared/hooks';
 import { Button, ModalBase } from '../ui';
-import { Can } from '@config/lib';
+import { useAbility } from '@config/lib';
+import { CATALOG_SUBJECTS } from '@features/others/catalog';
 
 export const UserMenu = () => {
 	const navigate = useNavigate();
@@ -29,6 +30,10 @@ export const UserMenu = () => {
 	} = useAuth();
 	const { user: userInfo } = useUser();
 	const { logout } = useContext(AuthContext);
+	const ability = useAbility();
+	const canSeeCatalog = CATALOG_SUBJECTS.some(subject =>
+		ability.can('read', subject)
+	);
 	const [
 		showModalUpdatePassword,
 		handleShowModalUpdatePassword,
@@ -193,7 +198,7 @@ export const UserMenu = () => {
 							</button>
 
 							{/* Catalogo */}
-							<Can action="read" subject="catalog">
+							{canSeeCatalog && (
 								<button
 									onClick={handleConfiguration}
 									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
@@ -210,7 +215,7 @@ export const UserMenu = () => {
 										</p>
 									</div>
 								</button>
-							</Can>
+							)}
 
 							{/* Roles y Permisos */}
 							{user?.isSuperAdmin && (
