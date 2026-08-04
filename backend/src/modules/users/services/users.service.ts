@@ -150,12 +150,25 @@ export class UsersService {
   }
 
   // Solo el super admin puede modificar los roles de un usuario existente.
-  assertCanChangeRoles(
+  // El formulario de edición reenvía <roles> aunque el usuario no lo haya
+  // tocado (es un campo más de formik), así que solo se bloquea si el
+  // conjunto de roles enviado realmente difiere del actual.
+  async assertCanChangeRoles(
+    id: string,
     roleNames: string[] | undefined,
     currentUser: TJwtPayload,
   ) {
     if (roleNames === undefined) return;
     if (currentUser.isSuperAdmin) return;
+
+    const targetUser = await this.findOne(id);
+    const currentRoleNames = targetUser.userRoles.map((ur) => ur.role.name);
+
+    const isSameRoles =
+      roleNames.length === currentRoleNames.length &&
+      roleNames.every((name) => currentRoleNames.includes(name));
+
+    if (isSameRoles) return;
 
     throw new ForbiddenException(
       'Solo un super administrador puede modificar los roles de un usuario.',
@@ -252,10 +265,10 @@ export class UsersService {
               },
               ...(postgradId
                 ? {
-                    undergradDegrees: {
+                    postgraduateDegrees: {
                       create: [
                         {
-                          undergraduate: { connect: { id: undergradId } },
+                          postgraduate: { connect: { id: postgradId } },
                         },
                       ],
                     },
@@ -286,12 +299,17 @@ export class UsersService {
 
     if (!newUser) throw new BadRequestException('Error al crear el usuario.');
 
-    if (isTempPass)
-      await this.mailService.sendMail({
-        to: newUser.email!,
-        subject: 'Contraseña temporal.',
-        html: TEMPLATE_TEMP_PASSWORD(password),
-      });
+    if (isTempPass) {
+      try {
+        await this.mailService.sendMail({
+          to: newUser.email!,
+          subject: 'Contraseña temporal.',
+          html: TEMPLATE_TEMP_PASSWORD(password),
+        });
+      } catch (error) {
+        console.error('Error al enviar correo con contraseña temporal:', error);
+      }
+    }
 
     return newUser;
   }
@@ -438,6 +456,18 @@ export class UsersService {
         ? hourToDateUTC(teacher.shiftStart)
         : undefined,
       shiftEnd: teacher.shiftEnd ? hourToDateUTC(teacher.shiftEnd) : undefined,
+      positionHeld:
+        teacher.positionId && teacher.centerDepartmentId
+          ? {
+              deleteMany: {},
+              create: [
+                {
+                  positionId: teacher.positionId,
+                  centerDepartmentId: teacher.centerDepartmentId,
+                },
+              ],
+            }
+          : undefined,
     };
 
     const [updatedUser, updatedTeacher] = await this.prisma.$transaction([

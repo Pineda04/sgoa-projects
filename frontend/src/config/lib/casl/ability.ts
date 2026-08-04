@@ -50,7 +50,7 @@ export type Subjects =
 	| 'air-conditioners'
 	| 'digital-blackboards'
 	| 'schedule-compliance-check'
-  | 'reports-monitor'
+	| 'reports-monitor'
 	| 'catalog'
 	| 'teacher-categories'
 	| 'contract-types'

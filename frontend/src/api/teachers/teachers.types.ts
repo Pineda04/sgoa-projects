@@ -45,6 +45,7 @@ export type TOutputTeacher = {
 		name: string;
 		isSuperAdmin: boolean;
 	}[];
+	positions?: TPosition[];
 	activeStatus: boolean;
 };
 

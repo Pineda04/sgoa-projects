@@ -13,14 +13,18 @@ export class TeacherRequiredFieldsForRoleConstraint
   implements ValidatorConstraintInterface
 {
   validate(obj: any, args: ValidationArguments): Promise<boolean> | boolean {
-    const object = args.object as { role: string } & TTeacher;
+    const object = args.object as { roles: string[] } & TTeacher;
 
     const teacherRoleNames: string[] = [
       ROLE_NAMES.COORDINADOR_AREA,
       ROLE_NAMES.DOCENTE,
     ];
 
-    if (!teacherRoleNames.includes(object.role)) return true;
+    if (
+      !object.roles ||
+      !object.roles.some((role) => teacherRoleNames.includes(role))
+    )
+      return true;
 
     return (
       !!object.undergradId &&

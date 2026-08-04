@@ -190,7 +190,11 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @GetCurrentUser() currentUser: TJwtPayload,
   ) {
-    this.usersService.assertCanChangeRoles(updateUserDto.roles, currentUser);
+    await this.usersService.assertCanChangeRoles(
+      id,
+      updateUserDto.roles,
+      currentUser,
+    );
 
     return this.usersService.update(id, updateUserDto);
   }

@@ -1,4 +1,6 @@
 import { TCustomOmit } from 'src/common/types';
+import { TCenter, TDepartmentJoin } from 'src/modules/centers/types';
+import { TPosition } from 'src/modules/teachers-config/types';
 
 export type TOutputTeacher = {
   id: string;
@@ -27,6 +29,12 @@ export type TOutputTeacher = {
     name: string;
     isSuperAdmin: boolean;
   }[];
+  positions: {
+    centerDepartmentId: string;
+    center: TCenter;
+    department: TDepartmentJoin;
+    position: TPosition;
+  }[];
   activeStatus: boolean;
 };
 
@@ -38,4 +46,5 @@ export type TOutputTeacherCustom = TCustomOmit<
   | 'postgrads'
   | 'undergrads'
   | 'roles'
+  | 'positions'
 >;

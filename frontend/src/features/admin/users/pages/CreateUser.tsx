@@ -38,6 +38,7 @@ export const CreateUser = () => {
 	// creadores siempre obtienen el rol por defecto (DOCENTE) en el backend.
 	const canManageRoles = !!authState.user?.isSuperAdmin;
 	const canManageDepartments = ability.can('manage', 'user-departments');
+	const extraFieldsEnabled = canManageRoles || canManageDepartments;
 
 	const {
 		values,
@@ -52,7 +53,7 @@ export const CreateUser = () => {
 		initialValues: {
 			...initialValuesUser,
 			roles: [],
-			extraFieldsEnabled: canManageRoles || canManageDepartments,
+			extraFieldsEnabled,
 		},
 		onSubmit: values => handleCreateUser(values),
 		validate: values => {
@@ -80,7 +81,7 @@ export const CreateUser = () => {
 			values: {
 				...initialValuesUser,
 				roles: [],
-				extraFieldsEnabled: canManageRoles || canManageDepartments,
+				extraFieldsEnabled,
 			},
 		});
 
@@ -204,7 +205,7 @@ export const CreateUser = () => {
 								setValues({ ...values, postgradId });
 							}}
 							onBlur={handleBlur}
-							defaultValue={''}
+							defaultValue={'select'}
 						>
 							<option value="select" disabled>
 								Seleccione
