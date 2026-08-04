@@ -4,16 +4,25 @@ import {
 	useIsOnline,
 	useCachedAcademicPeriod,
 } from '@shared/hooks';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+	ConnectionIndicator,
+} from '@shared/components';
 import { useAuth, useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
 import { MonitorChecklist, MonitorReports, SyncIndicator } from '../components';
 import { ListClassrooms } from '@features/infrastructure';
 
 export const DashboardMonitor = () => {
-	const validTabs = ['0', '1', '2'];
-	const { currentTab, setTab } = useTabWithReset(validTabs);
 	const isOnline = useIsOnline();
+	// Feature: sin conexión solo es válido el tab del checklist; las pestañas de
+	// Reportes y Aulas requieren red. useTabWithReset descarta el tab fuera de
+	// rango y devuelve a Checklist si se pierde la red estando en otra pestaña.
+	const validTabs = isOnline ? ['0', '1', '2'] : ['0'];
+	const { currentTab, setTab } = useTabWithReset(validTabs);
 	const currentUser = useUser();
 	// Feature: email de la sesión (JWT) como clave de la caché Dexie; está disponible
 	// incluso offline, a diferencia de useUser() que hace una petición HTTP.
@@ -40,11 +49,14 @@ export const DashboardMonitor = () => {
 					<p className="text-sm">{currentUser.user?.code}</p>
 					<p className="text-sm">{sessionEmail}</p>
 				</div>
-				<SyncIndicator
-					status={status}
-					pendingCount={pendingCount}
-					onRetry={forceSync}
-				/>
+				<div className="flex flex-wrap items-center justify-end gap-2">
+					<ConnectionIndicator />
+					<SyncIndicator
+						status={status}
+						pendingCount={pendingCount}
+						onRetry={forceSync}
+					/>
+				</div>
 			</div>
 
 			<Tabs
@@ -61,12 +73,14 @@ export const DashboardMonitor = () => {
 					</TabsTrigger>
 					<TabsTrigger
 						value="1"
+						disabled={!isOnline}
 						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
 					>
 						Reportes
 					</TabsTrigger>
 					<TabsTrigger
 						value="2"
+						disabled={!isOnline}
 						className="gap-1.5 sm:gap-2 text-xs sm:text-sm"
 					>
 						Aulas
