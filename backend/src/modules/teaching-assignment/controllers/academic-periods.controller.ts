@@ -104,6 +104,7 @@ export class AcademicPeriodsController {
 
   @Get('next-to-create')
   @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener periodo académico siguiente a crear una planificación',
