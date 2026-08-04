@@ -4,16 +4,10 @@ import {
 	useIsOnline,
 	useCachedAcademicPeriod,
 } from '@shared/hooks';
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-	ConnectionIndicator,
-} from '@shared/components';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { useAuth, useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
-import { MonitorChecklist, MonitorReports, SyncIndicator } from '../components';
+import { MonitorChecklist, MonitorReports } from '../components';
 import { ListClassrooms } from '@features/infrastructure';
 
 export const DashboardMonitor = () => {
@@ -49,14 +43,6 @@ export const DashboardMonitor = () => {
 					<p className="text-sm">{currentUser.user?.code}</p>
 					<p className="text-sm">{sessionEmail}</p>
 				</div>
-				<div className="flex flex-wrap items-center justify-end gap-2">
-					<ConnectionIndicator />
-					<SyncIndicator
-						status={status}
-						pendingCount={pendingCount}
-						onRetry={forceSync}
-					/>
-				</div>
 			</div>
 
 			<Tabs
@@ -89,7 +75,11 @@ export const DashboardMonitor = () => {
 
 				<TabsContent value="0">
 					<div className="bg-card border border-card-border rounded-xl shadow-lg shadow-primary/5 overflow-hidden p-4 sm:p-6">
-						<MonitorChecklist />
+						<MonitorChecklist
+							syncStatus={status}
+							syncPendingCount={pendingCount}
+							onSyncRetry={forceSync}
+						/>
 					</div>
 				</TabsContent>
 

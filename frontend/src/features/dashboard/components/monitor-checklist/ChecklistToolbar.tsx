@@ -1,5 +1,7 @@
 import { LayoutGrid, List, Rows3, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@shared/components';
+import { TSyncStatus } from '@shared/hooks';
+import { SyncIndicator } from '../SyncIndicator';
 import { SegmentedControl, TSegmentedOption } from './SegmentedControl';
 import {
 	JORNADA_OPTIONS,
@@ -67,6 +69,9 @@ interface ChecklistToolbarProps {
 	areFiltersOpen: boolean;
 	onToggleFilters: () => void;
 	onResetFilters: () => void;
+	syncStatus: TSyncStatus;
+	syncPendingCount: number;
+	onSyncRetry: () => void;
 }
 
 export const ChecklistToolbar = ({
@@ -86,7 +91,16 @@ export const ChecklistToolbar = ({
 	areFiltersOpen,
 	onToggleFilters,
 	onResetFilters,
+	syncStatus,
+	syncPendingCount,
+	onSyncRetry,
 }: ChecklistToolbarProps) => {
+	const todayLabel = new Date().toLocaleDateString('es-HN', {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	});
 	const activeFilterCount =
 		(buildingId ? 1 : 0) + (status !== 'ALL' ? 1 : 0) + (search ? 1 : 0);
 
@@ -105,7 +119,20 @@ export const ChecklistToolbar = ({
 	];
 
 	return (
-		<div className="sticky top-12.5 z-20 -mt-1 space-y-3 bg-card pt-1 pb-3 sm:top-14">
+		<div className="top-12.5 z-20 -mt-1 space-y-3 bg-card pt-1 pb-3 sm:top-14">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<h2 className="text-lg font-semibold capitalize text-foreground">
+					{todayLabel}
+				</h2>
+				<div className="flex flex-wrap items-center justify-end gap-2">
+					<SyncIndicator
+						status={syncStatus}
+						pendingCount={syncPendingCount}
+						onRetry={onSyncRetry}
+					/>
+				</div>
+			</div>
+
 			<div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 				<SegmentedControl
 					options={jornadaOptions}

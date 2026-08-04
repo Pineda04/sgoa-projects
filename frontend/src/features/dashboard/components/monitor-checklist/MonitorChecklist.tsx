@@ -9,6 +9,7 @@ import {
 	useLocalStorageState,
 	useModal,
 } from '@shared/hooks';
+import type { TSyncStatus } from '@shared/hooks';
 import { SkeletonCard } from '@shared';
 import { askConfirm } from '@shared/utils';
 import { BuildingAccordion } from './BuildingAccordion';
@@ -36,7 +37,17 @@ import {
 	TStatusFilter,
 } from './checklist.utils';
 
-export const MonitorChecklist = () => {
+interface MonitorChecklistProps {
+	syncStatus?: TSyncStatus;
+	syncPendingCount?: number;
+	onSyncRetry?: () => void;
+}
+
+export const MonitorChecklist = ({
+	syncStatus = 'SYNCED',
+	syncPendingCount = 0,
+	onSyncRetry,
+}: MonitorChecklistProps) => {
 	const isOnline = useIsOnline();
 	// Feature: email de la sesión (JWT) como clave de la caché Dexie; disponible offline.
 	const { authState } = useAuth();
@@ -261,6 +272,9 @@ export const MonitorChecklist = () => {
 				areFiltersOpen={areFiltersOpen}
 				onToggleFilters={() => setAreFiltersOpen(prev => !prev)}
 				onResetFilters={handleResetFilters}
+				syncStatus={syncStatus}
+				syncPendingCount={syncPendingCount}
+				onSyncRetry={onSyncRetry ?? (() => undefined)}
 			/>
 
 			{scopeSummary.total > 0 && <ChecklistProgress summary={scopeSummary} />}

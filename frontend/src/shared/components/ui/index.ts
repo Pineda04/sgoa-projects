@@ -8,4 +8,3 @@ export * from './button.tsx';
 export * from './tabs.tsx';
 export * from './modals';
 export * from './TagError';
-export * from './ConnectionIndicator';
