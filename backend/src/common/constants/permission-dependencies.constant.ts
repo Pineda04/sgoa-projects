@@ -120,6 +120,8 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     'air-conditioners',
     'brands',
     'pc-equipments',
+    'monitor-types',
+    'monitor-sizes',
   ),
 
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Periodos, Consolidado.

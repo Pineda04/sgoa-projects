@@ -241,10 +241,14 @@ describe('Permisos implícitos', () => {
           'lookup:pc-equipments',
           'lookup:air-conditioners',
           'lookup:digital-blackboards',
+          'lookup:monitor-types',
+          'lookup:monitor-sizes',
         ]),
       );
       // ...pero el módulo Aulas sigue fuera del menú y del mantenimiento.
       expect(teacher).not.toContain('read:classrooms');
+      expect(teacher).not.toContain('read:monitor-types');
+      expect(teacher).not.toContain('read:monitor-sizes');
 
       const fichaDeAula = buildGuard({
         permission: { action: 'read', subject: 'classrooms' },
