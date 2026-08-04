@@ -120,20 +120,6 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     'air-conditioners',
     'brands',
     'pc-equipments',
-  ),
-
-  // La página Catálogo administra en un solo lugar todas las entidades chicas.
-  catalog: grant(
-    'manage',
-    'teacher-categories',
-    'contract-types',
-    'shifts',
-    'room-types',
-    'connectivities',
-    'conditions',
-    'brands',
-    'pc-types',
-    'audio-equipments',
     'monitor-types',
     'monitor-sizes',
   ),
@@ -144,8 +130,12 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     ...lookup('departments'),
   ],
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Consolidado.
+  // El coordinador consulta y edita las clases de su departamento, pero solo
+  // la autoridad crea (y elimina) el catálogo de clases.
   'dashboard-coordinator': [
-    ...grant('manage', 'planifications', 'reports', 'users', 'courses'),
+    ...grant('manage', 'planifications', 'reports', 'users'),
+    ...grant('read', 'courses'),
+    ...grant('update', 'courses'),
     ...lookup('departments', 'periods'),
   ],
   // Pestañas: Clases asignadas e Informes, ambas acotadas al propio docente.

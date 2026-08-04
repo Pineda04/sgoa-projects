@@ -30,8 +30,6 @@ export const PERMISSION_SUBJECTS = [
   'audio-equipments',
   'air-conditioners',
   'digital-blackboards',
-  // Catálogos: entidades pequeñas que se administran desde la página Catálogo
-  'catalog',
   'brands',
   'conditions',
   'connectivities',
@@ -73,3 +71,7 @@ export const DEFAULT_PERMISSIONS = [
   'manage:help',
   'manage:profile',
 ] as const;
+
+export const NON_ASSIGNABLE_SUBJECTS: readonly TPermissionSubject[] = [
+  'dashboard-tab-classrooms',
+];

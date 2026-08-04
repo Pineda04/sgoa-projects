@@ -32,7 +32,7 @@ import {
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
-import { catalogRoutes } from '@features/others';
+import { catalogRoutes, CATALOG_SUBJECTS } from '@features/others';
 
 
 
@@ -66,7 +66,9 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'catalog',
-			element: <ProtectedRoute action="read" subject="catalog" />,
+			element: (
+				<ProtectedRoute action="read" subject={CATALOG_SUBJECTS} />
+			),
 			children: catalogRoutes,
 			errorElement: <div>404</div>,
 		},

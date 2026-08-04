@@ -250,6 +250,30 @@ describe('Permisos implícitos', () => {
       );
     });
 
+    it('el coordinador consulta y edita clases, pero solo la autoridad las crea', () => {
+      const coordinator = expandImpliedPermissions([
+        'manage:dashboard-coordinator',
+      ]);
+
+      expect(coordinator).toContain('read:courses');
+      expect(coordinator).toContain('update:courses');
+      expect(coordinator).not.toContain('manage:courses');
+
+      const crearClase = buildGuard({
+        permission: { action: 'create', subject: 'courses' },
+      });
+      const borrarClase = buildGuard({
+        permission: { action: 'delete', subject: 'courses' },
+      });
+      const editarClase = buildGuard({
+        permission: { action: 'update', subject: 'courses' },
+      });
+
+      expect(crearClase.canActivate(buildContext(coordinator))).toBe(false);
+      expect(borrarClase.canActivate(buildContext(coordinator))).toBe(false);
+      expect(editarClase.canActivate(buildContext(coordinator))).toBe(true);
+    });
+
     it('el docente abre la ficha de aula sin quedarse con el módulo Aulas', () => {
       const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
 
@@ -262,10 +286,14 @@ describe('Permisos implícitos', () => {
           'lookup:pc-equipments',
           'lookup:air-conditioners',
           'lookup:digital-blackboards',
+          'lookup:monitor-types',
+          'lookup:monitor-sizes',
         ]),
       );
       // ...pero el módulo Aulas sigue fuera del menú y del mantenimiento.
       expect(teacher).not.toContain('read:classrooms');
+      expect(teacher).not.toContain('read:monitor-types');
+      expect(teacher).not.toContain('read:monitor-sizes');
 
       const fichaDeAula = buildGuard({
         permission: { action: 'read', subject: 'classrooms' },
@@ -279,19 +307,20 @@ describe('Permisos implícitos', () => {
       expect(editarAula.canActivate(buildContext(teacher))).toBe(false);
     });
 
-    it('la página Catálogo concede las entidades que administra', () => {
-      const catalog = expandImpliedPermissions(['manage:catalog']);
+    it('la disponibilidad del aula se abre desde la ficha y la planificación', () => {
+      // Quien gestiona planificaciones depende de lookup:classrooms (no read).
+      const planner = expandImpliedPermissions(['manage:planifications']);
 
-      expect(catalog).toEqual(
-        expect.arrayContaining([
-          'manage:brands',
-          'manage:conditions',
-          'manage:room-types',
-          'manage:shifts',
-          'manage:contract-types',
-          'manage:teacher-categories',
-        ]),
-      );
+      const disponibilidad = buildGuard({
+        permission: { action: 'read', subject: 'classrooms' },
+        isLookupSource: true,
+      });
+      const mutarAula = buildGuard({
+        permission: { action: 'update', subject: 'classrooms' },
+      });
+
+      expect(disponibilidad.canActivate(buildContext(planner))).toBe(true);
+      expect(mutarAula.canActivate(buildContext(planner))).toBe(false);
     });
 
     it('el formulario de aula alcanza sus catálogos sin abrirles el módulo', () => {
