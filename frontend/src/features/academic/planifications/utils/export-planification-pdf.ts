@@ -63,15 +63,15 @@ export async function exportPlanification(
 		info.teacherName,
 		info.courseCode,
 		info.courseName,
-		info.section,
 		info.uv,
-		info.days,
+		info.section,
 		info.studentCount,
+		info.days,
+		info.center,
 		info.classroomName,
 		info.departmentName,
 		info.coordinator,
-		info.center,
-		info.nearGraduation,
+		info.nearGraduation ? 'Sí' : 'No',
 		info.observation ?? '',
 	]);
 
@@ -86,7 +86,7 @@ export async function exportPlanification(
 	type LastAutoTable = { finalY?: number };
 	const lastTable = (doc as unknown as { lastAutoTable?: LastAutoTable })
 		.lastAutoTable;
-	const y = (lastTable?.finalY ?? headerY + 55) + 45;
+	const y = (lastTable?.finalY ?? headerY + 55) + 80;
 
 	const lineWidth = 200;
 	const marginCenter = (doc.internal.pageSize.getWidth() - lineWidth) / 2;
@@ -100,15 +100,18 @@ export async function exportPlanification(
 		doc.addPage();
 	}
 
-	const newY = (doc as unknown as { lastAutoTable?: LastAutoTable })
-		.lastAutoTable?.finalY ?? y;
+	let firmaY = y;
+	if (firmaY + firmaHeight > pageHeight - marginBottom) {
+		doc.addPage();
+		firmaY = 140;
+	}
 
-	doc.line(marginCenter, newY, marginCenter + lineWidth, newY);
+	doc.line(marginCenter, firmaY, marginCenter + lineWidth, firmaY);
 	doc.setFontSize(10);
 	doc.text(
 		'Firma del coordinador de carrera',
 		marginCenter + lineWidth / 2,
-		newY + 18,
+		firmaY + 18,
 		{ align: 'center' }
 	);
 
