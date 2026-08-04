@@ -15,6 +15,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
 import { useAbility, useAuth } from '@config';
 import type { Subjects } from '@config/lib/casl/ability';
+import { useIsOnline } from '@shared/hooks';
 import { Button } from '../ui';
 
 interface SectionConfig {
@@ -148,10 +149,17 @@ export const Navbar = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const ability = useAbility();
+	const isOnline = useIsOnline();
 
 	const availableDashboards = useMemo(() => {
-		return DASHBOARD_CONFIG.filter(d => ability.can('read', d.subject));
-	}, [ability]);
+		return DASHBOARD_CONFIG.filter(
+			d =>
+				ability.can('read', d.subject) &&
+				// Feature: sin conexión solo el dashboard de monitoreo es utilizable;
+				// el resto de dashboards dependen de peticiones al backend.
+				(isOnline || d.subject === 'dashboard-monitor')
+		);
+	}, [ability, isOnline]);
 
 	const dashboardSections: SectionConfig[] = useMemo(
 		() => availableDashboards.map(d => ({ label: d.label, path: d.path })),
@@ -180,8 +188,12 @@ export const Navbar = () => {
 					return ability.can('read', s.subject);
 				}),
 			}))
-			.filter(mod => mod.sections.length > 0);
-	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin]);
+			.filter(mod => mod.sections.length > 0)
+			// Feature: sin conexión se ocultan los módulos que requieren red
+			// (Administración, Infraestructura, Inventario y demás dashboards);
+			// solo queda disponible el dashboard de monitoreo.
+			.filter(mod => isOnline || mod.id === 'dashboard');
+	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin, isOnline]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -272,14 +284,25 @@ export const Navbar = () => {
 			className="relative flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
 		>
 			<div>
-				<Link
-					to={'/home'}
-					className="flex items-center gap-2 md:gap-3 group"
-				>
-					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
+				{isOnline ? (
+					<Link
+						to={'/home'}
+						className="flex items-center gap-2 md:gap-3 group"
+					>
+						<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
+							SGOA UNAH
+						</span>
+					</Link>
+				) : (
+					// Feature: sin conexión el título no navega (iría a /home, que
+					// requiere red); se muestra como texto inerte.
+					<span
+						aria-disabled="true"
+						className="font-display text-lg md:text-xl text-white/50 tracking-wide hidden lg:block cursor-default select-none"
+					>
 						SGOA UNAH
 					</span>
-				</Link>
+				)}
 			</div>
 
 			{visibleModules.length > 0 && (

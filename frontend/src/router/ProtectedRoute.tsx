@@ -1,8 +1,9 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import { AppLayout } from './AppLayout';
 import { AuthContext } from '@config/providers';
 import { useAbility } from '@config';
+import { useIsOnline } from '@shared/hooks';
 import { Loading } from '@shared/components';
 import type { Actions, Subjects } from '@config/lib/casl/ability';
 
@@ -23,6 +24,8 @@ export const ProtectedRoute = ({
 		authState: { isAuthenticated, isLoading, user },
 	} = useContext(AuthContext);
 	const ability = useAbility();
+	const isOnline = useIsOnline();
+	const { pathname } = useLocation();
 
 	if (isLoading) return <Loading />;
 
@@ -30,6 +33,16 @@ export const ProtectedRoute = ({
 
 	if (superAdminOnly && !user?.isSuperAdmin)
 		return <Navigate to="/home" replace />;
+
+	// Feature: sin conexión solo el dashboard de monitoreo funciona (modo offline).
+	// Las demás rutas redirigen ahí únicamente cuando el usuario puede accederlo;
+	// si no (roles sin monitoreo), se conserva el flujo actual para no crear bucles.
+	if (
+		!isOnline &&
+		!pathname.startsWith('/dashboard/monitor') &&
+		ability.can('read', 'dashboard-monitor')
+	)
+		return <Navigate to="/dashboard/monitor" replace />;
 
 	const subjects = subject
 		? Array.isArray(subject)

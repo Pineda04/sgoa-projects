@@ -10,18 +10,19 @@ import type {
 
 const TEMPLATE_HEADERS = [
   '#',
-  'Código docente',
-  'Nombre del docente',
-  'Código de asignatura',
-  'Nombre de asignatura',
-  'Sección',
+  'No.Emp',
+  'Nombre',
+  'Código',
+  'Asignatura',
   'UV',
+  'Sección',
+  'No. Alumnos',
   'Días',
-  'Número de alumnos',
-  'Aula',
-  'Departamento',
-  'Coordinador',
-  'Centro',
+  'Centro / Telecentro',
+  'N° de Aula',
+  'Carrera o Área',
+  'Jefe / Coordinador',
+  'Estudiantes por graduarse',
   'Observaciones',
 ];
 
@@ -65,28 +66,30 @@ describe('ExcelFilesService', () => {
         sheet.cell(5, 3).value('Juan Pérez');
         sheet.cell(5, 4).value('IS101-2025');
         sheet.cell(5, 5).value('Ingeniería en Sistemas');
-        sheet.cell(5, 6).value('A1');
-        sheet.cell(5, 7).value(4);
-        sheet.cell(5, 8).value('LuMaMiVi');
-        sheet.cell(5, 9).value(35);
-        sheet.cell(5, 10).value('Edificio C, Aula 302');
-        sheet.cell(5, 11).value('Ingeniería en Sistemas');
-        sheet.cell(5, 12).value('María López');
-        sheet.cell(5, 13).value('Centro Universitario Regional');
-        sheet.cell(5, 14).value('Clase trasladada');
+        sheet.cell(5, 6).value(4);
+        sheet.cell(5, 7).value('A1');
+        sheet.cell(5, 8).value(35);
+        sheet.cell(5, 9).value('LuMaMiVi');
+        sheet.cell(5, 10).value('Centro Universitario Regional');
+        sheet.cell(5, 11).value('Edificio C, Aula 302');
+        sheet.cell(5, 12).value('Ingeniería en Sistemas');
+        sheet.cell(5, 13).value('María López');
+        sheet.cell(5, 14).value('Sí');
+        sheet.cell(5, 15).value('Clase trasladada');
 
         sheet.cell(6, 2).value('DOC002');
         sheet.cell(6, 3).value('Ana Gómez');
         sheet.cell(6, 4).value('MAT-201');
         sheet.cell(6, 5).value('Matemáticas');
-        sheet.cell(6, 6).value('B2');
-        sheet.cell(6, 7).value(3);
-        sheet.cell(6, 8).value('MaJuVi');
-        sheet.cell(6, 9).value(25);
-        sheet.cell(6, 10).value('Edificio A, Aula 105');
-        sheet.cell(6, 11).value('Ingeniería en Sistemas');
-        sheet.cell(6, 12).value('María López');
-        sheet.cell(6, 13).value('Centro Universitario Regional');
+        sheet.cell(6, 6).value(3);
+        sheet.cell(6, 7).value('B2');
+        sheet.cell(6, 8).value(25);
+        sheet.cell(6, 9).value('MaJuVi');
+        sheet.cell(6, 10).value('Centro Universitario Regional');
+        sheet.cell(6, 11).value('Edificio A, Aula 105');
+        sheet.cell(6, 12).value('Ingeniería en Sistemas');
+        sheet.cell(6, 13).value('María López');
+        sheet.cell(6, 14).value('No');
       });
 
       const result = await service.processFile(
@@ -110,6 +113,7 @@ describe('ExcelFilesService', () => {
         departmentName: 'Ingeniería en Sistemas',
         coordinator: 'María López',
         center: 'Centro Universitario Regional',
+        nearGraduation: true,
         observation: 'Clase trasladada',
       });
       expect(result.data[1]).toMatchObject({
@@ -122,6 +126,7 @@ describe('ExcelFilesService', () => {
         days: 'MaJuVi',
         studentCount: 25,
         classroomName: 'Edificio A, Aula 105',
+        nearGraduation: false,
       });
     });
 
@@ -135,28 +140,30 @@ describe('ExcelFilesService', () => {
         sheet.cell(2, 3).value('Juan Pérez');
         sheet.cell(2, 4).value('IS101-2025');
         sheet.cell(2, 5).value('Ingeniería en Sistemas');
-        sheet.cell(2, 6).value('A1');
-        sheet.cell(2, 7).value(4);
-        sheet.cell(2, 8).value('LuMaMiVi');
-        sheet.cell(2, 9).value(35);
-        sheet.cell(2, 10).value('Edificio C, Aula 302');
-        sheet.cell(2, 11).value('Ingeniería en Sistemas');
-        sheet.cell(2, 12).value('María López');
-        sheet.cell(2, 13).value('Centro Universitario Regional');
-        sheet.cell(2, 14).value('Clase trasladada');
+        sheet.cell(2, 6).value(4);
+        sheet.cell(2, 7).value('A1');
+        sheet.cell(2, 8).value(35);
+        sheet.cell(2, 9).value('LuMaMiVi');
+        sheet.cell(2, 10).value('Centro Universitario Regional');
+        sheet.cell(2, 11).value('Edificio C, Aula 302');
+        sheet.cell(2, 12).value('Ingeniería en Sistemas');
+        sheet.cell(2, 13).value('María López');
+        sheet.cell(2, 14).value('Sí');
+        sheet.cell(2, 15).value('Clase trasladada');
 
         sheet.cell(3, 2).value('DOC002');
         sheet.cell(3, 3).value('Ana Gómez');
         sheet.cell(3, 4).value('MAT-201');
         sheet.cell(3, 5).value('Matemáticas');
-        sheet.cell(3, 6).value('B2');
-        sheet.cell(3, 7).value(3);
-        sheet.cell(3, 8).value('MaJuVi');
-        sheet.cell(3, 9).value(25);
-        sheet.cell(3, 10).value('Edificio A, Aula 105');
-        sheet.cell(3, 11).value('Ingeniería en Sistemas');
-        sheet.cell(3, 12).value('María López');
-        sheet.cell(3, 13).value('Centro Universitario Regional');
+        sheet.cell(3, 6).value(3);
+        sheet.cell(3, 7).value('B2');
+        sheet.cell(3, 8).value(25);
+        sheet.cell(3, 9).value('MaJuVi');
+        sheet.cell(3, 10).value('Centro Universitario Regional');
+        sheet.cell(3, 11).value('Edificio A, Aula 105');
+        sheet.cell(3, 12).value('Ingeniería en Sistemas');
+        sheet.cell(3, 13).value('María López');
+        sheet.cell(3, 14).value('No');
       });
 
       const result = await service.processFile(
@@ -191,7 +198,7 @@ describe('ExcelFilesService', () => {
           sheet.cell(row, 2).value(`DOC00${row - 1}`);
           sheet.cell(row, 3).value(`Docente ${row - 1}`);
           sheet.cell(row, 4).value(`IS10${row - 1}-2025`);
-          sheet.cell(row, 7).value(4);
+          sheet.cell(row, 6).value(4);
         }
       });
 

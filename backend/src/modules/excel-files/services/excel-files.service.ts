@@ -126,7 +126,7 @@ export class ExcelFilesService<Type, Dto> {
   ): string[] {
     const headers: string[] = [];
 
-    for (let column = 1; column <= 14; column++) {
+    for (let column = 1; column <= 15; column++) {
       const cellValue =
         sheet.cell(headerRow, column).value()?.toString().trim() || '';
       headers.push(cellValue);
@@ -151,7 +151,7 @@ export class ExcelFilesService<Type, Dto> {
       const rowData: Partial<Dto> = {};
       let hasData = false;
 
-      for (let column = 1; column <= 14; column++) {
+      for (let column = 1; column <= 15; column++) {
         const rawValue = sheet.cell(row, column).value();
         const value =
           typeof rawValue === 'string'
@@ -199,18 +199,28 @@ export class ExcelFilesService<Type, Dto> {
     value: string,
     columnIndex: number,
     rawValue?: string | number | boolean | Date | null | undefined,
-  ): string | number {
-    //seccion
-    if (columnIndex === 5) {
+  ): string | number | boolean {
+    // seccion
+    if (columnIndex === 6) {
       return this.parseTimeValue(value, rawValue);
     }
 
-    // id, uv, días, numero de alumnos, numero de aula
-    const numericColumns = [0, 6, 7, 8, 9];
+    // estudiantes por graduarse
+    if (columnIndex === 13) {
+      return this.parseNearGraduation(value);
+    }
+
+    // id, uv, días, numero de alumnos
+    const numericColumns = [0, 5, 7, 8];
     const number = parseInt(value);
     return numericColumns.includes(columnIndex) && !isNaN(number)
       ? number
       : value;
+  }
+
+  private parseNearGraduation(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return ['sí', 'si', 's', 'yes', 'y', 'true', '1'].includes(normalized);
   }
 
   private parseTimeValue(

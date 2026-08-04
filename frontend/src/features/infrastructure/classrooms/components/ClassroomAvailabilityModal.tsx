@@ -15,6 +15,7 @@ interface ClassroomAvailabilityModalProps {
 	onClose: () => void;
 	classroomId: string;
 	classroomName: string;
+	defaultPeriodId?: string;
 }
 
 const DAYS: { key: TDayOfWeek; label: string; shortLabel: string }[] = [
@@ -63,7 +64,7 @@ function convertTo24h(time: string): string {
 	const parts = time.split(' ');
 	if (parts.length === 1) return time;
 	const [timePart, modifier] = parts;
-	let [hours, minutes] = timePart.split(':');
+	const [hours, minutes] = timePart.split(':');
 	let h = Number(hours);
 	if (modifier.toUpperCase() === 'PM' && h !== 12) h += 12;
 	if (modifier.toUpperCase() === 'AM' && h === 12) h = 0;
@@ -83,6 +84,7 @@ export const ClassroomAvailabilityModal = ({
 	onClose,
 	classroomId,
 	classroomName,
+	defaultPeriodId,
 }: ClassroomAvailabilityModalProps) => {
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();
 	const { data: allPeriods } = useGetAcademicPeriods();
@@ -92,12 +94,18 @@ export const ClassroomAvailabilityModal = ({
 
 	const todayKey = useMemo(() => JS_DAY_TO_KEY[new Date().getDay()], []);
 
+	const defaultPeriod = useMemo(() => {
+		if (defaultPeriodId)
+			return allPeriods?.find(p => p.id === defaultPeriodId);
+		return currentPeriod;
+	}, [allPeriods, defaultPeriodId, currentPeriod]);
+
 	useEffect(() => {
-		if (currentPeriod) {
-			setSelectedYear(prev => prev || String(currentPeriod.year));
-			setSelectedPac(prev => prev || String(currentPeriod.pac));
+		if (defaultPeriod) {
+			setSelectedYear(prev => prev || String(defaultPeriod.year));
+			setSelectedPac(prev => prev || String(defaultPeriod.pac));
 		}
-	}, [currentPeriod]);
+	}, [defaultPeriod]);
 
 	const years = useMemo(() => {
 		if (!allPeriods) return [];
@@ -106,13 +114,14 @@ export const ClassroomAvailabilityModal = ({
 	}, [allPeriods]);
 
 	const effectivePeriodId = useMemo(() => {
-		if (!selectedYear || !selectedPac) return currentPeriod?.id ?? '';
+		if (!selectedYear || !selectedPac)
+			return defaultPeriodId ?? currentPeriod?.id ?? '';
 		const match = allPeriods?.find(
 			p =>
 				p.year === Number(selectedYear) && p.pac === Number(selectedPac)
 		);
 		return match?.id ?? '';
-	}, [allPeriods, selectedYear, selectedPac, currentPeriod]);
+	}, [allPeriods, selectedYear, selectedPac, defaultPeriodId, currentPeriod]);
 
 	const { data: schedule, isLoading, isError } = useGetClassroomAvailability(
 		classroomId,

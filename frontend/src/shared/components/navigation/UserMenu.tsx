@@ -15,7 +15,7 @@ import {
 	ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
-import { useModal } from '@shared/hooks';
+import { useModal, useIsOnline } from '@shared/hooks';
 import { Button, ModalBase } from '../ui';
 import { useAbility } from '@config/lib';
 import { CATALOG_SUBJECTS } from '@features/others/catalog';
@@ -25,6 +25,7 @@ export const UserMenu = () => {
 	const searchRef = useRef<HTMLDivElement>(null);
 	const handleToggle = () => setIsOpen(!isOpen);
 	const [isOpen, setIsOpen] = useState(false);
+	const isOnline = useIsOnline();
 	const {
 		authState: { user },
 	} = useAuth();
@@ -155,17 +156,17 @@ export const UserMenu = () => {
 							{/* Perfil */}
 							<button
 								onClick={handleProfile}
-								disabled={!userInfo}
+								disabled={!userInfo || !isOnline}
 								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
 									${
-										!userInfo
+										!userInfo || !isOnline
 											? 'opacity-50 cursor-not-allowed text-gray-400'
 											: 'text-gray-700 hover:bg-gray-100 hover:text-primary cursor-pointer'
 									}`}
 							>
 								<div
 									className={`size-9 rounded-lg flex items-center justify-center
-									${userInfo ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}
+									${userInfo && isOnline ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}
 								>
 									<User className="size-4.5" />
 								</div>
@@ -182,7 +183,8 @@ export const UserMenu = () => {
 							{/* Cambiar contraseña */}
 							<button
 								onClick={handleChangePassword}
-								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								disabled={!isOnline}
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 									<LockClosedIcon className="size-4.5" />
@@ -201,7 +203,8 @@ export const UserMenu = () => {
 							{canSeeCatalog && (
 								<button
 									onClick={handleConfiguration}
-									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+									disabled={!isOnline}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 										<Square2StackIcon className="size-4.5" />
@@ -221,7 +224,8 @@ export const UserMenu = () => {
 							{user?.isSuperAdmin && (
 								<button
 									onClick={handleRoles}
-									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+									disabled={!isOnline}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 										<ShieldCheckIcon className="size-4.5" />
@@ -240,7 +244,8 @@ export const UserMenu = () => {
 							{/* Ayuda */}
 							<button
 								onClick={handleHelp}
-								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								disabled={!isOnline}
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 									<QuestionMarkCircleIcon className="size-4.5" />

@@ -229,6 +229,27 @@ describe('Permisos implícitos', () => {
       expect(plantilla.canActivate(buildContext(teacher))).toBe(false);
     });
 
+    it('el coordinador consulta next-to-create aunque solo tenga lookup:periods', () => {
+      const coordinator = expandImpliedPermissions([
+        'manage:dashboard-coordinator',
+      ]);
+
+      expect(coordinator).toContain('lookup:periods');
+
+      const nextToCreate = buildGuard({
+        permission: { action: 'read', subject: 'periods' },
+        isLookupSource: true,
+      });
+      const periodosComoModulo = buildGuard({
+        permission: { action: 'read', subject: 'periods' },
+      });
+
+      expect(nextToCreate.canActivate(buildContext(coordinator))).toBe(true);
+      expect(periodosComoModulo.canActivate(buildContext(coordinator))).toBe(
+        false,
+      );
+    });
+
     it('el coordinador consulta y edita clases, pero solo la autoridad las crea', () => {
       const coordinator = expandImpliedPermissions([
         'manage:dashboard-coordinator',

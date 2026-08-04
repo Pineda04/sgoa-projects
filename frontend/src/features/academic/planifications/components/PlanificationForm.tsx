@@ -9,6 +9,7 @@ import {
 	useGetCoursesCenterDepartmentBySearchTerm,
 } from '@api/courses';
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
+import { useGetAcademicPeriodNextToCreate } from '@api/periods';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
 import {
@@ -71,6 +72,8 @@ export const PlanificationForm = ({
 	>(null);
 
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
+
+	const { data: nextPeriod } = useGetAcademicPeriodNextToCreate();
 
 	const useCoursesSearch = (st: string) =>
 		useGetCoursesCenterDepartmentBySearchTerm(centerDepartmentId, st);
@@ -586,6 +589,7 @@ export const PlanificationForm = ({
 					onClose={closeAvail}
 					classroomId={selectedClassroomId}
 					classroomName={formik.values.classroomName}
+					defaultPeriodId={nextPeriod?.id}
 				/>
 			)}
 
