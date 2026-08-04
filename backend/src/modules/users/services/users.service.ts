@@ -12,7 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { TUser } from '../types';
 import { RolesService } from './roles.service';
 import * as argon from 'argon2';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import {
   generatePassword,
   hourToDateUTC,
@@ -49,35 +49,28 @@ export class UsersService {
     private readonly mailService: MailService,
     @Inject(forwardRef(() => PositionsService))
     private readonly positionsService: PositionsService,
-  ) { }
+  ) {}
 
   async createUserWithDeptAndPosition(
     createUserDto: CreateUserDto,
     currentUser: TJwtPayload,
   ) {
-    const { sub: userId, roles } = currentUser;
+    const { roles } = currentUser;
 
-    const {
-      categoryId,
-      contractTypeId,
-      shiftId,
-      undergradId,
-      centerDepartmentId,
-    } = createUserDto;
-    let { positionId } = createUserDto;
+    const teacherRoleNames: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
 
-    // Check if teacher data will be created (based on the same logic as in create method)
-    const willCreateTeacherData =
-      (!!categoryId && !!contractTypeId && !!shiftId && !!undergradId) ||
-      createUserDto.roles.some((role) =>
-        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(role),
-      );
-
-    // If no teacher data will be created, skip validation and create user normally
-    if (!willCreateTeacherData) return await this.create(createUserDto);
+    // Verifica si el usuario no tiene ninguno de los roles DOCENTE o COORDINADOR_AREA, y en ese caso crea el usuario.
+    if (
+      createUserDto.roles.length !== 0 &&
+      !createUserDto.roles.some((role) => teacherRoleNames.includes(role))
+    )
+      return await this.create(createUserDto);
 
     // Ya existe el decorador... validacion extra
-    if (roles.length === 1 && roles.includes(EUserRole.DOCENTE))
+    if (roles.length === 1 && roles.includes(ROLE_NAMES.DOCENTE))
       throw new ForbiddenException(
         'Los docentes no pueden asignar un departamento.',
       );
@@ -97,7 +90,7 @@ export class UsersService {
     //   createUserDto.centerId = currentUserDepartment.centerDepartment.centerId;
     // }
 
-    if (!centerDepartmentId)
+    if (!createUserDto.centerDepartmentId)
       throw new BadRequestException(
         `Debe ingresar el departamento al que pertenerá el docente.`,
       );
@@ -107,19 +100,18 @@ export class UsersService {
       EPosition.NONE,
     );
 
-    if (roles.includes(EUserRole.DOCENTE) && positionId)
+    if (roles.includes(ROLE_NAMES.DOCENTE) && createUserDto.positionId)
       throw new ForbiddenException('Los docentes no pueden asignar un cargo.');
 
     if (
-      roles.includes(EUserRole.COORDINADOR_AREA) &&
-      !roles.includes(EUserRole.ADMIN) &&
-      positionId !== postionNone.id
+      roles.includes(ROLE_NAMES.COORDINADOR_AREA) &&
+      !currentUser.isSuperAdmin &&
+      createUserDto.positionId !== postionNone.id
     ) {
-      positionId = postionNone.id;
       createUserDto.positionId = postionNone.id;
     }
 
-    if (!positionId)
+    if (!createUserDto.positionId)
       throw new BadRequestException(
         `Debe ingresar el cargo académico <positionId> que tendrá el docente en el departamento.`,
       );
@@ -128,12 +120,12 @@ export class UsersService {
       EPosition.DEPARTMENT_HEAD,
     );
 
-    if (positionId === coordinatorPosition.id) {
+    if (createUserDto.positionId === coordinatorPosition.id) {
       const existingCoordinator =
         await this.prisma.teacherDepartmentPosition.findFirst({
           where: {
-            positionId: positionId,
-            centerDepartmentId: centerDepartmentId,
+            positionId: createUserDto.positionId,
+            centerDepartmentId: createUserDto.centerDepartmentId,
             endDate: null,
           },
           select: { id: true, centerDepartmentId: true },
@@ -148,11 +140,46 @@ export class UsersService {
     return await this.create(createUserDto);
   }
 
+  normalizeRolesForCreate(
+    roleNames: string[],
+    currentUser: TJwtPayload,
+  ): string[] {
+    if (currentUser.isSuperAdmin) return roleNames;
+
+    return [ROLE_NAMES.DOCENTE];
+  }
+
+  // Solo el super admin puede modificar los roles de un usuario existente.
+  // El formulario de edición reenvía <roles> aunque el usuario no lo haya
+  // tocado (es un campo más de formik), así que solo se bloquea si el
+  // conjunto de roles enviado realmente difiere del actual.
+  async assertCanChangeRoles(
+    id: string,
+    roleNames: string[] | undefined,
+    currentUser: TJwtPayload,
+  ) {
+    if (roleNames === undefined) return;
+    if (currentUser.isSuperAdmin) return;
+
+    const targetUser = await this.findOne(id);
+    const currentRoleNames = targetUser.userRoles.map((ur) => ur.role.name);
+
+    const isSameRoles =
+      roleNames.length === currentRoleNames.length &&
+      roleNames.every((name) => currentRoleNames.includes(name));
+
+    if (isSameRoles) return;
+
+    throw new ForbiddenException(
+      'Solo un super administrador puede modificar los roles de un usuario.',
+    );
+  }
+
   async create(createUserDto: CreateUserDto) {
     // Rol DOCENTE por defecto, no se coloca en el dto, ya que al actualizarlo...
     // ...toma el que este por defecto
     if (createUserDto.roles.length === 0)
-      createUserDto.roles.push(EUserRole.DOCENTE);
+      createUserDto.roles.push(ROLE_NAMES.DOCENTE);
 
     let isTempPass = false;
 
@@ -210,57 +237,58 @@ export class UsersService {
       },
     };
 
-    const hasTeacherRole =
-      (!!categoryId && !!contractTypeId && !!shiftId && !!undergradId) ||
-      roleEntities.some((role) =>
-        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(
-          role.name as EUserRole,
-        ),
-      );
+    const teacherRoleNamesForCreate: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
+
+    const hasTeacherRole = roleEntities.some((role) =>
+      teacherRoleNamesForCreate.includes(role.name),
+    );
 
     // Crear aca toda la relacion, por si ocurre un problema...
     // ...al momento de crear el perfil de teacher, no sea en teachersService.
     const data = hasTeacherRole
       ? {
-        ...baseData,
-        teacher: {
-          create: {
-            category: { connect: { id: categoryId } },
-            contractType: { connect: { id: contractTypeId } },
-            shift: { connect: { id: shiftId } },
-            undergradDegrees: {
-              create: [
-                {
-                  undergraduate: { connect: { id: undergradId } },
-                },
-              ],
+          ...baseData,
+          teacher: {
+            create: {
+              category: { connect: { id: categoryId } },
+              contractType: { connect: { id: contractTypeId } },
+              shift: { connect: { id: shiftId } },
+              undergradDegrees: {
+                create: [
+                  {
+                    undergraduate: { connect: { id: undergradId } },
+                  },
+                ],
+              },
+              ...(postgradId
+                ? {
+                    postgraduateDegrees: {
+                      create: [
+                        {
+                          postgraduate: { connect: { id: postgradId } },
+                        },
+                      ],
+                    },
+                  }
+                : {}),
+              ...(positionId && centerDepartmentId
+                ? {
+                    positionHeld: {
+                      create: [
+                        {
+                          positionId,
+                          centerDepartmentId,
+                        },
+                      ],
+                    },
+                  }
+                : {}),
             },
-            ...(postgradId
-              ? {
-                postgraduateDegrees: {
-                  create: [
-                    {
-                      postgraduate: { connect: { id: postgradId } },
-                    },
-                  ],
-                },
-              }
-              : {}),
-            ...(positionId && centerDepartmentId
-              ? {
-                positionHeld: {
-                  create: [
-                    {
-                      positionId,
-                      centerDepartmentId,
-                    },
-                  ],
-                },
-              }
-              : {}),
           },
-        },
-      }
+        }
       : baseData;
 
     const newUser = await this.prisma.user.create({
@@ -431,14 +459,14 @@ export class UsersService {
       positionHeld:
         teacher.positionId && teacher.centerDepartmentId
           ? {
-            deleteMany: {},
-            create: [
-              {
-                positionId: teacher.positionId,
-                centerDepartmentId: teacher.centerDepartmentId,
-              },
-            ],
-          }
+              deleteMany: {},
+              create: [
+                {
+                  positionId: teacher.positionId,
+                  centerDepartmentId: teacher.centerDepartmentId,
+                },
+              ],
+            }
           : undefined,
     };
 

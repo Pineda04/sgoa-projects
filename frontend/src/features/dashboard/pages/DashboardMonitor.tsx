@@ -1,25 +1,50 @@
-import { useTabWithReset } from '@shared/hooks';
+import {
+	useTabWithReset,
+	useSyncEngine,
+	useIsOnline,
+	useCachedAcademicPeriod,
+} from '@shared/hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
-import { useUser } from '@config/providers';
+import { useAuth, useUser } from '@config/providers';
 import { useGetCurrentAcademicPeriod } from '@api/periods';
-import { MonitorChecklist, MonitorReports } from '../components';
+import { MonitorChecklist, MonitorReports, SyncIndicator } from '../components';
 import { ListClassrooms } from '@features/infrastructure';
 
 export const DashboardMonitor = () => {
 	const validTabs = ['0', '1', '2'];
 	const { currentTab, setTab } = useTabWithReset(validTabs);
-	const academicPeriodInfo = useGetCurrentAcademicPeriod();
+	const isOnline = useIsOnline();
 	const currentUser = useUser();
+	// Feature: email de la sesión (JWT) como clave de la caché Dexie; está disponible
+	// incluso offline, a diferencia de useUser() que hace una petición HTTP.
+	const sessionEmail = useAuth().authState.user?.email;
+	const academicPeriodInfo = useGetCurrentAcademicPeriod({
+		enabled: isOnline,
+		email: sessionEmail,
+	});
+	// Feature: leer el período vigente desde Dexie cuando no hay red. Fallback encadenado:
+	// conserva el título ya cargado mientras la fuente nueva aún se está resolviendo.
+	const cachedAcademicPeriod = useCachedAcademicPeriod(sessionEmail);
+	const periodTitle =
+		academicPeriodInfo.data?.title ?? cachedAcademicPeriod?.title;
+	const { status, pendingCount, forceSync } = useSyncEngine(sessionEmail);
 
 	return (
 		<div className="pb-8 sm:pb-12">
-			<div className="mb-6">
-				<h2 className="text-2xl font-semibold mb-2">
-					UNAH PAC {academicPeriodInfo.data?.title ?? '...'}
-				</h2>
-				<p className="text-sm">{currentUser.user?.name}</p>
-				<p className="text-sm">{currentUser.user?.code}</p>
-				<p className="text-sm">{currentUser.user?.email || ''}</p>
+			<div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<h2 className="text-2xl font-semibold mb-2">
+						UNAH PAC{' '}{periodTitle ?? '...'}
+					</h2>
+					<p className="text-sm">{currentUser.user?.name}</p>
+					<p className="text-sm">{currentUser.user?.code}</p>
+					<p className="text-sm">{sessionEmail}</p>
+				</div>
+				<SyncIndicator
+					status={status}
+					pendingCount={pendingCount}
+					onRetry={forceSync}
+				/>
 			</div>
 
 			<Tabs

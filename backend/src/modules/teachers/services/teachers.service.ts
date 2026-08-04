@@ -18,8 +18,6 @@ import {
   paginate,
   paginateOutput,
 } from 'src/common/utils';
-import { TPosition } from 'src/modules/teachers-config/types';
-import { TCenter, TDepartmentJoin } from 'src/modules/centers/types';
 import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
@@ -40,8 +38,10 @@ export class TeachersService {
           email: true,
           activeStatus: true,
           userRoles: {
-            include: {
-              role: true,
+            select: {
+              role: {
+                select: { id: true, name: true, isSuperAdmin: true },
+              },
             },
           },
         },
@@ -82,7 +82,7 @@ export class TeachersService {
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     // private readonly teachersUndergradService: TeachersUndergradService,
-  ) { }
+  ) {}
 
   // para crear un perfil de docente para un usuario ya creado, siempre y cuando el rol, sea: DOCENTE, COORDINADOR_CARRERA
   async create(createTeacherDto: CreateTeacherDto) {
@@ -109,9 +109,9 @@ export class TeachersService {
         shiftId,
         ...(shiftStart && shiftEnd
           ? {
-            shiftStart: hourToDateUTC(shiftStart),
-            shiftEnd: hourToDateUTC(shiftEnd),
-          }
+              shiftStart: hourToDateUTC(shiftStart),
+              shiftEnd: hourToDateUTC(shiftEnd),
+            }
           : {}),
         undergradDegrees: {
           create: [
@@ -122,30 +122,30 @@ export class TeachersService {
         },
         ...(postgradId
           ? {
-            undergradDegrees: {
-              create: [
-                {
-                  undergraduate: { connect: { id: undergradId } },
-                },
-              ],
-            },
-          }
+              undergradDegrees: {
+                create: [
+                  {
+                    undergraduate: { connect: { id: undergradId } },
+                  },
+                ],
+              },
+            }
           : {}),
         ...(positionId && centerDepartmentId
           ? {
-            positionHeld: {
-              create: [
-                {
-                  position: { connect: { id: positionId } },
-                  centerDepartment: {
-                    connect: {
-                      id: centerDepartmentId,
+              positionHeld: {
+                create: [
+                  {
+                    position: { connect: { id: positionId } },
+                    centerDepartment: {
+                      connect: {
+                        id: centerDepartmentId,
+                      },
                     },
                   },
-                },
-              ],
-            },
-          }
+                ],
+              },
+            }
           : {}),
       },
     });
@@ -476,6 +476,7 @@ export class TeachersService {
         id: u.postgraduate.id,
         name: u.postgraduate.name,
       })),
+      roles: teacher.user.userRoles.map((ur) => ur.role),
       positions: teacher.positionHeld.map((ph) => ({
         // ...ph,
         centerDepartmentId: ph.centerDepartment.id,
@@ -483,7 +484,6 @@ export class TeachersService {
         department: ph.centerDepartment.department,
         position: ph.position,
       })),
-      roles: (teacher.user as any).userRoles?.map((ur: any) => ur.role.name) ?? [],
       activeStatus: teacher.user.activeStatus,
     };
   }

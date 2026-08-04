@@ -23,42 +23,6 @@ export type TTeacher = {
   shiftEnd?: Date | null;
 };
 
-export type TOutputTeacher = {
-  id: string;
-  name: string;
-  email?: string;
-  code: string;
-  shiftStart?: string;
-  shiftEnd?: string;
-  shiftId: string;
-  categoryId: string;
-  contractTypeId: string;
-  userId: string;
-  categoryName: string;
-  contractTypeName: string;
-  shiftName: string;
-  undergrads: { id: string; name: string }[];
-  postgrads: { id: string; name: string }[];
-  positions?: {
-    centerDepartmentId: string;
-    center: TCenter;
-    department: TDepartmentJoin;
-    position: TPosition;
-  }[];
-  roles?: string[];
-  activeStatus: boolean;
-};
-
-export type TOutputTeacherCustom = {
-  id: string;
-  name: string;
-  code: string;
-  categoryId: string;
-  contractTypeId: string;
-  shiftId: string;
-  userId: string;
-  activeStatus: boolean;
-};
 export type TTeacherJoin = TCustomOmit<
   TTeacher,
   'undergradId' | 'postgradId'
@@ -68,6 +32,9 @@ export type TTeacherJoin = TCustomOmit<
   contractType: TContractType;
   user: TCustomPick<TUser, 'id' | 'code' | 'name' | 'activeStatus'> & {
     email?: string;
+    userRoles: {
+      role: { id: string; name: string; isSuperAdmin: boolean };
+    }[];
   };
   undergradDegrees: {
     teacherId: string;
@@ -87,6 +54,4 @@ export type TTeacherJoin = TCustomOmit<
       center: TCenter;
     };
   }[];
-
-
 };

@@ -12,6 +12,7 @@ import {
 	XMarkIcon,
 	QuestionMarkCircleIcon,
 	Square2StackIcon,
+	ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
 import { useModal } from '@shared/hooks';
@@ -75,6 +76,11 @@ export const UserMenu = () => {
 	const handleHelp = () => {
 		setIsOpen(false);
 		navigate('/help', { replace: true });
+	};
+
+	const handleRoles = () => {
+		setIsOpen(false);
+		navigate('/admin/roles', { replace: true });
 	};
 
 	const getInitials = (name?: string) => {
@@ -205,6 +211,26 @@ export const UserMenu = () => {
 									</div>
 								</button>
 							</Can>
+
+							{/* Roles y Permisos */}
+							{user?.isSuperAdmin && (
+								<button
+									onClick={handleRoles}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								>
+									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+										<ShieldCheckIcon className="size-4.5" />
+									</div>
+									<div>
+										<p className="text-sm font-medium">
+											Roles y Permisos
+										</p>
+										<p className="text-xs text-gray-400 mt-0.5">
+											Administra los roles del sistema
+										</p>
+									</div>
+								</button>
+							)}
 
 							{/* Ayuda */}
 							<button

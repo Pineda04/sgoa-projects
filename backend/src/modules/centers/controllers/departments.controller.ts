@@ -12,26 +12,22 @@ import {
 import { CreateDepartmentDto } from '../dto/create-department.dto';
 import { UpdateDepartmentDto } from '../dto/update-department.dto';
 import { DepartmentsService } from '../services/departments.service';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
-import { ApiCommonResponses, ResponseMessage } from 'src/common/decorators';
+import {
+  ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 
 @Controller('departments')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.MONITOR,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-)
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
+  @RequirePermission('create', 'departments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un departamento.')
   @ApiBody({
@@ -49,14 +45,8 @@ export class DepartmentsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.ADMIN,
-    EUserRole.DOCENTE,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'departments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de departamentos.')
   @ApiCommonResponses({
@@ -68,7 +58,7 @@ export class DepartmentsController {
   }
 
   @Get(':id')
-  @Roles(EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE, EUserRole.RRHH)
+  @RequirePermission('read', 'departments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del departamento.')
   @ApiParam({
@@ -87,6 +77,7 @@ export class DepartmentsController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'departments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el departamento.')
   @ApiParam({
@@ -110,6 +101,7 @@ export class DepartmentsController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'departments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el departamento.')
   @ApiParam({

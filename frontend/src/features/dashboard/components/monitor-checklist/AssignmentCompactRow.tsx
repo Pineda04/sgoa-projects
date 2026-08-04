@@ -8,6 +8,7 @@ export const AssignmentCompactRow = ({
 	disabled,
 	onConfirm,
 	onOpenModal,
+	onEditCheck,
 }: TAssignmentViewProps) => {
 	const isPending = item.status === 'PENDING';
 
@@ -45,7 +46,9 @@ export const AssignmentCompactRow = ({
 				item.check && (
 					<CheckResult
 						check={item.check}
-						className="pl-15 sm:w-72 sm:shrink-0 sm:pl-0 sm:text-right"
+						onEdit={item.canEditCheck ? onEditCheck : undefined}
+						disabled={disabled}
+						className="pl-15 sm:w-72 sm:shrink-0 sm:justify-end sm:pl-0 sm:text-right"
 					/>
 				)
 			)}

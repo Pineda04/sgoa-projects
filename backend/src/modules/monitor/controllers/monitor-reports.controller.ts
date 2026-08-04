@@ -2,18 +2,17 @@ import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import {
   ApiCommonResponses,
   ResponseMessage,
-  Roles,
+  RequirePermission,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ReportFiltersDto } from '../dto';
 import { MonitorReportsService } from '../services/monitor-reports.service';
 
 @Controller('monitor/checks')
-@Roles(EUserRole.MONITOR, EUserRole.ADMIN)
 export class MonitorReportsController {
   constructor(private readonly monitorReportsService: MonitorReportsService) {}
 
   @Get('report')
+  @RequirePermission('read', 'reports-monitor')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Reporte consolidado de cumplimiento de horarios.')
   @ApiCommonResponses({

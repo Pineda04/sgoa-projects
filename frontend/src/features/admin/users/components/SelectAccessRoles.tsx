@@ -1,9 +1,10 @@
 import Select, { StylesConfig } from 'react-select';
 import { useState } from 'react';
-import { EUserRole } from '@shared/constants';
+import { useAuth } from '@config/providers';
 import { ICreateUserProps } from '@api/users';
 import { useGetAllPositions } from '@api/positions';
 import { useGetAllCenters, useGetCenterById } from '@api/centers';
+import { useGetAllRoles } from '@api/roles';
 import { Error, Loading } from '@shared/components';
 import { setOptions } from '@shared/utils';
 import { TAcademicCommonProps } from '@api/periods';
@@ -72,17 +73,6 @@ const customStyles: StylesConfig = {
 	}),
 };
 
-const rolesAvailables = [
-	EUserRole.DIRECCION,
-	EUserRole.RRHH,
-	EUserRole.COORDINADOR_AREA,
-	EUserRole.DOCENTE,
-	EUserRole.MONITOR,
-].map(r => ({
-	value: r,
-	label: r,
-}));
-
 export const SelectAccessRoles = ({
 	touched,
 	values,
@@ -90,11 +80,17 @@ export const SelectAccessRoles = ({
 	errors,
 	handleBlur,
 }: ICreateUserProps) => {
+	const { authState } = useAuth();
 	const positions = useGetAllPositions();
 	const centers = useGetAllCenters();
+	const roles = useGetAllRoles();
 	const [centerId, setCenterId] = useState<string>('');
 	const centerInfo = useGetCenterById(centerId);
 	const isLoading = [positions, centers, centerInfo].some(q => q.isLoading);
+
+	const rolesAvailables = (roles.data ?? [])
+		.filter(role => !role.isSuperAdmin || authState.user?.isSuperAdmin)
+		.map(role => ({ value: role.name, label: role.name }));
 
 	return (
 		<>

@@ -30,7 +30,7 @@ import { useGetAllContractTypes } from '@api/contract-types';
 import { useGetAllShifts } from '@api/shifts';
 import { useGetAllPositions } from '@api/positions';
 import { useGetAllCenters, useGetCenterById } from '@api/centers';
-import { EUserRole } from '@shared/constants';
+import { useGetAllRoles } from '@api/roles';
 import { useMemo, useState } from 'react';
 import { userUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
@@ -51,6 +51,13 @@ const customStyles: StylesConfig<
 	option: base => ({
 		...base,
 		cursor: 'pointer',
+	}),
+	// El menú se porta a document.body para que no lo recorten los
+	// contenedores con overflow/alturas fijas del modal (ModalBase, la
+	// grilla de campos, etc.).
+	menuPortal: base => ({
+		...base,
+		zIndex: 9999,
 	}),
 };
 
@@ -153,6 +160,8 @@ const genElement = (field: Omit<TFieldConfig, 'label'> & {}) => {
 					isDisabled={readOnly}
 					onBlur={handleBlur}
 					styles={customStyles}
+					menuPortalTarget={document.body}
+					menuPosition="fixed"
 				/>
 			);
 		}
@@ -219,7 +228,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		isPending: isPendingDeleteTeacherPostgrad,
 	} = useManageTeacherDegrees(initialData.userId, 'postgrad', 'delete');
 
-	const canManageRoles = ability.can('manage', 'user-roles');
 	const canManageDepartments = ability.can('manage', 'user-departments');
 
 	const undergrads = useGetAllUndergrads();
@@ -229,6 +237,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 	const shifts = useGetAllShifts();
 	const positions = useGetAllPositions();
 	const centers = useGetAllCenters();
+	const roles = useGetAllRoles();
 	const [selectedCenterId, setSelectedCenterId] = useState<string>(
 		initialData.positions?.[0]?.center?.id || ''
 	);
@@ -242,7 +251,14 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		shifts,
 		positions,
 		centers,
+		roles,
 	].some(q => q.isLoading);
+
+	// Solo el super admin puede modificar los roles de un usuario existente.
+	const canUpdateRoles = !!user?.isSuperAdmin;
+	const assignableRoles = (roles.data ?? []).filter(
+		role => !role.isSuperAdmin || user?.isSuperAdmin
+	);
 
 	const [isEdit, setIsEdit] = useState(false);
 
@@ -257,8 +273,8 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				shiftId: initialData.shiftId,
 				shiftStart: initialData.shiftStart,
 				shiftEnd: initialData.shiftEnd,
-				roles: initialData.roles || [],
-				positionId: initialData.positions?.[0]?.position?.position || '',
+				roles: initialData.roles.map(r => r.name),
+				positionId: initialData.positions?.[0]?.position?.id || '',
 				centerId: initialData.positions?.[0]?.center?.id || '',
 				centerDepartmentId: initialData.positions?.[0]?.centerDepartmentId || '',
 			}) as TUpdateUser,
@@ -312,6 +328,29 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				handleBlur: formik.handleBlur,
 				handleChange: formik.handleChange,
 				readOnly: !isEdit,
+			},
+			{
+				label: 'Roles de acceso',
+				name: 'roles',
+				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+				defaultValue: (formik.values.roles ?? []).map(name => ({
+					label: name,
+					value: name,
+				})),
+				options: assignableRoles.map(role => ({
+					label: role.name,
+					value: role.name,
+				})),
+				isMulti: true,
+				handleBlur: formik.handleBlur,
+				handleChange: newValue => {
+					const selected = newValue as MultiValue<TCustomSelectOption>;
+					formik.setFieldValue(
+						'roles',
+						selected.map(option => option.value)
+					);
+				},
+				readOnly: !isEdit || !canUpdateRoles,
 			},
 			{
 				label: 'Categoría',
@@ -504,7 +543,8 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 					</div>
 				),
 			},
-			...(canManageRoles
+			// Campos que requieren permiso de departamentos
+			...(canManageDepartments
 				? [
 					{
 						label: 'Cargo académico',
@@ -531,36 +571,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						readOnly: !isEdit,
 					},
 					{
-						label: 'Roles de acceso',
-						name: 'roles' as const,
-						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
-						defaultValue: (formik.values.roles || []).map(r => ({
-							label: r,
-							value: r,
-						})),
-						options: [
-							EUserRole.DIRECCION,
-							EUserRole.RRHH,
-							EUserRole.COORDINADOR_AREA,
-							EUserRole.DOCENTE,
-							EUserRole.MONITOR,
-						].map(r => ({ label: r, value: r })),
-						isMulti: true,
-						handleBlur: formik.handleBlur,
-						handleChange: (newValue: unknown) => {
-							const rolesSelected =
-								(newValue as MultiValue<TCustomSelectOption>)?.map(v => v.value) || [];
-							formik.setFieldValue('roles', rolesSelected);
-						},
-						readOnly: !isEdit,
-					},
-				]
-				: []),
-
-			// 2. Campos que requieren permiso de departamentos
-			...(canManageDepartments
-				? [
-					{
 						label: 'Centro',
 						name: 'centerId' as const,
 						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
@@ -581,10 +591,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 							setSelectedCenterId(val);
 							formik.setValues(prev => ({
 								...prev,
-								CenterId: val,
+								centerId: val,
 								centerDepartmentId: '',
 							}));
-							formik.setFieldValue('centerDepartmentId', '');
 						},
 						readOnly: !isEdit,
 					},
@@ -628,7 +637,8 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 			positions.data,
 			centers.data,
 			centerInfo.data,
-			canManageRoles,
+			assignableRoles,
+			canUpdateRoles,
 			canManageDepartments,
 			formik,
 			isEdit,
@@ -730,7 +740,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				<hr className="h-px my-2 bg-gray-200 border-0" />
 			</div>
 			<div
-				className={`grid grid-cols-1 md:grid-cols-2 gap-4${isModal ? ' h-[50vh] overflow-auto' : ''}`}
+				className={`grid grid-cols-1 md:grid-cols-2 gap-4${isModal ? ' max-h-[50vh] overflow-auto pb-6' : ''}`}
 			>
 				{fields.map(field => {
 					const base = (content?: React.ReactNode) => (

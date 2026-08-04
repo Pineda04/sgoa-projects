@@ -22,6 +22,8 @@ import {
   positionsSeed,
   postgraduatesSeed,
   rolesSeed,
+  rolePermissionsSeed,
+  permissionsSeed,
   shiftsSeed,
   usersSeed,
 } from './data';
@@ -44,10 +46,28 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   const rolesData = handleData(rolesSeed);
 
+  // Idempotente: permite renombrar/promover roles existentes (ej. ADMIN -> SUPER_ADMIN)
+  // sin perder las FKs ya creadas en user_roles.
+  const roles = await Promise.all(
+    rolesSeed.map((role) =>
+      prisma.role.upsert({
+        where: { id: role.id },
+        update: {
+          name: role.name,
+          description: role.description,
+          isSuperAdmin: role.isSuperAdmin ?? false,
+        },
+        create: {
+          id: role.id,
+          name: role.name,
+          description: role.description,
+          isSuperAdmin: role.isSuperAdmin ?? false,
+        },
+      }),
+    ),
+  );
 
- 
   const [
-    roles,
     undergradDegrees,
     postgradDegrees,
     categories,
@@ -69,10 +89,6 @@ async function main() {
     activityTypes,
     multimediaTypes,
   ] = await Promise.all([
-    prisma.role.createMany({
-      data: rolesSeed,
-      skipDuplicates: true,
-    }),
     prisma.undergraduateDegree.createMany({
       data: careersSeed,
       skipDuplicates: true,
@@ -181,6 +197,34 @@ async function main() {
 
   console.log({ roles });
 
+  // Catálogo de permisos (Action x Subject)
+  await prisma.permission.createMany({
+    data: permissionsSeed,
+    skipDuplicates: true,
+  });
+
+  const allPermissions = await prisma.permission.findMany();
+  const permissionIdByKey = new Map(
+    allPermissions.map((p) => [`${p.action}:${p.subject}`, p.id]),
+  );
+
+  const rolePermissionsRows = Object.entries(rolePermissionsSeed).flatMap(
+    ([roleName, permissionKeys]) => {
+      const roleId = rolesData[roleName];
+      return permissionKeys
+        .map((key) => permissionIdByKey.get(key))
+        .filter((permissionId): permissionId is string => !!permissionId)
+        .map((permissionId) => ({ roleId, permissionId }));
+    },
+  );
+
+  const rolePermissions = await prisma.rolePermission.createMany({
+    data: rolePermissionsRows,
+    skipDuplicates: true,
+  });
+
+  console.log({ permissions: allPermissions.length, rolePermissions });
+
   // Users
   let createdUser = 0;
   for (const user of usersSeed(rolesData)) {
@@ -284,7 +328,6 @@ async function main() {
 
   // Tipos de multimedia
   console.log({ multimediaTypes });
-
 }
 
 main()

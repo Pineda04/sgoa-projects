@@ -17,11 +17,10 @@ import { UpdateTeacherDto } from '../dto/update-teacher.dto';
 import {
   ApiPagination,
   GetCurrentUserId,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { EUserRole } from 'src/common/enums';
 import { ExtractIdInterceptor } from 'src/common/interceptors';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { QueryPaginationDto } from 'src/common/dto';
@@ -37,12 +36,7 @@ export class TeachersController {
   ) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un perfil de docente.')
   @ApiBody({
@@ -77,13 +71,7 @@ export class TeachersController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de docentes.')
   @ApiPagination({
@@ -103,7 +91,6 @@ export class TeachersController {
   // no necesita el departmentId en la url, ya que el coordinador de área solo puede ver los docentes de su departamento
   // solo funcionara si el coordinador inicia sesión y tiene un departamento asignado
   @Get('coordinator/center-department/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de docentes con su centro-departamento y cargo en el center-department especificado para coordinadores de área.',
@@ -145,12 +132,7 @@ export class TeachersController {
   }
 
   @Get('teacher/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el docente por ID de usuario.')
   @ApiCommonResponses({
@@ -162,12 +144,7 @@ export class TeachersController {
   }
 
   @Get('search')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de docentes encontrado correctamente.')
   @ApiCommonResponses({
@@ -199,12 +176,7 @@ export class TeachersController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el docente.')
   @ApiCommonResponses({
@@ -233,12 +205,7 @@ export class TeachersController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('update', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Docente actualizado exitosamente.')
   @ApiBody({
@@ -258,12 +225,7 @@ export class TeachersController {
 
   // Cambiar el active status del usuario a false, para no eliminar el registro físicamente
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-  )
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Cambio de active status cambiado exitosamente.')
   @ApiCommonResponses({

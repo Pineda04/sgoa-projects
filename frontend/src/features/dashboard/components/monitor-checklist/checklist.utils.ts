@@ -115,6 +115,10 @@ export const getCurrentTimeString = (): string => {
 	return `${hours}:${minutes}`;
 };
 
+export const isCheckEdited = (
+	check: Pick<TMonitorAssignmentCheckStatus, 'createdAt' | 'updatedAt'>
+): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+
 export type TChecklistView = 'COMPACT' | 'DETAILED' | 'GRID';
 export type TStatusFilter = 'ALL' | 'PENDING' | 'VERIFIED';
 
@@ -128,6 +132,7 @@ export interface TChecklistItem {
 	assignment: TMonitorCurrentAssignment;
 	check: TMonitorAssignmentCheckStatus | null;
 	status: TAssignmentStatus;
+	canEditCheck: boolean;
 	buildingId: string;
 	buildingName: string;
 	classroomId: string;
@@ -151,6 +156,7 @@ export interface TAssignmentViewProps {
 	disabled: boolean;
 	onConfirm: (isPresent: boolean) => void;
 	onOpenModal: () => void;
+	onEditCheck: () => void;
 }
 
 export interface TChecklistScope {
@@ -175,13 +181,20 @@ const compareItems = (a: TChecklistItem, b: TChecklistItem): number => {
 
 export const buildChecklistItems = (
 	buildings: TMonitorBuildingAssignments[],
-	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>
+	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>,
+	currentUserId?: string
 ): TChecklistItem[] => {
 	const items = buildings.flatMap(building =>
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
+				// El check del servidor (assignment.check) es la fuente autoritativa: trae
+				// el id real y el monitorId verdadero. El override local (Dexie) solo se usa
+				// como respaldo mientras el registro no ha sido confirmado por el servidor
+				// (aún PENDING/SYNCING/ERROR), por lo que la edición (que requiere el id real
+				// vía PATCH) solo se habilita cuando existe check del servidor.
+				const serverCheck = assignment.check;
 				const check =
-					checkOverrides[assignment.courseClassroomId] ?? assignment.check;
+					serverCheck ?? checkOverrides[assignment.courseClassroomId] ?? null;
 				const startMinutes = parseStartMinutes(assignment.section);
 				const startTime =
 					startMinutes === null ? null : formatMinutes(startMinutes);
@@ -191,6 +204,8 @@ export const buildChecklistItems = (
 					assignment,
 					check,
 					status: getAssignmentStatus(check),
+					canEditCheck:
+						!!serverCheck && serverCheck.monitorId === currentUserId,
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,

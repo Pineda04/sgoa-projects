@@ -13,8 +13,7 @@ import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 import { TeachingSessionsService } from '../services/teaching-sessions.service';
 import { CreateTeachingSessionDto, UpdateTeachingSessionDto } from '../dto';
-import { ResponseMessage, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { RequirePermission, ResponseMessage } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 
 @Controller('teaching-sessions')
@@ -24,12 +23,7 @@ export class TeachingSessionsController {
   ) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'planifications')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una sesión de enseñanza.')
   @ApiBody({
@@ -49,13 +43,7 @@ export class TeachingSessionsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'planifications')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de sesiones de enseñanza.')
   @ApiCommonResponses({
@@ -70,13 +58,7 @@ export class TeachingSessionsController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'planifications')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Sesión de enseñanza obtenida correctamente.')
   @ApiCommonResponses({
@@ -92,13 +74,7 @@ export class TeachingSessionsController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('update', 'planifications')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la sesión de enseñanza.')
   @ApiBody({
@@ -121,12 +97,7 @@ export class TeachingSessionsController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'planifications')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la sesión de enseñanza.')
   @ApiCommonResponses({

@@ -214,6 +214,7 @@ sgoa-projects/
 - [Backend](./backend/README.md)
 - [Frontend](./frontend/README.md)
 - [Planificador IA](./planificador_ia/README.md)
+- [Modo Offline del Monitor](./docs/offline-mode.md)
 
 ## Variables de Entorno
 

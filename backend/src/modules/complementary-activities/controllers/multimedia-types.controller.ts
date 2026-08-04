@@ -11,11 +11,10 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiParam } from '@nestjs/swagger';
 import {
-  Roles,
+  RequirePermission,
   ResponseMessage,
   ApiCommonResponses,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { UpdateMultimediaTypeDto } from '../dto/update-multimedia-type.dto';
 import { MultimediaTypesService } from '../services/multimedia-types.service';
@@ -28,7 +27,7 @@ export class MultimediaTypesController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'activities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un tipo de multimedia.')
   @ApiBody({
@@ -45,7 +44,7 @@ export class MultimediaTypesController {
   }
 
   @Get()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de tipos de multimediaes.')
   @ApiCommonResponses({
@@ -57,13 +56,7 @@ export class MultimediaTypesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información del tipo de multimedia.')
   @ApiParam({
@@ -82,7 +75,7 @@ export class MultimediaTypesController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de multimedia.')
   @ApiParam({
@@ -106,7 +99,7 @@ export class MultimediaTypesController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado un tipo de multimedia.')
   @ApiParam({

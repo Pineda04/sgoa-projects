@@ -13,25 +13,19 @@ import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateBuildingDto, UpdateBuildingDto } from '../dto';
 import {
   ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { BuildingService } from '../services/building.service';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('buildings')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-)
 export class BuildingController {
   constructor(private readonly buildingService: BuildingService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'buildings')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un edificio.')
   @ApiBody({ type: CreateBuildingDto })
@@ -46,14 +40,8 @@ export class BuildingController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'buildings')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de edificios.')
   @ApiCommonResponses({
@@ -65,6 +53,7 @@ export class BuildingController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'buildings')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del edificio.')
   @ApiCommonResponses({
@@ -77,7 +66,7 @@ export class BuildingController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'buildings')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el edificio.')
   @ApiBody({ type: UpdateBuildingDto })
@@ -95,7 +84,7 @@ export class BuildingController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'buildings')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el edificio.')
   @ApiCommonResponses({

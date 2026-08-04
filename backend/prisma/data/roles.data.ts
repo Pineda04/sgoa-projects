@@ -1,8 +1,9 @@
 export const rolesSeed = [
   {
     id: '74b067dc-1130-45f0-a66b-d95709f96502',
-    name: 'ADMIN',
-    description: 'Acceso a todo.',
+    name: 'SUPER_ADMIN',
+    description: 'Acceso total y protegido. Único rol que gestiona roles y permisos.',
+    isSuperAdmin: true,
   },
   {
     id: '6705e39c-a5f1-46ab-97c0-d38eba358c73',

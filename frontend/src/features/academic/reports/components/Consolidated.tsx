@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@config';
-import { EUserRole } from '@shared/constants';
+import { ROLE_NAMES } from '@shared/constants';
 import { usePaginationParams, useDebounce } from '@shared/hooks';
 import {
 	useGetCurrentAcademicPeriod,
@@ -89,10 +89,10 @@ export const Consolidated = ({
 }: Props = {}) => {
 	const { authState } = useAuth();
 	const roles = authState.user?.roles ?? [];
-	const isAdminOrDireccion = roles.some(
-		r => r === EUserRole.ADMIN || r === EUserRole.DIRECCION
-	);
-	const isCoord = roles.includes(EUserRole.COORDINADOR_AREA);
+	// DIRECCION es el nombre de rol por convención; el super admin siempre cuenta como tal.
+	const isAdminOrDireccion =
+		!!authState.user?.isSuperAdmin || roles.includes('DIRECCION');
+	const isCoord = roles.includes(ROLE_NAMES.COORDINADOR_AREA);
 
 	const { page, size, setPage } = usePaginationParams();
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();

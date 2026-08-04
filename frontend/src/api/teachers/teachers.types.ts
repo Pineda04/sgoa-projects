@@ -1,4 +1,4 @@
-import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment, TDepartmentJoin } from "..";
+import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment } from "..";
 import { TPosition } from "../positions";
 
 export type TTeacherBasicInfo = {
@@ -40,13 +40,12 @@ export type TOutputTeacher = {
 		id: string;
 		name: string;
 	}[];
-	roles?: string[];
-	positions?: {
-		centerDepartmentId: string;
-		center: TCenter;
-		department: TDepartmentJoin;
-		position: TPosition;
+	roles: {
+		id: string;
+		name: string;
+		isSuperAdmin: boolean;
 	}[];
+	positions?: TPosition[];
 	activeStatus: boolean;
 };
 

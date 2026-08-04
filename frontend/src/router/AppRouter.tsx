@@ -7,7 +7,13 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } from '@features/admin';
+import {
+	departmentsRoutes,
+	degreesRoutes,
+	positionsRoutes,
+	facultiesRoutes,
+	rolesRoutes,
+} from '@features/admin';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
@@ -146,6 +152,12 @@ const router = createBrowserRouter(
 			path: 'admin/positions/*',
 			element: <ProtectedRoute action="read" subject="positions" />,
 			children: positionsRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
+			path: 'admin/roles/*',
+			element: <ProtectedRoute superAdminOnly />,
+			children: rolesRoutes,
 			errorElement: <div>404</div>,
 		},
 		{
