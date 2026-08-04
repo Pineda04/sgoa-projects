@@ -96,7 +96,7 @@ describe('UserController (e2e)', () => {
       findUnique: jest.fn().mockImplementation(({ where }) =>
         Promise.resolve({
           id: 'position-' + Date.now().toString(),
-          name: where?.name ?? 'Ninguno',
+          name: where?.name ?? 'Docente',
         }),
       ),
     },
