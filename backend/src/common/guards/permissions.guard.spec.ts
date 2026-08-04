@@ -258,21 +258,6 @@ describe('Permisos implícitos', () => {
       expect(editarAula.canActivate(buildContext(teacher))).toBe(false);
     });
 
-    it('la página Catálogo concede las entidades que administra', () => {
-      const catalog = expandImpliedPermissions(['manage:catalog']);
-
-      expect(catalog).toEqual(
-        expect.arrayContaining([
-          'manage:brands',
-          'manage:conditions',
-          'manage:room-types',
-          'manage:shifts',
-          'manage:contract-types',
-          'manage:teacher-categories',
-        ]),
-      );
-    });
-
     it('el formulario de aula alcanza sus catálogos sin abrirles el módulo', () => {
       const classroomManager = expandImpliedPermissions(['manage:classrooms']);
 

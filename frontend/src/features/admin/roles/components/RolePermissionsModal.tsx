@@ -65,7 +65,6 @@ const SUBJECTS_ORDER: Subjects[] = [
 	'audio-equipments',
 	'air-conditioners',
 	'digital-blackboards',
-	'catalog',
 	'teacher-categories',
 	'contract-types',
 	'shifts',

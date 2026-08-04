@@ -51,7 +51,6 @@ export type Subjects =
 	| 'digital-blackboards'
 	| 'schedule-compliance-check'
 	| 'reports-monitor'
-	| 'catalog'
 	| 'teacher-categories'
 	| 'contract-types'
 	| 'shifts'

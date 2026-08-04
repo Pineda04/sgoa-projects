@@ -10,6 +10,7 @@ import { UpdateRolePermissionsDto } from '../dto/update-role-permissions.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TPermissionsCatalog, TRole, TRoleWithPermissions } from '../types';
 import {
+  NON_ASSIGNABLE_SUBJECTS,
   PERMISSION_SUBJECTS,
   SUBJECT_IMPLIED_PERMISSIONS,
 } from 'src/common/constants';
@@ -111,8 +112,11 @@ export class RolesService {
     // El catálogo del código manda: la siembra usa skipDuplicates y no poda, así
     // que la tabla puede conservar filas de módulos que dejaron de ser
     // asignables (inicio, ayuda y perfil, hoy implícitos para todos).
+    const assignableSubjects = PERMISSION_SUBJECTS.filter(
+      (subject) => !NON_ASSIGNABLE_SUBJECTS.includes(subject),
+    );
     const permissions = await this.prisma.permission.findMany({
-      where: { subject: { in: [...PERMISSION_SUBJECTS] } },
+      where: { subject: { in: assignableSubjects } },
     });
 
     return {

@@ -81,6 +81,7 @@ export class ClassroomController {
 
   @Get('search')
   @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas encontrado correctamente.')
   @ApiCommonResponses({

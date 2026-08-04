@@ -122,22 +122,6 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
     'pc-equipments',
   ),
 
-  // La página Catálogo administra en un solo lugar todas las entidades chicas.
-  catalog: grant(
-    'manage',
-    'teacher-categories',
-    'contract-types',
-    'shifts',
-    'room-types',
-    'connectivities',
-    'conditions',
-    'brands',
-    'pc-types',
-    'audio-equipments',
-    'monitor-types',
-    'monitor-sizes',
-  ),
-
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Periodos, Consolidado.
   'dashboard-authorities': [
     ...grant('manage', 'planifications', 'reports', 'users', 'courses', 'periods'),
