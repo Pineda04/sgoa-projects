@@ -56,6 +56,7 @@ export const SUBJECT_LABELS: Record<Subjects, string> = {
 	'reports-monitor': 'Reportes de monitoreo',
 	// Usuarios
 	users: 'Usuarios',
+	'user-roles': 'Roles de usuario',
 	'user-departments': 'Departamentos de usuario',
 	'user-status': 'Estado de usuario',
 	// Vistas
