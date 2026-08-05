@@ -23,6 +23,7 @@ import {
 	ArrowUpTrayIcon,
 	TrashIcon,
 	PencilIcon,
+    PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowLeftIcon } from 'lucide-react';
 
@@ -212,19 +213,19 @@ export const CreatePlanification = () => {
 								<th className="py-2 px-4">#</th>
 								<th className="py-2 px-4">No. Empleado</th>
 								<th className="py-2 px-4">Nombre</th>
-								<th className="py-2 px-4">Código</th>
+								<th className="py-2 px-4">Codigo</th>
 								<th className="py-2 px-4">Asignatura</th>
 								<th className="py-2 px-4">Sección</th>
 								<th className="py-2 px-4">UV</th>
 								<th className="py-2 px-4">Días</th>
 								<th className="py-2 px-4">No. Alumnos</th>
-								<th className="py-2 px-4">N° de Aula</th>
-								<th className="py-2 px-4">Carrera/Área</th>
+								<th className="py-2 px-4">No. Aula</th>
+								<th className="py-2 px-4">Carrera</th>
 								<th className="py-2 px-4">Jefe/Coordinador</th>
-								<th className="py-2 px-4">Centro</th>
+								<th className="py-2 px-4">Centro/Telecentro</th>
 								<th className="py-2 px-4">Est. Por Egresar</th>
-								<th className="py-2 px-4">Observaciones</th>
-								<th className="py-2 px-4">Acciones</th>
+								<th className="py-2 px-4">Observación</th>
+								<th className="py-2 px-4 sticky right-0 bg-[#144C74]">Acciones</th>
 							</tr>
 						</thead>
 
@@ -287,26 +288,33 @@ export const CreatePlanification = () => {
 										<td className="py-2 px-2 border max-w-[50ch] whitespace-normal break-words text-left align-top">
 											{r.observation}
 										</td>
-										<td className="py-2 px-2 border">
+										<td
+											className={
+												'py-2 px-2 border sticky right-0 ' +
+												(i % 2 === 0
+													? 'bg-white'
+													: 'bg-gray-100')
+											}
+										>
 											<div className="flex gap-2 justify-center">
 												<Button
 													onClick={() => openEdit(i)}
-													className="p-1.5 bg-blue-500 text-white hover:bg-blue-600 transition duration-200"
+													className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-full transition-colors cursor-pointer"
 													title="Editar"
 													variant="unstyled"
 												>
-													<PencilIcon className="h-3.5 w-3.5" />
+													<PencilSquareIcon className="size-5" />
 												</Button>
 
 												<Button
 													onClick={() =>
 														handleDelete(i)
 													}
-													className="p-1.5 bg-red-500 text-white hover:bg-red-600 transition duration-200"
+													className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
 													title="Eliminar"
 													variant="unstyled"
 												>
-													<TrashIcon className="h-3.5 w-3.5" />
+													<TrashIcon className="size-5" />
 												</Button>
 											</div>
 										</td>
