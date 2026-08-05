@@ -12,8 +12,6 @@ export const DeleteDigitalBlackboardModal = ({
 	isOpen,
 	onClose,
 	onConfirm,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	description,
 	isPending = false,
 }: DeleteDigitalBlackboardModalProps) => {
 	return (

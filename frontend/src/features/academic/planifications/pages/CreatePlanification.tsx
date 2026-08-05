@@ -22,8 +22,7 @@ import {
 	DocumentCheckIcon,
 	ArrowUpTrayIcon,
 	TrashIcon,
-	PencilIcon,
-    PencilSquareIcon,
+	PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowLeftIcon } from 'lucide-react';
 
@@ -130,10 +129,9 @@ export const CreatePlanification = () => {
 			},
 			{
 				onSuccess: () => {
-					navigate(
-						`/dashboard/coordinator/${centerDepartmentId}`,
-						{ replace: true }
-					);
+					navigate(`/dashboard/coordinator/${centerDepartmentId}`, {
+						replace: true,
+					});
 				},
 				onError: (error: unknown) => {
 					const axiosError = error as AxiosError<{
@@ -174,14 +172,11 @@ export const CreatePlanification = () => {
 				</p>
 			</div>
 
-      <div className="mb-6 mt-6 flex justify-center gap-4">
-        <Button
-          onClick={() => navigate(-1)}
-          variant="outline"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          Volver
-        </Button>
+			<div className="mb-6 mt-6 flex justify-center gap-4">
+				<Button onClick={() => navigate(-1)} variant="outline">
+					<ArrowLeftIcon className="h-5 w-5" />
+					Volver
+				</Button>
 
 				<Button
 					onClick={openAdd}
@@ -225,7 +220,9 @@ export const CreatePlanification = () => {
 								<th className="py-2 px-4">Centro/Telecentro</th>
 								<th className="py-2 px-4">Est. Por Egresar</th>
 								<th className="py-2 px-4">Observación</th>
-								<th className="py-2 px-4 sticky right-0 bg-[#144C74]">Acciones</th>
+								<th className="py-2 px-4 sticky right-0 bg-[#144C74]">
+									Acciones
+								</th>
 							</tr>
 						</thead>
 
@@ -233,7 +230,7 @@ export const CreatePlanification = () => {
 							{rows.length === 0 ? (
 								<tr>
 									<td
-										colSpan={15}
+										colSpan={16}
 										className="py-6 text-gray-500"
 									>
 										Sin registros. Presiona "Agregar fila"
