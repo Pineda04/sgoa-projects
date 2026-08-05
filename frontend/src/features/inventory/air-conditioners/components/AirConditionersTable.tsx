@@ -93,7 +93,14 @@ export const AirConditionersTable = ({
 			key: 'description',
 			header: 'Descripción',
 			mobileLabel: 'Descripción',
-			render: row => row.description ?? '—',
+			render: row => (
+				<span
+					className="max-w-50 truncate text-center w-full inline-block"
+					title={row.description ?? undefined}
+				>
+					{row.description ?? '—'}
+				</span>
+			),
 		},
 		{
 			key: 'brand',
