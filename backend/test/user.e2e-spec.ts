@@ -47,6 +47,10 @@ describe('UserController (e2e)', () => {
   let app: INestApplication<App>;
 
   const TEST_CENTER_DEPARTMENT_ID = crypto.randomUUID();
+  const TEST_SHIFT_ID = crypto.randomUUID();
+  const TEST_CONTRACT_TYPE_ID = crypto.randomUUID();
+  const TEST_CATEGORY_ID = crypto.randomUUID();
+  const TEST_UNDERGRAD_ID = crypto.randomUUID();
 
   const mockUsers = [
     { id: '09d8245a-9257-4b57-b6e5-c68eb0412f16', name: 'TestMock' },
@@ -102,6 +106,18 @@ describe('UserController (e2e)', () => {
     },
     teacherDepartmentPosition: {
       findFirst: jest.fn(),
+    },
+    shift: {
+      findMany: jest.fn().mockResolvedValue([{ id: TEST_SHIFT_ID }]),
+    },
+    contractType: {
+      findMany: jest.fn().mockResolvedValue([{ id: TEST_CONTRACT_TYPE_ID }]),
+    },
+    teacherCategory: {
+      findMany: jest.fn().mockResolvedValue([{ id: TEST_CATEGORY_ID }]),
+    },
+    undergraduateDegree: {
+      findMany: jest.fn().mockResolvedValue([{ id: TEST_UNDERGRAD_ID }]),
     },
   };
 
@@ -172,6 +188,10 @@ describe('UserController (e2e)', () => {
       roles: [ROLE_NAMES.DOCENTE],
       dummyFieldForTeacher: 'test',
       centerDepartmentId: TEST_CENTER_DEPARTMENT_ID,
+      shiftId: TEST_SHIFT_ID,
+      contractTypeId: TEST_CONTRACT_TYPE_ID,
+      categoryId: TEST_CATEGORY_ID,
+      undergradId: TEST_UNDERGRAD_ID,
     };
 
     const response = await request(app.getHttpServer())
@@ -202,6 +222,11 @@ describe('UserController (e2e)', () => {
       passwordConfirm: 'TestPassword123',
       roles: [ROLE_NAMES.SUPER_ADMIN],
       dummyFieldForTeacher: 'test',
+      centerDepartmentId: TEST_CENTER_DEPARTMENT_ID,
+      shiftId: TEST_SHIFT_ID,
+      contractTypeId: TEST_CONTRACT_TYPE_ID,
+      categoryId: TEST_CATEGORY_ID,
+      undergradId: TEST_UNDERGRAD_ID,
     };
 
     const response = await request(app.getHttpServer())

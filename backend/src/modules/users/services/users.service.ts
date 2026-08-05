@@ -254,59 +254,49 @@ export class UsersService {
       },
     };
 
-    const teacherRoleNamesForCreate: string[] = [
-      ROLE_NAMES.DOCENTE,
-      ROLE_NAMES.COORDINADOR_AREA,
-    ];
-
-    const hasTeacherRole = roleEntities.some((role) =>
-      teacherRoleNamesForCreate.includes(role.name),
-    );
-
     // Crear aca toda la relacion, por si ocurre un problema...
     // ...al momento de crear el perfil de teacher, no sea en teachersService.
-    const data = hasTeacherRole
-      ? {
-          ...baseData,
-          teacher: {
-            create: {
-              category: { connect: { id: categoryId } },
-              contractType: { connect: { id: contractTypeId } },
-              shift: { connect: { id: shiftId } },
-              undergradDegrees: {
-                create: [
-                  {
-                    undergraduate: { connect: { id: undergradId } },
-                  },
-                ],
+    // Todo usuario creado registra siempre su perfil de docente, sin importar el rol.
+    const data = {
+      ...baseData,
+      teacher: {
+        create: {
+          category: { connect: { id: categoryId } },
+          contractType: { connect: { id: contractTypeId } },
+          shift: { connect: { id: shiftId } },
+          undergradDegrees: {
+            create: [
+              {
+                undergraduate: { connect: { id: undergradId } },
               },
-              ...(postgradId
-                ? {
-                    postgraduateDegrees: {
-                      create: [
-                        {
-                          postgraduate: { connect: { id: postgradId } },
-                        },
-                      ],
-                    },
-                  }
-                : {}),
-              ...(positionId && centerDepartmentId
-                ? {
-                    positionHeld: {
-                      create: [
-                        {
-                          positionId,
-                          centerDepartmentId,
-                        },
-                      ],
-                    },
-                  }
-                : {}),
-            },
+            ],
           },
-        }
-      : baseData;
+          ...(postgradId
+            ? {
+                postgraduateDegrees: {
+                  create: [
+                    {
+                      postgraduate: { connect: { id: postgradId } },
+                    },
+                  ],
+                },
+              }
+            : {}),
+          ...(positionId && centerDepartmentId
+            ? {
+                positionHeld: {
+                  create: [
+                    {
+                      positionId,
+                      centerDepartmentId,
+                    },
+                  ],
+                },
+              }
+            : {}),
+        },
+      },
+    };
 
     const newUser = await this.prisma.user.create({
       data: {
