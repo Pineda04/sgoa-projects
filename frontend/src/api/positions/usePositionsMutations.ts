@@ -4,6 +4,11 @@ import { alertSuccess } from '@shared/utils';
 import { TCreatePosition, TUpdatePosition } from '@features/admin';
 import { positionsApi, positionsKeys, TOutputPosition } from './';
 
+type TPositionsCache =
+    | TOutputPosition[]
+    | { data: TOutputPosition[] }
+    | undefined;
+
 export const useCreatePosition = () =>
     useMutation({
         mutationFn: (body: TCreatePosition) => positionsApi.createPosition(body),
@@ -13,7 +18,7 @@ export const useCreatePosition = () =>
         onSuccess: async res => {
             alertSuccess(res);
             const created: TOutputPosition | undefined = res?.data?.data;
-            const previous = queryClient.getQueryData<any>(positionsKeys.all);
+            const previous = queryClient.getQueryData<TPositionsCache>(positionsKeys.all);
 
             if (created) {
                 if (Array.isArray(previous)) {
@@ -59,7 +64,7 @@ export const useDeletePositionMutation = (positionId: string) => {
         // Optimistic update: remove item from cache immediately and rollback on error
         onMutate: async (id: string) => {
             await queryClient.cancelQueries({ queryKey: positionsKeys.all });
-            const previous = queryClient.getQueryData<any>(positionsKeys.all);
+            const previous = queryClient.getQueryData<TPositionsCache>(positionsKeys.all);
 
             // If cache is an array of positions
             if (Array.isArray(previous)) {
@@ -75,9 +80,9 @@ export const useDeletePositionMutation = (positionId: string) => {
                 });
             } // else: unknown shape, do nothing
 
-            return { previous } as { previous?: unknown };
+            return { previous } as { previous?: TPositionsCache };
         },
-        onError: (_err, _id, context: any) => {
+        onError: (_err, _id, context: { previous?: TPositionsCache }) => {
             if (context?.previous) {
                 queryClient.setQueryData(positionsKeys.all, context.previous);
             }
