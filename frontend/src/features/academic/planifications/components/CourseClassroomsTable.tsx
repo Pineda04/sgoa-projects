@@ -153,7 +153,7 @@ export const CourseClassroomsTable = ({
 	const columns: IResponsiveColumn<CourseClassroomData>[] = [
 		{
 			key: 'teacher.code',
-			header: 'No.Empleado',
+			header: 'No. Empleado',
 			mobileLabel: 'Cod.',
 			render: (row: CourseClassroomData) => row.teacher.code,
 		},
@@ -222,6 +222,14 @@ export const CourseClassroomsTable = ({
 			hiddenOnMobile: true,
 		},
 		{
+			key: 'nearGraduation',
+			header: 'Est. Por Egresar',
+			mobileLabel: 'Egresar',
+			hiddenOnMobile: true,
+			render: (row: CourseClassroomData) =>
+				row.nearGraduation ? 'Sí' : 'No',
+		},
+		{
 			key: 'observation',
 			header: 'Observación',
 			mobileLabel: 'Obs.',
@@ -276,7 +284,8 @@ export const CourseClassroomsTable = ({
 					columns={columns}
 					data={coursesInfo}
 					getRowKey={cc => cc.id}
-					className="w-full"
+          className="w-full"
+					showRowNumber
 				/>
 			</div>
 
