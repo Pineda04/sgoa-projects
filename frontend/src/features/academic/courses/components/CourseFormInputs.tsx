@@ -34,7 +34,9 @@ export const CourseFormInputs = ({
 					className="w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:text-muted-foreground"
 				/>
 				{formik.touched.code && formik.errors.code ? (
-					<p className="text-xs text-destructive">{formik.errors.code}</p>
+					<p className="text-xs text-destructive">
+						{formik.errors.code}
+					</p>
 				) : null}
 			</div>
 
@@ -58,7 +60,9 @@ export const CourseFormInputs = ({
 					className="w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:text-muted-foreground"
 				/>
 				{formik.touched.name && formik.errors.name ? (
-					<p className="text-xs text-destructive">{formik.errors.name}</p>
+					<p className="text-xs text-destructive">
+						{formik.errors.name}
+					</p>
 				) : null}
 			</div>
 
@@ -84,13 +88,17 @@ export const CourseFormInputs = ({
 					className="w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:text-muted-foreground"
 				/>
 				{formik.touched.uvs && formik.errors.uvs ? (
-					<p className="text-xs text-destructive">{formik.errors.uvs}</p>
+					<p className="text-xs text-destructive">
+						{formik.errors.uvs}
+					</p>
 				) : null}
 			</div>
 
 			{/* Estado */}
 			<div className="space-y-2">
-				<label className="text-sm font-medium text-foreground">Estado</label>
+				<label className="text-sm font-medium text-foreground">
+					Estado
+				</label>
 				<label className="flex items-center gap-3 cursor-pointer mt-2">
 					<div className="relative">
 						<input

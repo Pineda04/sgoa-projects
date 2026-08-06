@@ -90,7 +90,9 @@ export const ListCenters = () => {
 							<div className="flex items-center justify-center gap-3">
 								{canUpdate && (
 									<button
-										onClick={() => handleOpenEditModal(center)}
+										onClick={() =>
+											handleOpenEditModal(center)
+										}
 										className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
 										title="Editar centro"
 									>
@@ -114,25 +116,25 @@ export const ListCenters = () => {
 	];
 
 	return (
-	<div className="pb-8 sm:pb-12">
-      <div className="flex justify-between items-end mb-5">
-        <div>
-				<h1 className="text-2xl font-bold text-foreground">
-				Gestión de Centros
-				</h1>
-				<p className="text-muted-foreground mt-1">
-				Administración de centros operativos de la institución.
-				</p>
-			</div>
+		<div className="pb-8 sm:pb-12">
+			<div className="flex justify-between items-end mb-5">
+				<div>
+					<h1 className="text-2xl font-bold text-foreground">
+						Gestión de Centros
+					</h1>
+					<p className="text-muted-foreground mt-1">
+						Administración de centros operativos de la institución.
+					</p>
+				</div>
 				{canCreate && (
-				<Button
-					onClick={openCreateModal}
-					className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
-				>
-					<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
-					<span>Nuevo Centro</span>
-				</Button>
-			)}
+					<Button
+						onClick={openCreateModal}
+						className="w-fit justify-start bg-green-500 text-white p-2 hover:bg-green-600 transition flex flex-row duration-500"
+					>
+						<PlusIcon className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+						<span>Nuevo Centro</span>
+					</Button>
+				)}
 			</div>
 
 			<DataTable<TCenter>

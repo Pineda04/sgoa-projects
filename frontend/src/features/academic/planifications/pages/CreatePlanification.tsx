@@ -129,10 +129,9 @@ export const CreatePlanification = () => {
 			},
 			{
 				onSuccess: () => {
-					navigate(
-						`/dashboard/coordinator/${centerDepartmentId}`,
-						{ replace: true }
-					);
+					navigate(`/dashboard/coordinator/${centerDepartmentId}`, {
+						replace: true,
+					});
 				},
 				onError: (error: unknown) => {
 					const axiosError = error as AxiosError<{
@@ -173,14 +172,11 @@ export const CreatePlanification = () => {
 				</p>
 			</div>
 
-      <div className="mb-6 mt-6 flex justify-center gap-4">
-        <Button
-          onClick={() => navigate(-1)}
-          variant="outline"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          Volver
-        </Button>
+			<div className="mb-6 mt-6 flex justify-center gap-4">
+				<Button onClick={() => navigate(-1)} variant="outline">
+					<ArrowLeftIcon className="h-5 w-5" />
+					Volver
+				</Button>
 
 				<Button
 					onClick={openAdd}
@@ -267,7 +263,8 @@ export const CreatePlanification = () => {
 											{r.days}
 										</td>
 										<td className="py-2 px-2 border">
-											{r.studentCount ?? 'Sin información'}
+											{r.studentCount ??
+												'Sin información'}
 										</td>
 										<td className="py-2 px-2 border">
 											{r.classroomName}

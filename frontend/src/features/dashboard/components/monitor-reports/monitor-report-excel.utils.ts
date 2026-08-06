@@ -25,7 +25,9 @@ const downloadBlob = (blob: Blob, fileName: string) => {
 const RISKY_LEADING_CHARS = ['=', '+', '-', '@'];
 
 const sanitizeExcelCell = (value: string): string =>
-	RISKY_LEADING_CHARS.some(char => value.startsWith(char)) ? `'${value}` : value;
+	RISKY_LEADING_CHARS.some(char => value.startsWith(char))
+		? `'${value}`
+		: value;
 
 const sanitizeRowForExcel = (
 	row: TMonitorReportExportRow

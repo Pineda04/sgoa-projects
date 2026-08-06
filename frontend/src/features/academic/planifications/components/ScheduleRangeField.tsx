@@ -39,7 +39,9 @@ export const ScheduleRangeField = ({
 					id={startId}
 					value={startTime}
 					onChange={event =>
-						onChange(createScheduleRange(event.target.value, endTime))
+						onChange(
+							createScheduleRange(event.target.value, endTime)
+						)
 					}
 					onBlur={onBlur}
 					className={selectClassName}
@@ -63,7 +65,9 @@ export const ScheduleRangeField = ({
 					id={endId}
 					value={endTime}
 					onChange={event =>
-						onChange(createScheduleRange(startTime, event.target.value))
+						onChange(
+							createScheduleRange(startTime, event.target.value)
+						)
 					}
 					onBlur={onBlur}
 					className={selectClassName}

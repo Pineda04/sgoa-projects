@@ -1,1 +1,1 @@
-export * from './ListDepartments'
+export * from './ListDepartments';

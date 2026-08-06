@@ -14,8 +14,11 @@ import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 import { AcademicPeriodsService } from '../services/academic-periods.service';
 import { CreateAcademicPeriodDto, UpdateAcademicPeriodDto } from '../dto';
-import { LookupSource,
-  RequirePermission, ResponseMessage } from 'src/common/decorators';
+import {
+  LookupSource,
+  RequirePermission,
+  ResponseMessage,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { TPacModality } from '../types';
 

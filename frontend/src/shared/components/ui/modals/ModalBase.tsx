@@ -8,11 +8,16 @@ const portalRoot = document.getElementById('portal-root') ?? document.body;
 interface IModal {
 	isOpen: boolean;
 	onClose: () => void;
-  children: React.ReactNode;
+	children: React.ReactNode;
 	showCloseButton?: boolean;
 }
 
-export const ModalBase = ({ isOpen, onClose, children, showCloseButton = true }: IModal) => {
+export const ModalBase = ({
+	isOpen,
+	onClose,
+	children,
+	showCloseButton = true,
+}: IModal) => {
 	useEffect(() => {
 		if (isOpen) {
 			document.body.style.overflow = 'hidden';

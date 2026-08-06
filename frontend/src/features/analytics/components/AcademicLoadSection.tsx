@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { Info } from 'lucide-react';
 import { Popover } from 'radix-ui';
 import type { IDataTableColumn } from '@shared/components';
-import {
-	Button,
-	PaginationControls,
-	DataTable,
-} from '@shared/components';
+import { Button, PaginationControls, DataTable } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
 	analyticsApi,
@@ -95,9 +91,9 @@ const ScheduleDistribution = ({
 			? 'No aplica'
 			: distribution.dataStatus === 'complete'
 				? 'Sin incidencias'
-			: distribution.dataStatus === 'partial'
-				? 'Con exclusiones'
-				: 'No disponible';
+				: distribution.dataStatus === 'partial'
+					? 'Con exclusiones'
+					: 'No disponible';
 	const statusDescription =
 		distribution.coverage.total === 0
 			? 'No hay secciones con los filtros seleccionados, por eso el estado de horarios no aplica.'
@@ -109,14 +105,21 @@ const ScheduleDistribution = ({
 		.join(', ');
 
 	return (
-		<section className="mt-8 rounded-xl border border-card-border bg-card p-4 sm:p-5" aria-labelledby="schedule-distribution-title">
+		<section
+			className="mt-8 rounded-xl border border-card-border bg-card p-4 sm:p-5"
+			aria-labelledby="schedule-distribution-title"
+		>
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 				<div>
-					<h3 id="schedule-distribution-title" className="text-lg font-semibold text-card-foreground">
+					<h3
+						id="schedule-distribution-title"
+						className="text-lg font-semibold text-card-foreground"
+					>
 						Reuniones por día y rango horario
 					</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
-						Distribución reportada por el plan académico, sin completar ni inferir horarios.
+						Distribución reportada por el plan académico, sin
+						completar ni inferir horarios.
 					</p>
 				</div>
 				<p className="w-fit rounded-full bg-primary-light px-3 py-1.5 text-sm font-semibold text-primary">
@@ -130,15 +133,32 @@ const ScheduleDistribution = ({
 						Estado de horarios
 						<Popover.Root>
 							<Popover.Trigger asChild>
-								<button type="button" aria-label="Explicación del estado de horarios" className="flex size-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+								<button
+									type="button"
+									aria-label="Explicación del estado de horarios"
+									className="flex size-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+								>
 									<Info className="size-3" />
 								</button>
 							</Popover.Trigger>
 							<Popover.Portal>
-								<Popover.Content sideOffset={6} align="start" collisionPadding={12} className="z-50 w-72 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg outline-none">
-									<p className="text-sm font-semibold">{statusLabel}</p>
-									<p className="mt-1 text-xs leading-relaxed text-muted-foreground">{statusDescription}</p>
-									{exclusionReasons ? <p className="mt-2 text-xs font-medium">Motivo: {exclusionReasons}.</p> : null}
+								<Popover.Content
+									sideOffset={6}
+									align="start"
+									collisionPadding={12}
+									className="z-50 w-72 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg outline-none"
+								>
+									<p className="text-sm font-semibold">
+										{statusLabel}
+									</p>
+									<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+										{statusDescription}
+									</p>
+									{exclusionReasons ? (
+										<p className="mt-2 text-xs font-medium">
+											Motivo: {exclusionReasons}.
+										</p>
+									) : null}
 									<Popover.Arrow className="fill-card" />
 								</Popover.Content>
 							</Popover.Portal>
@@ -146,18 +166,51 @@ const ScheduleDistribution = ({
 					</dt>
 					<dd className="font-semibold">{statusLabel}</dd>
 				</div>
-				<div><dt className="text-xs text-muted-foreground">Secciones incluidas</dt><dd className="font-semibold">{distribution.coverage.included}</dd></div>
-				<div><dt className="text-xs text-muted-foreground">Secciones evaluadas</dt><dd className="font-semibold">{distribution.coverage.total}</dd></div>
-				<div><dt className="text-xs text-muted-foreground">Secciones excluidas</dt><dd className="font-semibold">{distribution.coverage.excluded}</dd></div>
+				<div>
+					<dt className="text-xs text-muted-foreground">
+						Secciones incluidas
+					</dt>
+					<dd className="font-semibold">
+						{distribution.coverage.included}
+					</dd>
+				</div>
+				<div>
+					<dt className="text-xs text-muted-foreground">
+						Secciones evaluadas
+					</dt>
+					<dd className="font-semibold">
+						{distribution.coverage.total}
+					</dd>
+				</div>
+				<div>
+					<dt className="text-xs text-muted-foreground">
+						Secciones excluidas
+					</dt>
+					<dd className="font-semibold">
+						{distribution.coverage.excluded}
+					</dd>
+				</div>
 			</dl>
 
 			{distribution.items.length > 0 ? (
-				<ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Distribución de reuniones">
+				<ul
+					className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+					aria-label="Distribución de reuniones"
+				>
 					{distribution.items.map(item => (
-						<li key={`${item.dayOfWeek}-${item.startTime}-${item.endTime}`} className="min-w-0 rounded-lg border border-border p-3">
-							<p className="font-semibold text-foreground">{DAY_LABELS[item.dayOfWeek]}</p>
-							<p className="text-sm text-muted-foreground">{item.startTime} a {item.endTime}</p>
-							<p className="mt-2 text-sm font-semibold text-primary">{meetingCountLabel(item.meetingCount)}</p>
+						<li
+							key={`${item.dayOfWeek}-${item.startTime}-${item.endTime}`}
+							className="min-w-0 rounded-lg border border-border p-3"
+						>
+							<p className="font-semibold text-foreground">
+								{DAY_LABELS[item.dayOfWeek]}
+							</p>
+							<p className="text-sm text-muted-foreground">
+								{item.startTime} a {item.endTime}
+							</p>
+							<p className="mt-2 text-sm font-semibold text-primary">
+								{meetingCountLabel(item.meetingCount)}
+							</p>
 						</li>
 					))}
 				</ul>
@@ -171,10 +224,14 @@ const ScheduleDistribution = ({
 
 			{distribution.coverage.reasons.length > 0 ? (
 				<div className="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
-					<p className="font-semibold text-foreground">Motivos de exclusión</p>
+					<p className="font-semibold text-foreground">
+						Motivos de exclusión
+					</p>
 					<ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
 						{distribution.coverage.reasons.map(reason => (
-							<li key={reason}>{COVERAGE_REASON_LABELS[reason]}</li>
+							<li key={reason}>
+								{COVERAGE_REASON_LABELS[reason]}
+							</li>
 						))}
 					</ul>
 				</div>
@@ -230,7 +287,10 @@ export const AcademicLoadSection = () => {
 				periodId: academicLoadFilters.periodId,
 				metric: 'teacher_load',
 				...(academicLoadFilters.centerDepartmentId
-					? { centerDepartmentId: academicLoadFilters.centerDepartmentId }
+					? {
+							centerDepartmentId:
+								academicLoadFilters.centerDepartmentId,
+						}
 					: {}),
 				...(academicLoadFilters.teacherId
 					? { teacherId: academicLoadFilters.teacherId }
@@ -258,8 +318,8 @@ export const AcademicLoadSection = () => {
 					Carga académica
 				</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					Resumen consolidado del período seleccionado. Los indicadores no se
-					recalculan desde el detalle.
+					Resumen consolidado del período seleccionado. Los
+					indicadores no se recalculan desde el detalle.
 				</p>
 			</div>
 
@@ -268,7 +328,10 @@ export const AcademicLoadSection = () => {
 					No fue posible cargar los indicadores de carga académica.
 				</div>
 			) : summary.isPending ? (
-				<AnalyticsSummarySkeleton count={METRICS.length} showDistribution />
+				<AnalyticsSummarySkeleton
+					count={METRICS.length}
+					showDistribution
+				/>
 			) : (
 				<>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -280,7 +343,9 @@ export const AcademicLoadSection = () => {
 							/>
 						))}
 					</div>
-					<ScheduleDistribution distribution={summary.data.scheduleDistribution} />
+					<ScheduleDistribution
+						distribution={summary.data.scheduleDistribution}
+					/>
 				</>
 			)}
 
@@ -301,18 +366,26 @@ export const AcademicLoadSection = () => {
 							<span className="shrink-0">Ordenar por:</span>
 							<select
 								value={loadSort}
-								onChange={event => handleSortChange(event.target.value)}
+								onChange={event =>
+									handleSortChange(event.target.value)
+								}
 								className="min-h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-normal text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 							>
 								{SORT_OPTIONS.map(option => (
-									<option key={option.value} value={option.value}>
+									<option
+										key={option.value}
+										value={option.value}
+									>
 										{option.label}
 									</option>
 								))}
 							</select>
 						</label>
 						{options?.capabilities.canExport ? (
-							<AnalyticsExportButton onClick={handleExport} isExporting={isExporting} />
+							<AnalyticsExportButton
+								onClick={handleExport}
+								isExporting={isExporting}
+							/>
 						) : null}
 					</div>
 				</div>
@@ -330,7 +403,11 @@ export const AcademicLoadSection = () => {
 							Los filtros actuales tienen {totalPages} página
 							{totalPages === 1 ? '' : 's'} de resultados.
 						</p>
-						<Button className="mt-4" size="sm" onClick={() => setLoadPage(1)}>
+						<Button
+							className="mt-4"
+							size="sm"
+							onClick={() => setLoadPage(1)}
+						>
 							Volver a la página 1
 						</Button>
 					</div>

@@ -1,4 +1,7 @@
-import { TPlanification, TPlanificationWithErrors } from "./assignment-reports.types";
+import {
+	TPlanification,
+	TPlanificationWithErrors,
+} from './assignment-reports.types';
 
 export interface ICreateAcademicAssignmentParams {
 	centerDepartmentId: string;

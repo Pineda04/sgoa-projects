@@ -36,7 +36,8 @@ export const analyticsOptions = {
 				centerDepartmentId,
 				buildingId
 			),
-			queryFn: () => analyticsApi.getFilterOptions(centerDepartmentId, buildingId),
+			queryFn: () =>
+				analyticsApi.getFilterOptions(centerDepartmentId, buildingId),
 			select: response => response.data.data,
 			staleTime: STALE_TIME.SHORT,
 			retry: false,
@@ -46,18 +47,23 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.academicLoad(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getAcademicLoad(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	academicLoadDetails: (userId: string | null, filters?: AcademicLoadDetailsFilters) =>
+	academicLoadDetails: (
+		userId: string | null,
+		filters?: AcademicLoadDetailsFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.academicLoadDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getAcademicLoadDetails(filters);
 			},
 			select: response => response.data.data,
@@ -68,29 +74,38 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.enrollment(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getEnrollment(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	enrollmentDetails: (userId: string | null, filters?: EnrollmentDetailsFilters) =>
+	enrollmentDetails: (
+		userId: string | null,
+		filters?: EnrollmentDetailsFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.enrollmentDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getEnrollmentDetails(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	classroomAvailability: (userId: string | null, filters?: ClassroomAvailabilityFilters) =>
+	classroomAvailability: (
+		userId: string | null,
+		filters?: ClassroomAvailabilityFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.classroomAvailability(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requieren período y rango horario.');
+				if (!filters)
+					throw new Error('Se requieren período y rango horario.');
 				return analyticsApi.getClassroomAvailability(filters);
 			},
 			select: response => response.data.data,
@@ -102,9 +117,13 @@ export const analyticsOptions = {
 		filters?: ClassroomAvailabilityDetailsFilters
 	) =>
 		queryOptions({
-			queryKey: analyticsKeys.classroomAvailabilityDetails(userId, filters),
+			queryKey: analyticsKeys.classroomAvailabilityDetails(
+				userId,
+				filters
+			),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requieren período y rango horario.');
+				if (!filters)
+					throw new Error('Se requieren período y rango horario.');
 				return analyticsApi.getClassroomAvailabilityDetails(filters);
 			},
 			select: response => response.data.data,
@@ -115,18 +134,23 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.classroomCapacity(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getClassroomCapacity(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	classroomCapacityDetails: (userId: string | null, filters?: ClassroomCapacityFilters) =>
+	classroomCapacityDetails: (
+		userId: string | null,
+		filters?: ClassroomCapacityFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.classroomCapacityDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getClassroomCapacityDetails(filters);
 			},
 			select: response => response.data.data,
@@ -137,18 +161,23 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.technology(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getTechnology(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	technologyDetails: (userId: string | null, filters?: TechnologyDetailsFilters) =>
+	technologyDetails: (
+		userId: string | null,
+		filters?: TechnologyDetailsFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.technologyDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un período académico.');
+				if (!filters)
+					throw new Error('Se requiere un período académico.');
 				return analyticsApi.getTechnologyDetails(filters);
 			},
 			select: response => response.data.data,
@@ -167,7 +196,8 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.staffDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('No hay filtros autorizados de personal.');
+				if (!filters)
+					throw new Error('No hay filtros autorizados de personal.');
 				return analyticsApi.getStaffDetails(filters);
 			},
 			select: response => response.data.data,
@@ -178,18 +208,23 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.activities(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un alcance temporal.');
+				if (!filters)
+					throw new Error('Se requiere un alcance temporal.');
 				return analyticsApi.getActivities(filters);
 			},
 			select: response => response.data.data,
 			retry: false,
 			refetchOnWindowFocus: false,
 		}),
-	activityDetails: (userId: string | null, filters?: ActivityDetailsFilters) =>
+	activityDetails: (
+		userId: string | null,
+		filters?: ActivityDetailsFilters
+	) =>
 		queryOptions({
 			queryKey: analyticsKeys.activityDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('Se requiere un alcance temporal.');
+				if (!filters)
+					throw new Error('Se requiere un alcance temporal.');
 				return analyticsApi.getActivityDetails(filters);
 			},
 			select: response => response.data.data,
@@ -212,7 +247,8 @@ export const analyticsOptions = {
 		queryOptions({
 			queryKey: analyticsKeys.monitoringDetails(userId, filters),
 			queryFn: () => {
-				if (!filters) throw new Error('No hay filtros autorizados de monitoreo.');
+				if (!filters)
+					throw new Error('No hay filtros autorizados de monitoreo.');
 				return analyticsApi.getMonitoringDetails(filters);
 			},
 			select: response => response.data.data,

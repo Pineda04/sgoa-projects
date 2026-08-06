@@ -96,7 +96,9 @@ export const CreateCourseModal = ({
 							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 							disabled={createMutation.isPending}
 						>
-							{!createMutation.isPending && <FiSave className="size-4" />}
+							{!createMutation.isPending && (
+								<FiSave className="size-4" />
+							)}
 							<span>
 								{createMutation.isPending
 									? 'Guardando...'

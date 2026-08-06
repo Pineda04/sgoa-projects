@@ -111,7 +111,7 @@ export async function exportReportActivities(
 ) {
 	if (!data) return;
 
-	const 	selectedFont = fontFamily ?? getPdfFontPreference();
+	const selectedFont = fontFamily ?? getPdfFontPreference();
 	const jsPdfFont = getJsPdfFontName(selectedFont);
 
 	const [jsPDFModule, autoTableModule] = await Promise.all([
@@ -262,7 +262,9 @@ export async function exportReportActivities(
 			],
 		],
 		body: data.assignmentReportData.teachingSession.courseClassrooms.map(
-			(d: typeof data.assignmentReportData.teachingSession.courseClassrooms[0]) => [
+			(
+				d: (typeof data.assignmentReportData.teachingSession.courseClassrooms)[0]
+			) => [
 				d.course.code,
 				d.course.name,
 				d.section,
@@ -462,9 +464,14 @@ export async function exportReportActivities(
 		doc.setPage(i);
 		doc.setFontSize(10);
 		doc.setFont(jsPdfFont, 'normal');
-		doc.text(`${i} de ${finalTotalPages}`, pageWidth - 50, pageHeight - 30, {
-			align: 'right',
-		});
+		doc.text(
+			`${i} de ${finalTotalPages}`,
+			pageWidth - 50,
+			pageHeight - 30,
+			{
+				align: 'right',
+			}
+		);
 	}
 
 	//Formato para el archivo

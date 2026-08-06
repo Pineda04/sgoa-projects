@@ -13,10 +13,13 @@ export const useCreateAirConditioner = () =>
 		mutationFn: (body: TCreateAirConditioner) =>
 			airConditionersApi.createAirConditioner(body),
 		onSuccess: async res => {
-
 			await Promise.all([
-				queryClient.removeQueries({ queryKey: airConditionersKeys.all }),
-				queryClient.removeQueries({ queryKey: airConditionersKeys.list() }),
+				queryClient.removeQueries({
+					queryKey: airConditionersKeys.all,
+				}),
+				queryClient.removeQueries({
+					queryKey: airConditionersKeys.list(),
+				}),
 			]);
 			alertSuccess(res);
 		},
@@ -32,10 +35,13 @@ export const useUpdateAirConditioner = () => {
 			body: TUpdateAirConditioner;
 		}) => airConditionersApi.updateAirConditioner({ id, body }),
 		onSuccess: async res => {
-
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: airConditionersKeys.list() }),
-				queryClient.invalidateQueries({ queryKey: airConditionersKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: airConditionersKeys.list(),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: airConditionersKeys.all,
+				}),
 			]);
 			alertSuccess(res);
 		},
@@ -45,13 +51,15 @@ export const useUpdateAirConditioner = () => {
 
 export const useDeleteAirConditioner = () => {
 	const { mutateAsync, isPending } = useMutation({
-		mutationFn: (id: string) =>
-			airConditionersApi.deleteAirConditioner(id),
+		mutationFn: (id: string) => airConditionersApi.deleteAirConditioner(id),
 		onSuccess: async res => {
-
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: airConditionersKeys.list() }),
-				queryClient.invalidateQueries({ queryKey: airConditionersKeys.all }),
+				queryClient.invalidateQueries({
+					queryKey: airConditionersKeys.list(),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: airConditionersKeys.all,
+				}),
 			]);
 			alertSuccess(res);
 		},

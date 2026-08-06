@@ -79,8 +79,14 @@ export class CoursesController {
     @Query('activeStatus') activeStatus: string | undefined,
     @Query() query: QueryPaginationDto,
   ) {
-    const active = activeStatus !== undefined ? activeStatus === 'true' : undefined;
-    return this.coursesService.findBySearchTerm(searchTerm, query, undefined, active);
+    const active =
+      activeStatus !== undefined ? activeStatus === 'true' : undefined;
+    return this.coursesService.findBySearchTerm(
+      searchTerm,
+      query,
+      undefined,
+      active,
+    );
   }
 
   @Get('search/:centerDepartmentId')
@@ -105,7 +111,8 @@ export class CoursesController {
     @Query() query: QueryPaginationDto,
     @Param('centerDepartmentId', ValidateIdPipe) centerDepartmentId: string,
   ) {
-    const active = activeStatus !== undefined ? activeStatus === 'true' : undefined;
+    const active =
+      activeStatus !== undefined ? activeStatus === 'true' : undefined;
     return this.coursesService.findBySearchTerm(
       searchTerm,
       query,

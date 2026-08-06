@@ -8,11 +8,7 @@ import {
 import { useGetAllMyCoordinations } from '@api/teachers';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetConsolidated } from '@api/courses';
-import {
-	DataTable,
-	Pagination,
-	SkeletonTable,
-} from '@shared/components';
+import { DataTable, Pagination, SkeletonTable } from '@shared/components';
 import { TOutputConsolidated } from '@api/courses/courses.types';
 
 interface Props {
@@ -40,8 +36,7 @@ const columns = [
 		key: 'initial',
 		header: 'Matrícula Inicial',
 		mobileLabel: 'Inicial',
-		render: (row: TOutputConsolidated) =>
-			row.initial ?? 'Sin información',
+		render: (row: TOutputConsolidated) => row.initial ?? 'Sin información',
 	},
 	{
 		key: 'final',
@@ -179,7 +174,9 @@ export const Consolidated = ({
 	return (
 		<div className="min-h-screen bg-transparent">
 			<div className="pb-4 grid items-end grid-cols-1 md:grid-cols-4 gap-4">
-				<div className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+				<div
+					className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}
+				>
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">
 							Buscar Clase o Docente
@@ -208,7 +205,9 @@ export const Consolidated = ({
 								}}
 								className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 							>
-								<option value="">Todos los departamentos</option>
+								<option value="">
+									Todos los departamentos
+								</option>
 								{allDepartments?.map(d => (
 									<option key={d.id} value={d.id}>
 										{d.name}

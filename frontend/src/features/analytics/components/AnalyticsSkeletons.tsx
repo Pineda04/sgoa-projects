@@ -47,10 +47,17 @@ export const AnalyticsSummarySkeleton = ({
 );
 
 export const AnalyticsPageSkeleton = () => (
-	<div className="space-y-6" aria-busy="true" aria-label="Cargando analíticas">
+	<div
+		className="space-y-6"
+		aria-busy="true"
+		aria-label="Cargando analíticas"
+	>
 		<div className="flex gap-2 overflow-hidden rounded-2xl border border-card-border bg-card p-2 shadow-card">
 			{Array.from({ length: 6 }, (_, index) => (
-				<Skeleton key={index} className="h-10 w-28 shrink-0 rounded-xl" />
+				<Skeleton
+					key={index}
+					className="h-10 w-28 shrink-0 rounded-xl"
+				/>
 			))}
 		</div>
 		<div className="rounded-2xl border border-card-border bg-card p-4 shadow-card sm:p-6">

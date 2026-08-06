@@ -9,9 +9,7 @@ import { hourToDateUTC } from 'src/common/utils';
 
 @ValidatorConstraint({ name: 'valid-wordkig-day', async: false })
 @Injectable()
-export class IsValidWorkinDayConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidWorkinDayConstraint implements ValidatorConstraintInterface {
   private error: {
     type: 'missing' | 'compare' | 'global';
     field: 'shiftStart' | 'shiftEnd' | 'both';

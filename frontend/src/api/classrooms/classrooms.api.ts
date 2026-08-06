@@ -12,14 +12,25 @@ export const classroomsApi = {
 	getAllClassrooms: (
 		page: number,
 		size: number,
-		filters?: { name?: string; buildingId?: string; roomTypeId?: string; activeStatus?: string }
+		filters?: {
+			name?: string;
+			buildingId?: string;
+			roomTypeId?: string;
+			activeStatus?: string;
+		}
 	) => {
-		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
 		if (filters?.name) params.set('name', filters.name);
 		if (filters?.buildingId) params.set('buildingId', filters.buildingId);
 		if (filters?.roomTypeId) params.set('roomTypeId', filters.roomTypeId);
-		if (filters?.activeStatus) params.set('activeStatus', filters.activeStatus);
-		return api.get<IResponse<TClassroom[]>>(`/classrooms?${params.toString()}`);
+		if (filters?.activeStatus)
+			params.set('activeStatus', filters.activeStatus);
+		return api.get<IResponse<TClassroom[]>>(
+			`/classrooms?${params.toString()}`
+		);
 	},
 
 	getClassroomsBySearchTerm: (
@@ -43,7 +54,11 @@ export const classroomsApi = {
 	deleteClassroom: (id: string) =>
 		api.delete<IResponse<TClassroom>>(`/classrooms/${id}`),
 
-	getClassroomAvailability: (id: string, periodId: string, dayOfWeek?: string) => {
+	getClassroomAvailability: (
+		id: string,
+		periodId: string,
+		dayOfWeek?: string
+	) => {
 		const params = new URLSearchParams({ periodId });
 		if (dayOfWeek) params.set('dayOfWeek', dayOfWeek);
 		return api.get<IResponse<TClassroomSchedule>>(

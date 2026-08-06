@@ -1,15 +1,7 @@
 import { useState } from 'react';
-import {
-	AlertTriangle,
-	CheckCircle2,
-	CircleHelp,
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleHelp } from 'lucide-react';
 import type { IResponsiveColumn } from '@shared/components';
-import {
-	Button,
-	PaginationControls,
-	DataTable,
-} from '@shared/components';
+import { Button, PaginationControls, DataTable } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
 	analyticsApi,
@@ -57,11 +49,7 @@ const formatNullableNumber = (value: number | null) =>
 const formatOccupancy = (value: number | null) =>
 	value === null ? 'No calculable' : `${numberFormatter.format(value)}%`;
 
-const EnrollmentCapacityStatus = ({
-	status,
-}: {
-	status: boolean | null;
-}) => {
+const EnrollmentCapacityStatus = ({ status }: { status: boolean | null }) => {
 	if (status === null) {
 		return (
 			<span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
@@ -90,7 +78,9 @@ const COLUMNS = [
 		header: 'Asignatura / código',
 		render: (row: EnrollmentDetailRow) => (
 			<div className="min-w-48 text-left">
-				<p className="font-semibold text-foreground">{row.courseName}</p>
+				<p className="font-semibold text-foreground">
+					{row.courseName}
+				</p>
 				<p className="text-xs text-muted-foreground">
 					{row.courseCode} · Sección {row.groupCode}
 				</p>
@@ -114,7 +104,8 @@ const COLUMNS = [
 	{
 		key: 'occupancyRate',
 		header: 'Ocupación',
-		render: (row: EnrollmentDetailRow) => formatOccupancy(row.occupancyRate),
+		render: (row: EnrollmentDetailRow) =>
+			formatOccupancy(row.occupancyRate),
 	},
 	{
 		key: 'availableSeats',
@@ -149,7 +140,10 @@ export const EnrollmentSection = () => {
 			? {
 					periodId: enrollmentFilters.periodId,
 					...(enrollmentFilters.centerDepartmentId
-						? { centerDepartmentId: enrollmentFilters.centerDepartmentId }
+						? {
+								centerDepartmentId:
+									enrollmentFilters.centerDepartmentId,
+							}
 						: {}),
 					...(enrollmentFilters.teacherId
 						? { teacherId: enrollmentFilters.teacherId }
@@ -186,7 +180,10 @@ export const EnrollmentSection = () => {
 				metric: 'enrollment_capacity',
 				periodId: enrollmentFilters.periodId,
 				...(enrollmentFilters.centerDepartmentId
-					? { centerDepartmentId: enrollmentFilters.centerDepartmentId }
+					? {
+							centerDepartmentId:
+								enrollmentFilters.centerDepartmentId,
+						}
 					: {}),
 				...(enrollmentFilters.teacherId
 					? { teacherId: enrollmentFilters.teacherId }
@@ -214,19 +211,21 @@ export const EnrollmentSection = () => {
 					Matrícula y capacidad
 				</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					Indicadores de matrícula reportada y capacidad física del período.
-					 Los indicadores provienen del resumen del servidor.
+					Indicadores de matrícula reportada y capacidad física del
+					período. Los indicadores provienen del resumen del servidor.
 				</p>
 			</div>
 			{enrollmentUsesDomainScope ? (
 				<p className="mb-4 rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
-					Este bloque usa el alcance autorizado específico de matrícula.
+					Este bloque usa el alcance autorizado específico de
+					matrícula.
 				</p>
 			) : null}
 
 			{summary.isError ? (
 				<div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-					No fue posible cargar los indicadores de matrícula y capacidad.
+					No fue posible cargar los indicadores de matrícula y
+					capacidad.
 				</div>
 			) : summary.isPending ? (
 				<AnalyticsSummarySkeleton count={METRICS.length} />
@@ -254,9 +253,12 @@ export const EnrollmentSection = () => {
 								: 'Detalle paginado'}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							La capacidad mostrada corresponde al estado actual de las aulas.
+							La capacidad mostrada corresponde al estado actual
+							de las aulas.
 						</p>
-						{details.data?.notes.includes('current_classroom_capacity') ? (
+						{details.data?.notes.includes(
+							'current_classroom_capacity'
+						) ? (
 							<p className="mt-1 text-xs font-medium text-muted-foreground">
 								Capacidad actual aplicada
 							</p>
@@ -267,25 +269,34 @@ export const EnrollmentSection = () => {
 							<span className="shrink-0">Ordenar por:</span>
 							<select
 								value={enrollmentSort}
-								onChange={event => handleSortChange(event.target.value)}
+								onChange={event =>
+									handleSortChange(event.target.value)
+								}
 								className="min-h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-normal text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 							>
 								{SORT_OPTIONS.map(option => (
-									<option key={option.value} value={option.value}>
+									<option
+										key={option.value}
+										value={option.value}
+									>
 										{option.label}
 									</option>
 								))}
 							</select>
 						</label>
 						{options?.capabilities.canExport ? (
-							<AnalyticsExportButton onClick={handleExport} isExporting={isExporting} />
+							<AnalyticsExportButton
+								onClick={handleExport}
+								isExporting={isExporting}
+							/>
 						) : null}
 					</div>
 				</div>
 
 				{details.isError ? (
 					<div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-						No fue posible cargar el detalle de matrícula y capacidad.
+						No fue posible cargar el detalle de matrícula y
+						capacidad.
 					</div>
 				) : isPageOutOfRange ? (
 					<div className="rounded-xl border border-card-border bg-muted px-5 py-8 text-center">

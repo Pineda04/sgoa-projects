@@ -11,7 +11,10 @@ interface FieldProps {
 const Field = ({ label, value }: FieldProps) => (
 	<div className="min-w-0">
 		<dt className="text-xs text-muted-foreground">{label}</dt>
-		<dd className="truncate text-sm font-medium text-foreground" title={value}>
+		<dd
+			className="truncate text-sm font-medium text-foreground"
+			title={value}
+		>
 			{value}
 		</dd>
 	</div>

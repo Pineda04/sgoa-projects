@@ -43,9 +43,12 @@ const AssignmentEditor = ({
 							className="mt-1 size-4"
 						/>
 						<span>
-							<span className="block text-sm font-semibold">{building.name}</span>
+							<span className="block text-sm font-semibold">
+								{building.name}
+							</span>
 							<span className="text-xs text-muted-foreground">
-								{building.center?.name ?? 'Centro sin información'}
+								{building.center?.name ??
+									'Centro sin información'}
 							</span>
 						</span>
 					</label>
@@ -59,7 +62,9 @@ const AssignmentEditor = ({
 						mutation.mutate({ userId, buildingIds: selectedIds })
 					}
 				>
-					{mutation.isPending ? 'Guardando...' : 'Guardar asignaciones'}
+					{mutation.isPending
+						? 'Guardando...'
+						: 'Guardar asignaciones'}
 				</Button>
 			</div>
 		</div>
@@ -78,7 +83,8 @@ export const MonitorBuildingAssignments = () => {
 				role.rolePermissions.some(
 					({ permission }) =>
 						permission.subject === 'schedule-compliance-check' &&
-						(permission.action === 'manage' || permission.action === 'create')
+						(permission.action === 'manage' ||
+							permission.action === 'create')
 				)
 		)
 	);
@@ -89,7 +95,8 @@ export const MonitorBuildingAssignments = () => {
 				Edificios por monitor
 			</h2>
 			<p className="mt-1 text-sm text-muted-foreground">
-				La lista reemplaza el alcance operativo y analítico futuro del monitor.
+				La lista reemplaza el alcance operativo y analítico futuro del
+				monitor.
 			</p>
 			<label className="mt-4 block max-w-xl text-sm font-semibold">
 				Monitor

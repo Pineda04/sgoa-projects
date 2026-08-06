@@ -8,9 +8,7 @@ import { DepartmentsService } from '../services/departments.service';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidDepartmentIdConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidDepartmentIdConstraint implements ValidatorConstraintInterface {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   async validate(

@@ -15,7 +15,11 @@ import {
 	type IDataTableColumn,
 } from '@shared/components';
 import { useModal } from '@shared/hooks';
-import { ESwalIcons, formatHondurasDateTime, genericAlert } from '@shared/utils';
+import {
+	ESwalIcons,
+	formatHondurasDateTime,
+	genericAlert,
+} from '@shared/utils';
 import { useAbility } from '@config';
 import { EditCheckModal } from './EditCheckModal';
 import {
@@ -133,9 +137,8 @@ export const MonitorReportTable = ({
 }: MonitorReportTableProps) => {
 	const { authState } = useAuth();
 	const ability = useAbility();
-	const [exportingFormat, setExportingFormat] = useState<TExportFormat | null>(
-		null
-	);
+	const [exportingFormat, setExportingFormat] =
+		useState<TExportFormat | null>(null);
 	const [editingCheck, setEditingCheck] =
 		useState<TScheduleComplianceCheckDetail | null>(null);
 	const [isEditModalOpen, openEditModal, closeEditModal] = useModal();
@@ -235,7 +238,8 @@ export const MonitorReportTable = ({
 						) : (
 							<FileSpreadsheet className="size-4" />
 						)}
-						<span className="hidden sm:inline">Exportar a </span>Excel
+						<span className="hidden sm:inline">Exportar a </span>
+						Excel
 					</Button>
 				</div>
 			</div>

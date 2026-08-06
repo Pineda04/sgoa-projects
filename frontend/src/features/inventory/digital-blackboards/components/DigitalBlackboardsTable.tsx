@@ -7,7 +7,10 @@ import {
 } from '@api/digital-blackboards';
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
-import { useGetAllMonitorSizes, useGetAllMonitorTypes } from '@api/pc-equipments';
+import {
+	useGetAllMonitorSizes,
+	useGetAllMonitorTypes,
+} from '@api/pc-equipments';
 import { DeleteDigitalBlackboardModal } from './DeleteDigitalBlackboardModal';
 import { EditDigitalBlackboardForm } from './EditDigitalBlackboardForm';
 

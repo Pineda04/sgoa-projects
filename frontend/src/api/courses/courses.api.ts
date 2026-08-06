@@ -1,5 +1,9 @@
 import { api } from '@config';
-import { ICreateCourse, IUpdateCourse, IUpdateCourseClassroom } from './courses.interfaces';
+import {
+	ICreateCourse,
+	IUpdateCourse,
+	IUpdateCourseClassroom,
+} from './courses.interfaces';
 import { IResponse } from '@shared';
 import {
 	TCourse,
@@ -27,7 +31,8 @@ export const coursesApi = {
 			page: String(page),
 			size: String(size),
 		});
-		if (activeStatus !== undefined) params.set('activeStatus', String(activeStatus));
+		if (activeStatus !== undefined)
+			params.set('activeStatus', String(activeStatus));
 
 		return api.get<IResponse<TCourse[]>>(`/courses/search?${params}`);
 	},
@@ -47,7 +52,8 @@ export const coursesApi = {
 			page: String(page),
 			size: String(size),
 		});
-		if (activeStatus !== undefined) params.set('activeStatus', String(activeStatus));
+		if (activeStatus !== undefined)
+			params.set('activeStatus', String(activeStatus));
 
 		return api.get<IResponse<TCourse[]>>(
 			`/courses/search/${centerDepartmentId}?${params}`
@@ -82,7 +88,6 @@ export const coursesApi = {
 
 // Secciones
 export const courseClassroomsApi = {
-
 	getAllCoursesByRoleAndPeriod: (
 		role: 'coordinator' | 'authority',
 		periodId: string,
@@ -91,7 +96,12 @@ export const courseClassroomsApi = {
 		api.get<
 			IResponse<
 				(TCourseClassroom & {
-					teacher: { id: string; userId: string; name: string; code: string };
+					teacher: {
+						id: string;
+						userId: string;
+						name: string;
+						code: string;
+					};
 					centerDepartment: TCenterDepartment & {
 						center: Pick<TAcademicCommonProps, 'name'>;
 						department: Pick<TAcademicCommonProps, 'name'>;
@@ -124,7 +134,10 @@ export const courseClassroomsApi = {
 		api.get<IResponse<TCourseClassroomDetail>>(`/course-classrooms/${id}`),
 
 	updateCourseClassroom: (id: string, data: IUpdateCourseClassroom) =>
-		api.patch<IResponse<TCourseClassroom>>(`/course-classrooms/${id}`, data),
+		api.patch<IResponse<TCourseClassroom>>(
+			`/course-classrooms/${id}`,
+			data
+		),
 
 	changeTeacherCourseClassroom: (
 		courseClassroomId: string,
@@ -160,7 +173,8 @@ export const courseStadisticsApi = {
 			searchParams.set('centerDepartmentId', params.centerDepartmentId);
 		if (params.page) searchParams.set('page', String(params.page));
 		if (params.size) searchParams.set('size', String(params.size));
-		if (params.searchTerm) searchParams.set('searchTerm', params.searchTerm);
+		if (params.searchTerm)
+			searchParams.set('searchTerm', params.searchTerm);
 		return api.get<IResponse<TOutputConsolidated[]>>(
 			`/course-stadistics/consolidated?${searchParams}`
 		);

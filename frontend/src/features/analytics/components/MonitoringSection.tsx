@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import type { IResponsiveColumn } from '@shared/components';
-import {
-	PaginationControls,
-	DataTable,
-} from '@shared/components';
+import { PaginationControls, DataTable } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
 	analyticsApi,
@@ -196,14 +193,20 @@ export const MonitoringSection = () => {
 	return (
 		<div>
 			<div className="mb-5">
-				<h2 className="text-xl font-semibold text-card-foreground">Monitoreo</h2>
+				<h2 className="text-xl font-semibold text-card-foreground">
+					Monitoreo
+				</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					Cumplimiento observado y uso de pizarra en chequeos autorizados. Los
-					registros legados sin captura no se clasifican como no usados.
+					Cumplimiento observado y uso de pizarra en chequeos
+					autorizados. Los registros legados sin captura no se
+					clasifican como no usados.
 				</p>
 			</div>
 			{summary.isPending ? (
-				<AnalyticsSummarySkeleton count={METRICS.length} showDistribution />
+				<AnalyticsSummarySkeleton
+					count={METRICS.length}
+					showDistribution
+				/>
 			) : summary.isError ? (
 				<p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
 					No fue posible cargar los indicadores de monitoreo.
@@ -232,7 +235,9 @@ export const MonitoringSection = () => {
 										'center',
 										'centerDepartment',
 										'period',
-									].find(value => value === event.target.value);
+									].find(
+										value => value === event.target.value
+									);
 									if (
 										option === 'day' ||
 										option === 'teacher' ||
@@ -249,7 +254,9 @@ export const MonitoringSection = () => {
 								<option value="teacher">Docente</option>
 								<option value="building">Edificio</option>
 								<option value="center">Centro</option>
-								<option value="centerDepartment">Carrera</option>
+								<option value="centerDepartment">
+									Carrera
+								</option>
 								<option value="period">Período</option>
 							</select>
 						</label>
@@ -263,7 +270,9 @@ export const MonitoringSection = () => {
 			<div className="mt-8 border-t border-border pt-6">
 				<div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 					<div>
-						<h3 className="text-lg font-semibold">Detalle auditable</h3>
+						<h3 className="text-lg font-semibold">
+							Detalle auditable
+						</h3>
 						<p className="text-xs text-muted-foreground">
 							{details.data?.meta.total ?? 0} registros
 						</p>
@@ -275,14 +284,19 @@ export const MonitoringSection = () => {
 								value={monitoringMetric}
 								onChange={event => {
 									const metric = DETAIL_METRICS.find(
-										item => item.value === event.target.value
+										item =>
+											item.value === event.target.value
 									);
-									if (metric) setMonitoringMetric(metric.value);
+									if (metric)
+										setMonitoringMetric(metric.value);
 								}}
 								className="block min-h-10 rounded-lg border border-input bg-background px-3"
 							>
 								{DETAIL_METRICS.map(metric => (
-									<option key={metric.value} value={metric.value}>
+									<option
+										key={metric.value}
+										value={metric.value}
+									>
 										{metric.label}
 									</option>
 								))}
@@ -294,7 +308,8 @@ export const MonitoringSection = () => {
 								value={monitoringSort}
 								onChange={event => {
 									const sort = SORTS.find(
-										item => item.value === event.target.value
+										item =>
+											item.value === event.target.value
 									);
 									if (sort) setMonitoringSort(sort.value);
 								}}
@@ -308,7 +323,10 @@ export const MonitoringSection = () => {
 							</select>
 						</label>
 						{options?.capabilities.canExport ? (
-							<AnalyticsExportButton onClick={exportRows} isExporting={isExporting} />
+							<AnalyticsExportButton
+								onClick={exportRows}
+								isExporting={isExporting}
+							/>
 						) : null}
 					</div>
 				</div>

@@ -123,11 +123,11 @@ export const ClassroomAvailabilityModal = ({
 		return match?.id ?? '';
 	}, [allPeriods, selectedYear, selectedPac, defaultPeriodId, currentPeriod]);
 
-	const { data: schedule, isLoading, isError } = useGetClassroomAvailability(
-		classroomId,
-		effectivePeriodId,
-		undefined
-	);
+	const {
+		data: schedule,
+		isLoading,
+		isError,
+	} = useGetClassroomAvailability(classroomId, effectivePeriodId, undefined);
 
 	const activeDays = useMemo(
 		() => DAYS.filter(d => schedule?.schedule?.[d.key]),
@@ -179,7 +179,8 @@ export const ClassroomAvailabilityModal = ({
 		let occupied = 0;
 		for (const day of activeDays) {
 			for (const time of TIME_SLOTS) {
-				if (getOccupiedAtSlotFrom(occupiedMap, day.key, time)) occupied += 1;
+				if (getOccupiedAtSlotFrom(occupiedMap, day.key, time))
+					occupied += 1;
 				else if (availableSet.has(`${day.key}-${time}`)) available += 1;
 			}
 		}
@@ -298,14 +299,21 @@ export const ClassroomAvailabilityModal = ({
 								strokeWidth={1.5}
 								className="size-10 text-gray-300"
 							>
-								<rect x="3" y="4" width="18" height="18" rx="2" />
+								<rect
+									x="3"
+									y="4"
+									width="18"
+									height="18"
+									rx="2"
+								/>
 								<path d="M16 2v4M8 2v4M3 10h18" />
 							</svg>
 							<p className="text-sm font-medium text-gray-600">
 								Sin horario asignado
 							</p>
 							<p className="text-xs text-gray-400">
-								Este periodo no tiene horarios registrados para el aula
+								Este periodo no tiene horarios registrados para
+								el aula
 							</p>
 						</div>
 					) : (
@@ -323,7 +331,9 @@ export const ClassroomAvailabilityModal = ({
 											<button
 												type="button"
 												onClick={() =>
-													setExpandedDay(isOpen ? null : day.key)
+													setExpandedDay(
+														isOpen ? null : day.key
+													)
 												}
 												className="flex w-full items-center justify-between px-3 py-2.5 text-left"
 											>
@@ -349,26 +359,37 @@ export const ClassroomAvailabilityModal = ({
 											{isOpen && (
 												<div className="flex flex-col divide-y divide-gray-100 border-t border-gray-100">
 													{TIME_SLOTS.map(time => {
-														const occupied = getOccupiedAtSlot(
-															day.key,
-															time
-														);
-														const available = isAvailable(day.key, time);
+														const occupied =
+															getOccupiedAtSlot(
+																day.key,
+																time
+															);
+														const available =
+															isAvailable(
+																day.key,
+																time
+															);
 														return (
 															<div
 																key={time}
 																className="flex items-center gap-3 px-3 py-2"
 															>
 																<span className="w-24 shrink-0 text-xs font-medium text-gray-500">
-																	{getSlotLabel(time)}
+																	{getSlotLabel(
+																		time
+																	)}
 																</span>
 																{occupied ? (
 																	<div className="min-w-0 flex-1 rounded-md bg-red-50 px-2 py-1">
 																		<p className="truncate text-xs font-semibold text-red-700">
-																			{occupied.courseName}
+																			{
+																				occupied.courseName
+																			}
 																		</p>
 																		<p className="truncate text-[11px] text-red-500">
-																			{occupied.teacherName}
+																			{
+																				occupied.teacherName
+																			}
 																		</p>
 																	</div>
 																) : available ? (
@@ -377,7 +398,8 @@ export const ClassroomAvailabilityModal = ({
 																	</div>
 																) : (
 																	<div className="flex-1 rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-400">
-																		No aplica
+																		No
+																		aplica
 																	</div>
 																)}
 															</div>
@@ -422,15 +444,26 @@ export const ClassroomAvailabilityModal = ({
 											<tr key={time}>
 												<td
 													className={`sticky left-0 z-10 border-r border-gray-200 p-2 text-xs font-medium text-gray-600 ${
-														rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'
+														rowIdx % 2 === 0
+															? 'bg-white'
+															: 'bg-gray-50/60'
 													}`}
 												>
 													{getSlotLabel(time)}
 												</td>
 												{activeDays.map(day => {
-													const occupied = getOccupiedAtSlot(day.key, time);
-													const available = isAvailable(day.key, time);
-													const isToday = day.key === todayKey;
+													const occupied =
+														getOccupiedAtSlot(
+															day.key,
+															time
+														);
+													const available =
+														isAvailable(
+															day.key,
+															time
+														);
+													const isToday =
+														day.key === todayKey;
 
 													if (occupied) {
 														return (
@@ -442,10 +475,14 @@ export const ClassroomAvailabilityModal = ({
 																<div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 group-hover:block">
 																	<div className="max-w-55 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
 																		<p className="truncate font-semibold">
-																			{occupied.courseName}
+																			{
+																				occupied.courseName
+																			}
 																		</p>
 																		<p className="truncate text-gray-300">
-																			{occupied.teacherName}
+																			{
+																				occupied.teacherName
+																			}
 																		</p>
 																		<div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
 																	</div>
@@ -463,7 +500,27 @@ export const ClassroomAvailabilityModal = ({
 																<div className="size-full min-h-8.5 bg-green-400/80 transition-colors hover:bg-green-500" />
 																<div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 group-hover:block">
 																	<div className="whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
-																		{day.label} {to12h(time)} - {to12h(String(Number(time.split(':')[0]) + 1).padStart(2, '0') + ':00')}
+																		{
+																			day.label
+																		}{' '}
+																		{to12h(
+																			time
+																		)}{' '}
+																		-{' '}
+																		{to12h(
+																			String(
+																				Number(
+																					time.split(
+																						':'
+																					)[0]
+																				) +
+																					1
+																			).padStart(
+																				2,
+																				'0'
+																			) +
+																				':00'
+																		)}
 																		<div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
 																	</div>
 																</div>
@@ -478,7 +535,9 @@ export const ClassroomAvailabilityModal = ({
 														>
 															<div
 																className={`size-full min-h-8.5 ${
-																	isToday ? 'bg-indigo-50/40' : 'bg-gray-50'
+																	isToday
+																		? 'bg-indigo-50/40'
+																		: 'bg-gray-50'
 																}`}
 															/>
 														</td>
@@ -517,7 +576,10 @@ function AvailabilitySkeleton() {
 					<div key={r} className="flex gap-1">
 						<div className="h-9 w-20 shrink-0 rounded bg-gray-100 sm:w-20" />
 						{Array.from({ length: 5 }).map((_, c) => (
-							<div key={c} className="h-9 flex-1 rounded bg-gray-100" />
+							<div
+								key={c}
+								className="h-9 flex-1 rounded bg-gray-100"
+							/>
 						))}
 					</div>
 				))}

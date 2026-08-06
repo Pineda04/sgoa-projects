@@ -121,9 +121,9 @@ export function courseClassroomSectionsOverlap(
 
   return Boolean(
     firstSection &&
-      secondSection &&
-      firstSection.startMinutes < secondSection.endMinutes &&
-      secondSection.startMinutes < firstSection.endMinutes,
+    secondSection &&
+    firstSection.startMinutes < secondSection.endMinutes &&
+    secondSection.startMinutes < firstSection.endMinutes,
   );
 }
 

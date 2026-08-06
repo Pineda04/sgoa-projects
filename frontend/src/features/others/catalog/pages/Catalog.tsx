@@ -54,11 +54,7 @@ import {
 	monitorTypesKeys,
 	monitorSizesKeys,
 } from '@api/pc-equipments';
-import {
-	useGetAllShifts,
-	shiftsApi,
-	shiftsKeys,
-} from '@api/shifts';
+import { useGetAllShifts, shiftsApi, shiftsKeys } from '@api/shifts';
 import {
 	useGetAllAudioEquipments,
 	audioEquipmentsApi,
@@ -150,17 +146,23 @@ const configItems = [
 export const Catalog = () => {
 	const [activeEntity, setActiveEntity] = useState<string | null>(null);
 
-	const { data: teacherCategories, isLoading: tcLoading } =	useGetAllTeacherCategories();
-	const { data: contractTypes, isLoading: ctLoading } = useGetAllContractTypes();
+	const { data: teacherCategories, isLoading: tcLoading } =
+		useGetAllTeacherCategories();
+	const { data: contractTypes, isLoading: ctLoading } =
+		useGetAllContractTypes();
 	const { data: brands, isLoading: brLoading } = useGetAllBrands();
 	const { data: conditions, isLoading: cdLoading } = useGetAllConditions();
 	const { data: roomTypes, isLoading: rtLoading } = useGetAllRoomTypes();
-	const { data: connectivities, isLoading: cnLoading } = useGetAllConnectivities();
+	const { data: connectivities, isLoading: cnLoading } =
+		useGetAllConnectivities();
 	const { data: pcTypes, isLoading: ptLoading } = useGetAllPcTypes();
-	const { data: monitorTypes, isLoading: mtLoading } = useGetAllMonitorTypes();
-	const { data: monitorSizes, isLoading: msLoading } = useGetAllMonitorSizes();
+	const { data: monitorTypes, isLoading: mtLoading } =
+		useGetAllMonitorTypes();
+	const { data: monitorSizes, isLoading: msLoading } =
+		useGetAllMonitorSizes();
 	const { data: shifts, isLoading: shLoading } = useGetAllShifts();
-	const { data: audioEquipments, isLoading: aeLoading } =	useGetAllAudioEquipments();
+	const { data: audioEquipments, isLoading: aeLoading } =
+		useGetAllAudioEquipments();
 
 	const entityConfig: Partial<Record<string, EntityConfig>> = useMemo(
 		() => ({
@@ -189,19 +191,27 @@ export const Catalog = () => {
 							teacherCategoriesApi.deleteTeacherCategory(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: teacherCategoriesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: teacherCategoriesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'contract-types': {
 				fieldKey: 'name',
@@ -228,21 +238,29 @@ export const Catalog = () => {
 							contractTypesApi.deleteContractType(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: contractTypesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
+					queryClient.invalidateQueries({
+						queryKey: contractTypesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
-			},
-			'brands': {
+			brands: {
 				fieldKey: 'name',
 				data: brands,
 				isLoading: brLoading,
@@ -265,21 +283,29 @@ export const Catalog = () => {
 						),
 						...deleteIds.map(id => brandsApi.deleteBrand(id)),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: brandsKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
+					queryClient.invalidateQueries({
+						queryKey: brandsKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
-			},
-			'conditions': {
+			conditions: {
 				fieldKey: 'status',
 				data: conditions,
 				isLoading: cdLoading,
@@ -304,19 +330,27 @@ export const Catalog = () => {
 							conditionsApi.deleteCondition(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: conditionsKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: conditionsKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'room-types': {
 				fieldKey: 'description',
@@ -341,21 +375,29 @@ export const Catalog = () => {
 						),
 						...deleteIds.map(id => roomTypesApi.deleteRoomType(id)),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: roomTypesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
+					queryClient.invalidateQueries({
+						queryKey: roomTypesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
-			},
-			'connectivities': {
+			connectivities: {
 				fieldKey: 'description',
 				data: connectivities,
 				isLoading: cnLoading,
@@ -380,19 +422,27 @@ export const Catalog = () => {
 							connectivitiesApi.deleteConnectivity(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: connectivitiesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: connectivitiesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'pc-types': {
 				fieldKey: 'description',
@@ -415,23 +465,29 @@ export const Catalog = () => {
 								body: { description: item.value },
 							})
 						),
-						...deleteIds.map(id =>
-							pcTypesApi.deletePcType(id)
-						),
+						...deleteIds.map(id => pcTypesApi.deletePcType(id)),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: pcTypesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: pcTypesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'monitor-types': {
 				fieldKey: 'description',
@@ -458,19 +514,27 @@ export const Catalog = () => {
 							monitorTypesApi.deleteMonitorType(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: monitorTypesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: monitorTypesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'monitor-sizes': {
 				fieldKey: 'description',
@@ -497,21 +561,29 @@ export const Catalog = () => {
 							monitorSizesApi.deleteMonitorSize(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: monitorSizesKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
+					queryClient.invalidateQueries({
+						queryKey: monitorSizesKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
-			},
-			'shifts': {
+			shifts: {
 				fieldKey: 'name',
 				data: shifts,
 				isLoading: shLoading,
@@ -532,23 +604,29 @@ export const Catalog = () => {
 								body: { name: item.value },
 							})
 						),
-						...deleteIds.map(id =>
-							shiftsApi.deleteShift(id)
-						),
+						...deleteIds.map(id => shiftsApi.deleteShift(id)),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: shiftsKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: shiftsKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 			'audio-equipments': {
 				fieldKey: 'description',
@@ -566,28 +644,35 @@ export const Catalog = () => {
 							})
 						),
 						...updateItems.map(item =>
-							audioEquipmentsApi.updateAudioEquipment(
-								item.id,
-								{ description: item.value }
-							)
+							audioEquipmentsApi.updateAudioEquipment(item.id, {
+								description: item.value,
+							})
 						),
 						...deleteIds.map(id =>
 							audioEquipmentsApi.deleteAudioEquipment(id)
 						),
 					]);
-				queryClient.invalidateQueries({
-					queryKey: audioEquipmentsKeys.all,
-				});
-				const fulfilled = results.slice(0, createItems.length).filter(r => r.status === 'fulfilled');
-				const createdIds = fulfilled
-					.map(r => (r.value as { data: { data: { id: string } } }).data.data.id)
-					.filter((id): id is string => typeof id === 'string');
-				const rejected = results.filter(r => r.status === 'rejected');
-				if (rejected.length > 0) {
-					throw rejected[0].reason;
-				}
-				return { createdIds };
-			},
+					queryClient.invalidateQueries({
+						queryKey: audioEquipmentsKeys.all,
+					});
+					const fulfilled = results
+						.slice(0, createItems.length)
+						.filter(r => r.status === 'fulfilled');
+					const createdIds = fulfilled
+						.map(
+							r =>
+								(r.value as { data: { data: { id: string } } })
+									.data.data.id
+						)
+						.filter((id): id is string => typeof id === 'string');
+					const rejected = results.filter(
+						r => r.status === 'rejected'
+					);
+					if (rejected.length > 0) {
+						throw rejected[0].reason;
+					}
+					return { createdIds };
+				},
 			},
 		}),
 		[
@@ -660,7 +745,10 @@ export const Catalog = () => {
 												description={item.description}
 												onClick={
 													entitySubjects.has(item.key)
-														? () => setActiveEntity(item.key)
+														? () =>
+																setActiveEntity(
+																	item.key
+																)
 														: undefined
 												}
 											/>

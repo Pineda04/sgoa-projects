@@ -1,5 +1,5 @@
-import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment } from "..";
-import { TPosition } from "../positions";
+import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment } from '..';
+import { TPosition } from '../positions';
 
 export type TTeacherBasicInfo = {
 	name: string;

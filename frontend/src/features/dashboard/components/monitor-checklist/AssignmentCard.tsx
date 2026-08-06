@@ -23,7 +23,8 @@ export const AssignmentCard = ({
 						{item.assignment.courseName}
 					</p>
 					<p className="text-xs text-muted-foreground">
-						{item.assignment.courseCode} · Grupo {item.assignment.groupCode}
+						{item.assignment.courseCode} · Grupo{' '}
+						{item.assignment.groupCode}
 					</p>
 				</div>
 				<StatusBadge status={item.status} />

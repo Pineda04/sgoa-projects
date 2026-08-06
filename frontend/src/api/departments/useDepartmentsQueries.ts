@@ -15,13 +15,12 @@ export const useGetAllDepartments = () =>
 		select: res => res.data.data as TDepartmentWithCoordinations[],
 	});
 
-
 //este hook no gestiona paginacion y es usado en /admin/departments
 export const useGetDepartments = () => {
 	return useQuery({
 		queryKey: departmentsKeys.allForTable,
 		queryFn: () => departmentsApi.getAllDepartmentsForTable(),
 		staleTime: STALE_TIME.VERY_LONG,
-		select: res => res.data
-	})
-}
+		select: res => res.data,
+	});
+};

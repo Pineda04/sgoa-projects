@@ -1,7 +1,10 @@
 import type { FormikProps } from 'formik';
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
-import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import {
+	TClassroomSearch,
+	useGetClassroomsBySearchTerm,
+} from '@api/classrooms';
 import { SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
 import { TAirConditionerFormValues } from '../schemas';
@@ -162,7 +165,7 @@ export const AirConditionerFormInputs = ({
 						customOptionsReactSelect(
 							data.label,
 							data.data?.building?.name ?? '',
-							context,
+							context
 						)
 					}
 					defaultOption={classroomDefaultOption}

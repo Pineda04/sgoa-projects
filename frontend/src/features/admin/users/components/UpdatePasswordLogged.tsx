@@ -110,11 +110,9 @@ export const UpdatePasswordLogged = ({
 						type="submit"
 						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
 						disabled={!errors}
-          >
-            <FiSave className="size-4" />
-            <span>
-              Actualizar Contraseña
-						</span>
+					>
+						<FiSave className="size-4" />
+						<span>Actualizar Contraseña</span>
 					</Button>
 				</div>
 			</form>

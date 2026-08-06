@@ -1,10 +1,7 @@
 import '../../../App.css';
 import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-	UpdatePasswordLogged,
-	UserView,
-} from '@features/admin/users';
+import { UpdatePasswordLogged, UserView } from '@features/admin/users';
 import { User } from 'lucide-react';
 import {
 	LockClosedIcon,
@@ -40,11 +37,8 @@ export const UserMenu = () => {
 		handleShowModalUpdatePassword,
 		handleCloseModalUpdatePassword,
 	] = useModal();
-	const [
-		showModalProfile,
-		handleShowModalProfile,
-		handleCloseModalProfile,
-	] = useModal();
+	const [showModalProfile, handleShowModalProfile, handleCloseModalProfile] =
+		useModal();
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -292,9 +286,7 @@ export const UserMenu = () => {
 				isOpen={showModalProfile}
 				onClose={handleCloseModalProfile}
 			>
-				{userInfo && (
-					<UserView initialData={userInfo} isModal />
-				)}
+				{userInfo && <UserView initialData={userInfo} isModal />}
 			</ModalBase>
 		</>
 	);

@@ -5,7 +5,12 @@ import {
 	CheckCircleIcon,
 	XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { TCourseClassroom, TCourseStadistic, TCourseStadisticOmit, useUpdateCourseStadistic } from '@api/courses';
+import {
+	TCourseClassroom,
+	TCourseStadistic,
+	TCourseStadisticOmit,
+	useUpdateCourseStadistic,
+} from '@api/courses';
 import { courseStadisticSchema } from '../schemas/course-stadistic.schema';
 import { errorsFormik } from '@shared/utils';
 import { Button } from '@shared/components';
@@ -33,24 +38,23 @@ export const CourseStadisticEdit = ({
 		handleBlur,
 		resetForm,
 		submitForm,
-	} =
-		useFormik<TCourseStadisticOmit>({
-			initialValues: {
-				APB: courseStadistic?.APB ?? 0,
-				NSP: courseStadistic?.NSP ?? 0,
-				RPB: courseStadistic?.RPB ?? 0,
-				ABD: courseStadistic?.ABD ?? 0,
-			},
-			onSubmit: values => onSubmitting(values),
-			validateOnChange: true,
-			validate: values => {
-				const result = courseStadisticSchema.safeParse(values);
+	} = useFormik<TCourseStadisticOmit>({
+		initialValues: {
+			APB: courseStadistic?.APB ?? 0,
+			NSP: courseStadistic?.NSP ?? 0,
+			RPB: courseStadistic?.RPB ?? 0,
+			ABD: courseStadistic?.ABD ?? 0,
+		},
+		onSubmit: values => onSubmitting(values),
+		validateOnChange: true,
+		validate: values => {
+			const result = courseStadisticSchema.safeParse(values);
 
-				if (result.success) return;
+			if (result.success) return;
 
-				return errorsFormik<TCourseStadisticOmit>(result);
-			},
-		});
+			return errorsFormik<TCourseStadisticOmit>(result);
+		},
+	});
 
 	const [showSumError, setShowSumError] = useState(false);
 	const onSubmitting = async (values: TCourseStadisticOmit) => {
@@ -173,11 +177,11 @@ export const CourseStadisticEdit = ({
 							<span>Sin información</span>
 						) : isInputsActive ? (
 							<div className="flex gap-2 justify-center">
-				<Button
-					type="button"
-					className="cursor-pointer"
-					onClick={submitForm}
-					variant="unstyled"
+								<Button
+									type="button"
+									className="cursor-pointer"
+									onClick={submitForm}
+									variant="unstyled"
 								>
 									<CheckCircleIcon className="my-1 size-6 text-[#144C74] hover:text-[#5BC85C] transition duration-250" />
 								</Button>
@@ -187,14 +191,15 @@ export const CourseStadisticEdit = ({
 									onClick={() => {
 										resetForm({
 											values: {
-													APB: courseStadistic.APB,
-													RPB: courseStadistic.RPB,
-													NSP: courseStadistic.NSP,
-													ABD: courseStadistic.ABD,
+												APB: courseStadistic.APB,
+												RPB: courseStadistic.RPB,
+												NSP: courseStadistic.NSP,
+												ABD: courseStadistic.ABD,
 											},
 										});
 										setIsInputsActive(false);
-									}} variant="unstyled"
+									}}
+									variant="unstyled"
 								>
 									<XCircleIcon className="my-1 size-6 text-[#144C74] hover:text-[#DC3545] transition duration-250"></XCircleIcon>
 								</Button>
@@ -203,7 +208,8 @@ export const CourseStadisticEdit = ({
 							<Button
 								type="button"
 								className="cursor-pointer"
-								onClick={() => setIsInputsActive(true)} variant="unstyled"
+								onClick={() => setIsInputsActive(true)}
+								variant="unstyled"
 							>
 								<PencilIcon className="mt-1 size-6 text-[#144C74] hover:text-[#FCC40C] transition duration-250" />
 							</Button>
@@ -220,12 +226,13 @@ export const CourseStadisticEdit = ({
 							"0".
 						</label>
 					)}
-					{showSumError && infoCourseClassroom.studentCount !== null && (
-						<label className="text-sm text-[#DC3545] block">
-							*La suma de los campos 'APB, RPB, NSP, ABD' debe ser
-							igual a {infoCourseClassroom.studentCount}.
-						</label>
-					)}
+					{showSumError &&
+						infoCourseClassroom.studentCount !== null && (
+							<label className="text-sm text-[#DC3545] block">
+								*La suma de los campos 'APB, RPB, NSP, ABD' debe
+								ser igual a {infoCourseClassroom.studentCount}.
+							</label>
+						)}
 				</td>
 			</tr>
 		</>

@@ -69,8 +69,7 @@ persistQueryClient({
 				((scope === 'monitor' && resource === 'current-assignments') ||
 					(scope === 'academic-periods' && resource === 'current'));
 			return (
-				defaultShouldDehydrateQuery(query) &&
-				isOwnerScopedCurrentData
+				defaultShouldDehydrateQuery(query) && isOwnerScopedCurrentData
 			);
 		},
 	},

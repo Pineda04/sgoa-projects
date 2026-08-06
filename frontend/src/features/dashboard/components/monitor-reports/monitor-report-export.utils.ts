@@ -44,4 +44,5 @@ export const buildExportFileName = (
 	extension: 'pdf' | 'xlsx',
 	dateFrom?: string,
 	dateTo?: string
-): string => `Reporte-Monitoreo_${dateFrom ?? '-'}_${dateTo ?? '-'}.${extension}`;
+): string =>
+	`Reporte-Monitoreo_${dateFrom ?? '-'}_${dateTo ?? '-'}.${extension}`;

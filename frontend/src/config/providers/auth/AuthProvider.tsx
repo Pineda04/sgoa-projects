@@ -1,10 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload, IUser } from '@shared/interfaces';
+import {
+	IAuthStateProps,
+	IChildrenProps,
+	IResponse,
+	ITokenPayload,
+	IUser,
+} from '@shared/interfaces';
 import { authApi, IAuthLogin, ITokens, useLogin } from '@api/auth';
-import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
-import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache, cleanupSyncedChecks } from '@config/lib';
+import {
+	getAccessToken,
+	removeAccessToken,
+	setAccessToken,
+} from '@features/auth';
+import {
+	queryClient,
+	db,
+	saveCredentials,
+	verifyCredentials,
+	clearOtherMonitorsCache,
+	cleanupSyncedChecks,
+} from '@config/lib';
 import { askConfirm } from '@shared/utils';
 import { clear as clearIdb } from 'idb-keyval';
 import { isAxiosError } from 'axios';
@@ -40,7 +57,9 @@ const checkSessionToken = async (token: string) => {
 	//Si no hay internet y puede registrar verificaciones, omitir el refresh y usar el token cacheado
 	if (!navigator.onLine && canCheckOffline(decoded)) {
 		if (decoded.exp < currentTime) {
-			throw new Error('La autorización offline expiró. Conéctate para renovarla.');
+			throw new Error(
+				'La autorización offline expiró. Conéctate para renovarla.'
+			);
 		}
 		return decoded;
 	}
@@ -93,11 +112,17 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 		// Feature: dejar solo la caché local (asignaciones/período) de este monitor.
 		void clearOtherMonitorsCache(info.email).catch(err =>
-			console.error('No se pudo limpiar la caché de otros monitores:', err)
+			console.error(
+				'No se pudo limpiar la caché de otros monitores:',
+				err
+			)
 		);
 		// Política de retención: descartar checks SYNCED antiguos del monitor.
 		void cleanupSyncedChecks(info.email).catch(err =>
-			console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+			console.error(
+				'No se pudo limpiar los checks sincronizados antiguos:',
+				err
+			)
 		);
 
 		return {
@@ -150,7 +175,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
-					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					permissions: Array.isArray(info.permissions)
+						? info.permissions
+						: [],
 					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
@@ -168,7 +195,10 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 					password: userCredentials.password,
 					accessToken: data.data.access_token,
 				}).catch(err =>
-					console.error('No se pudieron guardar las credenciales locales:', err)
+					console.error(
+						'No se pudieron guardar las credenciales locales:',
+						err
+					)
 				);
 			} else {
 				void db.credentials.delete(userCredentials.email.toLowerCase());
@@ -176,11 +206,17 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 			// Feature: descartar la caché local de otros monitores del dispositivo.
 			void clearOtherMonitorsCache(userCredentials.email).catch(err =>
-				console.error('No se pudo limpiar la caché de otros monitores:', err)
+				console.error(
+					'No se pudo limpiar la caché de otros monitores:',
+					err
+				)
 			);
 			// Política de retención: descartar checks SYNCED antiguos del monitor.
 			void cleanupSyncedChecks(userCredentials.email).catch(err =>
-				console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+				console.error(
+					'No se pudo limpiar los checks sincronizados antiguos:',
+					err
+				)
 			);
 
 			return data;
@@ -295,7 +331,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
-					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					permissions: Array.isArray(info.permissions)
+						? info.permissions
+						: [],
 					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},

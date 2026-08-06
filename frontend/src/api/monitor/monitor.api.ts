@@ -27,7 +27,9 @@ const buildCheckFiltersParams = (filters?: TCheckFilters) => {
 
 export const monitorApi = {
 	getCurrentAssignments: () =>
-		api.get<IResponse<TMonitorBuildingAssignments[]>>('/monitor/current-assignments'),
+		api.get<IResponse<TMonitorBuildingAssignments[]>>(
+			'/monitor/current-assignments'
+		),
 
 	getBuildings: () =>
 		api.get<IResponse<TMonitorBuilding[]>>('/monitor/buildings'),

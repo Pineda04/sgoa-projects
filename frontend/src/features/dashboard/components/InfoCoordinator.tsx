@@ -13,12 +13,14 @@ export const InfoCoordinator = ({
 }: InfoCoordinatorProps) => {
 	const navigate = useNavigate();
 	const paramsCenterDepartmentId = useParams().centerDepartmentId;
-	const centerDepartmentId = propCenterDepartmentId ?? paramsCenterDepartmentId;
+	const centerDepartmentId =
+		propCenterDepartmentId ?? paramsCenterDepartmentId;
 	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
 	const validIds = currentUser.headPositions.map(p => p.centerDepartmentId);
-	const isValidId =	centerDepartmentId && validIds.includes(centerDepartmentId);
+	const isValidId =
+		centerDepartmentId && validIds.includes(centerDepartmentId);
 	const effectiveId = isValidId ? centerDepartmentId : undefined;
 
 	// Redirigir solo si NO hay ID en URL y SÍ hay al menos un cargo disponible
@@ -37,10 +39,11 @@ export const InfoCoordinator = ({
 	if (centerDepartmentId && !isValidId) {
 		return (
 			<div className="px-8 py-6 text-red-600">
-				El departamento seleccionado no está autorizado para este usuario.
+				El departamento seleccionado no está autorizado para este
+				usuario.
 			</div>
 		);
-}
+	}
 
 	const currentPosition = currentUser.headPositions.find(
 		p => p.centerDepartmentId === effectiveId
@@ -51,8 +54,7 @@ export const InfoCoordinator = ({
 	return (
 		<div className="mb-6">
 			<h2 className="text-2xl font-semibold mb-2">
-				{currentCenter}{' '}PAC{' '}
-				{academicPeriodInfo.data?.title ?? '...'}
+				{currentCenter} PAC {academicPeriodInfo.data?.title ?? '...'}
 			</h2>
 			<p className="text-sm">{currentUser.user?.name}</p>
 			<p className="text-sm">{currentUser.user?.code}</p>
@@ -68,9 +70,7 @@ export const InfoCoordinator = ({
 						value={effectiveId ?? ''}
 						onChange={e => {
 							const newId = e.target.value;
-							navigate(
-								`/dashboard/coordinator/${newId}`
-							);
+							navigate(`/dashboard/coordinator/${newId}`);
 						}}
 					>
 						<option value="" disabled>

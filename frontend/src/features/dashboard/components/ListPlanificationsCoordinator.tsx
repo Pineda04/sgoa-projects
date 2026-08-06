@@ -27,12 +27,11 @@ export const ListPlanificationsCoordinator = ({
 		return uniqueYears.sort((a, b) => b - a);
 	}, [periods]);
 
-	const { isLoading, data } =
-		useGetAcademicAssignmentCoordinatorOnlyPeriods(
-			centerDepartmentId,
-			yearFilter || undefined,
-			pacFilter || undefined
-		);
+	const { isLoading, data } = useGetAcademicAssignmentCoordinatorOnlyPeriods(
+		centerDepartmentId,
+		yearFilter || undefined,
+		pacFilter || undefined
+	);
 
 	return (
 		<div className="space-y-4">

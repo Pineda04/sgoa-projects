@@ -1,11 +1,24 @@
 import { useMemo, useState } from 'react';
-import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import {
+	PencilSquareIcon,
+	TrashIcon,
+	PlusIcon,
+} from '@heroicons/react/24/outline';
 import { CreateAcademicPeriodModal } from '../components/CreateAcademicPeriodModal';
 import { EditAcademicPeriodModal } from '../components/EditAcademicPeriodModal';
 import { DeleteAcademicPeriodModal } from '../components/DeleteAcademicPeriodModal';
 import { useModal, usePaginationParams } from '@shared/hooks';
-import { TCurrentAcademicPeriod, useDeleteAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
-import { Button, DataTable, IDataTableColumn, Loading } from '@shared/components';
+import {
+	TCurrentAcademicPeriod,
+	useDeleteAcademicPeriod,
+	useGetAcademicPeriods,
+} from '@api/periods';
+import {
+	Button,
+	DataTable,
+	IDataTableColumn,
+	Loading,
+} from '@shared/components';
 import { ESwalIcons, genericAlert } from '@shared/utils';
 import { useAbility } from '@config/lib';
 
@@ -23,7 +36,9 @@ export const AcademicPeriodsList = () => {
 	const [isCreateOpen, openCreate, closeCreate] = useModal();
 	const [isEditOpen, openEdit, closeEdit] = useModal();
 	const [isDeleteOpen, openDelete, closeDelete] = useModal();
-	const [selected, setSelected] = useState<TCurrentAcademicPeriod | null>(null);
+	const [selected, setSelected] = useState<TCurrentAcademicPeriod | null>(
+		null
+	);
 
 	const ability = useAbility();
 	const canCreate = ability.can('create', 'periods');
@@ -49,7 +64,8 @@ export const AcademicPeriodsList = () => {
 		pacFilter || undefined,
 		modalityFilter || undefined
 	);
-	const { mutate: deletePeriod, isPending: isDeleting } = useDeleteAcademicPeriod();
+	const { mutate: deletePeriod, isPending: isDeleting } =
+		useDeleteAcademicPeriod();
 
 	const handleOpenEdit = (period: TCurrentAcademicPeriod) => {
 		setSelected(period);
@@ -106,13 +122,15 @@ export const AcademicPeriodsList = () => {
 			key: 'startDate',
 			header: 'Fecha Inicio',
 			className: 'text-gray-800 font-normal p-4',
-			render: (period: TCurrentAcademicPeriod) => formatDate(period.startDate),
+			render: (period: TCurrentAcademicPeriod) =>
+				formatDate(period.startDate),
 		},
 		{
 			key: 'endDate',
 			header: 'Fecha Fin',
 			className: 'text-gray-800 font-normal p-4',
-			render: (period: TCurrentAcademicPeriod) => formatDate(period.endDate),
+			render: (period: TCurrentAcademicPeriod) =>
+				formatDate(period.endDate),
 		},
 		...(canUpdate || canDelete
 			? [
@@ -231,7 +249,10 @@ export const AcademicPeriodsList = () => {
 				/>
 			)}
 
-			<CreateAcademicPeriodModal isOpen={isCreateOpen} onClose={closeCreate} />
+			<CreateAcademicPeriodModal
+				isOpen={isCreateOpen}
+				onClose={closeCreate}
+			/>
 
 			<EditAcademicPeriodModal
 				isOpen={isEditOpen}

@@ -9,9 +9,7 @@ import { normalizeText } from 'src/common/utils';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidNameDepartmentConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidNameDepartmentConstraint implements ValidatorConstraintInterface {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   async validate(name: string, args?: ValidationArguments): Promise<boolean> {

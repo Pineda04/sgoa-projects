@@ -32,7 +32,11 @@ export const useAnalyticsFilterOptions = (
 ) => {
 	const userId = useAnalyticsUserId();
 	return useQuery({
-		...analyticsOptions.filterOptions(userId, centerDepartmentId, buildingId),
+		...analyticsOptions.filterOptions(
+			userId,
+			centerDepartmentId,
+			buildingId
+		),
 		enabled: config?.enabled,
 	});
 };

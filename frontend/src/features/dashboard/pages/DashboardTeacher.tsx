@@ -279,8 +279,8 @@ export const DashboardTeacher = () => {
 				</TabsContent>
 
 				{/* Aulas */}
-        <TabsContent value="2">
-          <ListClassrooms showHeader={false} />
+				<TabsContent value="2">
+					<ListClassrooms showHeader={false} />
 				</TabsContent>
 			</Tabs>
 		</div>

@@ -109,9 +109,7 @@ export const EditBuildingModal = ({
 							<input
 								type="color"
 								value={
-									/^#[0-9a-fA-F]{6}$/.test(color)
-										? color
-										: ''
+									/^#[0-9a-fA-F]{6}$/.test(color) ? color : ''
 								}
 								onChange={e => setColor(e.target.value)}
 								className="w-12 h-10 p-0 cursor-pointer shrink-0"
@@ -121,7 +119,7 @@ export const EditBuildingModal = ({
 								type="text"
 								value={color}
 								onChange={e => setColor(e.target.value)}
-								placeholder='Ej. #ff5733 o Celeste y azul'
+								placeholder="Ej. #ff5733 o Celeste y azul"
 								className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-green-200 focus:border-transparent text-sm"
 								disabled={isPending}
 							/>
@@ -138,7 +136,11 @@ export const EditBuildingModal = ({
 							value={floors}
 							onChange={e => {
 								const val = e.target.value;
-								if (val === '' || (Number(val) >= 0 && Number.isInteger(Number(val)))) {
+								if (
+									val === '' ||
+									(Number(val) >= 0 &&
+										Number.isInteger(Number(val)))
+								) {
 									setFloors(val);
 								}
 							}}

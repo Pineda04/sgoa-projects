@@ -23,7 +23,8 @@ export const DeleteAirConditionerModal = ({
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-4">
 				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
-					¿Estás seguro que quieres eliminar el aire acondicionado ubicado en{' '}
+					¿Estás seguro que quieres eliminar el aire acondicionado
+					ubicado en{' '}
 					<span className="font-medium text-gray-800">
 						{classroomName ?? '—'}
 					</span>{' '}

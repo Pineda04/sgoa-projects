@@ -1,6 +1,6 @@
-import { TAssignmentReport } from "@api/assignment-reports";
-import { TCurrentAcademicPeriod } from "@api/periods";
-import { TOutputTeacher, TTeacherPosition } from "@api/teachers";
+import { TAssignmentReport } from '@api/assignment-reports';
+import { TCurrentAcademicPeriod } from '@api/periods';
+import { TOutputTeacher, TTeacherPosition } from '@api/teachers';
 
 export interface ILastAutoTable {
 	finalY: number;

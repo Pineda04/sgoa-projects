@@ -19,7 +19,8 @@ export default defineConfig({
 			manifest: {
 				name: 'SGOA — Sistema de Gestión de Operaciones Académicas',
 				short_name: 'SGOA',
-				description: 'Sistema de monitoreo y seguimiento académico UNAH',
+				description:
+					'Sistema de monitoreo y seguimiento académico UNAH',
 				theme_color: '#ffffff',
 				background_color: '#ffffff',
 				display: 'standalone',
@@ -42,12 +43,12 @@ export default defineConfig({
 		allowedHosts: ['kellee-unbragging-angela.ngrok-free.dev'],
 	},
 	resolve: {
-    alias: {
-      '@api': resolve(__dirname, './src/api'),
-      '@config': resolve(__dirname, './src/config'),
-      '@features': resolve(__dirname, './src/features'),
-      '@router': resolve(__dirname, './src/router'),
-      '@shared': resolve(__dirname, './src/shared'),
+		alias: {
+			'@api': resolve(__dirname, './src/api'),
+			'@config': resolve(__dirname, './src/config'),
+			'@features': resolve(__dirname, './src/features'),
+			'@router': resolve(__dirname, './src/router'),
+			'@shared': resolve(__dirname, './src/shared'),
 		},
 	},
 });

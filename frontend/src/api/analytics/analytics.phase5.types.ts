@@ -1,4 +1,7 @@
-import type { AnalyticsMetricNote, AnalyticsMetricResult } from './analytics.types';
+import type {
+	AnalyticsMetricNote,
+	AnalyticsMetricResult,
+} from './analytics.types';
 import type { DigitalBlackboardUseStatus } from '../monitor/monitor.types';
 
 export interface MonitoringFilters {

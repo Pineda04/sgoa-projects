@@ -55,7 +55,8 @@ const NOTE_LABELS = {
 	current_classroom_catalog: 'Catálogo actual de aulas aplicado',
 	current_inventory_catalog: 'Catálogo actual de inventario aplicado',
 	potential_technology_coverage: 'Cobertura tecnológica potencial',
-	section_enrollments_not_unique_students: 'Matrículas por sección, no estudiantes únicos',
+	section_enrollments_not_unique_students:
+		'Matrículas por sección, no estudiantes únicos',
 	current_staff_attributes: 'Atributos actuales del personal',
 	current_position_catalog: 'Catálogo actual de cargos',
 	current_activity_type_catalog: 'Catálogo actual de tipos de actividad',
@@ -186,7 +187,11 @@ const StatusInfo = ({
 					</p>
 					{reasons.length ? (
 						<p className="mt-2 text-xs font-medium text-foreground">
-							Motivo: {reasons.map(reason => COVERAGE_REASON_LABELS[reason]).join(', ')}.
+							Motivo:{' '}
+							{reasons
+								.map(reason => COVERAGE_REASON_LABELS[reason])
+								.join(', ')}
+							.
 						</p>
 					) : null}
 					<Popover.Arrow className="fill-card" />
@@ -221,10 +226,13 @@ export const MetricCard = ({
 					coverage={currentCoverage}
 				/>
 			</div>
-			<p className={`mt-3 font-semibold tabular-nums text-card-foreground ${metric.value === null ? 'text-base' : 'text-3xl'}`}>
+			<p
+				className={`mt-3 font-semibold tabular-nums text-card-foreground ${metric.value === null ? 'text-base' : 'text-3xl'}`}
+			>
 				{formattedNumber(metric.value, metric.unit, nullLabel)}
 			</p>
-			{metric.numerator !== undefined && metric.denominator !== undefined ? (
+			{metric.numerator !== undefined &&
+			metric.denominator !== undefined ? (
 				<p className="mt-2 text-xs text-muted-foreground">
 					Relación:{' '}
 					<span className="font-semibold tabular-nums text-foreground">
@@ -238,11 +246,15 @@ export const MetricCard = ({
 					{description}
 				</p>
 			) : null}
-			{showNotes && metric.notes?.map(note => (
-				<p key={note} className="mt-2 text-xs font-medium text-muted-foreground">
-					{NOTE_LABELS[note]}
-				</p>
-			))}
+			{showNotes &&
+				metric.notes?.map(note => (
+					<p
+						key={note}
+						className="mt-2 text-xs font-medium text-muted-foreground"
+					>
+						{NOTE_LABELS[note]}
+					</p>
+				))}
 			{metric.comparison ? (
 				<div className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
 					<div className="flex items-center justify-between gap-2">
@@ -269,7 +281,10 @@ export const MetricCard = ({
 					<p className="mt-1">
 						Diferencia:{' '}
 						<span className="font-semibold text-foreground">
-							{signedNumber(metric.comparison.absoluteChange, metric.unit)}
+							{signedNumber(
+								metric.comparison.absoluteChange,
+								metric.unit
+							)}
 						</span>{' '}
 						·{' '}
 						{metric.comparison.percentageChange === null

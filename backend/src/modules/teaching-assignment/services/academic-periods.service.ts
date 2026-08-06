@@ -32,8 +32,7 @@ export class AcademicPeriodsService {
   async create(
     createAcademicPeriodDto: CreateAcademicPeriodDto,
   ): Promise<TCreateAcademicPeriod> {
-
-        const { startDate, endDate, year } = createAcademicPeriodDto;
+    const { startDate, endDate, year } = createAcademicPeriodDto;
 
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -47,13 +46,13 @@ export class AcademicPeriodsService {
     const endYear = end.getFullYear();
     const startYear = start.getFullYear();
 
-    if ( year !=  startYear) {
+    if (year != startYear) {
       throw new BadRequestException(
         'La fecha de inicio no encaja con el año especificado.',
       );
-    }    
-    
-    if ( year !=  endYear) {
+    }
+
+    if (year != endYear) {
       throw new BadRequestException(
         'La fecha de fin no encaja con el año especificado.',
       );
@@ -73,12 +72,16 @@ export class AcademicPeriodsService {
     pac?: string,
     pac_modality?: string,
   ): Promise<TAcademicPeriod[]> {
-   // await this.currentAcademicPeriod(); Kenneth: Comentado porque literalmente no se para que llama este servicio, solo estorba en el caso de que no haya un trimestre registrado.
+    // await this.currentAcademicPeriod(); Kenneth: Comentado porque literalmente no se para que llama este servicio, solo estorba en el caso de que no haya un trimestre registrado.
 
     // Validate year parameter
     if (year !== undefined) {
       const trimmedYear = year.trim();
-      if (trimmedYear === '' || !/^\d+$/.test(trimmedYear) || isNaN(parseInt(trimmedYear))) {
+      if (
+        trimmedYear === '' ||
+        !/^\d+$/.test(trimmedYear) ||
+        isNaN(parseInt(trimmedYear))
+      ) {
         throw new BadRequestException(
           'El valor de <year> debe ser un número entero válido.',
         );
@@ -88,7 +91,11 @@ export class AcademicPeriodsService {
     // Validate pac parameter
     if (pac !== undefined) {
       const trimmedPac = pac.trim();
-      if (trimmedPac === '' || !/^\d+$/.test(trimmedPac) || isNaN(parseInt(trimmedPac))) {
+      if (
+        trimmedPac === '' ||
+        !/^\d+$/.test(trimmedPac) ||
+        isNaN(parseInt(trimmedPac))
+      ) {
         throw new BadRequestException(
           'El valor de <pac> debe ser un número entero válido.',
         );
@@ -155,8 +162,6 @@ export class AcademicPeriodsService {
     id: string,
     updateAcademicPeriodDto: UpdateAcademicPeriodDto,
   ): Promise<TUpdateAcademicPeriod> {
-
-
     const academicPeriod = await this.prisma.academicPeriod.findUnique({
       where: {
         id,
@@ -168,7 +173,6 @@ export class AcademicPeriodsService {
         `El periodo académico con id <${id}> no fue encontrado.`,
       );
 
-
     const mergedAcademicPeriod = {
       ...academicPeriod,
       ...updateAcademicPeriodDto,
@@ -176,8 +180,13 @@ export class AcademicPeriodsService {
 
     const { startDate, endDate, year } = mergedAcademicPeriod;
 
-    if (isNaN(Date.parse(String(startDate))) || isNaN(Date.parse(String(endDate)))) {
-      throw new BadRequestException('Las fechas proporcionadas no son válidas.');
+    if (
+      isNaN(Date.parse(String(startDate))) ||
+      isNaN(Date.parse(String(endDate)))
+    ) {
+      throw new BadRequestException(
+        'Las fechas proporcionadas no son válidas.',
+      );
     }
 
     const start = new Date(startDate);
@@ -192,13 +201,13 @@ export class AcademicPeriodsService {
     const endYear = end.getFullYear();
     const startYear = start.getFullYear();
 
-    if ( year !=  startYear) {
+    if (year != startYear) {
       throw new BadRequestException(
         'La fecha de inicio no encaja con el año especificado.',
       );
     }
 
-    if ( year !=  endYear) {
+    if (year != endYear) {
       throw new BadRequestException(
         'La fecha de fin no encaja con el año especificado.',
       );
@@ -268,7 +277,6 @@ export class AcademicPeriodsService {
     // return currentPeriod;
 
     const year = getYear(localDate);
-
 
     return {
       id: period.id,

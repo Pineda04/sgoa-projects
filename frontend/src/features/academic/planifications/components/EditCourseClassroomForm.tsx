@@ -258,7 +258,9 @@ export const EditCourseClassroomForm = ({
 					<label className="block mb-2 font-bold">Sección</label>
 					<ScheduleRangeField
 						value={formik.values.section}
-						onChange={value => formik.setFieldValue('section', value)}
+						onChange={value =>
+							formik.setFieldValue('section', value)
+						}
 						onBlur={() => formik.setFieldTouched('section', true)}
 					/>
 					{formik.touched.section && formik.errors.section && (
@@ -404,7 +406,8 @@ export const EditCourseClassroomForm = ({
 					classroomId={formik.values.classroomId}
 					classroomName={formik.values.classroomName}
 					defaultPeriodId={
-						courseClassroom.teachingSession.assignmentReport.periodId
+						courseClassroom.teachingSession.assignmentReport
+							.periodId
 					}
 				/>
 			)}

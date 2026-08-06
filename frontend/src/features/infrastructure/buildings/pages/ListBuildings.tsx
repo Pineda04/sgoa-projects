@@ -147,7 +147,9 @@ export const ListBuildings = () => {
 								)}
 								{canDelete && (
 									<button
-										onClick={() => handleOpenDelete(building)}
+										onClick={() =>
+											handleOpenDelete(building)
+										}
 										className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
 										title="Eliminar edificio"
 									>
@@ -164,14 +166,14 @@ export const ListBuildings = () => {
 	return (
 		<div className="pb-8 sm:pb-12">
 			{/* ENCABEZADO */}
-      <div className="flex justify-between items-end mb-5">
-        <div>
+			<div className="flex justify-between items-end mb-5">
+				<div>
 					<h1 className="text-2xl font-bold text-foreground">
-					Gestión de Edificios
+						Gestión de Edificios
 					</h1>
 					<p className="text-muted-foreground mt-1">
-					Administración de la infraestructura física y edificios
-					de la institución.
+						Administración de la infraestructura física y edificios
+						de la institución.
 					</p>
 				</div>
 				{canCreate && (

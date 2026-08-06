@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { academicAssignmentAuthoritiesKeys, academicAssignmentCoordinatorKeys, academicAssignmentReportsKeys } from './assignment-reports.keys';
+import {
+	academicAssignmentAuthoritiesKeys,
+	academicAssignmentCoordinatorKeys,
+	academicAssignmentReportsKeys,
+} from './assignment-reports.keys';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared';
 import { academicAssignmentReportsApi } from './assignment-reports.api';

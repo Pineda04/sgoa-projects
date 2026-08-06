@@ -44,8 +44,7 @@ export const ListDigitalBlackboards = () => {
 			{/* TABLA */}
 			{isError ? (
 				<p className="text-sm text-red-500">
-					Error al cargar las pizarras digitales. Intenta
-					nuevamente.
+					Error al cargar las pizarras digitales. Intenta nuevamente.
 				</p>
 			) : (
 				<DigitalBlackboardsTable

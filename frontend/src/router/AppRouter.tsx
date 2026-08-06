@@ -16,7 +16,10 @@ import {
 } from '@features/admin';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
-import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
+import {
+	AcademicAssignmentReport,
+	MonitorReport,
+} from '@features/academic/reports/pages';
 import { centersRoutes } from '@features/infrastructure/centers/routes';
 import { pcEquipmentsRoutes } from '@features/inventory/pc-equipments/routes';
 import { PrivateRoute } from './PrivateRoute';
@@ -31,7 +34,10 @@ import {
 } from '@features/dashboard';
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
-import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
+import {
+	airConditionersRoutes,
+	digitalBlackboardsRoutes,
+} from '@features/inventory';
 import { catalogRoutes, CATALOG_SUBJECTS } from '@features/others';
 import { analyticsRoutes } from '@features/analytics';
 
@@ -73,31 +79,43 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'dashboard/authorities',
-			element: <ProtectedRoute action="read" subject="dashboard-authorities" />,
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-authorities" />
+			),
 			children: [{ index: true, element: <DashboardAuthorities /> }],
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'dashboard/coordinator',
-			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
-			children: [{ index: true, element: <RedirectToDefaultDepartment /> }],
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-coordinator" />
+			),
+			children: [
+				{ index: true, element: <RedirectToDefaultDepartment /> },
+			],
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'dashboard/coordinator/:centerDepartmentId',
-			element: <ProtectedRoute action="read" subject="dashboard-coordinator" />,
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-coordinator" />
+			),
 			children: [{ index: true, element: <DashboardCoordinator /> }],
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'dashboard/teacher',
-			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-teacher" />
+			),
 			children: [{ index: true, element: <DashboardTeacher /> }],
 			errorElement: <div>404</div>,
 		},
 		{
 			path: 'dashboard/monitor',
-			element: <ProtectedRoute action="read" subject="dashboard-monitor" />,
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-monitor" />
+			),
 			children: [{ index: true, element: <DashboardMonitor /> }],
 			errorElement: <div>404</div>,
 		},
@@ -115,7 +133,9 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'academic/reports/teacher/:id',
-			element: <ProtectedRoute action="read" subject="dashboard-teacher" />,
+			element: (
+				<ProtectedRoute action="read" subject="dashboard-teacher" />
+			),
 			children: [{ index: true, element: <AcademicAssignmentReport /> }],
 			errorElement: <div>404</div>,
 		},
@@ -198,13 +218,17 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'inventory/air-conditioners/*',
-			element: <ProtectedRoute action='read' subject='air-conditioners' />,
+			element: (
+				<ProtectedRoute action="read" subject="air-conditioners" />
+			),
 			children: airConditionersRoutes,
-			errorElement: <div>404</div>
+			errorElement: <div>404</div>,
 		},
 		{
 			path: 'inventory/digital-blackboards/*',
-			element: <ProtectedRoute action="read" subject="digital-blackboards" />,
+			element: (
+				<ProtectedRoute action="read" subject="digital-blackboards" />
+			),
 			children: digitalBlackboardsRoutes,
 			errorElement: <div>404</div>,
 		},

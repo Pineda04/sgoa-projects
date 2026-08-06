@@ -84,7 +84,9 @@ export function ResponsiveTable<T>({
 					{data.length === 0 ? (
 						<tr>
 							<td
-								colSpan={columns.length + (showRowNumber ? 1 : 0)}
+								colSpan={
+									columns.length + (showRowNumber ? 1 : 0)
+								}
 								className="py-8 text-muted-foreground"
 							>
 								{emptyMessage}
@@ -114,7 +116,10 @@ export function ResponsiveTable<T>({
 									>
 										{col.render
 											? col.render(row, index)
-											: (getNestedValue(row, col.key) as ReactNode)}
+											: (getNestedValue(
+													row,
+													col.key
+												) as ReactNode)}
 									</td>
 								))}
 							</tr>
@@ -145,22 +150,34 @@ export function ResponsiveTable<T>({
 						>
 							{showRowNumber && (
 								<div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
-									<span className="text-xs font-medium text-muted-foreground">#</span>
-									<span className="font-semibold text-primary">{index + 1}</span>
+									<span className="text-xs font-medium text-muted-foreground">
+										#
+									</span>
+									<span className="font-semibold text-primary">
+										{index + 1}
+									</span>
 								</div>
 							)}
 							<dl className="min-w-0 space-y-2">
 								{columns
 									.filter(col => !col.hiddenOnMobile)
 									.map(col => (
-										<div key={col.key} className="grid min-w-0 grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-start gap-2">
+										<div
+											key={col.key}
+											className="grid min-w-0 grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-start gap-2"
+										>
 											<dt className="text-xs text-muted-foreground shrink-0">
 												{col.mobileLabel || col.header}
 											</dt>
 											<dd className="min-w-0 break-words text-right text-sm font-medium text-foreground [overflow-wrap:anywhere]">
 												{col.render
 													? col.render(row, index)
-													: String(getNestedValue(row, col.key) ?? '-')}
+													: String(
+															getNestedValue(
+																row,
+																col.key
+															) ?? '-'
+														)}
 											</dd>
 										</div>
 									))}

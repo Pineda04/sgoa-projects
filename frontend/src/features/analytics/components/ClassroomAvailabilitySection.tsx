@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, CircleHelp } from 'lucide-react';
 import type { IResponsiveColumn } from '@shared/components';
-import {
-	Button,
-	PaginationControls,
-	DataTable,
-} from '@shared/components';
+import { Button, PaginationControls, DataTable } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
 	analyticsApi,
@@ -103,15 +99,18 @@ const Conflicts = ({ row }: { row: ClassroomAvailabilityRow }) => {
 				>
 					{conflict.visibility === 'restricted' ? (
 						<p>
-							Clase fuera de tu alcance · {conflict.startTime} - {conflict.endTime}
+							Clase fuera de tu alcance · {conflict.startTime} -{' '}
+							{conflict.endTime}
 						</p>
 					) : (
 						<>
 							<p className="font-semibold text-foreground">
-								{conflict.courseName} ({conflict.courseCode}) · Grupo{' '}
-								{conflict.groupCode}
+								{conflict.courseName} ({conflict.courseCode}) ·
+								Grupo {conflict.groupCode}
 							</p>
-							<p className="mt-1 text-muted-foreground">{conflict.teacherName}</p>
+							<p className="mt-1 text-muted-foreground">
+								{conflict.teacherName}
+							</p>
 							<p className="text-muted-foreground">
 								{conflict.startTime} - {conflict.endTime}
 							</p>
@@ -169,7 +168,9 @@ const COLUMNS = [
 		render: (row: ClassroomAvailabilityRow) => (
 			<div className="text-left">
 				<p>{row.buildingName}</p>
-				<p className="text-xs text-muted-foreground">{row.centerName}</p>
+				<p className="text-xs text-muted-foreground">
+					{row.centerName}
+				</p>
 			</div>
 		),
 	},
@@ -236,11 +237,12 @@ export const ClassroomAvailabilitySection = () => {
 		if (!classroomFilters) return;
 		setIsExporting(true);
 		try {
-			const response = await analyticsApi.exportClassroomAvailabilityDetails({
-				metric: 'classroom_availability',
-				...classroomFilters,
-				sort: classroomSort,
-			});
+			const response =
+				await analyticsApi.exportClassroomAvailabilityDetails({
+					metric: 'classroom_availability',
+					...classroomFilters,
+					sort: classroomSort,
+				});
 			downloadBlob(
 				response.data,
 				`analytics-disponibilidad-aulas-${classroomFilters.periodId}.xlsx`
@@ -272,7 +274,9 @@ export const ClassroomAvailabilitySection = () => {
 						<span className="mb-1.5 block">Día</span>
 						<select
 							value={values.dayOfWeek}
-							onChange={event => setClassroomDayOfWeek(event.target.value)}
+							onChange={event =>
+								setClassroomDayOfWeek(event.target.value)
+							}
 							className="min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						>
 							{DAYS.map(day => (
@@ -287,7 +291,9 @@ export const ClassroomAvailabilitySection = () => {
 						<input
 							type="time"
 							value={values.startTime}
-							onChange={event => setClassroomStartTime(event.target.value)}
+							onChange={event =>
+								setClassroomStartTime(event.target.value)
+							}
 							className="min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
 					</label>
@@ -296,15 +302,17 @@ export const ClassroomAvailabilitySection = () => {
 						<input
 							type="time"
 							value={values.endTime}
-							onChange={event => setClassroomEndTime(event.target.value)}
+							onChange={event =>
+								setClassroomEndTime(event.target.value)
+							}
 							className="min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
 					</label>
 				</div>
 				{!classroomRangeIsValid ? (
 					<p className="mt-3 text-sm font-medium text-destructive">
-						Ingresa horas válidas y asegúrate de que la hora de inicio sea menor
-						que la hora de fin.
+						Ingresa horas válidas y asegúrate de que la hora de
+						inicio sea menor que la hora de fin.
 					</p>
 				) : null}
 			</div>
@@ -324,7 +332,8 @@ export const ClassroomAvailabilitySection = () => {
 				</p>
 			) : !classroomRangeIsValid ? null : summary.isError ? (
 				<div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-					No fue posible cargar los indicadores de disponibilidad de aulas.
+					No fue posible cargar los indicadores de disponibilidad de
+					aulas.
 				</div>
 			) : summary.isPending ? (
 				<AnalyticsSummarySkeleton
@@ -355,7 +364,9 @@ export const ClassroomAvailabilitySection = () => {
 									? `${details.data.meta.total} aula${details.data.meta.total === 1 ? '' : 's'}`
 									: 'Detalle paginado'}
 							</p>
-							{details.data?.notes.includes('current_classroom_catalog') ? (
+							{details.data?.notes.includes(
+								'current_classroom_catalog'
+							) ? (
 								<p className="mt-1 text-xs font-medium text-muted-foreground">
 									Catálogo actual de aulas aplicado
 								</p>
@@ -366,25 +377,34 @@ export const ClassroomAvailabilitySection = () => {
 								<span className="shrink-0">Ordenar por:</span>
 								<select
 									value={classroomSort}
-									onChange={event => handleSortChange(event.target.value)}
+									onChange={event =>
+										handleSortChange(event.target.value)
+									}
 									className="min-h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-normal text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 								>
 									{SORT_OPTIONS.map(option => (
-										<option key={option.value} value={option.value}>
+										<option
+											key={option.value}
+											value={option.value}
+										>
 											{option.label}
 										</option>
 									))}
 								</select>
 							</label>
 							{options?.capabilities.canExport ? (
-								<AnalyticsExportButton onClick={handleExport} isExporting={isExporting} />
+								<AnalyticsExportButton
+									onClick={handleExport}
+									isExporting={isExporting}
+								/>
 							) : null}
 						</div>
 					</div>
 
 					{details.isError ? (
 						<div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-							No fue posible cargar el detalle de disponibilidad de aulas.
+							No fue posible cargar el detalle de disponibilidad
+							de aulas.
 						</div>
 					) : isPageOutOfRange ? (
 						<div className="rounded-xl border border-card-border bg-muted px-5 py-8 text-center">

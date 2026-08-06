@@ -49,12 +49,15 @@ import type {
 
 export const analyticsApi = {
 	getFilterOptions: (centerDepartmentId?: string, buildingId?: string) =>
-		api.get<IResponse<AnalyticsFilterOptions>>('/analytics/filter-options', {
-			params:
-				centerDepartmentId || buildingId
-					? { centerDepartmentId, buildingId }
-					: undefined,
-		}),
+		api.get<IResponse<AnalyticsFilterOptions>>(
+			'/analytics/filter-options',
+			{
+				params:
+					centerDepartmentId || buildingId
+						? { centerDepartmentId, buildingId }
+						: undefined,
+			}
+		),
 	getAcademicLoad: (filters: AcademicLoadFilters) =>
 		api.get<IResponse<AcademicLoadSummary>>('/analytics/academic-load', {
 			params: filters,
@@ -83,9 +86,12 @@ export const analyticsApi = {
 			responseType: 'blob',
 		}),
 	getClassroomAvailability: (filters: ClassroomAvailabilityFilters) =>
-		api.get<IResponse<ClassroomAvailabilitySummary>>('/analytics/classrooms', {
-			params: filters,
-		}),
+		api.get<IResponse<ClassroomAvailabilitySummary>>(
+			'/analytics/classrooms',
+			{
+				params: filters,
+			}
+		),
 	getClassroomAvailabilityDetails: (
 		filters: ClassroomAvailabilityDetailsFilters
 	) =>
@@ -129,7 +135,9 @@ export const analyticsApi = {
 			responseType: 'blob',
 		}),
 	getStaff: (filters: StaffFilters) =>
-		api.get<IResponse<StaffSummary>>('/analytics/staff', { params: filters }),
+		api.get<IResponse<StaffSummary>>('/analytics/staff', {
+			params: filters,
+		}),
 	getStaffDetails: (filters: StaffDetailsFilters) =>
 		api.get<IResponse<StaffDetails>>('/analytics/staff/details', {
 			params: filters,

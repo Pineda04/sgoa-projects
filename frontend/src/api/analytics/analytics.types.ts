@@ -70,16 +70,14 @@ export interface StaffDomainFilterContext extends AnalyticsDomainFilterContext {
 	};
 }
 
-export interface ActivitiesDomainFilterContext
-	extends AnalyticsDomainFilterContext {
+export interface ActivitiesDomainFilterContext extends AnalyticsDomainFilterContext {
 	catalogs: {
 		activityTypes: AnalyticsCatalogOption[];
 		availableYears: number[];
 	};
 }
 
-export interface MonitoringDomainFilterContext
-	extends AnalyticsDomainFilterContext {
+export interface MonitoringDomainFilterContext extends AnalyticsDomainFilterContext {
 	filters: AnalyticsDomainFilterContext['filters'] & {
 		buildingId: AnalyticsFilterMode;
 	};
@@ -93,7 +91,9 @@ export interface MonitoringDomainFilterContext
 
 export interface AnalyticsFilterOptions {
 	domains: AnalyticsDomain[];
-	domainContexts: Partial<Record<AnalyticsDomain, AnalyticsDomainFilterContext>> & {
+	domainContexts: Partial<
+		Record<AnalyticsDomain, AnalyticsDomainFilterContext>
+	> & {
 		staff?: StaffDomainFilterContext;
 		activities?: ActivitiesDomainFilterContext;
 		monitoring?: MonitoringDomainFilterContext;
@@ -451,8 +451,7 @@ export type ClassroomAvailabilityMetricKey =
 	| 'indeterminateClassrooms'
 	| 'occupancyRate';
 
-export interface ClassroomAvailabilitySummary
-	extends ClassroomAvailabilityFilters {
+export interface ClassroomAvailabilitySummary extends ClassroomAvailabilityFilters {
 	notes: AnalyticsMetricNote[];
 	metrics: Record<ClassroomAvailabilityMetricKey, AnalyticsMetricResult>;
 }
@@ -490,16 +489,14 @@ export const isClassroomAvailabilitySort = (
 	}
 };
 
-export interface ClassroomAvailabilityDetailsFilters
-	extends ClassroomAvailabilityFilters {
+export interface ClassroomAvailabilityDetailsFilters extends ClassroomAvailabilityFilters {
 	metric: 'classroom_availability';
 	page?: string;
 	size?: string;
 	sort?: ClassroomAvailabilitySort;
 }
 
-export interface ClassroomAvailabilityExportFilters
-	extends ClassroomAvailabilityFilters {
+export interface ClassroomAvailabilityExportFilters extends ClassroomAvailabilityFilters {
 	metric: 'classroom_availability';
 	sort?: ClassroomAvailabilitySort;
 }
@@ -551,8 +548,7 @@ export interface ClassroomAvailabilityRow {
 	scheduleIssues: ClassroomScheduleIssue[];
 }
 
-export interface ClassroomAvailabilityDetails
-	extends ClassroomAvailabilityFilters {
+export interface ClassroomAvailabilityDetails extends ClassroomAvailabilityFilters {
 	metric: 'classroom_availability';
 	notes: AnalyticsMetricNote[];
 	rows: ClassroomAvailabilityRow[];

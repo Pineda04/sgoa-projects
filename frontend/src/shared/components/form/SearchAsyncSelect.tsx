@@ -38,7 +38,6 @@ const promiseOptions = <T,>(
 	);
 };
 
-
 export const SearchAsyncSelect = <T,>({
 	hook,
 	handleChange,
@@ -94,10 +93,15 @@ export const SearchAsyncSelect = <T,>({
 	};
 
 	return (
-    <Select
-      styles={{
-        control: (baseStyles) => ({ ...baseStyles, cursor: 'text', outline: 'none', boxShadow: 'none' }),
-      }}
+		<Select
+			styles={{
+				control: baseStyles => ({
+					...baseStyles,
+					cursor: 'text',
+					outline: 'none',
+					boxShadow: 'none',
+				}),
+			}}
 			components={{
 				DropdownIndicator: () => (
 					<IoSearch className="size-5 mx-2 text-gray-400 shrink-0" />

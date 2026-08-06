@@ -1,12 +1,12 @@
-import { TCenter } from '../centers/centers.types'; 
+import { TCenter } from '../centers/centers.types';
 
 export type TBuilding = {
-    id: string;
-    name: string;
-    color: string | null;
-    floors: string | null;
-    centerId: string;
-    center?: TCenter; 
+	id: string;
+	name: string;
+	color: string | null;
+	floors: string | null;
+	centerId: string;
+	center?: TCenter;
 };
 
 export type TCreateBuilding = Omit<TBuilding, 'id' | 'center' | 'classrooms'>;

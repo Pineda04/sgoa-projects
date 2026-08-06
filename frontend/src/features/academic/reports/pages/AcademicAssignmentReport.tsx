@@ -112,8 +112,12 @@ export const AcademicAssignmentReport = () => {
 				</h1>
 			</div>
 			<div className="flex flex-col items-center sm:flex-row gap-2 mt-4">
-				<Button onClick={() => navigate(-1)} variant="outline" className='bg-white hover:bg-white/50'>
-          <ArrowLeftIcon className="size-5" />
+				<Button
+					onClick={() => navigate(-1)}
+					variant="outline"
+					className="bg-white hover:bg-white/50"
+				>
+					<ArrowLeftIcon className="size-5" />
 				</Button>
 				<Button
 					type="submit"

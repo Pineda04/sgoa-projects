@@ -14,14 +14,23 @@ interface SummaryCardProps {
 	accentClassName: string;
 }
 
-const SummaryCard = ({ label, value, icon, accentClassName }: SummaryCardProps) => (
+const SummaryCard = ({
+	label,
+	value,
+	icon,
+	accentClassName,
+}: SummaryCardProps) => (
 	<div className="flex items-center gap-2 rounded-xl border border-card-border bg-card p-3 shadow-sm sm:gap-3 sm:p-4">
-		<div className={`flex size-9 shrink-0 items-center justify-center rounded-lg sm:size-10 ${accentClassName}`}>
+		<div
+			className={`flex size-9 shrink-0 items-center justify-center rounded-lg sm:size-10 ${accentClassName}`}
+		>
 			{icon}
 		</div>
 		<div className="min-w-0">
 			<p className="truncate text-xs text-muted-foreground">{label}</p>
-			<p className="truncate text-lg font-semibold text-foreground sm:text-xl">{value}</p>
+			<p className="truncate text-lg font-semibold text-foreground sm:text-xl">
+				{value}
+			</p>
 		</div>
 	</div>
 );

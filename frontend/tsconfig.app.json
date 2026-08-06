@@ -34,7 +34,7 @@
 			"@router/*": ["src/router/*"],
 			"@router": ["src/router/index"],
 			"@shared/*": ["src/shared/*"],
-			"@shared": ["src/shared/index"],
+			"@shared": ["src/shared/index"]
 		}
 	},
 	"include": ["src", "**/*.tsx", "**/*.ts"]

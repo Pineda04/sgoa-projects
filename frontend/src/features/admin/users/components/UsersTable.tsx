@@ -1,7 +1,12 @@
 import { EyeIcon, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { UserView } from './UserView';
-import { TOutputTeacher, useGetAllTeacherCategories, useGetTeachers, useGetTeachersCoordinator } from '@api/teachers';
+import {
+	TOutputTeacher,
+	useGetAllTeacherCategories,
+	useGetTeachers,
+	useGetTeachersCoordinator,
+} from '@api/teachers';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 import {
@@ -42,8 +47,13 @@ export const UsersTable = ({
 		contractTypeId: contractTypeFilter || undefined,
 	};
 
-	const teachersQuery = useGetTeachers(filterParams, { enabled: !centerDepartmentId });
-	const teachersCoordinatorQuery = useGetTeachersCoordinator(centerDepartmentId ?? '', filterParams);
+	const teachersQuery = useGetTeachers(filterParams, {
+		enabled: !centerDepartmentId,
+	});
+	const teachersCoordinatorQuery = useGetTeachersCoordinator(
+		centerDepartmentId ?? '',
+		filterParams
+	);
 
 	const { data, isLoading, isError } = centerDepartmentId
 		? teachersCoordinatorQuery

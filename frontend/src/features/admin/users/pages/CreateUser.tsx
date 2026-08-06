@@ -349,11 +349,9 @@ export const CreateUser = () => {
 						<Button
 							type="submit"
 							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-            >
-              <FiSave className="size-4" />
-              <span>
-                Guardar Usuario
-              </span>
+						>
+							<FiSave className="size-4" />
+							<span>Guardar Usuario</span>
 						</Button>
 					</div>
 				</form>

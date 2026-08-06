@@ -1,7 +1,10 @@
 import { askDel } from '@shared/utils/delete-action';
 import { DocumentMinusIcon } from '@heroicons/react/24/outline';
 import { TrashIcon } from 'lucide-react';
-import { TVerificationMedia, useDeleteVerificationMediaFile } from '@api/verification-medias';
+import {
+	TVerificationMedia,
+	useDeleteVerificationMediaFile,
+} from '@api/verification-medias';
 import { Button } from '@shared/components';
 
 const squareSizes: Record<number, string> = {
@@ -132,7 +135,8 @@ export const PreviewImages = ({
 									className={commonClassesSquare(
 										sizeSquare,
 										`relative overflow-hidden group ${isRemovable ? 'cursor-pointer' : ''}`
-									)} variant="unstyled"
+									)}
+									variant="unstyled"
 								>
 									{preview}
 									{isRemovable && (

@@ -1,12 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { CourseList } from '@features/academic/courses';
 import { useTabWithReset } from '@shared/hooks';
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '@shared/components';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import {
 	InfoCoordinator,
 	ListAcademicAssignmentReports,
@@ -69,7 +64,7 @@ export const DashboardCoordinator = () => {
 						centerDepartmentId={centerDepartmentId ?? ''}
 						// showDepartmentInTable
 					/>
-        </TabsContent>
+				</TabsContent>
 
 				{/* Consolidado */}
 				<TabsContent value="4">

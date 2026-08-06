@@ -1,10 +1,7 @@
 import { getAccessToken } from '@features/auth/utils';
 import axios, { InternalAxiosRequestConfig } from 'axios';
 
-const noAuthEndpoints = [
-	'/auth/local/signin',
-	'/auth/local/signup',
-];
+const noAuthEndpoints = ['/auth/local/signin', '/auth/local/signup'];
 
 const API =
 	import.meta.env.VITE_API_BASE_URL ??

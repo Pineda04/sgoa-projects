@@ -20,7 +20,10 @@ export const StatusBadge = ({ status, className = '' }: StatusBadgeProps) => {
 		<span
 			className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${badgeClassName} ${className}`}
 		>
-			<span className={`size-1.5 rounded-full ${dotClassName}`} aria-hidden />
+			<span
+				className={`size-1.5 rounded-full ${dotClassName}`}
+				aria-hidden
+			/>
 			{label}
 		</span>
 	);

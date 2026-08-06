@@ -408,8 +408,7 @@ export class AssignmentReportsController {
       'Retorna un listado paginado de los periodos académicos en los que existen asignaciones académicas, de todos los centros y departamentos. Cada objeto incluye el nombre del centro y del departamento correspondiente. Solo accesible para ADMIN, DIRECCION y RRHH.',
   })
   @ApiCommonResponses({
-    summary:
-      'Consulta de periodos académicos con asignaciones (global)',
+    summary: 'Consulta de periodos académicos con asignaciones (global)',
     okDescription: 'Listado de periodos obtenido correctamente.',
     badRequestDescription: 'La solicitud contiene parámetros inválidos.',
     internalErrorDescription: 'Error interno al procesar la solicitud.',
@@ -432,7 +431,9 @@ export class AssignmentReportsController {
   @Get('template')
   @RequirePermission('create', 'planifications')
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Plantilla de asignación académica descargada correctamente.')
+  @ResponseMessage(
+    'Plantilla de asignación académica descargada correctamente.',
+  )
   @ApiOperation({
     summary: 'Descargar plantilla Excel de asignación académica',
     description:

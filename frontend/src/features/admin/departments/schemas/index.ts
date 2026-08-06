@@ -1,1 +1,1 @@
-export * from './departments.schemas'
+export * from './departments.schemas';

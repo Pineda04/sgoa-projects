@@ -10,9 +10,7 @@ import { UndergradsService } from 'src/modules/teachers-degrees/services/undergr
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidGradDegreeConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidGradDegreeConstraint implements ValidatorConstraintInterface {
   // Considerar que si alguien mas agrega otro, es probable que no se vea reflejado.
   // Es probable que se elimine.
   private cache = new Map<string, string[]>();

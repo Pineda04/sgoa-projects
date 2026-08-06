@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateDepartmentDto } from '../dto/create-department.dto';
 import { UpdateDepartmentDto } from '../dto/update-department.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,7 +15,7 @@ import { normalizeText } from 'src/common/utils';
 
 @Injectable()
 export class DepartmentsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<TDepartment> {
     // Pueden crear pero no necesariamente agregar de primeras a un departamento
@@ -148,7 +152,9 @@ export class DepartmentsService {
     // Verificar que el departamento existe
     const existing = await this.prisma.department.findUnique({ where: { id } });
     if (!existing)
-      throw new NotFoundException(`El departamento con id <${id}> no fue encontrado.`);
+      throw new NotFoundException(
+        `El departamento con id <${id}> no fue encontrado.`,
+      );
 
     // Validar unicidad del nombre excluyendo el propio registro
     if (updateDepartmentDto.name !== undefined) {

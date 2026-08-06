@@ -15,7 +15,6 @@ import { IsValidIdsInventoryConfigConstraint } from 'src/modules/inventory/valid
 import { EInventoryConfig } from 'src/modules/inventory/enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-
 export class CreateClassroomDto {
   @ApiProperty({
     description: 'Nombre del aula.',
@@ -89,7 +88,9 @@ export class CreateClassroomDto {
     example: true,
   })
   @IsOptional()
-  @IsBoolean({message: 'La propiedad <activeStatus> debe ser un valor booleano.'})
+  @IsBoolean({
+    message: 'La propiedad <activeStatus> debe ser un valor booleano.',
+  })
   activeStatus?: boolean;
 
   @ApiProperty({
@@ -196,6 +197,9 @@ export class CreateClassroomDto {
   })
   @IsOptional()
   @IsArray({ message: 'La propiedad <departmentIds> debe ser un arreglo.' })
-  @IsUUID('all', { each: true, message: 'Cada departmentId debe ser un UUID válido.' })
+  @IsUUID('all', {
+    each: true,
+    message: 'Cada departmentId debe ser un UUID válido.',
+  })
   departmentIds?: string[];
 }

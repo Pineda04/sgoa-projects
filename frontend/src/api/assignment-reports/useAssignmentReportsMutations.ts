@@ -1,9 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
-import { ICreateAcademicAssignmentArrayParams, ICreateAcademicAssignmentParams, IViewAcademicAssignmentParams } from "./assignment-reports.interfaces";
+import { useMutation } from '@tanstack/react-query';
+import {
+	ICreateAcademicAssignmentArrayParams,
+	ICreateAcademicAssignmentParams,
+	IViewAcademicAssignmentParams,
+} from './assignment-reports.interfaces';
 import { alertSuccess } from '@shared';
 import { queryClient } from '@config/lib';
-import { coursesKeys } from "../courses";
-import { academicAssignmentReportsApi } from "./assignment-reports.api";
+import { coursesKeys } from '../courses';
+import { academicAssignmentReportsApi } from './assignment-reports.api';
 
 export const useCreateAcademicAssignmentMutation = () => {
 	return useMutation({

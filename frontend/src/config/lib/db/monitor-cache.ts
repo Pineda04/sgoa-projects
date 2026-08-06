@@ -56,7 +56,10 @@ export const saveCurrentAcademicPeriod = async (
 			fetchedAt: Date.now(),
 		});
 	} catch (error) {
-		console.warn('No se pudo guardar la caché del período académico:', error);
+		console.warn(
+			'No se pudo guardar la caché del período académico:',
+			error
+		);
 	}
 };
 
@@ -75,8 +78,14 @@ export const clearOtherMonitorsCache = async (email: string) => {
 			db.monitorAssignments,
 			db.academicPeriods,
 			async () => {
-				await db.monitorAssignments.where('email').notEqual(normalized).delete();
-				await db.academicPeriods.where('email').notEqual(normalized).delete();
+				await db.monitorAssignments
+					.where('email')
+					.notEqual(normalized)
+					.delete();
+				await db.academicPeriods
+					.where('email')
+					.notEqual(normalized)
+					.delete();
 			}
 		);
 	} catch (error) {
@@ -95,6 +104,9 @@ export const cleanupSyncedChecks = async (email?: string) => {
 			.filter(check => check.createdAt < cutoff)
 			.delete();
 	} catch (error) {
-		console.warn('No se pudo limpiar los checks sincronizados antiguos:', error);
+		console.warn(
+			'No se pudo limpiar los checks sincronizados antiguos:',
+			error
+		);
 	}
 };

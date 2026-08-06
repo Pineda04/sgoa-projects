@@ -9,9 +9,7 @@ import { TTeacher } from 'src/modules/teachers/types';
 
 @ValidatorConstraint({ name: 'TeacherFieldsRequiredForRole', async: false })
 @Injectable()
-export class TeacherRequiredFieldsForRoleConstraint
-  implements ValidatorConstraintInterface
-{
+export class TeacherRequiredFieldsForRoleConstraint implements ValidatorConstraintInterface {
   validate(obj: any, args: ValidationArguments): Promise<boolean> | boolean {
     const object = args.object as { roles: string[] } & TTeacher;
 

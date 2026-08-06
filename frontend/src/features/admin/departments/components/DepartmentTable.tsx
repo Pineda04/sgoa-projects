@@ -1,8 +1,5 @@
 import type { IResponse } from '@shared/interfaces';
-import {
-	DataTable,
-	IDataTableColumn,
-} from '@shared/components';
+import { DataTable, IDataTableColumn } from '@shared/components';
 import { TOutputDepartment } from '@api/departments';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
@@ -23,7 +20,6 @@ export const DepartmentTable = ({
 	onEdit,
 	onDelete,
 }: DepartmentTableProps) => {
-
 	const columns: IDataTableColumn<TOutputDepartment>[] = [
 		{ key: 'name', header: 'Nombre', mobileLabel: 'Nombre' },
 		{ key: 'facultyName', header: 'Facultad', mobileLabel: 'Facultad' },

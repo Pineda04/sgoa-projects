@@ -8,9 +8,7 @@ import { PositionsService } from '../services/positions.service';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidPositionIdConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidPositionIdConstraint implements ValidatorConstraintInterface {
   constructor(private readonly positionsService: PositionsService) {}
 
   async validate(

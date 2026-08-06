@@ -16,7 +16,9 @@ describe('TeachersUndergradController', () => {
       .useValue(mockTeachersUndergradService)
       .compile();
 
-    controller = module.get<TeachersUndergradController>(TeachersUndergradController);
+    controller = module.get<TeachersUndergradController>(
+      TeachersUndergradController,
+    );
   });
 
   it('should be defined', () => {

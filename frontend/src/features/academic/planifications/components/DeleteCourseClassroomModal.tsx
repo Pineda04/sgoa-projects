@@ -19,7 +19,8 @@ export const DeleteCourseClassroomModal = ({
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-4">
 				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
-					¿Está seguro que desea eliminar la planificación de la asignatura{' '}
+					¿Está seguro que desea eliminar la planificación de la
+					asignatura{' '}
 					{courseLabel && (
 						<span className="font-medium text-gray-800">
 							&lt;{courseLabel}&gt;

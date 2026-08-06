@@ -17,7 +17,11 @@ interface EditCheckModalProps {
 	check: TScheduleComplianceCheckDetail | null;
 }
 
-export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) => {
+export const EditCheckModal = ({
+	isOpen,
+	onClose,
+	check,
+}: EditCheckModalProps) => {
 	const { updateCheck, isPendingUpdateCheck } = useUpdateCheckMutation();
 	const [isPresent, setIsPresent] = useState<boolean | null>(null);
 	const [observation, setObservation] = useState('');
@@ -50,8 +54,9 @@ export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) 
 				isPresent,
 				observation: observation.trim(),
 				digitalBlackboardUseStatus:
-					isPresent && check.courseClassroom.classroom.hasDigitalBlackboard
-						? blackboardUse ?? undefined
+					isPresent &&
+					check.courseClassroom.classroom.hasDigitalBlackboard
+						? (blackboardUse ?? undefined)
 						: undefined,
 			});
 			onClose();
@@ -72,13 +77,17 @@ export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) 
 
 				<dl className="mb-5 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted p-3 text-sm">
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Asignatura</dt>
+						<dt className="text-xs text-muted-foreground">
+							Asignatura
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{check.courseClassroom.course.name}
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Docente</dt>
+						<dt className="text-xs text-muted-foreground">
+							Docente
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{check.courseClassroom.teacher.name}
 						</dd>
@@ -90,7 +99,9 @@ export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) 
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Edificio</dt>
+						<dt className="text-xs text-muted-foreground">
+							Edificio
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{check.courseClassroom.classroom.building.name}
 						</dd>
@@ -118,27 +129,34 @@ export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) 
 						disabled={isPendingUpdateCheck}
 					/>
 
-					{isPresent && check.courseClassroom.classroom.hasDigitalBlackboard ? (
+					{isPresent &&
+					check.courseClassroom.classroom.hasDigitalBlackboard ? (
 						<fieldset>
 							<legend className="mb-2 text-sm font-semibold text-foreground">
 								¿Se utilizó la pizarra digital?
 							</legend>
 							<div className="grid gap-2 sm:grid-cols-3">
-								{BLACKBOARD_USE_OPTIONS.map(({ value, label }) => (
-									<label
-										key={value}
-										className={`cursor-pointer rounded-lg border px-3 py-2 text-center text-sm ${blackboardUse === value ? 'border-primary bg-primary-light text-primary' : 'border-border text-muted-foreground'}`}
-									>
-										<input
-											type="radio"
-											name="reportBlackboardUse"
-											className="sr-only"
-											checked={blackboardUse === value}
-											onChange={() => setBlackboardUse(value)}
-										/>
-										{label}
-									</label>
-								))}
+								{BLACKBOARD_USE_OPTIONS.map(
+									({ value, label }) => (
+										<label
+											key={value}
+											className={`cursor-pointer rounded-lg border px-3 py-2 text-center text-sm ${blackboardUse === value ? 'border-primary bg-primary-light text-primary' : 'border-border text-muted-foreground'}`}
+										>
+											<input
+												type="radio"
+												name="reportBlackboardUse"
+												className="sr-only"
+												checked={
+													blackboardUse === value
+												}
+												onChange={() =>
+													setBlackboardUse(value)
+												}
+											/>
+											{label}
+										</label>
+									)
+								)}
 							</div>
 						</fieldset>
 					) : null}
@@ -157,12 +175,15 @@ export const EditCheckModal = ({ isOpen, onClose, check }: EditCheckModalProps) 
 							disabled={
 								isPresent === null ||
 								(isPresent &&
-									check.courseClassroom.classroom.hasDigitalBlackboard &&
+									check.courseClassroom.classroom
+										.hasDigitalBlackboard &&
 									!blackboardUse) ||
 								isPendingUpdateCheck
 							}
 						>
-							{isPendingUpdateCheck ? 'Guardando...' : 'Guardar cambios'}
+							{isPendingUpdateCheck
+								? 'Guardando...'
+								: 'Guardar cambios'}
 						</Button>
 					</div>
 				</form>

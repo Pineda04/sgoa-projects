@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useGetAcademicAssignmentReportsCoordinatorByCenter } from '@api/assignment-reports';
-import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
+import {
+	Button,
+	IResponsiveColumn,
+	Loading,
+	Pagination,
+	ResponsiveTable,
+} from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce, usePaginationParams } from '@shared/hooks';

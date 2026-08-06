@@ -20,16 +20,16 @@ import type {
 	MonitoringFilters,
 } from './analytics.phase5.types';
 
-const normalizeFilters = (filters?: AcademicLoadFilters | EnrollmentFilters) => ({
+const normalizeFilters = (
+	filters?: AcademicLoadFilters | EnrollmentFilters
+) => ({
 	periodId: filters?.periodId ?? null,
 	comparisonPeriodId: filters?.comparisonPeriodId ?? null,
 	centerDepartmentId: filters?.centerDepartmentId ?? null,
 	teacherId: filters?.teacherId ?? null,
 });
 
-const normalizeClassroomFilters = (
-	filters?: ClassroomAvailabilityFilters
-) => ({
+const normalizeClassroomFilters = (filters?: ClassroomAvailabilityFilters) => ({
 	periodId: filters?.periodId ?? null,
 	centerDepartmentId: filters?.centerDepartmentId ?? null,
 	dayOfWeek: filters?.dayOfWeek ?? null,
@@ -77,42 +77,45 @@ export const analyticsKeys = {
 		userId: string | null,
 		centerDepartmentId?: string,
 		buildingId?: string
-	) =>
-		[
-			...analyticsKeys.all(userId),
-			'filter-options',
-			{
-				centerDepartmentId: centerDepartmentId ?? null,
-				buildingId: buildingId ?? null,
-			},
-		],
-	academicLoad: (userId: string | null, filters?: AcademicLoadFilters) =>
-		[
-			...analyticsKeys.all(userId),
-			'academic-load',
-			'summary',
-			normalizeFilters(filters),
-		],
-	academicLoadDetails: (userId: string | null, filters?: AcademicLoadDetailsFilters) =>
-		[
-			...analyticsKeys.all(userId),
-			'academic-load',
-			'details',
-			{
-				...normalizeFilters(filters),
-				metric: filters?.metric ?? 'teacher_load',
-				page: filters?.page ?? '1',
-				size: filters?.size ?? '25',
-				sort: filters?.sort ?? 'name:asc',
-			},
-		],
+	) => [
+		...analyticsKeys.all(userId),
+		'filter-options',
+		{
+			centerDepartmentId: centerDepartmentId ?? null,
+			buildingId: buildingId ?? null,
+		},
+	],
+	academicLoad: (userId: string | null, filters?: AcademicLoadFilters) => [
+		...analyticsKeys.all(userId),
+		'academic-load',
+		'summary',
+		normalizeFilters(filters),
+	],
+	academicLoadDetails: (
+		userId: string | null,
+		filters?: AcademicLoadDetailsFilters
+	) => [
+		...analyticsKeys.all(userId),
+		'academic-load',
+		'details',
+		{
+			...normalizeFilters(filters),
+			metric: filters?.metric ?? 'teacher_load',
+			page: filters?.page ?? '1',
+			size: filters?.size ?? '25',
+			sort: filters?.sort ?? 'name:asc',
+		},
+	],
 	enrollment: (userId: string | null, filters?: EnrollmentFilters) => [
 		...analyticsKeys.all(userId),
 		'enrollment',
 		'summary',
 		normalizeFilters(filters),
 	],
-	enrollmentDetails: (userId: string | null, filters?: EnrollmentDetailsFilters) => [
+	enrollmentDetails: (
+		userId: string | null,
+		filters?: EnrollmentDetailsFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'enrollment',
 		'details',
@@ -124,7 +127,10 @@ export const analyticsKeys = {
 			sort: filters?.sort ?? 'courseCode:asc',
 		},
 	],
-	classroomAvailability: (userId: string | null, filters?: ClassroomAvailabilityFilters) => [
+	classroomAvailability: (
+		userId: string | null,
+		filters?: ClassroomAvailabilityFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'classrooms',
 		'summary',
@@ -145,14 +151,20 @@ export const analyticsKeys = {
 			sort: filters?.sort ?? 'classroomName:asc',
 		},
 	],
-	classroomCapacity: (userId: string | null, filters?: PeriodCenterFilters) => [
+	classroomCapacity: (
+		userId: string | null,
+		filters?: PeriodCenterFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'classrooms',
 		'capacity',
 		'summary',
 		normalizePeriodCenterFilters(filters),
 	],
-	classroomCapacityDetails: (userId: string | null, filters?: ClassroomCapacityFilters) => [
+	classroomCapacityDetails: (
+		userId: string | null,
+		filters?: ClassroomCapacityFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'classrooms',
 		'capacity',
@@ -171,7 +183,10 @@ export const analyticsKeys = {
 		'summary',
 		normalizePeriodCenterFilters(filters),
 	],
-	technologyDetails: (userId: string | null, filters?: TechnologyDetailsFilters) => [
+	technologyDetails: (
+		userId: string | null,
+		filters?: TechnologyDetailsFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'technology',
 		'details',
@@ -207,7 +222,10 @@ export const analyticsKeys = {
 		'summary',
 		normalizeActivityFilters(filters),
 	],
-	activityDetails: (userId: string | null, filters?: ActivityDetailsFilters) => [
+	activityDetails: (
+		userId: string | null,
+		filters?: ActivityDetailsFilters
+	) => [
 		...analyticsKeys.all(userId),
 		'activities',
 		'details',

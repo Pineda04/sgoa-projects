@@ -21,7 +21,10 @@ import {
 	Pagination,
 } from '@shared/components';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
-import { ClassroomAvailabilityModal, DeleteClassroomModal } from '../components';
+import {
+	ClassroomAvailabilityModal,
+	DeleteClassroomModal,
+} from '../components';
 
 interface ListClassroomsProps {
 	showHeader?: boolean;
@@ -134,7 +137,8 @@ export const ListClassrooms = ({ showHeader = true }: ListClassroomsProps) => {
 			mobileLabel: 'Disponibilidad',
 			render: row => {
 				const roomTypeDesc = roomTypeMap.get(row.roomTypeId) ?? '';
-				const isVirtual = roomTypeDesc.toLowerCase() === 'espacio virtual';
+				const isVirtual =
+					roomTypeDesc.toLowerCase() === 'espacio virtual';
 				const isInactive = !row.activeStatus;
 				const disabled = isVirtual || isInactive;
 
@@ -152,10 +156,27 @@ export const ListClassrooms = ({ showHeader = true }: ListClassroomsProps) => {
 									: 'text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 cursor-pointer hover:shadow'
 							}`}
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-								<line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-								<line x1="3" y1="10" x2="21" y2="10"/>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								className="size-3.5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<rect
+									x="3"
+									y="4"
+									width="18"
+									height="18"
+									rx="2"
+									ry="2"
+								/>
+								<line x1="16" y1="2" x2="16" y2="6" />
+								<line x1="8" y1="2" x2="8" y2="6" />
+								<line x1="3" y1="10" x2="21" y2="10" />
 							</svg>
 							Consultar
 						</button>
@@ -171,7 +192,9 @@ export const ListClassrooms = ({ showHeader = true }: ListClassroomsProps) => {
 				<div className="flex items-center justify-center gap-3">
 					<button
 						onClick={() =>
-							navigate(`/infrastructure/classrooms/view/${row.id}`)
+							navigate(
+								`/infrastructure/classrooms/view/${row.id}`
+							)
 						}
 						className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
 						title="Ver aula"
@@ -205,7 +228,7 @@ export const ListClassrooms = ({ showHeader = true }: ListClassroomsProps) => {
 		},
 	];
 
-		return (
+	return (
 		<div className="pb-8 sm:pb-12">
 			{showHeader && (
 				<div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

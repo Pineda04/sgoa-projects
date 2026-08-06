@@ -83,9 +83,9 @@ export const MonitorChecklist = ({
 	const [status, setStatus] = useState<TStatusFilter>('ALL');
 	const [search, setSearch] = useState('');
 	const [areFiltersOpen, setAreFiltersOpen] = useState(false);
-	const [collapsedBuildingIds, setCollapsedBuildingIds] = useState<Set<string>>(
-		new Set()
-	);
+	const [collapsedBuildingIds, setCollapsedBuildingIds] = useState<
+		Set<string>
+	>(new Set());
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [isModalOpen, openModal, closeModal] = useModal();
@@ -93,7 +93,12 @@ export const MonitorChecklist = ({
 	const currentUserId = authState.user?.sub;
 
 	const items = useMemo(
-		() => buildChecklistItems(sourceData ?? [], effectiveOverrides, currentUserId),
+		() =>
+			buildChecklistItems(
+				sourceData ?? [],
+				effectiveOverrides,
+				currentUserId
+			),
 		[sourceData, effectiveOverrides, currentUserId]
 	);
 
@@ -124,7 +129,10 @@ export const MonitorChecklist = ({
 		() => filterByScope(items, { jornada, buildingId, search }),
 		[items, jornada, buildingId, search]
 	);
-	const scopeSummary = useMemo(() => summarizeItems(scopeItems), [scopeItems]);
+	const scopeSummary = useMemo(
+		() => summarizeItems(scopeItems),
+		[scopeItems]
+	);
 
 	const groups = useMemo(
 		() => groupItemsByBuilding(filterByStatus(scopeItems, status)),
@@ -255,11 +263,17 @@ export const MonitorChecklist = ({
 									className="flex flex-wrap items-center justify-between gap-2 rounded border border-amber-200 bg-background p-2 dark:border-amber-900"
 								>
 									<span>
-										{item?.assignment.courseName ?? issue.courseClassroomId}: {issue.syncReason}
+										{item?.assignment.courseName ??
+											issue.courseClassroomId}
+										: {issue.syncReason}
 									</span>
 									<button
 										type="button"
-										onClick={() => handleDiscardSyncIssue(issue.offlineId)}
+										onClick={() =>
+											handleDiscardSyncIssue(
+												issue.offlineId
+											)
+										}
 										className="rounded border border-amber-400 px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 dark:text-amber-200"
 									>
 										Descartar
@@ -292,7 +306,9 @@ export const MonitorChecklist = ({
 				onSyncRetry={onSyncRetry ?? (() => undefined)}
 			/>
 
-			{scopeSummary.total > 0 && <ChecklistProgress summary={scopeSummary} />}
+			{scopeSummary.total > 0 && (
+				<ChecklistProgress summary={scopeSummary} />
+			)}
 
 			{groups.length === 0 ? (
 				<div className="py-12 text-center">
@@ -303,12 +319,14 @@ export const MonitorChecklist = ({
 								No quedan verificaciones pendientes
 							</p>
 							<p className="text-sm text-muted-foreground">
-								Ya registraste todas las asignaciones de esta selección.
+								Ya registraste todas las asignaciones de esta
+								selección.
 							</p>
 						</>
 					) : (
 						<p className="text-muted-foreground">
-							No hay asignaciones que coincidan con los filtros seleccionados.
+							No hay asignaciones que coincidan con los filtros
+							seleccionados.
 						</p>
 					)}
 				</div>
@@ -320,7 +338,9 @@ export const MonitorChecklist = ({
 							group={group}
 							view={view}
 							isOpen={!collapsedBuildingIds.has(group.buildingId)}
-							onToggle={() => handleToggleBuilding(group.buildingId)}
+							onToggle={() =>
+								handleToggleBuilding(group.buildingId)
+							}
 							submittingId={submittingId}
 							isRegistering={isRegistering}
 							onConfirm={handleQuickConfirm}

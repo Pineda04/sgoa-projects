@@ -33,7 +33,8 @@ export const formatCheckDate = (isoDate: string): string => {
 export const isCheckEdited = (check: {
 	createdAt: string;
 	updatedAt: string;
-}): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+}): boolean =>
+	new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
 
 export const STATUS_BADGE_CONFIG = {
 	PRESENT: {
@@ -46,11 +47,12 @@ export const STATUS_BADGE_CONFIG = {
 	},
 } as const;
 
-export const BLACKBOARD_USE_LABELS: Record<DigitalBlackboardUseStatus, string> = {
-	USED: 'Usada',
-	NOT_USED: 'No usada',
-	UNKNOWN: 'No determinado',
-};
+export const BLACKBOARD_USE_LABELS: Record<DigitalBlackboardUseStatus, string> =
+	{
+		USED: 'Usada',
+		NOT_USED: 'No usada',
+		UNKNOWN: 'No determinado',
+	};
 
 export const BLACKBOARD_USE_OPTIONS: ReadonlyArray<{
 	value: DigitalBlackboardUseStatus;

@@ -146,7 +146,11 @@ export const useAnalyticsFilters = (
 		: undefined;
 	const scopedOptions = useAnalyticsFilterOptions(
 		effectiveCenterId,
-		{ enabled: Boolean((effectiveCenterId || effectiveBuildingId) && data) },
+		{
+			enabled: Boolean(
+				(effectiveCenterId || effectiveBuildingId) && data
+			),
+		},
 		effectiveBuildingId
 	);
 	const effectiveOptions =
@@ -156,9 +160,9 @@ export const useAnalyticsFilters = (
 	const requestedPeriodId = query.periodId;
 	const defaultPeriodId = data?.defaults.periodId ?? null;
 	const effectivePeriodId = includesId(periodOptions, requestedPeriodId)
-		? requestedPeriodId ?? undefined
+		? (requestedPeriodId ?? undefined)
 		: includesId(periodOptions, defaultPeriodId)
-			? defaultPeriodId ?? undefined
+			? (defaultPeriodId ?? undefined)
 			: undefined;
 	const requestedComparisonId = query.comparisonPeriodId;
 	const effectiveComparisonPeriodId =
@@ -166,7 +170,7 @@ export const useAnalyticsFilters = (
 		data?.capabilities.canComparePeriods &&
 		includesId(periodOptions, requestedComparisonId) &&
 		requestedComparisonId !== effectivePeriodId
-			? requestedComparisonId ?? undefined
+			? (requestedComparisonId ?? undefined)
 			: undefined;
 	const requestedTeacherId = query.teacherId;
 	const effectiveTeacherId = context
@@ -178,7 +182,8 @@ export const useAnalyticsFilters = (
 			)
 		: undefined;
 	const hasResolvedScope =
-		(!effectiveCenterId && !effectiveBuildingId) || Boolean(scopedOptions.data);
+		(!effectiveCenterId && !effectiveBuildingId) ||
+		Boolean(scopedOptions.data);
 	const domainAvailable = Boolean(data?.domains.includes(domain));
 	const periodCenterFilters: PeriodCenterFilters | undefined =
 		domainAvailable && hasResolvedScope && effectivePeriodId && context
@@ -196,7 +201,9 @@ export const useAnalyticsFilters = (
 					...(effectiveComparisonPeriodId
 						? { comparisonPeriodId: effectiveComparisonPeriodId }
 						: {}),
-					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
+					...(effectiveTeacherId
+						? { teacherId: effectiveTeacherId }
+						: {}),
 				}
 			: undefined;
 	const enrollmentFilters: EnrollmentFilters | undefined =
@@ -206,14 +213,15 @@ export const useAnalyticsFilters = (
 					...(effectiveComparisonPeriodId
 						? { comparisonPeriodId: effectiveComparisonPeriodId }
 						: {}),
-					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
+					...(effectiveTeacherId
+						? { teacherId: effectiveTeacherId }
+						: {}),
 				}
 			: undefined;
 	const dayOfWeek = query.dayOfWeek;
 	const requestedStartTime = query.startTime;
 	const requestedEndTime = query.endTime;
-	const requestedRangeIsValid =
-		requestedStartTime < requestedEndTime;
+	const requestedRangeIsValid = requestedStartTime < requestedEndTime;
 	const startTime = requestedRangeIsValid ? requestedStartTime : '07:00';
 	const endTime = requestedRangeIsValid ? requestedEndTime : '08:00';
 	const classroomRangeIsValid = true;
@@ -225,14 +233,22 @@ export const useAnalyticsFilters = (
 	const catalogValue = (
 		options: { id: string }[] | undefined,
 		value: string | null
-	) => (options && includesId(options, value) ? value ?? undefined : undefined);
+	) =>
+		options && includesId(options, value)
+			? (value ?? undefined)
+			: undefined;
 	const staffFilters: StaffFilters | undefined =
-		domain === 'staff' && domainAvailable && hasResolvedScope && staffContext
+		domain === 'staff' &&
+		domainAvailable &&
+		hasResolvedScope &&
+		staffContext
 			? {
 					...(effectiveCenterId
 						? { centerDepartmentId: effectiveCenterId }
 						: {}),
-					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
+					...(effectiveTeacherId
+						? { teacherId: effectiveTeacherId }
+						: {}),
 					...(catalogValue(
 						staffContext.catalogs.contractTypes,
 						query.contractTypeId
@@ -307,12 +323,17 @@ export const useAnalyticsFilters = (
 						? { periodId: effectivePeriodId }
 						: { year: String(activityYear) }),
 					...(activityTimeMode === 'year' && validPacPair
-						? { pac: String(selectedPac), pacModality: rawPacModality ?? '' }
+						? {
+								pac: String(selectedPac),
+								pacModality: rawPacModality ?? '',
+							}
 						: {}),
 					...(effectiveCenterId
 						? { centerDepartmentId: effectiveCenterId }
 						: {}),
-					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
+					...(effectiveTeacherId
+						? { teacherId: effectiveTeacherId }
+						: {}),
 					...(catalogValue(
 						activityContext.catalogs.activityTypes,
 						query.activityTypeId
@@ -332,10 +353,8 @@ export const useAnalyticsFilters = (
 	const defaultDateFrom = institutionalDate(monthAgoDate);
 	const requestedDateFrom = query.dateFrom;
 	const requestedDateTo = query.dateTo;
-	const dateFrom =
-		requestedDateFrom ?? defaultDateFrom;
-	const dateTo =
-		requestedDateTo ?? today;
+	const dateFrom = requestedDateFrom ?? defaultDateFrom;
+	const dateTo = requestedDateTo ?? today;
 	const monitoringFilters: MonitoringFilters | undefined =
 		domain === 'monitoring' &&
 		domainAvailable &&
@@ -345,9 +364,15 @@ export const useAnalyticsFilters = (
 			? {
 					dateFrom,
 					dateTo,
-					...(effectivePeriodId ? { periodId: effectivePeriodId } : {}),
-					...(effectiveBuildingId ? { buildingId: effectiveBuildingId } : {}),
-					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
+					...(effectivePeriodId
+						? { periodId: effectivePeriodId }
+						: {}),
+					...(effectiveBuildingId
+						? { buildingId: effectiveBuildingId }
+						: {}),
+					...(effectiveTeacherId
+						? { teacherId: effectiveTeacherId }
+						: {}),
 				}
 			: undefined;
 
@@ -398,23 +423,23 @@ export const useAnalyticsFilters = (
 		activityPage: null,
 		monitoringPage: null,
 	} satisfies QueryUpdates;
-	const updateParams = (
-		updates: QueryUpdates,
-		resetPage = true
-	) => {
+	const updateParams = (updates: QueryUpdates, resetPage = true) => {
 		void setQuery(resetPage ? { ...updates, ...pageReset } : updates);
 	};
 	const setPage = (value: number) => {
 		const nextPage = value === 1 ? null : value;
-		if (domain === 'academic-load') updateParams({ loadPage: nextPage }, false);
-		else if (domain === 'enrollment') updateParams({ enrollmentPage: nextPage }, false);
+		if (domain === 'academic-load')
+			updateParams({ loadPage: nextPage }, false);
+		else if (domain === 'enrollment')
+			updateParams({ enrollmentPage: nextPage }, false);
 		else if (domain === 'classrooms' && classroomView === 'capacity')
 			updateParams({ capacityPage: nextPage }, false);
 		else if (domain === 'classrooms')
 			updateParams({ classroomPage: nextPage }, false);
 		else if (domain === 'technology')
 			updateParams({ technologyPage: nextPage }, false);
-		else if (domain === 'staff') updateParams({ staffPage: nextPage }, false);
+		else if (domain === 'staff')
+			updateParams({ staffPage: nextPage }, false);
 		else if (domain === 'activities')
 			updateParams({ activityPage: nextPage }, false);
 		else updateParams({ monitoringPage: nextPage }, false);
@@ -434,7 +459,8 @@ export const useAnalyticsFilters = (
 		classroomIgnoresTeacherFilter: false,
 		classroomCapacityFilters:
 			domain === 'classrooms' ? periodCenterFilters : undefined,
-		technologyFilters: domain === 'technology' ? periodCenterFilters : undefined,
+		technologyFilters:
+			domain === 'technology' ? periodCenterFilters : undefined,
 		staffFilters,
 		activityFilters,
 		monitoringFilters,
@@ -455,7 +481,9 @@ export const useAnalyticsFilters = (
 			activityTimeMode,
 			activityYear,
 			activityPac: validPacPair ? String(selectedPac) : undefined,
-			activityPacModality: validPacPair ? rawPacModality ?? undefined : undefined,
+			activityPacModality: validPacPair
+				? (rawPacModality ?? undefined)
+				: undefined,
 			classroomView,
 			technologyBreakdown,
 			staffBreakdown,
@@ -480,7 +508,8 @@ export const useAnalyticsFilters = (
 		activitySort,
 		monitoringMetric,
 		monitoringSort,
-		isResolvingTeachers: Boolean(effectiveCenterId) && scopedOptions.isPending,
+		isResolvingTeachers:
+			Boolean(effectiveCenterId) && scopedOptions.isPending,
 		setPage,
 		setLoadPage: setPage,
 		setEnrollmentPage: setPage,
@@ -498,7 +527,10 @@ export const useAnalyticsFilters = (
 					value && value !== effectivePeriodId ? value : null,
 			}),
 		setCenterDepartmentId: (value: string) =>
-			updateParams({ centerDepartmentId: value || null, teacherId: null }),
+			updateParams({
+				centerDepartmentId: value || null,
+				teacherId: null,
+			}),
 		setTeacherId: (value: string) =>
 			updateParams({ teacherId: value || null }),
 		setBuildingId: (value: string) =>
@@ -547,7 +579,8 @@ export const useAnalyticsFilters = (
 		},
 		setClassroomStartTime: (value: string) =>
 			updateParams({ startTime: value }),
-		setClassroomEndTime: (value: string) => updateParams({ endTime: value }),
+		setClassroomEndTime: (value: string) =>
+			updateParams({ endTime: value }),
 		setCatalogFilter: (
 			key:
 				| 'contractTypeId'

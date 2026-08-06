@@ -6,7 +6,11 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@shared/components';
-import { AcademicPeriodsList, Consolidated, CourseList } from '@features/academic';
+import {
+	AcademicPeriodsList,
+	Consolidated,
+	CourseList,
+} from '@features/academic';
 import { useAbility } from '@config/lib';
 import { UsersTable } from '@features/admin';
 import { useNavigate } from 'react-router-dom';
@@ -22,14 +26,11 @@ const UsersTab = () => {
 	const navigate = useNavigate();
 
 	return (
-		<UsersTable
-			onNavigateToCreate={() => navigate('/admin/users/new')}
-		/>
+		<UsersTable onNavigateToCreate={() => navigate('/admin/users/new')} />
 	);
 };
 
 export const DashboardAuthorities = () => {
-
 	const currentUser = useUser();
 	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
@@ -45,14 +46,18 @@ export const DashboardAuthorities = () => {
 		<>
 			<div className="mb-6">
 				<h2 className="text-2xl font-semibold">
-					UNAH PAC{' '}{academicPeriodInfo.data?.title ?? '...'}
+					UNAH PAC {academicPeriodInfo.data?.title ?? '...'}
 				</h2>
 				<p className="text-sm">{currentUser.user?.name}</p>
 				<p className="text-sm">{currentUser.user?.code}</p>
 				<p className="text-sm">{currentUser.user?.email}</p>
 			</div>
 
-			<Tabs value={currentTab} onValueChange={setTab} className="mt-4 sm:mt-8">
+			<Tabs
+				value={currentTab}
+				onValueChange={setTab}
+				className="mt-4 sm:mt-8"
+			>
 				<TabsList variant="pills" className="mb-4 sm:mb-6">
 					<TabsTrigger value="0">Planificaciones</TabsTrigger>
 					<TabsTrigger value="1">Informes</TabsTrigger>
@@ -79,7 +84,12 @@ export const DashboardAuthorities = () => {
 
 				{/* Clases */}
 				<TabsContent value="3">
-					{currentTab === '3' && <CourseList showDepartmentFilter showDepartmentInTable={showDepartment} />}
+					{currentTab === '3' && (
+						<CourseList
+							showDepartmentFilter
+							showDepartmentInTable={showDepartment}
+						/>
+					)}
 				</TabsContent>
 
 				{/* Periodos */}
@@ -89,7 +99,9 @@ export const DashboardAuthorities = () => {
 
 				{/* Consolidado */}
 				<TabsContent value="5">
-					{currentTab === '5' && <Consolidated showDepartmentFilter />}
+					{currentTab === '5' && (
+						<Consolidated showDepartmentFilter />
+					)}
 				</TabsContent>
 			</Tabs>
 		</>

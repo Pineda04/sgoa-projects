@@ -25,12 +25,18 @@ export const ViewAirConditionerModal = ({
 	onClose,
 	airConditionerId,
 }: ViewAirConditionerModalProps) => {
-	const { data: airConditioner, isLoading, isError } = useGetAirConditioner(airConditionerId);
+	const {
+		data: airConditioner,
+		isLoading,
+		isError,
+	} = useGetAirConditioner(airConditionerId);
 
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-2">
-				<h1 className="text-xl font-bold mb-1">Detalle del Aire Acondicionado</h1>
+				<h1 className="text-xl font-bold mb-1">
+					Detalle del Aire Acondicionado
+				</h1>
 				{!isLoading && (
 					<p className="text-sm text-gray-500 mb-3">
 						{airConditioner?.description ?? 'Sin descripción'}
@@ -74,7 +80,10 @@ export const ViewAirConditionerModal = ({
 							/>
 							<DetailField
 								label="Centro"
-								value={airConditioner.classroom?.build?.center?.name}
+								value={
+									airConditioner.classroom?.build?.center
+										?.name
+								}
 							/>
 						</div>
 					</>

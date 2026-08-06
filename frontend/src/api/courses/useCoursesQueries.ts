@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi, courseClassroomsApi, courseStadisticsApi } from './courses.api';
+import {
+	coursesApi,
+	courseClassroomsApi,
+	courseStadisticsApi,
+} from './courses.api';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared';
 import { coursesKeys } from './courses.keys';
@@ -69,8 +73,16 @@ export const useGetAllCourses = (
 	const { page, size } = usePaginationParams();
 
 	return useQuery({
-		queryKey: ['courses', 'all', searchTerm, activeStatus !== undefined ? String(activeStatus) : 'all', page, size],
-		queryFn: () => coursesApi.getAllCourses(searchTerm, page, size, activeStatus),
+		queryKey: [
+			'courses',
+			'all',
+			searchTerm,
+			activeStatus !== undefined ? String(activeStatus) : 'all',
+			page,
+			size,
+		],
+		queryFn: () =>
+			coursesApi.getAllCourses(searchTerm, page, size, activeStatus),
 		retry: false,
 		enabled: isActive,
 		refetchOnWindowFocus: false,
@@ -107,10 +119,13 @@ export const useGetAllCoursesAuthorityByPeriod = (
 ) =>
 	useQuery({
 		// Se podria usar las misma key si no hay choque pero para evitar de problemas de cache se modificará la key
-		queryKey: [...coursesKeys.periodCenter(
-			periodId ?? '',
-			centerDepartmentId ?? ''
-		), 'authority'],
+		queryKey: [
+			...coursesKeys.periodCenter(
+				periodId ?? '',
+				centerDepartmentId ?? ''
+			),
+			'authority',
+		],
 		queryFn: () =>
 			courseClassroomsApi.getAllCoursesByRoleAndPeriod(
 				'authority',
@@ -153,7 +168,13 @@ export const useSearchCourses = (
 			size,
 		],
 		queryFn: () =>
-			coursesApi.searchCourse(centerDepartmentId ?? '', searchTerm, page, size, activeStatus),
+			coursesApi.searchCourse(
+				centerDepartmentId ?? '',
+				searchTerm,
+				page,
+				size,
+				activeStatus
+			),
 		enabled: Boolean(
 			searchTerm !== ''
 				? searchTerm.length >= 3 && !!centerDepartmentId

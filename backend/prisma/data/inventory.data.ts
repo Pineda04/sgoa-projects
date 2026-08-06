@@ -67,7 +67,10 @@ export const monitorSizesSeed = {
   inches_70: { id: '588cbc2d-080f-482d-923b-28846cdedeac', description: '70"' },
   inches_86: { id: 'd109a5af-2d52-423f-badb-332406cb0b67', description: '86"' },
   inches_98: { id: '418d72b0-ae7c-4a66-8936-a857a60e3e1a', description: '98"' },
-  inches_110: { id: 'e5758e17-028c-4aa7-b89e-396a9ddf6769', description: '110"' },
+  inches_110: {
+    id: 'e5758e17-028c-4aa7-b89e-396a9ddf6769',
+    description: '110"',
+  },
 };
 
 export const pcTypesSeed = {

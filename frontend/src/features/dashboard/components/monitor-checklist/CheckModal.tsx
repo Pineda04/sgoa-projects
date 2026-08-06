@@ -71,7 +71,7 @@ export const CheckModal = ({
 			isPresent,
 			observation,
 			isPresent && item.assignment.hasDigitalBlackboard
-				? blackboardUse ?? undefined
+				? (blackboardUse ?? undefined)
 				: undefined
 		);
 		if (wasRegistered) onClose();
@@ -81,7 +81,9 @@ export const CheckModal = ({
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="sm:min-w-md">
 				<h1 className="mb-1 text-lg font-bold text-foreground sm:text-xl">
-					{mode === 'edit' ? 'Editar verificación' : 'Registrar verificación'}
+					{mode === 'edit'
+						? 'Editar verificación'
+						: 'Registrar verificación'}
 				</h1>
 				<p className="mb-4 text-xs text-muted-foreground">
 					{mode === 'edit'
@@ -91,13 +93,17 @@ export const CheckModal = ({
 
 				<dl className="mb-5 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted p-3 text-sm">
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Asignatura</dt>
+						<dt className="text-xs text-muted-foreground">
+							Asignatura
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{item.assignment.courseName}
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Docente</dt>
+						<dt className="text-xs text-muted-foreground">
+							Docente
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{item.assignment.teacher.name}
 						</dd>
@@ -109,19 +115,25 @@ export const CheckModal = ({
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Edificio</dt>
+						<dt className="text-xs text-muted-foreground">
+							Edificio
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{item.buildingName}
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Sección</dt>
+						<dt className="text-xs text-muted-foreground">
+							Sección
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{item.assignment.groupCode}
 						</dd>
 					</div>
 					<div className="min-w-0">
-						<dt className="text-xs text-muted-foreground">Horario</dt>
+						<dt className="text-xs text-muted-foreground">
+							Horario
+						</dt>
 						<dd className="truncate font-medium text-foreground">
 							{item.schedule}
 						</dd>
@@ -137,8 +149,7 @@ export const CheckModal = ({
 						disabled={isSubmitting}
 					/>
 
-					{isPresent &&
-					item.assignment.hasDigitalBlackboard ? (
+					{isPresent && item.assignment.hasDigitalBlackboard ? (
 						<fieldset>
 							<legend className="mb-2 text-sm font-semibold text-foreground">
 								¿Se utilizó la pizarra digital?
@@ -153,8 +164,12 @@ export const CheckModal = ({
 											type="radio"
 											name="blackboardUse"
 											className="sr-only"
-											checked={blackboardUse === option.value}
-											onChange={() => setBlackboardUse(option.value)}
+											checked={
+												blackboardUse === option.value
+											}
+											onChange={() =>
+												setBlackboardUse(option.value)
+											}
 										/>
 										{option.label}
 									</label>

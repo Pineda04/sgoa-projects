@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiCommonResponses,
   LookupSource,
@@ -64,7 +74,10 @@ export class DigitalBlackboardController {
     okDescription: 'Pizarra digital actualizada correctamente.',
     notFoundDescription: 'La pizarra digital no existe.',
   })
-  update(@Param('id', ValidateIdPipe) id: string, @Body() updateDigitalBlackboardDto: UpdateDigitalBlackboardDto) {
+  update(
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() updateDigitalBlackboardDto: UpdateDigitalBlackboardDto,
+  ) {
     return this.digitalBlackboardService.update(id, updateDigitalBlackboardDto);
   }
 

@@ -9,7 +9,10 @@ import { TagError } from '@shared/components';
 import { MonitorReportFilters } from './MonitorReportFilters';
 import { MonitorReportSummary } from './MonitorReportSummary';
 import { MonitorReportTable } from './MonitorReportTable';
-import { getDateDaysAgoString, getTodayDateString } from './monitor-reports.utils';
+import {
+	getDateDaysAgoString,
+	getTodayDateString,
+} from './monitor-reports.utils';
 
 const DEFAULT_RANGE_DAYS = 6;
 

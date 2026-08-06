@@ -118,7 +118,8 @@ export const getCurrentTimeString = (): string => {
 
 export const isCheckEdited = (
 	check: Pick<TMonitorAssignmentCheckStatus, 'createdAt' | 'updatedAt'>
-): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+): boolean =>
+	new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
 
 export type TChecklistView = 'COMPACT' | 'DETAILED' | 'GRID';
 export type TStatusFilter = 'ALL' | 'PENDING' | 'VERIFIED';
@@ -191,7 +192,8 @@ export const buildChecklistItems = (
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
 				const serverCheck = assignment.check;
-				const localOverride = checkOverrides[assignment.courseClassroomId] ?? null;
+				const localOverride =
+					checkOverrides[assignment.courseClassroomId] ?? null;
 				const check = localOverride ?? serverCheck ?? null;
 				const checkSource: TChecklistItem['checkSource'] = localOverride
 					? 'LOCAL'
@@ -211,7 +213,8 @@ export const buildChecklistItems = (
 					status: getAssignmentStatus(check),
 					canEditCheck:
 						checkSource === 'LOCAL' ||
-						(checkSource === 'SERVER' && serverCheck?.monitorId === currentUserId),
+						(checkSource === 'SERVER' &&
+							serverCheck?.monitorId === currentUserId),
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,
@@ -248,7 +251,9 @@ export const filterByScope = (
 	return items.filter(item => {
 		const matchesBuilding = !buildingId || item.buildingId === buildingId;
 		const matchesJornada =
-			jornada === 'ALL' || item.jornada === null || item.jornada === jornada;
+			jornada === 'ALL' ||
+			item.jornada === null ||
+			item.jornada === jornada;
 		const matchesSearch = !term || item.searchText.includes(term);
 
 		return matchesBuilding && matchesJornada && matchesSearch;
@@ -312,5 +317,7 @@ export const countPendingByJornada = (
 	items.filter(
 		item =>
 			item.status === 'PENDING' &&
-			(jornada === 'ALL' || item.jornada === null || item.jornada === jornada)
+			(jornada === 'ALL' ||
+				item.jornada === null ||
+				item.jornada === jornada)
 	).length;

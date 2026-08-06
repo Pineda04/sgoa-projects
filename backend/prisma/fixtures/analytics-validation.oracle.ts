@@ -7,7 +7,9 @@ import { PrismaClient } from 'src/generated/prisma/client';
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('DATABASE_URL is required.');
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: databaseUrl }),
+});
 const PERIOD_ID = 'a1000000-0000-4000-8000-000000000009';
 const COMPARISON_PERIOD_ID = 'a1000000-0000-4000-8000-000000000010';
 const CENTER_DEPARTMENT_ID = 'a1000000-0000-4000-8000-000000000005';
@@ -99,7 +101,9 @@ const query = <T>(sql: string, ...params: unknown[]) =>
 
 function parseDays(value: string): string[] | null {
   const matches = value.match(/Lu|Ma|Mi|Ju|Vi|Sa|Do/g) ?? [];
-  return matches.length > 0 && matches.join('') === value && new Set(matches).size === matches.length
+  return matches.length > 0 &&
+    matches.join('') === value &&
+    new Set(matches).size === matches.length
     ? matches
     : null;
 }
@@ -109,15 +113,29 @@ function parseMinutes(value: string): number | null {
   return match ? Number(match[1]) * 60 + Number(match[2]) : null;
 }
 
-function parseSchedule(value: string): { start: string; end: string; startMinutes: number; endMinutes: number } | null {
+function parseSchedule(value: string): {
+  start: string;
+  end: string;
+  startMinutes: number;
+  endMinutes: number;
+} | null {
   const match = value.trim().match(/^(.+?)\s*-\s*(.+?)$/);
   if (!match) return null;
   const startMinutes = parseMinutes(match[1]);
   const endMinutes = parseMinutes(match[2]);
-  if (startMinutes === null || endMinutes === null || startMinutes >= endMinutes) return null;
+  if (
+    startMinutes === null ||
+    endMinutes === null ||
+    startMinutes >= endMinutes
+  )
+    return null;
   return {
-    start: `${Math.floor(startMinutes / 60).toString().padStart(2, '0')}:${(startMinutes % 60).toString().padStart(2, '0')}`,
-    end: `${Math.floor(endMinutes / 60).toString().padStart(2, '0')}:${(endMinutes % 60).toString().padStart(2, '0')}`,
+    start: `${Math.floor(startMinutes / 60)
+      .toString()
+      .padStart(2, '0')}:${(startMinutes % 60).toString().padStart(2, '0')}`,
+    end: `${Math.floor(endMinutes / 60)
+      .toString()
+      .padStart(2, '0')}:${(endMinutes % 60).toString().padStart(2, '0')}`,
     startMinutes,
     endMinutes,
   };
@@ -127,16 +145,29 @@ function percentage(numerator: number, denominator: number): number | null {
   return denominator ? (numerator / denominator) * 100 : null;
 }
 
-function distribution(rows: { id: string; label: string }[], denominator: number) {
-  const counts = new Map<string, { id: string; label: string; value: number }>();
+function distribution(
+  rows: { id: string; label: string }[],
+  denominator: number,
+) {
+  const counts = new Map<
+    string,
+    { id: string; label: string; value: number }
+  >();
   for (const row of rows) {
     const current = counts.get(row.id) ?? { ...row, value: 0 };
     current.value += 1;
     counts.set(row.id, current);
   }
   return [...counts.values()]
-    .sort((left, right) => left.label.localeCompare(right.label, 'es') || left.id.localeCompare(right.id))
-    .map((item) => ({ ...item, percentage: percentage(item.value, denominator) ?? 0 }));
+    .sort(
+      (left, right) =>
+        left.label.localeCompare(right.label, 'es') ||
+        left.id.localeCompare(right.id),
+    )
+    .map((item) => ({
+      ...item,
+      percentage: percentage(item.value, denominator) ?? 0,
+    }));
 }
 
 async function loadSections(periodId: string): Promise<Section[]> {
@@ -332,8 +363,18 @@ async function main() {
 
   const uniqueCourses = new Set(sections.map(({ courseId }) => courseId));
   const uniqueTeachers = new Set(sections.map(({ teacherId }) => teacherId));
-  const validScheduleSections = sections.filter(({ days, schedule }) => parseDays(days) && parseSchedule(schedule));
-  const scheduleGroups = new Map<string, { dayOfWeek: string; startTime: string; endTime: string; meetingCount: number }>();
+  const validScheduleSections = sections.filter(
+    ({ days, schedule }) => parseDays(days) && parseSchedule(schedule),
+  );
+  const scheduleGroups = new Map<
+    string,
+    {
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+      meetingCount: number;
+    }
+  >();
   for (const row of validScheduleSections) {
     const days = parseDays(row.days)!;
     const schedule = parseSchedule(row.schedule)!;
@@ -341,40 +382,122 @@ async function main() {
       const key = `${dayOfWeek}:${schedule.start}:${schedule.end}`;
       const current = scheduleGroups.get(key);
       if (current) current.meetingCount += 1;
-      else scheduleGroups.set(key, { dayOfWeek, startTime: schedule.start, endTime: schedule.end, meetingCount: 1 });
+      else
+        scheduleGroups.set(key, {
+          dayOfWeek,
+          startTime: schedule.start,
+          endTime: schedule.end,
+          meetingCount: 1,
+        });
     }
   }
 
-  const knownEnrollments = sections.filter(({ studentCount }) => studentCount !== null);
-  const physicalSections = sections.filter(({ modality }) => modality !== 'Espacio Virtual');
-  const comparableSections = physicalSections.filter(({ studentCount, maxCapacity }) => studentCount !== null && maxCapacity !== null && maxCapacity > 0);
-  const enrollmentSum = knownEnrollments.reduce((sum, row) => sum + row.studentCount!, 0);
-  const capacitySum = comparableSections.reduce((sum, row) => sum + row.maxCapacity!, 0);
-  const physicalEnrollmentSum = comparableSections.reduce((sum, row) => sum + row.studentCount!, 0);
-  const equippedClassroomIds = new Set(inventory.filter(({ equipmentType }) => equipmentType === 'digital_blackboard').map(({ classroomId }) => classroomId));
-  const equippedSections = sections.filter(({ classroomId, modality }) => equippedClassroomIds.has(classroomId) && modality !== 'Espacio Virtual');
-  const knownEquippedSections = equippedSections.filter(({ studentCount }) => studentCount !== null);
+  const knownEnrollments = sections.filter(
+    ({ studentCount }) => studentCount !== null,
+  );
+  const physicalSections = sections.filter(
+    ({ modality }) => modality !== 'Espacio Virtual',
+  );
+  const comparableSections = physicalSections.filter(
+    ({ studentCount, maxCapacity }) =>
+      studentCount !== null && maxCapacity !== null && maxCapacity > 0,
+  );
+  const enrollmentSum = knownEnrollments.reduce(
+    (sum, row) => sum + row.studentCount!,
+    0,
+  );
+  const capacitySum = comparableSections.reduce(
+    (sum, row) => sum + row.maxCapacity!,
+    0,
+  );
+  const physicalEnrollmentSum = comparableSections.reduce(
+    (sum, row) => sum + row.studentCount!,
+    0,
+  );
+  const equippedClassroomIds = new Set(
+    inventory
+      .filter(({ equipmentType }) => equipmentType === 'digital_blackboard')
+      .map(({ classroomId }) => classroomId),
+  );
+  const equippedSections = sections.filter(
+    ({ classroomId, modality }) =>
+      equippedClassroomIds.has(classroomId) && modality !== 'Espacio Virtual',
+  );
+  const knownEquippedSections = equippedSections.filter(
+    ({ studentCount }) => studentCount !== null,
+  );
   const activeTeacherIds = new Set(staff.map(({ id }) => id));
-  const reportedActivityTeacherIds = new Set(activities.map(({ teacherId }) => teacherId));
-  const activeWithReport = [...reportedActivityTeacherIds].filter((id) => activeTeacherIds.has(id)).length;
+  const reportedActivityTeacherIds = new Set(
+    activities.map(({ teacherId }) => teacherId),
+  );
+  const activeWithReport = [...reportedActivityTeacherIds].filter((id) =>
+    activeTeacherIds.has(id),
+  ).length;
 
-  const byType = distribution(inventory.map(({ equipmentType }) => ({ id: equipmentType, label: equipmentType })), inventory.length);
-  const byCondition = distribution(inventory.map(({ conditionId, conditionLabel }) => ({ id: conditionId, label: conditionLabel })), inventory.length);
-  const byBuilding = distribution(inventory.map(({ buildingId, buildingName }) => ({ id: buildingId, label: buildingName })), inventory.length);
-  const activityByType = distribution(activities.map(({ activityTypeId, activityTypeName }) => ({ id: activityTypeId, label: activityTypeName })), activities.length);
-  const activityByTeacher = distribution(activities.map(({ teacherId, teacherName }) => ({ id: teacherId, label: teacherName })), activities.length);
-  const activityByCenter = distribution(activities.map(({ centerDepartmentId }) => ({ id: centerDepartmentId, label: centerDepartmentId })), activities.length);
+  const byType = distribution(
+    inventory.map(({ equipmentType }) => ({
+      id: equipmentType,
+      label: equipmentType,
+    })),
+    inventory.length,
+  );
+  const byCondition = distribution(
+    inventory.map(({ conditionId, conditionLabel }) => ({
+      id: conditionId,
+      label: conditionLabel,
+    })),
+    inventory.length,
+  );
+  const byBuilding = distribution(
+    inventory.map(({ buildingId, buildingName }) => ({
+      id: buildingId,
+      label: buildingName,
+    })),
+    inventory.length,
+  );
+  const activityByType = distribution(
+    activities.map(({ activityTypeId, activityTypeName }) => ({
+      id: activityTypeId,
+      label: activityTypeName,
+    })),
+    activities.length,
+  );
+  const activityByTeacher = distribution(
+    activities.map(({ teacherId, teacherName }) => ({
+      id: teacherId,
+      label: teacherName,
+    })),
+    activities.length,
+  );
+  const activityByCenter = distribution(
+    activities.map(({ centerDepartmentId }) => ({
+      id: centerDepartmentId,
+      label: centerDepartmentId,
+    })),
+    activities.length,
+  );
 
-  const used = checks.filter(({ blackboardStatus }) => blackboardStatus === 'USED').length;
-  const notUsed = checks.filter(({ blackboardStatus }) => blackboardStatus === 'NOT_USED').length;
-  const unknown = checks.filter(({ blackboardStatus }) => blackboardStatus === 'UNKNOWN').length;
+  const used = checks.filter(
+    ({ blackboardStatus }) => blackboardStatus === 'USED',
+  ).length;
+  const notUsed = checks.filter(
+    ({ blackboardStatus }) => blackboardStatus === 'NOT_USED',
+  ).length;
+  const unknown = checks.filter(
+    ({ blackboardStatus }) => blackboardStatus === 'UNKNOWN',
+  ).length;
   const observedDenominator = used + notUsed;
   const observedTotal = observedDenominator + unknown;
 
   const result = {
     generatedAt: new Date().toISOString(),
     source: 'independent raw SQL oracle',
-    filters: { periodId: PERIOD_ID, comparisonPeriodId: COMPARISON_PERIOD_ID, centerDepartmentId: CENTER_DEPARTMENT_ID, buildingId: BUILDING_ID },
+    filters: {
+      periodId: PERIOD_ID,
+      comparisonPeriodId: COMPARISON_PERIOD_ID,
+      centerDepartmentId: CENTER_DEPARTMENT_ID,
+      buildingId: BUILDING_ID,
+    },
     counts: {
       sectionsP1: sections.length,
       sectionsP2: comparisonSections.length,
@@ -390,22 +513,52 @@ async function main() {
       assignedUvs: sections.reduce((sum, row) => sum + row.uvs, 0),
       assignedTeachers: uniqueTeachers.size,
       averageSectionsPerTeacher: sections.length / uniqueTeachers.size,
-      averageUvsPerTeacher: sections.reduce((sum, row) => sum + row.uvs, 0) / uniqueTeachers.size,
+      averageUvsPerTeacher:
+        sections.reduce((sum, row) => sum + row.uvs, 0) / uniqueTeachers.size,
       scheduleDistribution: {
-        items: [...scheduleGroups.values()].sort((left, right) => left.dayOfWeek.localeCompare(right.dayOfWeek) || left.startTime.localeCompare(right.startTime)),
-        coverage: { included: validScheduleSections.length, total: sections.length, excluded: sections.length - validScheduleSections.length, reasons: ['invalid_schedule_days', 'invalid_schedule_section'] },
+        items: [...scheduleGroups.values()].sort(
+          (left, right) =>
+            left.dayOfWeek.localeCompare(right.dayOfWeek) ||
+            left.startTime.localeCompare(right.startTime),
+        ),
+        coverage: {
+          included: validScheduleSections.length,
+          total: sections.length,
+          excluded: sections.length - validScheduleSections.length,
+          reasons: ['invalid_schedule_days', 'invalid_schedule_section'],
+        },
       },
-      comparison: { offeredSections: comparisonSections.length, absoluteChange: sections.length - comparisonSections.length, percentageChange: ((sections.length - comparisonSections.length) / comparisonSections.length) * 100 },
+      comparison: {
+        offeredSections: comparisonSections.length,
+        absoluteChange: sections.length - comparisonSections.length,
+        percentageChange:
+          ((sections.length - comparisonSections.length) /
+            comparisonSections.length) *
+          100,
+      },
     },
     enrollment: {
       reportedEnrollments: enrollmentSum,
       averageEnrollmentPerSection: enrollmentSum / knownEnrollments.length,
-      sectionsOverCapacity: comparableSections.filter(({ studentCount, maxCapacity }) => studentCount! > maxCapacity!).length,
-      availablePhysicalSeats: comparableSections.reduce((sum, row) => sum + Math.max(0, row.maxCapacity! - row.studentCount!), 0),
+      sectionsOverCapacity: comparableSections.filter(
+        ({ studentCount, maxCapacity }) => studentCount! > maxCapacity!,
+      ).length,
+      availablePhysicalSeats: comparableSections.reduce(
+        (sum, row) => sum + Math.max(0, row.maxCapacity! - row.studentCount!),
+        0,
+      ),
       occupancyRate: (physicalEnrollmentSum / capacitySum) * 100,
       enrollmentDataCoverage: (knownEnrollments.length / sections.length) * 100,
-      enrollmentCoverage: { included: knownEnrollments.length, total: sections.length, excluded: sections.length - knownEnrollments.length },
-      capacityCoverage: { included: comparableSections.length, total: physicalSections.length, excluded: physicalSections.length - comparableSections.length },
+      enrollmentCoverage: {
+        included: knownEnrollments.length,
+        total: sections.length,
+        excluded: sections.length - knownEnrollments.length,
+      },
+      capacityCoverage: {
+        included: comparableSections.length,
+        total: physicalSections.length,
+        excluded: physicalSections.length - comparableSections.length,
+      },
     },
     classroomAvailability: {
       eligibleClassrooms: classrooms.length,
@@ -416,40 +569,91 @@ async function main() {
       query: { dayOfWeek: 'Lu', startTime: '08:30', endTime: '09:30' },
     },
     classroomCapacity: {
-      installedCapacity: classrooms.filter(({ maxCapacity }) => maxCapacity !== null && maxCapacity > 0).reduce((sum, row) => sum + row.maxCapacity!, 0),
-      capacityDataCoverage: (classrooms.filter(({ maxCapacity }) => maxCapacity !== null && maxCapacity > 0).length / classrooms.length) * 100,
+      installedCapacity: classrooms
+        .filter(({ maxCapacity }) => maxCapacity !== null && maxCapacity > 0)
+        .reduce((sum, row) => sum + row.maxCapacity!, 0),
+      capacityDataCoverage:
+        (classrooms.filter(
+          ({ maxCapacity }) => maxCapacity !== null && maxCapacity > 0,
+        ).length /
+          classrooms.length) *
+        100,
     },
     technology: {
       eligibleClassrooms: classrooms.length,
       equippedClassrooms: equippedClassroomIds.size,
-      digitalBlackboardCoverage: (equippedClassroomIds.size / classrooms.length) * 100,
-      knownEnrollmentsInEquippedClassrooms: knownEquippedSections.reduce((sum, row) => sum + row.studentCount!, 0),
-      equippedEnrollmentDataCoverage: (knownEquippedSections.length / equippedSections.length) * 100,
+      digitalBlackboardCoverage:
+        (equippedClassroomIds.size / classrooms.length) * 100,
+      knownEnrollmentsInEquippedClassrooms: knownEquippedSections.reduce(
+        (sum, row) => sum + row.studentCount!,
+        0,
+      ),
+      equippedEnrollmentDataCoverage:
+        (knownEquippedSections.length / equippedSections.length) * 100,
       totalEquipment: inventory.length,
       distributions: { byType, byCondition, byBuilding },
     },
     staff: {
       activeTeachers: activeTeacherIds.size,
-      byContract: distribution(staff.map(({ id, contractName }) => ({ id: contractName, label: contractName })), staff.length),
-      byCategory: distribution(staff.map(({ id, categoryName }) => ({ id: categoryName, label: categoryName })), staff.length),
-      byShift: distribution(staff.map(({ id, shiftName }) => ({ id: shiftName, label: shiftName })), staff.length),
-      byCurrentPosition: distribution(staff.filter(({ positionId }) => positionId).map(({ positionId, positionName }) => ({ id: positionId!, label: positionName! })), staff.length),
+      byContract: distribution(
+        staff.map(({ id, contractName }) => ({
+          id: contractName,
+          label: contractName,
+        })),
+        staff.length,
+      ),
+      byCategory: distribution(
+        staff.map(({ id, categoryName }) => ({
+          id: categoryName,
+          label: categoryName,
+        })),
+        staff.length,
+      ),
+      byShift: distribution(
+        staff.map(({ id, shiftName }) => ({ id: shiftName, label: shiftName })),
+        staff.length,
+      ),
+      byCurrentPosition: distribution(
+        staff
+          .filter(({ positionId }) => positionId)
+          .map(({ positionId, positionName }) => ({
+            id: positionId!,
+            label: positionName!,
+          })),
+        staff.length,
+      ),
     },
     activities: {
       totalActivities: activities.length,
       reportedTeachers: reportedActivityTeacherIds.size,
-      averageActivitiesPerReportedTeacher: activities.length / reportedActivityTeacherIds.size,
-      activeTeacherReportCoverage: (activeWithReport / activeTeacherIds.size) * 100,
-      distributions: { byType: activityByType, byTeacher: activityByTeacher, byCenter: activityByCenter },
+      averageActivitiesPerReportedTeacher:
+        activities.length / reportedActivityTeacherIds.size,
+      activeTeacherReportCoverage:
+        (activeWithReport / activeTeacherIds.size) * 100,
+      distributions: {
+        byType: activityByType,
+        byTeacher: activityByTeacher,
+        byCenter: activityByCenter,
+      },
     },
     monitoring: {
       totalChecks: checks.length,
       presentChecks: checks.filter(({ isPresent }) => isPresent).length,
       absentChecks: checks.filter(({ isPresent }) => !isPresent).length,
-      complianceRate: (checks.filter(({ isPresent }) => isPresent).length / checks.length) * 100,
+      complianceRate:
+        (checks.filter(({ isPresent }) => isPresent).length / checks.length) *
+        100,
       observedBlackboardUseRate: (used / observedDenominator) * 100,
-      blackboardObservationCoverage: (observedDenominator / observedTotal) * 100,
-      blackboardUseStatus: { USED: used, NOT_USED: notUsed, UNKNOWN: unknown, missing: checks.filter(({ blackboardStatus }) => blackboardStatus === null).length },
+      blackboardObservationCoverage:
+        (observedDenominator / observedTotal) * 100,
+      blackboardUseStatus: {
+        USED: used,
+        NOT_USED: notUsed,
+        UNKNOWN: unknown,
+        missing: checks.filter(
+          ({ blackboardStatus }) => blackboardStatus === null,
+        ).length,
+      },
     },
     detailTotals: {
       teacher_load: uniqueTeachers.size,
@@ -462,7 +666,9 @@ async function main() {
       staff_current: staff.length,
       activities: activities.length,
       monitoring_checks: checks.length,
-      digital_blackboard_use: checks.filter(({ blackboardStatus }) => blackboardStatus !== null).length,
+      digital_blackboard_use: checks.filter(
+        ({ blackboardStatus }) => blackboardStatus !== null,
+      ).length,
     },
   };
 

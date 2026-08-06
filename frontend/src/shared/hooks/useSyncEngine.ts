@@ -58,8 +58,9 @@ export const useSyncEngine = (email?: string) => {
 			}));
 
 			// 2. Enviar lote al backend
-			const result = (await monitorApi.batchSync({ checks: checksToSync })).data
-				.data;
+			const result = (
+				await monitorApi.batchSync({ checks: checksToSync })
+			).data.data;
 
 			// 3. Marcar solo los registros persistidos. Los conflictos y rechazos
 			// se conservan para que el monitor los revise y descarte explícitamente.

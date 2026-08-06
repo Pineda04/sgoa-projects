@@ -81,7 +81,9 @@ export const CreateFacultyModal = ({
 						>
 							{!isPending && <FiSave className="size-4" />}
 							<span>
-								{isPending ? 'Guardando...' : 'Guardar Facultad'}
+								{isPending
+									? 'Guardando...'
+									: 'Guardar Facultad'}
 							</span>
 						</Button>
 					</div>

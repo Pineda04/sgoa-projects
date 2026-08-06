@@ -2,31 +2,31 @@ import { api } from '@config/lib';
 import { IResponse } from '@shared';
 import { TAcademicCommonProps } from '../periods/periods.types';
 import {
-    TCreatePosition,
-    TOutputPosition,
-    TUpdatePosition,
+	TCreatePosition,
+	TOutputPosition,
+	TUpdatePosition,
 } from './positions.types';
 
 export const positionsApi = {
-    //Todos los cargos
-    getAllPositions: () =>
-        api.get<IResponse<TAcademicCommonProps[]>>(`/positions`),
+	//Todos los cargos
+	getAllPositions: () =>
+		api.get<IResponse<TAcademicCommonProps[]>>(`/positions`),
 
-    getAllPositionsForTable: () =>
-        api.get<IResponse<TOutputPosition[]>>(`/positions`),
+	getAllPositionsForTable: () =>
+		api.get<IResponse<TOutputPosition[]>>(`/positions`),
 
-    //Crear cargos
-    createPosition: (body: TCreatePosition) =>
-        api.post<IResponse<TOutputPosition>>(`/positions`, body),
+	//Crear cargos
+	createPosition: (body: TCreatePosition) =>
+		api.post<IResponse<TOutputPosition>>(`/positions`, body),
 
-    getOnePosition: (id: string) =>
-        api.get<IResponse<TOutputPosition>>(`/positions/${id}`),
+	getOnePosition: (id: string) =>
+		api.get<IResponse<TOutputPosition>>(`/positions/${id}`),
 
-    //Actualizar cargos
-    updatePosition: ({ id, body }: { id: string; body: TUpdatePosition }) =>
-        api.patch<IResponse<TOutputPosition>>(`/positions/${id}`, body),
+	//Actualizar cargos
+	updatePosition: ({ id, body }: { id: string; body: TUpdatePosition }) =>
+		api.patch<IResponse<TOutputPosition>>(`/positions/${id}`, body),
 
-    //Eliminar cargos
-    deletePosition: (id: string) =>
-        api.delete<IResponse<TOutputPosition>>(`/positions/${id}`),
+	//Eliminar cargos
+	deletePosition: (id: string) =>
+		api.delete<IResponse<TOutputPosition>>(`/positions/${id}`),
 };

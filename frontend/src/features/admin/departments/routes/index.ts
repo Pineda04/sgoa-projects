@@ -1,2 +1,2 @@
-export { DepartmentsRouter } from './DepartmentsRouter'
-export { departmentsRoutes } from './DepartmentsRoutes'
+export { DepartmentsRouter } from './DepartmentsRouter';
+export { departmentsRoutes } from './DepartmentsRoutes';

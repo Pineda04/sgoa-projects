@@ -105,7 +105,7 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Aires Acondicionados',
 				path: '/inventory/air-conditioners',
-				subject: 'air-conditioners'
+				subject: 'air-conditioners',
 			},
 			{
 				label: 'Pizarras Digitales',
@@ -251,29 +251,34 @@ export const Navbar = () => {
 	const visibleModules = useMemo(() => {
 		if (!isAuthenticated) return [];
 
-		return modulesWithSections
-			.map(mod => ({
-				...mod,
-				sections: mod.sections.filter(s => {
-					if (s.superAdminOnly) return !!user?.isSuperAdmin;
-					if (!s.subject) return true;
-					return ability.can('read', s.subject);
-				}),
-			}))
-			.filter(mod => mod.sections.length > 0)
-			// Feature: sin conexión se ocultan los módulos que requieren red
-			// (Administración, Infraestructura, Inventario y demás dashboards);
-			// solo queda disponible el dashboard de monitoreo.
-			.filter(mod => isOnline || mod.id === 'dashboard');
-	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin, isOnline]);
+		return (
+			modulesWithSections
+				.map(mod => ({
+					...mod,
+					sections: mod.sections.filter(s => {
+						if (s.superAdminOnly) return !!user?.isSuperAdmin;
+						if (!s.subject) return true;
+						return ability.can('read', s.subject);
+					}),
+				}))
+				.filter(mod => mod.sections.length > 0)
+				// Feature: sin conexión se ocultan los módulos que requieren red
+				// (Administración, Infraestructura, Inventario y demás dashboards);
+				// solo queda disponible el dashboard de monitoreo.
+				.filter(mod => isOnline || mod.id === 'dashboard')
+		);
+	}, [
+		isAuthenticated,
+		ability,
+		modulesWithSections,
+		user?.isSuperAdmin,
+		isOnline,
+	]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (!(e.target instanceof Node)) return;
-			if (
-				navbarRef.current &&
-				!navbarRef.current.contains(e.target)
-			) {
+			if (navbarRef.current && !navbarRef.current.contains(e.target)) {
 				setOpenDropdownId(null);
 			}
 		};
@@ -392,10 +397,11 @@ export const Navbar = () => {
 									{mod.sections.length >
 										(mod.id === 'dashboard' ? 1 : 0) && (
 										<ChevronDownIcon
-											className={`size-3.5 transition-transform duration-200 ${openDropdownId === mod.id
+											className={`size-3.5 transition-transform duration-200 ${
+												openDropdownId === mod.id
 													? 'rotate-180'
 													: ''
-												}`}
+											}`}
 										/>
 									)}
 								</button>
@@ -414,21 +420,23 @@ export const Navbar = () => {
 														setOpenDropdownId(null)
 													}
 													className={`block px-4 py-2.5 text-sm transition-colors duration-150 border-b border-gray-50 last:border-b-0
-													${isSectionActive(
-														section.path
-													)
+													${
+														isSectionActive(
+															section.path
+														)
 															? 'text-primary font-semibold bg-primary/5'
 															: 'text-gray-700 hover:bg-gray-50 hover:text-primary'
-														}`}
+													}`}
 												>
 													<div className="flex items-center gap-2">
 														<span
-															className={`w-1 h-1 rounded-full ${isSectionActive(
-																section.path
-															)
+															className={`w-1 h-1 rounded-full ${
+																isSectionActive(
+																	section.path
+																)
 																	? 'bg-primary'
 																	: 'bg-gray-300'
-																}`}
+															}`}
 														/>
 														{section.label}
 													</div>
@@ -461,10 +469,7 @@ export const Navbar = () => {
 								to="/home"
 								onClick={() => setIsOpen(false)}
 								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200 lg:hidden
-									${location.pathname === '/home'
-										? 'bg-white/15'
-										: 'hover:bg-white/5'
-									}`}
+									${location.pathname === '/home' ? 'bg-white/15' : 'hover:bg-white/5'}`}
 							>
 								<HomeIcon className="size-5 text-white/70 shrink-0" />
 								<span className="text-base font-medium text-white/90 flex-1 text-left">
@@ -492,12 +497,13 @@ export const Navbar = () => {
 											}
 										}}
 										className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
-												${mod.disabled
-												? 'opacity-40'
-												: isModuleActive(mod.id)
-													? 'bg-white/15'
-													: 'hover:bg-white/5'
-											}`}
+												${
+													mod.disabled
+														? 'opacity-40'
+														: isModuleActive(mod.id)
+															? 'bg-white/15'
+															: 'hover:bg-white/5'
+												}`}
 									>
 										<mod.icon className="size-5 text-white/70 shrink-0" />
 										<span className="text-base font-medium text-white/90 flex-1 text-left">
@@ -510,10 +516,11 @@ export const Navbar = () => {
 										)}
 										{mod.sections.length > 1 && (
 											<ChevronDownIcon
-												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${mobileExpandedId === mod.id
+												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${
+													mobileExpandedId === mod.id
 														? 'rotate-180'
 														: ''
-													}`}
+												}`}
 											/>
 										)}
 									</button>
@@ -529,12 +536,13 @@ export const Navbar = () => {
 															setIsOpen(false)
 														}
 														className={`block px-4 py-2.5 rounded-lg text-sm transition-colors duration-150
-																	${isSectionActive(
-															section.path
-														)
-																? 'text-accent font-medium bg-white/10'
-																: 'text-white/70 hover:text-white hover:bg-white/5'
-															}`}
+																	${
+																		isSectionActive(
+																			section.path
+																		)
+																			? 'text-accent font-medium bg-white/10'
+																			: 'text-white/70 hover:text-white hover:bg-white/5'
+																	}`}
 													>
 														{section.label}
 													</Link>

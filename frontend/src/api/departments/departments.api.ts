@@ -29,10 +29,9 @@ export const departmentsApi = {
 	getOneDepartment: (id: string) =>
 		api.get<IResponse<TDepartment>>(`/departments/${id}`),
 
-	updateDepartment: ({ id, body }: { id: string, body: TUpdateDepartment }) =>
+	updateDepartment: ({ id, body }: { id: string; body: TUpdateDepartment }) =>
 		api.patch<IResponse<TDepartment>>(`/departments/${id}`, body),
 
 	deleteDepartment: (id: string) =>
 		api.delete<IResponse<TDepartment>>(`/departments/${id}`),
-
 };

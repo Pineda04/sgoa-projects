@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { User, Building2, BookOpen, GraduationCap, Calendar, Briefcase, Award } from 'lucide-react';
+import {
+	User,
+	Building2,
+	BookOpen,
+	GraduationCap,
+	Calendar,
+	Briefcase,
+	Award,
+} from 'lucide-react';
 import { useUser } from '@config';
 import { useGetCurrentAcademicPeriod } from '@api';
 import { getUniqueCenters, Loading } from '@shared';
@@ -10,7 +18,7 @@ export const Home = () => {
 	const [centerSelected, setCenterSelected] = useState(0);
 	const isLoading = [currentUser, academicPeriodInfo].some(q => q.isLoading);
 
-  const uniqueCenters = useMemo(
+	const uniqueCenters = useMemo(
 		() => currentUser.user && getUniqueCenters(currentUser.user.positions),
 		[currentUser.user]
 	);
@@ -47,11 +55,13 @@ export const Home = () => {
 						<GraduationCap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
 					</div>
 					<h2 className="mt-5 text-lg sm:text-xl font-display text-foreground">
-						No se encontró información académica vinculada a este usuario
+						No se encontró información académica vinculada a este
+						usuario
 					</h2>
 					<p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
-						Para poder acceder a ciertas funcionalidades
-            necesitas pertenecer a un departamento o cargo académico en el sistema.
+						Para poder acceder a ciertas funcionalidades necesitas
+						pertenecer a un departamento o cargo académico en el
+						sistema.
 					</p>
 				</div>
 			</div>
@@ -89,12 +99,18 @@ export const Home = () => {
 					<div className="p-4 sm:p-6 md:p-8">
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 							<FieldCard
-								icon={<Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+								icon={
+									<Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
 								label="Centro Universitario"
 							>
 								<select
 									value={centerSelected}
-									onChange={e => setCenterSelected(Number(e.target.value))}
+									onChange={e =>
+										setCenterSelected(
+											Number(e.target.value)
+										)
+									}
 									className="w-full bg-transparent border-none text-foreground font-medium
 										outline-none cursor-pointer focus:ring-0 p-0 text-sm sm:text-base"
 								>
@@ -107,64 +123,91 @@ export const Home = () => {
 							</FieldCard>
 
 							<FieldCard
-								icon={<BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+								icon={
+									<BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
 								label="Facultad"
 							>
 								<span className="text-muted-foreground text-sm sm:text-base">
-									{facultiesByCenter.map(f => f.name).join(', ')}
-								</span>
-							</FieldCard>
-
-							<FieldCard
-								icon={<Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
-								label="Período Académico"
-							>
-								<span className="font-medium text-foreground text-sm sm:text-base">
-									{academicPeriodInfo.data?.title || 'No disponible'}
-								</span>
-							</FieldCard>
-
-							<FieldCard
-								icon={<Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
-								label="Departamento"
-							>
-								<span className="text-muted-foreground text-sm sm:text-base">
-									{positionsByCenter
-										.map(p => `${p.department.name} | ${p.position.name}`)
+									{facultiesByCenter
+										.map(f => f.name)
 										.join(', ')}
 								</span>
 							</FieldCard>
 
 							<FieldCard
-								icon={<GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+								icon={
+									<Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
+								label="Período Académico"
+							>
+								<span className="font-medium text-foreground text-sm sm:text-base">
+									{academicPeriodInfo.data?.title ||
+										'No disponible'}
+								</span>
+							</FieldCard>
+
+							<FieldCard
+								icon={
+									<Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
+								label="Departamento"
+							>
+								<span className="text-muted-foreground text-sm sm:text-base">
+									{positionsByCenter
+										.map(
+											p =>
+												`${p.department.name} | ${p.position.name}`
+										)
+										.join(', ')}
+								</span>
+							</FieldCard>
+
+							<FieldCard
+								icon={
+									<GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
 								label="Formación Académica"
 							>
 								<div className="space-y-1">
-									{currentUser.user?.undergrads.map((u, i) => (
-										<p key={u.id} className="text-xs sm:text-sm text-muted-foreground">
-											Pregrado {i + 1}: {u.name}
-										</p>
-									))}
+									{currentUser.user?.undergrads.map(
+										(u, i) => (
+											<p
+												key={u.id}
+												className="text-xs sm:text-sm text-muted-foreground"
+											>
+												Pregrado {i + 1}: {u.name}
+											</p>
+										)
+									)}
 									{currentUser.user?.postgrads.map((u, i) => (
-										<p key={u.id} className="text-xs sm:text-sm text-muted-foreground">
+										<p
+											key={u.id}
+											className="text-xs sm:text-sm text-muted-foreground"
+										>
 											Postgrado {i + 1}: {u.name}
 										</p>
 									))}
-									{currentUser.user?.undergrads.length === 0 &&
-									 currentUser.user?.postgrads.length === 0 && (
-										<p className="text-xs sm:text-sm text-muted-foreground">
-											No registrada
-										</p>
-									)}
+									{currentUser.user?.undergrads.length ===
+										0 &&
+										currentUser.user?.postgrads.length ===
+											0 && (
+											<p className="text-xs sm:text-sm text-muted-foreground">
+												No registrada
+											</p>
+										)}
 								</div>
 							</FieldCard>
 
 							<FieldCard
-								icon={<Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+								icon={
+									<Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+								}
 								label="Categoría de Docente"
 							>
 								<span className="font-medium text-foreground text-sm sm:text-base">
-									{currentUser.user?.categoryName || 'No asignada'}
+									{currentUser.user?.categoryName ||
+										'No asignada'}
 								</span>
 							</FieldCard>
 						</div>
@@ -178,7 +221,7 @@ export const Home = () => {
 function FieldCard({
 	icon,
 	label,
-	children
+	children,
 }: {
 	icon: React.ReactNode;
 	label: string;
@@ -194,9 +237,7 @@ function FieldCard({
 					{label}
 				</span>
 			</div>
-			<div className="pl-11 sm:pl-13">
-				{children}
-			</div>
+			<div className="pl-11 sm:pl-13">{children}</div>
 		</div>
 	);
 }

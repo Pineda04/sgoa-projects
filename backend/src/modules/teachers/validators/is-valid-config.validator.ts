@@ -12,9 +12,7 @@ import { TeacherCategoriesService } from 'src/modules/teachers-config/services/t
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidConfigTeacherConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidConfigTeacherConstraint implements ValidatorConstraintInterface {
   private cache = new Map<string, string[]>();
 
   constructor(

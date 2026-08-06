@@ -1,20 +1,11 @@
 import { cn } from '@config/lib';
 
-const shimmerClasses = 'animate-shimmer bg-gradient-to-r from-transparent via-primary/20 to-transparent bg-[length:200%_100%]';
+const shimmerClasses =
+	'animate-shimmer bg-gradient-to-r from-transparent via-primary/20 to-transparent bg-[length:200%_100%]';
 
-export function Skeleton({
-	className,
-}: {
-	className?: string;
-}) {
+export function Skeleton({ className }: { className?: string }) {
 	return (
-		<div
-			className={cn(
-				'rounded-md bg-muted',
-				shimmerClasses,
-				className
-			)}
-		/>
+		<div className={cn('rounded-md bg-muted', shimmerClasses, className)} />
 	);
 }
 
@@ -56,11 +47,7 @@ export function SkeletonCircle({
 
 	return (
 		<Skeleton
-			className={cn(
-				'rounded-full',
-				sizeClasses[size],
-				className
-			)}
+			className={cn('rounded-full', sizeClasses[size], className)}
 		/>
 	);
 }
@@ -72,45 +59,15 @@ export function SkeletonButton({
 	width?: string;
 	className?: string;
 }) {
-	return (
-		<Skeleton
-			className={cn(
-				'h-9 rounded-md',
-				width,
-				className
-			)}
-		/>
-	);
+	return <Skeleton className={cn('h-9 rounded-md', width, className)} />;
 }
 
-export function SkeletonBadge({
-	className,
-}: {
-	className?: string;
-}) {
-	return (
-		<Skeleton
-			className={cn(
-				'h-5 w-16 rounded-full',
-				className
-			)}
-		/>
-	);
+export function SkeletonBadge({ className }: { className?: string }) {
+	return <Skeleton className={cn('h-5 w-16 rounded-full', className)} />;
 }
 
-export function SkeletonInput({
-	className,
-}: {
-	className?: string;
-}) {
-	return (
-		<Skeleton
-			className={cn(
-				'h-10 w-full rounded-md',
-				className
-			)}
-		/>
-	);
+export function SkeletonInput({ className }: { className?: string }) {
+	return <Skeleton className={cn('h-10 w-full rounded-md', className)} />;
 }
 
 export function SkeletonTable({
@@ -158,7 +115,12 @@ export function SkeletonCard({
 	className?: string;
 }) {
 	return (
-		<div className={cn('space-y-3 p-4 rounded-xl border border-border/50', className)}>
+		<div
+			className={cn(
+				'space-y-3 p-4 rounded-xl border border-border/50',
+				className
+			)}
+		>
 			{showNumber && (
 				<div className="flex justify-between items-center pb-3 border-b border-border/30">
 					<Skeleton className="h-4 w-10 rounded" />
@@ -167,7 +129,10 @@ export function SkeletonCard({
 			)}
 			<div className="space-y-2">
 				{[...Array(fields)].map((_, i) => (
-					<div key={`field-${i}`} className="flex justify-between gap-4">
+					<div
+						key={`field-${i}`}
+						className="flex justify-between gap-4"
+					>
 						<Skeleton className="h-4 w-16 rounded" />
 						<Skeleton className="h-4 w-24 rounded" />
 					</div>

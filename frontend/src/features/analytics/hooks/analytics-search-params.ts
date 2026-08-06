@@ -132,15 +132,18 @@ export const analyticsSearchParams = {
 	dayOfWeek: parseAsStringLiteral(CLASSROOM_DAY_CODES).withDefault('Lu'),
 	startTime: parseAsTime.withDefault('07:00'),
 	endTime: parseAsTime.withDefault('08:00'),
-	classroomView: parseAsStringLiteral(['availability', 'capacity']).withDefault(
-		'availability'
-	),
+	classroomView: parseAsStringLiteral([
+		'availability',
+		'capacity',
+	]).withDefault('availability'),
 	contractTypeId: parseAsString,
 	categoryId: parseAsString,
 	shiftId: parseAsString,
 	positionId: parseAsString,
 	activityTypeId: parseAsString,
-	activityTimeMode: parseAsStringLiteral(['period', 'year']).withDefault('period'),
+	activityTimeMode: parseAsStringLiteral(['period', 'year']).withDefault(
+		'period'
+	),
 	activityYear: parseAsInteger,
 	activityPac: parseAsString,
 	activityPacModality: parseAsString,
@@ -152,19 +155,21 @@ export const analyticsSearchParams = {
 	staffPage: parseAsPositiveInteger.withDefault(1),
 	activityPage: parseAsPositiveInteger.withDefault(1),
 	monitoringPage: parseAsPositiveInteger.withDefault(1),
-	loadSort: parseAsStringLiteral(ACADEMIC_LOAD_DETAIL_SORTS).withDefault('name:asc'),
+	loadSort: parseAsStringLiteral(ACADEMIC_LOAD_DETAIL_SORTS).withDefault(
+		'name:asc'
+	),
 	enrollmentSort: parseAsStringLiteral(ENROLLMENT_DETAIL_SORTS).withDefault(
 		'courseCode:asc'
 	),
-	classroomSort: parseAsStringLiteral(CLASSROOM_AVAILABILITY_SORTS).withDefault(
-		'classroomName:asc'
-	),
+	classroomSort: parseAsStringLiteral(
+		CLASSROOM_AVAILABILITY_SORTS
+	).withDefault('classroomName:asc'),
 	capacitySort: parseAsStringLiteral(CLASSROOM_CAPACITY_SORTS).withDefault(
 		'classroomName:asc'
 	),
-	technologyMetric: parseAsStringLiteral(TECHNOLOGY_DETAIL_METRICS).withDefault(
-		'equipped_classrooms'
-	),
+	technologyMetric: parseAsStringLiteral(
+		TECHNOLOGY_DETAIL_METRICS
+	).withDefault('equipped_classrooms'),
 	technologySort: parseAsStringLiteral(TECHNOLOGY_DETAIL_SORTS).withDefault(
 		'classroomName:asc'
 	),

@@ -81,17 +81,20 @@ class LocalDB extends Dexie {
 		super('SGOALocalDB');
 		this.version(1).stores({
 			// Solo se indexan las propiedades por las que se va a buscar/filtrar
-			offlineChecks: 'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
+			offlineChecks:
+				'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
 		});
 		this.version(2).stores({
 			// Feature: v2 agrega la tabla credentials (clave primaria: email)
-			offlineChecks: 'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
+			offlineChecks:
+				'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
 			credentials: 'email',
 		});
 		this.version(3).stores({
 			// Feature: v3 agrega las tablas de caché para modo offline del monitor
 			// (clave primaria: email del monitor; una fila por usuario)
-			offlineChecks: 'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
+			offlineChecks:
+				'offlineId, courseClassroomId, checkDate, checkTime, syncStatus',
 			credentials: 'email',
 			monitorAssignments: 'email',
 			academicPeriods: 'email',
@@ -100,7 +103,8 @@ class LocalDB extends Dexie {
 			.stores({
 				// Feature: v4 aísla offlineChecks por email del monitor (dispositivo
 				// compartido). Índices compuestos para lecturas/sync por usuario.
-				offlineChecks: 'offlineId, email, [email+checkDate], [email+syncStatus]',
+				offlineChecks:
+					'offlineId, email, [email+checkDate], [email+syncStatus]',
 				credentials: 'email',
 				monitorAssignments: 'email',
 				academicPeriods: 'email',
@@ -119,7 +123,8 @@ class LocalDB extends Dexie {
 			});
 		this.version(5)
 			.stores({
-				offlineChecks: 'offlineId, email, [email+checkDate], [email+syncStatus]',
+				offlineChecks:
+					'offlineId, email, [email+checkDate], [email+syncStatus]',
 				credentials: 'email',
 				monitorAssignments: 'email',
 				academicPeriods: 'email',
@@ -136,7 +141,8 @@ class LocalDB extends Dexie {
 			});
 		this.version(6)
 			.stores({
-				offlineChecks: 'offlineId, email, [email+checkDate], [email+syncStatus]',
+				offlineChecks:
+					'offlineId, email, [email+checkDate], [email+syncStatus]',
 				credentials: 'email',
 				monitorAssignments: '[email+date], email',
 				academicPeriods: 'email',

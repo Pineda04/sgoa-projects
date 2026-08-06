@@ -17,7 +17,8 @@ import {
 
 const formatImplied = (permission: string) => {
 	const [action = '', subject = ''] = permission.split(':');
-	const actionLabels: Readonly<Record<string, string>> = IMPLIED_ACTION_LABELS;
+	const actionLabels: Readonly<Record<string, string>> =
+		IMPLIED_ACTION_LABELS;
 	const subjectLabels: Readonly<Record<string, string>> = SUBJECT_LABELS;
 
 	return `${actionLabels[action] ?? action} ${subjectLabels[subject] ?? subject}`;
@@ -93,8 +94,11 @@ export const RolePermissionsModal = ({
 	onClose,
 	role,
 }: RolePermissionsModalProps) => {
-	const { data: roleData, isLoading: isLoadingRole } = useGetRole(role?.id ?? '');
-	const { data: catalog, isLoading: isLoadingCatalog } = useGetPermissionsCatalog();
+	const { data: roleData, isLoading: isLoadingRole } = useGetRole(
+		role?.id ?? ''
+	);
+	const { data: catalog, isLoading: isLoadingCatalog } =
+		useGetPermissionsCatalog();
 	const { updateRolePermissions, isPendingUpdatePermissions } =
 		useUpdateRolePermissions(role?.id ?? '');
 
@@ -152,12 +156,14 @@ export const RolePermissionsModal = ({
 					Permisos de {role?.name}
 				</h1>
 				<p className="text-xs text-gray-500 mb-5">
-					Marca las acciones permitidas por módulo. &quot;Gestionar&quot;
-					incluye ver, crear, editar y eliminar. Lo que aparece como
+					Marca las acciones permitidas por módulo.
+					&quot;Gestionar&quot; incluye ver, crear, editar y eliminar.
+					Lo que aparece como
 					<span className="text-green-700"> Incluye </span>
-					se concede solo: &quot;Consultar&quot; es apenas la lista para
-					llenar un desplegable, mientras que los dashboards conceden lo
-					que dejan hacer sus pestañas &mdash; son permisos amplios.
+					se concede solo: &quot;Consultar&quot; es apenas la lista
+					para llenar un desplegable, mientras que los dashboards
+					conceden lo que dejan hacer sus pestañas &mdash; son
+					permisos amplios.
 				</p>
 
 				{isLoading ? (
@@ -183,8 +189,10 @@ export const RolePermissionsModal = ({
 								</thead>
 								<tbody>
 									{orderedSubjects.map(subject => {
-										const permissions = bySubject.get(subject);
-										const implied = impliedPermissions[subject] ?? [];
+										const permissions =
+											bySubject.get(subject);
+										const implied =
+											impliedPermissions[subject] ?? [];
 										return (
 											<tr
 												key={subject}
@@ -192,20 +200,28 @@ export const RolePermissionsModal = ({
 											>
 												<td className="sticky left-0 z-10 bg-white px-3 py-2 text-gray-700 border-r border-gray-100">
 													<span>
-														{SUBJECT_LABELS[subject] ??
-															subject}
+														{SUBJECT_LABELS[
+															subject
+														] ?? subject}
 													</span>
 													{implied.length > 0 && (
 														<span className="block text-[11px] text-green-700">
 															Incluye:{' '}
-															{implied.map(formatImplied).join(', ')}
+															{implied
+																.map(
+																	formatImplied
+																)
+																.join(', ')}
 														</span>
 													)}
 												</td>
 												{ACTIONS_ORDER.map(action => {
-													const permission = permissions?.find(
-														p => p.action === action
-													);
+													const permission =
+														permissions?.find(
+															p =>
+																p.action ===
+																action
+														);
 													if (!permission)
 														return (
 															<td

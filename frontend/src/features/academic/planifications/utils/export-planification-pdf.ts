@@ -123,9 +123,14 @@ export async function exportPlanification(
 		doc.setPage(i);
 		doc.setFontSize(10);
 		doc.setFont(jsPdfFont, 'normal');
-		doc.text(`${i} de ${finalTotalPages}`, pageWidth - 50, pageHeight - 30, {
-			align: 'right',
-		});
+		doc.text(
+			`${i} de ${finalTotalPages}`,
+			pageWidth - 50,
+			pageHeight - 30,
+			{
+				align: 'right',
+			}
+		);
 	}
 
 	const fileName = 'Planificación académica ' + pac + 'PAC ' + year;

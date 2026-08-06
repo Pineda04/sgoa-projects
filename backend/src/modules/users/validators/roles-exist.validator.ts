@@ -7,9 +7,7 @@ import { RolesService } from '../services/roles.service';
 
 @ValidatorConstraint({ name: 'RolesExistByName', async: true })
 @Injectable()
-export class RolesExistByNameConstraint
-  implements ValidatorConstraintInterface
-{
+export class RolesExistByNameConstraint implements ValidatorConstraintInterface {
   constructor(private readonly rolesService: RolesService) {}
 
   async validate(roles: unknown): Promise<boolean> {

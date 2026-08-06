@@ -263,12 +263,12 @@ export class AnalyticsFilterOptionsService {
         canComparePeriods: Boolean(academicContext) && periods.length > 1,
         canExport: Boolean(
           academicContext ||
-            enrollmentContext ||
-            classroomsContext ||
-            technologyContext ||
-            staffContext ||
-            activitiesContext ||
-            monitoringContext,
+          enrollmentContext ||
+          classroomsContext ||
+          technologyContext ||
+          staffContext ||
+          activitiesContext ||
+          monitoringContext,
         ),
       },
     };

@@ -4,9 +4,12 @@ import { classroomsKeys } from './classrooms.keys';
 import { STALE_TIME } from '@config';
 import { usePaginationParams } from '@shared/hooks';
 
-export const useGetAllClassrooms = (
-	filters?: { name?: string; buildingId?: string; roomTypeId?: string; activeStatus?: string }
-) => {
+export const useGetAllClassrooms = (filters?: {
+	name?: string;
+	buildingId?: string;
+	roomTypeId?: string;
+	activeStatus?: string;
+}) => {
 	const { page, size } = usePaginationParams();
 	return useQuery({
 		queryKey: classroomsKeys.list(page, size, filters),
@@ -23,7 +26,8 @@ export const useGetClassroomsBySearchTerm = (
 ) =>
 	useQuery({
 		queryKey: classroomsKeys.search(searchTerm, page),
-		queryFn: () => classroomsApi.getClassroomsBySearchTerm(searchTerm, page, size),
+		queryFn: () =>
+			classroomsApi.getClassroomsBySearchTerm(searchTerm, page, size),
 		enabled: searchTerm.length >= 2,
 		staleTime: STALE_TIME.SHORT,
 		select: res => res.data,
@@ -45,7 +49,8 @@ export const useGetClassroomAvailability = (
 ) =>
 	useQuery({
 		queryKey: classroomsKeys.availability(id, periodId, dayOfWeek),
-		queryFn: () => classroomsApi.getClassroomAvailability(id, periodId, dayOfWeek),
+		queryFn: () =>
+			classroomsApi.getClassroomAvailability(id, periodId, dayOfWeek),
 		enabled: Boolean(id) && Boolean(periodId),
 		staleTime: STALE_TIME.SHORT,
 		select: res => res.data.data,

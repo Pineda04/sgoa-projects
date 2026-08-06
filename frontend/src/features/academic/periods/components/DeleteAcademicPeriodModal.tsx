@@ -1,4 +1,4 @@
-import { Button, ModalBase } from "@shared/components";
+import { Button, ModalBase } from '@shared/components';
 
 interface DeleteAcademicPeriodModalProps {
 	isOpen: boolean;

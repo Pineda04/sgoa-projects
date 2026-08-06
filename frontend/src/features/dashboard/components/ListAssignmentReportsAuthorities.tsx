@@ -3,7 +3,13 @@ import { useGetAllAssignmentReportsForAuthorities } from '@api/assignment-report
 import { TAssignmentReport } from '@api/assignment-reports';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetAllCenters } from '@api/centers';
-import { Button, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
+import {
+	Button,
+	IResponsiveColumn,
+	Loading,
+	Pagination,
+	ResponsiveTable,
+} from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce, usePaginationParams } from '@shared/hooks';
@@ -42,7 +48,11 @@ export const ListAssignmentReportsAuthorities = () => {
 
 	const reports = (data?.data ?? []) as TAssignmentReport[];
 
-	const handleView = (reportId: string, teacherName: string, teacherCode: string) => {
+	const handleView = (
+		reportId: string,
+		teacherName: string,
+		teacherCode: string
+	) => {
 		navigate(`/academic/reports/coordinator/${reportId}`, {
 			state: { teacherName, teacherCode },
 		});
@@ -55,7 +65,9 @@ export const ListAssignmentReportsAuthorities = () => {
 			mobileLabel: 'Periodo',
 			render: (row: TAssignmentReport) => (
 				<span>
-					<span className="font-medium text-[#144C74]">{row.period.year}</span>
+					<span className="font-medium text-[#144C74]">
+						{row.period.year}
+					</span>
 					{' - '}
 					<span className="text-gray-600">
 						{row.period.pac_modality} {row.period.pac}
@@ -73,7 +85,9 @@ export const ListAssignmentReportsAuthorities = () => {
 			header: 'Código',
 			mobileLabel: 'Código',
 			render: (row: TAssignmentReport) => (
-				<span className="font-mono text-sm">{row.teacher.user.code}</span>
+				<span className="font-mono text-sm">
+					{row.teacher.user.code}
+				</span>
 			),
 		},
 		{
@@ -81,7 +95,9 @@ export const ListAssignmentReportsAuthorities = () => {
 			header: 'Departamento',
 			mobileLabel: 'Departamento',
 			render: (row: TAssignmentReport) => (
-				<span className="text-sm">{row.centerDepartment?.department?.name ?? '—'}</span>
+				<span className="text-sm">
+					{row.centerDepartment?.department?.name ?? '—'}
+				</span>
 			),
 		},
 		{
@@ -89,7 +105,9 @@ export const ListAssignmentReportsAuthorities = () => {
 			header: 'Centro',
 			mobileLabel: 'Centro',
 			render: (row: TAssignmentReport) => (
-				<span className="text-sm text-gray-600">{row.centerDepartment?.center?.name ?? '—'}</span>
+				<span className="text-sm text-gray-600">
+					{row.centerDepartment?.center?.name ?? '—'}
+				</span>
 			),
 		},
 		{
@@ -101,7 +119,11 @@ export const ListAssignmentReportsAuthorities = () => {
 					type="button"
 					className="text-[#144C74] hover:text-[#FCC40C] transition font-medium underline"
 					onClick={() =>
-						handleView(row.id, row.teacher.user.name, row.teacher.user.code)
+						handleView(
+							row.id,
+							row.teacher.user.name,
+							row.teacher.user.code
+						)
 					}
 					variant="unstyled"
 				>

@@ -41,7 +41,9 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 				const existing = await db.offlineChecks
 					.where('[email+checkDate]')
 					.equals([email ?? '', checkDate])
-					.filter(check => check.courseClassroomId === courseClassroomId)
+					.filter(
+						check => check.courseClassroomId === courseClassroomId
+					)
 					.first();
 
 				if (existing) {
@@ -54,7 +56,10 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 								? digitalBlackboardUseStatus
 								: undefined,
 						};
-						await db.offlineChecks.update(existing.offlineId, changes);
+						await db.offlineChecks.update(
+							existing.offlineId,
+							changes
+						);
 					}
 					return;
 				}
@@ -85,7 +90,10 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 				await saveOffline(input);
 				return true;
 			} catch (error) {
-				console.error('Error al guardar verificación localmente:', error);
+				console.error(
+					'Error al guardar verificación localmente:',
+					error
+				);
 				return false;
 			} finally {
 				setSubmittingId(null);
