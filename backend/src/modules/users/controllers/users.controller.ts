@@ -10,7 +10,6 @@ import {
   HttpStatus,
   forwardRef,
   Inject,
-  ForbiddenException,
   Query,
   Put,
 } from '@nestjs/common';
@@ -21,13 +20,13 @@ import {
   GetCurrentUser,
   GetCurrentUserId,
   ResponseMessage,
+  SuperAdminOnly,
 } from 'src/common/decorators';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { ValidateIdPipe } from 'src/common/pipes';
-import { Roles } from 'src/common/decorators';
-import { EUserRole } from '../../../common/enums';
+import { RequirePermission } from 'src/common/decorators';
 import { TeachersService } from 'src/modules/teachers/services/teachers.service';
 import { TJwtPayload } from 'src/modules/auth/types';
 import { QueryPaginationDto } from 'src/common/dto';
@@ -43,7 +42,7 @@ export class UsersController {
   ) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.COORDINADOR_AREA, EUserRole.RRHH)
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Usuario creado exitosamente. Por favor, revise su correo.')
   @ApiBody({
@@ -58,24 +57,14 @@ export class UsersController {
     badRequestDescription: 'Datos inválidos para la creación del usuario.',
     internalErrorDescription: 'Error interno al crear el usuario.',
   })
-  create(
+  async create(
     @Body() createUserDto: CreateUserDto,
     @GetCurrentUser() currentUser: TJwtPayload,
   ) {
-    const allowedRoles = currentUser.roles.includes(EUserRole.ADMIN)
-      ? new Set(Object.values(EUserRole))
-      : currentUser.roles.includes(EUserRole.RRHH)
-        ? new Set([EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA])
-        : new Set([EUserRole.DOCENTE]);
-    const requestedRoles = createUserDto.roles.length
-      ? createUserDto.roles
-      : [EUserRole.DOCENTE];
-
-    if (requestedRoles.some((role) => !allowedRoles.has(role))) {
-      throw new ForbiddenException(
-        'No tiene permiso para asignar uno o más de los roles solicitados.',
-      );
-    }
+    createUserDto.roles = this.usersService.normalizeRolesForCreate(
+      createUserDto.roles,
+      currentUser,
+    );
 
     return this.usersService.createUserWithDeptAndPosition(
       createUserDto,
@@ -84,12 +73,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de usuarios.')
   @ApiCommonResponses({
@@ -103,12 +87,7 @@ export class UsersController {
   }
 
   @Get('one/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de usuario obtenida.')
   @ApiCommonResponses({
@@ -123,12 +102,7 @@ export class UsersController {
   }
 
   @Get('code/:code')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de usuario obtenida por código.')
   @ApiCommonResponses({
@@ -144,12 +118,7 @@ export class UsersController {
   }
 
   @Get('role/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-  )
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de usuarios por rol obtenido.')
   @ApiCommonResponses({
@@ -159,12 +128,12 @@ export class UsersController {
     internalErrorDescription: 'Error interno al obtener los usuarios por rol.',
     notFoundDescription: 'No se encontraron usuarios para el rol especificado.',
   })
-  findAllUsersWithRole(@Param('roleId', ValidateIdPipe) roleId: string) {
+  findAllUsersWithRole(@Param('id', ValidateIdPipe) roleId: string) {
     return this.usersService.findAllUsersWithRole(roleId);
   }
 
   @Get('search')
-  @Roles(EUserRole.ADMIN, EUserRole.RRHH, EUserRole.DIRECCION)
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de usuarios encontrado correctamente.')
   @ApiCommonResponses({
@@ -206,7 +175,7 @@ export class UsersController {
   }
 
   @Get(':id/monitor-buildings')
-  @Roles(EUserRole.ADMIN)
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Asignaciones de edificios obtenidas correctamente.')
   findMonitorBuildingAssignments(@Param('id', ValidateIdPipe) id: string) {
@@ -214,7 +183,7 @@ export class UsersController {
   }
 
   @Put(':id/monitor-buildings')
-  @Roles(EUserRole.ADMIN)
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Asignaciones de edificios actualizadas correctamente.')
   replaceMonitorBuildingAssignments(
@@ -228,7 +197,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN)
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({
@@ -242,16 +211,23 @@ export class UsersController {
     internalErrorDescription: 'Error interno al actualizar el usuario.',
     notFoundDescription: 'No se encontró el usuario solicitado.',
   })
-  update(
+  async update(
     @Param('id', ValidateIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @GetCurrentUser() currentUser: TJwtPayload,
   ) {
+    await this.usersService.assertCanChangeRoles(
+      id,
+      updateUserDto.roles,
+      currentUser,
+    );
+
     return this.usersService.update(id, updateUserDto);
   }
 
   // No se elimina, solo se desactiva
   @Delete(':id')
-  @Roles(EUserRole.ADMIN)
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario eliminado correctamente.')
   @ApiCommonResponses({

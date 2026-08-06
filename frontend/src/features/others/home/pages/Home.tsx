@@ -30,6 +30,33 @@ export const Home = () => {
 
 	if (isLoading) return <Loading />;
 
+	if (currentUser.isError || !currentUser.user)
+		return (
+			<div className="max-w-4xl mx-auto mt-4 sm:mt-6 md:mt-8 mb-8 md:mb-12 px-3 sm:px-4">
+				<div className="text-center mb-6 sm:mb-8 md:mb-10">
+					<h1 className="text-2xl sm:text-3xl md:text-4xl font-display text-foreground mb-2 sm:mb-3">
+						Información Personal
+					</h1>
+					<p className="text-muted-foreground text-sm sm:text-base">
+						Consulta tu información académica y docente
+					</p>
+				</div>
+
+				<div className="bg-card border-2 border-dashed border-primary/30 rounded-xl md:rounded-2xl shadow-lg shadow-primary/5 p-8 sm:p-12 text-center">
+					<div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-linear-to-br from-primary to-primary-hover rounded-full flex items-center justify-center shadow-lg shadow-primary/20">
+						<GraduationCap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+					</div>
+					<h2 className="mt-5 text-lg sm:text-xl font-display text-foreground">
+						No se encontró información académica vinculada a este usuario
+					</h2>
+					<p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+						Para poder acceder a ciertas funcionalidades
+            necesitas pertenecer a un departamento o cargo académico en el sistema.
+					</p>
+				</div>
+			</div>
+		);
+
 	return (
 		<div className="max-w-4xl mx-auto mt-4 sm:mt-6 md:mt-8 mb-8 md:mb-12 px-3 sm:px-4">
 			<div className="animate-in slide-up">

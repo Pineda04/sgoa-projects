@@ -12,7 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { TUser } from '../types';
 import { RolesService } from './roles.service';
 import * as argon from 'argon2';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import {
   generatePassword,
   hourToDateUTC,
@@ -38,7 +38,11 @@ export class UsersService {
     // roleId: true,
     userRoles: {
       include: {
-        role: true,
+        role: {
+          include: {
+            rolePermissions: { include: { permission: true } },
+          },
+        },
       },
     },
   };
@@ -57,17 +61,20 @@ export class UsersService {
   ) {
     const { roles } = currentUser;
 
+    const teacherRoleNames: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
+
     // Verifica si el usuario no tiene ninguno de los roles DOCENTE o COORDINADOR_AREA, y en ese caso crea el usuario.
     if (
       createUserDto.roles.length !== 0 &&
-      !createUserDto.roles.some((role) =>
-        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(role),
-      )
+      !createUserDto.roles.some((role) => teacherRoleNames.includes(role))
     )
       return await this.create(createUserDto);
 
     // Ya existe el decorador... validacion extra
-    if (roles.length === 1 && roles.includes(EUserRole.DOCENTE))
+    if (roles.length === 1 && roles.includes(ROLE_NAMES.DOCENTE))
       throw new ForbiddenException(
         'Los docentes no pueden asignar un departamento.',
       );
@@ -97,12 +104,12 @@ export class UsersService {
       EPosition.NONE,
     );
 
-    if (roles.includes(EUserRole.DOCENTE) && createUserDto.positionId)
+    if (roles.includes(ROLE_NAMES.DOCENTE) && createUserDto.positionId)
       throw new ForbiddenException('Los docentes no pueden asignar un cargo.');
 
     if (
-      roles.includes(EUserRole.COORDINADOR_AREA) &&
-      !roles.includes(EUserRole.ADMIN) &&
+      roles.includes(ROLE_NAMES.COORDINADOR_AREA) &&
+      !currentUser.isSuperAdmin &&
       createUserDto.positionId !== postionNone.id
     ) {
       createUserDto.positionId = postionNone.id;
@@ -137,11 +144,46 @@ export class UsersService {
     return await this.create(createUserDto);
   }
 
+  normalizeRolesForCreate(
+    roleNames: string[],
+    currentUser: TJwtPayload,
+  ): string[] {
+    if (currentUser.isSuperAdmin) return roleNames;
+
+    return [ROLE_NAMES.DOCENTE];
+  }
+
+  // Solo el super admin puede modificar los roles de un usuario existente.
+  // El formulario de edición reenvía <roles> aunque el usuario no lo haya
+  // tocado (es un campo más de formik), así que solo se bloquea si el
+  // conjunto de roles enviado realmente difiere del actual.
+  async assertCanChangeRoles(
+    id: string,
+    roleNames: string[] | undefined,
+    currentUser: TJwtPayload,
+  ) {
+    if (roleNames === undefined) return;
+    if (currentUser.isSuperAdmin) return;
+
+    const targetUser = await this.findOne(id);
+    const currentRoleNames = targetUser.userRoles.map((ur) => ur.role.name);
+
+    const isSameRoles =
+      roleNames.length === currentRoleNames.length &&
+      roleNames.every((name) => currentRoleNames.includes(name));
+
+    if (isSameRoles) return;
+
+    throw new ForbiddenException(
+      'Solo un super administrador puede modificar los roles de un usuario.',
+    );
+  }
+
   async create(createUserDto: CreateUserDto) {
     // Rol DOCENTE por defecto, no se coloca en el dto, ya que al actualizarlo...
     // ...toma el que este por defecto
     if (createUserDto.roles.length === 0)
-      createUserDto.roles.push(EUserRole.DOCENTE);
+      createUserDto.roles.push(ROLE_NAMES.DOCENTE);
 
     let isTempPass = false;
 
@@ -199,10 +241,13 @@ export class UsersService {
       },
     };
 
+    const teacherRoleNamesForCreate: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
+
     const hasTeacherRole = roleEntities.some((role) =>
-      [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(
-        role.name as EUserRole,
-      ),
+      teacherRoleNamesForCreate.includes(role.name),
     );
 
     // Crear aca toda la relacion, por si ocurre un problema...
@@ -224,10 +269,10 @@ export class UsersService {
               },
               ...(postgradId
                 ? {
-                    undergradDegrees: {
+                    postgraduateDegrees: {
                       create: [
                         {
-                          undergraduate: { connect: { id: undergradId } },
+                          postgraduate: { connect: { id: postgradId } },
                         },
                       ],
                     },
@@ -258,12 +303,17 @@ export class UsersService {
 
     if (!newUser) throw new BadRequestException('Error al crear el usuario.');
 
-    if (isTempPass)
-      await this.mailService.sendMail({
-        to: newUser.email!,
-        subject: 'Contraseña temporal.',
-        html: TEMPLATE_TEMP_PASSWORD(password),
-      });
+    if (isTempPass) {
+      try {
+        await this.mailService.sendMail({
+          to: newUser.email!,
+          subject: 'Contraseña temporal.',
+          html: TEMPLATE_TEMP_PASSWORD(password),
+        });
+      } catch (error) {
+        console.error('Error al enviar correo con contraseña temporal:', error);
+      }
+    }
 
     return newUser;
   }
@@ -428,8 +478,28 @@ export class UsersService {
       roles && roles.length
         ? await this.roleService.findManyByNames(roles)
         : [];
-    const shouldClearMonitorAssignments =
-      roles !== undefined && !roles.includes(EUserRole.MONITOR);
+    const captureRoleCount =
+      roles === undefined
+        ? null
+        : await this.prisma.role.count({
+            where: {
+              name: { in: roles },
+              OR: [
+                { isSuperAdmin: true },
+                {
+                  rolePermissions: {
+                    some: {
+                      permission: {
+                        subject: 'schedule-compliance-check',
+                        action: { in: ['manage', 'create'] },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          });
+    const shouldClearMonitorAssignments = captureRoleCount === 0;
 
     const userData: Partial<Prisma.UserUpdateInput> = {
       name,
@@ -486,6 +556,18 @@ export class UsersService {
         ? hourToDateUTC(teacher.shiftStart)
         : undefined,
       shiftEnd: teacher.shiftEnd ? hourToDateUTC(teacher.shiftEnd) : undefined,
+      positionHeld:
+        teacher.positionId && teacher.centerDepartmentId
+          ? {
+              deleteMany: {},
+              create: [
+                {
+                  positionId: teacher.positionId,
+                  centerDepartmentId: teacher.centerDepartmentId,
+                },
+              ],
+            }
+          : undefined,
     };
 
     const updatedUser = await this.prisma.$transaction(async (transaction) => {
@@ -514,28 +596,65 @@ export class UsersService {
       where: {
         id: userId,
         activeStatus: true,
-        userRoles: { some: { role: { name: EUserRole.MONITOR } } },
+        userRoles: {
+          some: {
+            role: {
+              OR: [
+                { isSuperAdmin: true },
+                {
+                  rolePermissions: {
+                    some: {
+                      permission: {
+                        subject: 'schedule-compliance-check',
+                        action: { in: ['manage', 'create'] },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
       },
       select: { id: true },
     });
 
     if (!user) {
       throw new BadRequestException(
-        'El usuario debe estar activo y tener el rol MONITOR.',
+        'El usuario debe estar activo y tener permiso para registrar verificaciones.',
       );
     }
   }
 
   async remove(id: string): Promise<boolean> {
-    const deleteUser = await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        activeStatus: false,
+    const target = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userRoles: {
+          where: { role: { isSuperAdmin: true } },
+          select: { roleId: true },
+        },
       },
     });
 
-    return !!deleteUser;
+    if (!target) {
+      throw new NotFoundException(
+        `El usuario con id <${id}> no fue encontrado.`,
+      );
+    }
+
+    if (target.userRoles.length > 0) {
+      throw new ForbiddenException(
+        'No se puede desactivar una cuenta de super administrador.',
+      );
+    }
+
+    const deactivatedUser = await this.prisma.user.update({
+      where: { id },
+      data: { activeStatus: false, hashedRt: null },
+    });
+
+    return !!deactivatedUser;
   }
 }

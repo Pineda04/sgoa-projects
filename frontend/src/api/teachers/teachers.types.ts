@@ -40,6 +40,12 @@ export type TOutputTeacher = {
 		id: string;
 		name: string;
 	}[];
+	roles: {
+		id: string;
+		name: string;
+		isSuperAdmin: boolean;
+	}[];
+	positions?: TPosition[];
 	activeStatus: boolean;
 };
 
@@ -57,11 +63,11 @@ export type TTeacherPosition = {
 
 export type TTeachingSession = {
 	id: string;
-	consultHour: string; // ISO Date
-	tutoringHour: string; // ISO Date
+	consultHour: string | null; // ISO Date
+	tutoringHour: string | null; // ISO Date
 	assignmentReportId: string;
 	courseClassrooms: (TCourseClassroom & {
-		courseStadistic: TCourseStadistic;
+		courseStadistic: TCourseStadistic | null;
 	})[];
 };
 

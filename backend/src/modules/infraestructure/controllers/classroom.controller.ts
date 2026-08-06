@@ -14,10 +14,10 @@ import { UpdateClassroomDto } from '../dto/update-classroom.dto';
 import {
   ApiCommonResponses,
   ApiPagination,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ClassroomService } from '../services/classroom.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
@@ -26,18 +26,11 @@ import { QueryClassroomDto } from '../dto';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('classrooms')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.MONITOR,
-)
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'classrooms')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un aula.')
   @ApiBody({ type: CreateClassroomDto })
@@ -53,14 +46,8 @@ export class ClassroomController {
 
   @Get('availability/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @ResponseMessage('Disponibilidad del aula obtenida correctamente.')
   @ApiCommonResponses({
     summary: 'Obtener disponibilidad de un aula',
@@ -77,14 +64,8 @@ export class ClassroomController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas.')
   @ApiPagination({
@@ -100,14 +81,8 @@ export class ClassroomController {
   }
 
   @Get('search')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.RRHH,
-    EUserRole.DIRECCION,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de aulas encontrado correctamente.')
   @ApiCommonResponses({
@@ -128,14 +103,8 @@ export class ClassroomController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'classrooms')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha encontrado el aula.')
   @ApiCommonResponses({
@@ -148,7 +117,7 @@ export class ClassroomController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el aula.')
   @ApiBody({ type: UpdateClassroomDto })
@@ -166,7 +135,7 @@ export class ClassroomController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'classrooms')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el aula.')
   @ApiCommonResponses({

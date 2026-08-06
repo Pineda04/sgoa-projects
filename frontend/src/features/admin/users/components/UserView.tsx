@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { PencilIcon, Save, XCircle } from 'lucide-react';
+import { PencilIcon, Save } from 'lucide-react';
 import { IoWarningOutline } from 'react-icons/io5';
 import { askDel } from '@shared/utils/delete-action';
 import Select, {
@@ -28,6 +28,9 @@ import {
 } from '@api/degrees';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useGetAllShifts } from '@api/shifts';
+import { useGetAllPositions } from '@api/positions';
+import { useGetAllCenters, useGetCenterById } from '@api/centers';
+import { useGetAllRoles } from '@api/roles';
 import { useMemo, useState } from 'react';
 import { userUpdateSchema } from '../schemas';
 import { errorsFormik } from '@shared/utils';
@@ -48,6 +51,13 @@ const customStyles: StylesConfig<
 	option: base => ({
 		...base,
 		cursor: 'pointer',
+	}),
+	// El menú se porta a document.body para que no lo recorten los
+	// contenedores con overflow/alturas fijas del modal (ModalBase, la
+	// grilla de campos, etc.).
+	menuPortal: base => ({
+		...base,
+		zIndex: 9999,
 	}),
 };
 
@@ -150,6 +160,8 @@ const genElement = (field: Omit<TFieldConfig, 'label'> & {}) => {
 					isDisabled={readOnly}
 					onBlur={handleBlur}
 					styles={customStyles}
+					menuPortalTarget={document.body}
+					menuPosition="fixed"
 				/>
 			);
 		}
@@ -188,7 +200,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		authState: { user },
 	} = useAuth();
 	const ability = useAbility();
-	const canUpdate = ability.can('update', 'users');
+	const canUpdate =
+		ability.can('update', 'users') ||
+		ability.can('update', 'profile');
 
 	const { updateUser, isPendingUpdate } = useUpdateUser(initialData.userId);
 	const { changeStatusActiveUser, isPendingChangeStatusActive } =
@@ -214,11 +228,20 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		isPending: isPendingDeleteTeacherPostgrad,
 	} = useManageTeacherDegrees(initialData.userId, 'postgrad', 'delete');
 
+	const canManageDepartments = ability.can('manage', 'user-departments');
+
 	const undergrads = useGetAllUndergrads();
 	const postgrads = useGetAllPostgrads();
 	const contractTypes = useGetAllContractTypes();
 	const categories = useGetAllTeacherCategories();
 	const shifts = useGetAllShifts();
+	const positions = useGetAllPositions();
+	const centers = useGetAllCenters();
+	const roles = useGetAllRoles();
+	const [selectedCenterId, setSelectedCenterId] = useState<string>(
+		initialData.positions?.[0]?.center?.id || ''
+	);
+	const centerInfo = useGetCenterById(selectedCenterId);
 
 	const isLoading = [
 		undergrads,
@@ -226,7 +249,16 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 		contractTypes,
 		categories,
 		shifts,
+		positions,
+		centers,
+		roles,
 	].some(q => q.isLoading);
+
+	// Solo el super admin puede modificar los roles de un usuario existente.
+	const canUpdateRoles = !!user?.isSuperAdmin;
+	const assignableRoles = (roles.data ?? []).filter(
+		role => !role.isSuperAdmin || user?.isSuperAdmin
+	);
 
 	const [isEdit, setIsEdit] = useState(false);
 
@@ -241,6 +273,10 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				shiftId: initialData.shiftId,
 				shiftStart: initialData.shiftStart,
 				shiftEnd: initialData.shiftEnd,
+				roles: initialData.roles.map(r => r.name),
+				positionId: initialData.positions?.[0]?.position?.id || '',
+				centerId: initialData.positions?.[0]?.center?.id || '',
+				centerDepartmentId: initialData.positions?.[0]?.centerDepartmentId || '',
 			}) as TUpdateUser,
 		[initialData]
 	);
@@ -294,6 +330,29 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				readOnly: !isEdit,
 			},
 			{
+				label: 'Roles de acceso',
+				name: 'roles',
+				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+				defaultValue: (formik.values.roles ?? []).map(name => ({
+					label: name,
+					value: name,
+				})),
+				options: assignableRoles.map(role => ({
+					label: role.name,
+					value: role.name,
+				})),
+				isMulti: true,
+				handleBlur: formik.handleBlur,
+				handleChange: newValue => {
+					const selected = newValue as MultiValue<TCustomSelectOption>;
+					formik.setFieldValue(
+						'roles',
+						selected.map(option => option.value)
+					);
+				},
+				readOnly: !isEdit || !canUpdateRoles,
+			},
+			{
 				label: 'Categoría',
 				name: 'categoryId',
 				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
@@ -303,9 +362,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: categories.data
 					? categories.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -327,9 +386,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: contractTypes.data
 					? contractTypes.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -351,9 +410,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				),
 				options: shifts.data
 					? shifts.data.map(cat => ({
-							label: cat.name,
-							value: cat.id,
-						}))
+						label: cat.name,
+						value: cat.id,
+					}))
 					: [],
 				isMulti: false,
 				handleBlur: formik.handleBlur,
@@ -366,51 +425,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				readOnly: !isEdit,
 			},
 			{
-				label: 'Jornada laboral',
-				name: 'workingDay',
-				type: FIELD_TYPE_TAG.CUSTOM,
-				element: (
-					<div key={'workingDay'} className="grid grid-cols-2 gap-2">
-						{(
-							[
-								{
-									label: 'Hora de inicio',
-									name: 'shiftStart',
-									type: FIELD_TYPE_TAG.TIME_SELECT,
-									value: String(
-										formik.values.shiftStart ?? ''
-									),
-									placeholder: '15:00',
-									handleBlur: formik.handleBlur,
-									handleChange: formik.handleChange,
-									readOnly: !isEdit,
-								},
-								{
-									label: 'Hora final',
-									name: 'shiftEnd',
-									type: FIELD_TYPE_TAG.TIME_SELECT,
-									value: String(formik.values.shiftEnd ?? ''),
-									placeholder: '20:00',
-									handleBlur: formik.handleBlur,
-									handleChange: formik.handleChange,
-									readOnly: !isEdit,
-								},
-							] as TFieldConfig[]
-						).map(field => (
-							<div
-								key={field.name}
-								className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
-							>
-								<label className="mb-2 sm:whitespace-break-spaces lg:whitespace-nowrap">
-									{field.label}
-								</label>
-								{genElement(field)}
-							</div>
-						))}
-					</div>
-				),
-			},
-			{
 				label: 'Pregados',
 				name: 'undergradId',
 				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
@@ -420,9 +434,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				})),
 				options: undergrads.data
 					? undergrads.data.map(u => ({
-							label: u.name,
-							value: u.id,
-						}))
+						label: u.name,
+						value: u.id,
+					}))
 					: [],
 				isMulti: true,
 				handleBlur: formik.handleBlur,
@@ -448,7 +462,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				readOnly: !isEdit,
 			},
 			{
-				label: 'Postgrados',
+				label: 'Posgrados',
 				name: 'postgradId',
 				type: FIELD_TYPE_TAG.CUSTOM_SELECT,
 				defaultValue: initialData.postgrads.map(u => ({
@@ -457,9 +471,9 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				})),
 				options: postgrads.data
 					? postgrads.data.map(u => ({
-							label: u.name,
-							value: u.id,
-						}))
+						label: u.name,
+						value: u.id,
+					}))
 					: [],
 				isMulti: true,
 				handleBlur: formik.handleBlur,
@@ -484,6 +498,134 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 				},
 				readOnly: !isEdit,
 			},
+			{
+				label: 'Jornada laboral',
+				name: 'workingDay',
+				type: FIELD_TYPE_TAG.CUSTOM,
+				element: (
+					<div key={'workingDay'} className="grid grid-cols-2 gap-2">
+						{(
+							[
+								{
+									label: 'Inicio',
+									name: 'shiftStart',
+									type: FIELD_TYPE_TAG.TIME_SELECT,
+									value: String(
+										formik.values.shiftStart ?? ''
+									),
+									placeholder: '15:00',
+									handleBlur: formik.handleBlur,
+									handleChange: formik.handleChange,
+									readOnly: !isEdit,
+								},
+								{
+									label: 'Fin',
+									name: 'shiftEnd',
+									type: FIELD_TYPE_TAG.TIME_SELECT,
+									value: String(formik.values.shiftEnd ?? ''),
+									placeholder: '20:00',
+									handleBlur: formik.handleBlur,
+									handleChange: formik.handleChange,
+									readOnly: !isEdit,
+								},
+							] as TFieldConfig[]
+						).map(field => (
+							<div
+								key={field.name}
+								className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
+							>
+								<label className="mb-2 sm:whitespace-break-spaces lg:whitespace-nowrap">
+									{field.label}
+								</label>
+								{genElement(field)}
+							</div>
+						))}
+					</div>
+				),
+			},
+			// Campos que requieren permiso de departamentos
+			...(canManageDepartments
+				? [
+					{
+						label: 'Cargo académico',
+						name: 'positionId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							positions.data,
+							formik.values.positionId
+						),
+						options: positions.data
+							? positions.data.map(pos => ({
+								label: pos.name,
+								value: pos.id,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							formik.setFieldValue(
+								'positionId',
+								(newValue as SingleValue<TCustomSelectOption>)?.value
+							);
+						},
+						readOnly: !isEdit,
+					},
+					{
+						label: 'Centro',
+						name: 'centerId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							centers.data,
+							formik.values.centerId || selectedCenterId
+						),
+						options: centers.data
+							? centers.data.map(c => ({
+								label: c.name,
+								value: c.id,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							const val = (newValue as SingleValue<TCustomSelectOption>)?.value || '';
+							setSelectedCenterId(val);
+							formik.setValues(prev => ({
+								...prev,
+								centerId: val,
+								centerDepartmentId: '',
+							}));
+						},
+						readOnly: !isEdit,
+					},
+					{
+						label: 'Departamento',
+						name: 'centerDepartmentId' as const,
+						type: FIELD_TYPE_TAG.CUSTOM_SELECT,
+						defaultValue: selectedValueSelect(
+							centerInfo.data?.departments?.map(d => ({
+								id: d.centerDepartmentId,
+								name: d.name,
+							})),
+							formik.values.centerDepartmentId
+						),
+						options: centerInfo.data?.departments
+							? centerInfo.data.departments.map(d => ({
+								label: d.name,
+								value: d.centerDepartmentId,
+							}))
+							: [],
+						isMulti: false,
+						handleBlur: formik.handleBlur,
+						handleChange: (newValue: unknown) => {
+							formik.setFieldValue(
+								'centerDepartmentId',
+								(newValue as SingleValue<TCustomSelectOption>)?.value
+							);
+						},
+						readOnly: !isEdit,
+					},
+				]
+				: []),
 		],
 		[
 			initialData,
@@ -492,8 +634,15 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 			shifts.data,
 			undergrads.data,
 			postgrads.data,
+			positions.data,
+			centers.data,
+			centerInfo.data,
+			assignableRoles,
+			canUpdateRoles,
+			canManageDepartments,
 			formik,
 			isEdit,
+			selectedCenterId,
 			addUserTeacherUndergrad,
 			deleteUserTeacherUndergrad,
 			addUserTeacherPostgrad,
@@ -530,7 +679,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 	return (
 		<div className={`${!isModal ? 'min-h-screen ' : ''}px-4 py-4`}>
 			<div
-				className={`sticky z-20 mb-5 ${isModal ? 'bg-white' : 'bg-gray-50 top-14.25'}`}
+				className={`mr-6 sticky z-20 mb-5 ${isModal ? 'bg-white' : 'bg-gray-50 top-14.25'}`}
 			>
 				<div className="flex flex-col justify-start items-center py-5 md:flex-row md:justify-between md:items-center md:py-0 w-full">
 					<h1 className="text-2xl font-semibold">
@@ -555,7 +704,7 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-blue-300 transition duration-500 cursor-pointer"
+							className="w-fit bg-[#144C74] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 hover:bg-[#144C74]/90 transition duration-500 cursor-pointer"
 							hidden={isEdit || !canUpdate}
 							onClick={handleEdit}
 							variant="unstyled"
@@ -565,17 +714,6 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 						</Button>
 						<Button
 							type="button"
-							className="w-fit bg-[#5BC85C] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-green-300 transition duration-500 cursor-pointer"
-							hidden={!isEdit}
-							onClick={() => formik.handleSubmit()}
-							variant="unstyled"
-						>
-							<Save className="size-5" />
-							Guardar
-						</Button>
-						<Button
-							type="button"
-							className="w-fit bg-[#DC3545] flex flex-row mx-auto items-center rounded-md text-white p-2 gap-2 ml-2 hover:bg-red-400 transition duration-500 cursor-pointer"
 							hidden={!isEdit}
 							onClick={() => {
 								handleEdit();
@@ -583,17 +721,26 @@ export const UserView = ({ initialData, isModal }: IProps) => {
 									values: initialValues,
 								});
 							}}
+							variant="outline"
+						>
+							Cancelar
+						</Button>
+						<Button
+							type="button"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 ml-2"
+							hidden={!isEdit}
+							onClick={() => formik.handleSubmit()}
 							variant="unstyled"
 						>
-							<XCircle className="size-5" />
-							Cancelar
+							<Save className="size-5" />
+							Guardar
 						</Button>
 					</div>
 				</div>
 				<hr className="h-px my-2 bg-gray-200 border-0" />
 			</div>
 			<div
-				className={`grid grid-cols-1 md:grid-cols-2 gap-4${isModal ? ' h-[50vh] overflow-auto' : ''}`}
+				className={`grid grid-cols-1 md:grid-cols-2 gap-4${isModal ? ' max-h-[50vh] overflow-auto pb-6' : ''}`}
 			>
 				{fields.map(field => {
 					const base = (content?: React.ReactNode) => (

@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { EUserRole } from 'src/common/enums';
+import { TPermissionSubject } from 'src/common/constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EPosition } from 'src/modules/teachers-config/enums';
 import {
@@ -17,35 +17,32 @@ import {
   AnalyticsScopeBranch,
 } from '../types';
 
-const ALL_DOMAINS: AnalyticsDomain[] = [
+const DOMAIN_PERMISSION_SUBJECTS: Record<AnalyticsDomain, TPermissionSubject> =
+  {
+    'academic-load': 'analytics-academic-load',
+    enrollment: 'analytics-enrollment',
+    classrooms: 'analytics-classrooms',
+    staff: 'analytics-staff',
+    technology: 'analytics-technology',
+    activities: 'analytics-activities',
+    monitoring: 'analytics-monitoring',
+  };
+
+const TEACHER_SCOPED_DOMAINS = new Set<AnalyticsDomain>([
+  'academic-load',
+  'enrollment',
+  'classrooms',
+  'activities',
+]);
+
+const CENTER_DEPARTMENT_SCOPED_DOMAINS = new Set<AnalyticsDomain>([
   'academic-load',
   'enrollment',
   'classrooms',
   'staff',
   'technology',
   'activities',
-  'monitoring',
-];
-
-const ROLE_DOMAINS: Partial<Record<EUserRole, AnalyticsDomain[]>> = {
-  [EUserRole.DIRECCION]: ALL_DOMAINS,
-  [EUserRole.RRHH]: ['academic-load', 'staff'],
-  [EUserRole.DOCENTE]: [
-    'academic-load',
-    'enrollment',
-    'classrooms',
-    'activities',
-  ],
-  [EUserRole.COORDINADOR_AREA]: [
-    'academic-load',
-    'enrollment',
-    'classrooms',
-    'staff',
-    'technology',
-    'activities',
-  ],
-  [EUserRole.MONITOR]: ['monitoring'],
-};
+]);
 
 @Injectable()
 export class AnalyticsScopeService {
@@ -73,41 +70,27 @@ export class AnalyticsScopeService {
     context: AnalyticsContext,
     domain: AnalyticsDomain,
   ): AnalyticsDomainScope {
-    if (context.roles.includes(EUserRole.ADMIN)) {
+    if (context.isSuperAdmin) {
       return { domain, branches: [{ type: 'global' }] };
     }
 
-    if (
-      context.roles.some(
-        (role) =>
-          role === EUserRole.DIRECCION && ROLE_DOMAINS[role]?.includes(domain),
-      )
-    ) {
+    const permissionSubject = DOMAIN_PERMISSION_SUBJECTS[domain];
+
+    if (context.permissions.includes(`manage:${permissionSubject}`)) {
       return { domain, branches: [{ type: 'global' }] };
     }
 
     const branches: AnalyticsScopeBranch[] = [];
 
-    if (
-      context.roles.includes(EUserRole.RRHH) &&
-      ROLE_DOMAINS[EUserRole.RRHH]?.includes(domain)
-    ) {
-      return { domain, branches: [{ type: 'global' }] };
+    if (!context.permissions.includes(`read:${permissionSubject}`)) {
+      return { domain, branches };
     }
 
-    if (
-      context.roles.includes(EUserRole.DOCENTE) &&
-      ROLE_DOMAINS[EUserRole.DOCENTE]?.includes(domain) &&
-      context.teacherId
-    ) {
+    if (TEACHER_SCOPED_DOMAINS.has(domain) && context.teacherId) {
       branches.push({ type: 'teacher', teacherId: context.teacherId });
     }
 
-    if (
-      context.roles.includes(EUserRole.MONITOR) &&
-      ROLE_DOMAINS[EUserRole.MONITOR]?.includes(domain) &&
-      context.monitorBuildingIds.length
-    ) {
+    if (domain === 'monitoring' && context.monitorBuildingIds.length) {
       branches.push({
         type: 'buildings',
         buildingIds: context.monitorBuildingIds,
@@ -116,8 +99,7 @@ export class AnalyticsScopeService {
     }
 
     if (
-      context.roles.includes(EUserRole.COORDINADOR_AREA) &&
-      ROLE_DOMAINS[EUserRole.COORDINADOR_AREA]?.includes(domain) &&
+      CENTER_DEPARTMENT_SCOPED_DOMAINS.has(domain) &&
       context.centerDepartmentIds.length
     ) {
       branches.push({
@@ -222,7 +204,20 @@ export class AnalyticsScopeService {
       where: { id: userId, activeStatus: true },
       select: {
         id: true,
-        userRoles: { select: { role: { select: { name: true } } } },
+        userRoles: {
+          select: {
+            role: {
+              select: {
+                isSuperAdmin: true,
+                rolePermissions: {
+                  select: {
+                    permission: { select: { action: true, subject: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
         teacher: {
           select: {
             id: true,
@@ -244,14 +239,18 @@ export class AnalyticsScopeService {
       throw new UnauthorizedException('El usuario no está activo.');
     }
 
-    const knownRoles = new Set(Object.values(EUserRole));
-    const roles = user.userRoles
-      .map(({ role }) => role.name)
-      .filter((role): role is EUserRole => knownRoles.has(role as EUserRole));
-
     return {
       userId: user.id,
-      roles: [...new Set(roles)],
+      permissions: [
+        ...new Set(
+          user.userRoles.flatMap(({ role }) =>
+            role.rolePermissions.map(
+              ({ permission }) => `${permission.action}:${permission.subject}`,
+            ),
+          ),
+        ),
+      ],
+      isSuperAdmin: user.userRoles.some(({ role }) => role.isSuperAdmin),
       teacherId: user.teacher?.id ?? null,
       centerDepartmentIds: [
         ...new Set(

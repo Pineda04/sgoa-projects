@@ -12,7 +12,9 @@ import {
   UseInterceptors,
   Query,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AcademicAssignmentReportsService } from '../services/academic-assignment-reports.service';
 import {
   AcademicAssignmentArrayDto,
@@ -26,10 +28,9 @@ import {
 import {
   ApiPagination,
   GetCurrentUserId,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   ApiBody,
@@ -43,6 +44,24 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 
+const ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS = [
+  '#',
+  'No.Emp',
+  'Nombre',
+  'Código',
+  'Asignatura',
+  'UV',
+  'Sección',
+  'No. Alumnos',
+  'Días',
+  'Centro / Telecentro',
+  'N° de Aula',
+  'Carrera o Área',
+  'Jefe / Coordinador',
+  'Estudiantes por graduarse',
+  'Observaciones',
+];
+
 @Controller('academic-assignment-reports')
 export class AssignmentReportsController {
   constructor(
@@ -54,12 +73,7 @@ export class AssignmentReportsController {
   ) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'reports')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un informe de asignación académica.')
   @ApiBody({
@@ -84,13 +98,7 @@ export class AssignmentReportsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de informes de asignación académica.')
   @ApiPagination({
@@ -121,13 +129,7 @@ export class AssignmentReportsController {
   }
 
   @Get('periods')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de solamente el periodo donde el usuario autenticado tiene informes.',
@@ -148,13 +150,7 @@ export class AssignmentReportsController {
   }
 
   @Get('user/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de informes de asignación académica de un usuario por ID.',
@@ -189,13 +185,7 @@ export class AssignmentReportsController {
   }
 
   @Get('user/code/:code')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de informes de asignación académica de un usuario por código.',
@@ -231,13 +221,7 @@ export class AssignmentReportsController {
   }
 
   @Get('my')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de informes de asignación académica del usuario autenticado.',
@@ -266,13 +250,7 @@ export class AssignmentReportsController {
   }
 
   @Get('my/period/:id/center-department/:centerDepartmentId')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Informe de asignación académica del usuario autenticado obtenido por ID de periodo e ID de la relación centro-departamento.',
@@ -300,6 +278,7 @@ export class AssignmentReportsController {
   }
 
   @Get('center-department/:centerDepartmentId')
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de asignaciones académicas por la relación centro-departamento.',
@@ -336,7 +315,7 @@ export class AssignmentReportsController {
   }
 
   @Get('coordinator/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de asignaciones académicas por center-department para coordinadores de área.',
@@ -375,7 +354,7 @@ export class AssignmentReportsController {
   }
 
   @Get('coordinator/:centerDepartmentId/periods')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Lista de periodos académicos con asignaciones académicas registradas para el center-department especificado.',
@@ -417,7 +396,7 @@ export class AssignmentReportsController {
   }
 
   @Get('periods/all')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Lista de periodos académicos con asignaciones académicas registradas para todos los centros y departamentos.',
@@ -450,14 +429,38 @@ export class AssignmentReportsController {
     );
   }
 
+  @Get('template')
+  @RequirePermission('create', 'planifications')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Plantilla de asignación académica descargada correctamente.')
+  @ApiOperation({
+    summary: 'Descargar plantilla Excel de asignación académica',
+    description:
+      'Genera y descarga una plantilla Excel (.xlsx) con el formato esperado para cargar planificaciones académicas.',
+  })
+  @ApiCommonResponses({
+    summary: 'Descargar plantilla Excel',
+    okDescription: 'Plantilla Excel descargada correctamente.',
+    internalErrorDescription: 'Error interno al generar la plantilla.',
+  })
+  async downloadTemplate(@Res() res: Response) {
+    const buffer = await this.excelFilesService.generateTemplate(
+      ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS,
+    );
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition':
+        'attachment; filename="plantilla-planificacion-academica.xlsx"',
+      'Content-Length': buffer.length.toString(),
+    });
+
+    res.send(buffer);
+  }
+
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información del informe de asignación académica.')
   @ApiOperation({
@@ -481,7 +484,7 @@ export class AssignmentReportsController {
   }
 
   @Get('departments/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('read', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Detalle de asignaciones académicas para el periodo especificado en el centro-departamento indicado.',
@@ -550,12 +553,7 @@ export class AssignmentReportsController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado un informe de asignación académica.')
   @ApiOperation({
@@ -587,12 +585,7 @@ export class AssignmentReportsController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado un informe de asignación académica.')
   @ApiOperation({
@@ -616,12 +609,7 @@ export class AssignmentReportsController {
   }
 
   @Delete('/period/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'reports')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Se ha eliminado los informes de asignación académica para un periodo.',
@@ -648,12 +636,7 @@ export class AssignmentReportsController {
   }
 
   @Post('file/coordinator/view/:centerDepartmentId')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'reports')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Vista previa generada correctamente desde el archivo.')
@@ -716,7 +699,7 @@ export class AssignmentReportsController {
   }
 
   @Post('array/coordinator/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('create', 'reports')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se han creado los informes de asignación académica.')
   @ApiOperation({
@@ -770,7 +753,7 @@ export class AssignmentReportsController {
   }
 
   @Post('file/coordinator/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
+  @RequirePermission('create', 'reports')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se han creado los informes de asignación académica.')

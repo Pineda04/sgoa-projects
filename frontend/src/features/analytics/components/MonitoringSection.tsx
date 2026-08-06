@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
 import type { IResponsiveColumn } from '@shared/components';
 import {
-	Button,
 	PaginationControls,
-	ResponsiveTable,
-	Skeleton,
+	DataTable,
 } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
@@ -18,6 +15,8 @@ import {
 	type MonitoringDetailSort,
 } from '@api/analytics';
 import { useAnalyticsFilters } from '../hooks';
+import { AnalyticsSummarySkeleton } from './AnalyticsSkeletons';
+import { AnalyticsExportButton } from './AnalyticsExportButton';
 import { DistributionBars } from './DistributionBars';
 import { MetricCard } from './MetricCard';
 
@@ -204,11 +203,7 @@ export const MonitoringSection = () => {
 				</p>
 			</div>
 			{summary.isPending ? (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{METRICS.map(metric => (
-						<Skeleton key={metric.key} className="h-36 rounded-xl" />
-					))}
-				</div>
+				<AnalyticsSummarySkeleton count={METRICS.length} showDistribution />
 			) : summary.isError ? (
 				<p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
 					No fue posible cargar los indicadores de monitoreo.
@@ -273,9 +268,9 @@ export const MonitoringSection = () => {
 							{details.data?.meta.total ?? 0} registros
 						</p>
 					</div>
-					<div className="flex flex-col gap-2 sm:flex-row">
-						<label className="text-sm font-semibold">
-							Detalle
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+						<label className="flex items-center gap-2 text-sm font-semibold">
+							<span className="shrink-0">Detalle:</span>
 							<select
 								value={monitoringMetric}
 								onChange={event => {
@@ -284,7 +279,7 @@ export const MonitoringSection = () => {
 									);
 									if (metric) setMonitoringMetric(metric.value);
 								}}
-								className="mt-1 block min-h-10 rounded-lg border border-input bg-background px-3"
+								className="block min-h-10 rounded-lg border border-input bg-background px-3"
 							>
 								{DETAIL_METRICS.map(metric => (
 									<option key={metric.value} value={metric.value}>
@@ -293,8 +288,8 @@ export const MonitoringSection = () => {
 								))}
 							</select>
 						</label>
-						<label className="text-sm font-semibold">
-							Orden
+						<label className="flex items-center gap-2 text-sm font-semibold">
+							<span className="shrink-0">Ordenar por:</span>
 							<select
 								value={monitoringSort}
 								onChange={event => {
@@ -303,7 +298,7 @@ export const MonitoringSection = () => {
 									);
 									if (sort) setMonitoringSort(sort.value);
 								}}
-								className="mt-1 block min-h-10 rounded-lg border border-input bg-background px-3"
+								className="block min-h-10 rounded-lg border border-input bg-background px-3"
 							>
 								{SORTS.map(sort => (
 									<option key={sort.value} value={sort.value}>
@@ -313,14 +308,11 @@ export const MonitoringSection = () => {
 							</select>
 						</label>
 						{options?.capabilities.canExport ? (
-							<Button onClick={exportRows} disabled={isExporting}>
-								{isExporting ? <Loader2 className="size-4 animate-spin" /> : null}
-								{isExporting ? 'Exportando...' : 'Exportar Excel'}
-							</Button>
+							<AnalyticsExportButton onClick={exportRows} isExporting={isExporting} />
 						) : null}
 					</div>
 				</div>
-				<ResponsiveTable
+				<DataTable
 					columns={COLUMNS}
 					data={details.data?.rows ?? []}
 					getRowKey={row => row.checkId}

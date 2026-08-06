@@ -1,8 +1,7 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { GetCurrentUserId, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { GetCurrentUserId, RequirePermission } from 'src/common/decorators';
 import {
   AcademicLoadDetailsDto,
   AcademicLoadExportDto,
@@ -44,65 +43,9 @@ import { MonitoringAnalyticsService } from '../services/monitoring-analytics.ser
 const XLSX_CONTENT_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-const ANALYTICS_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-  EUserRole.MONITOR,
-];
-
-const ACADEMIC_LOAD_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-];
-
-const ENROLLMENT_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-];
-
-const CLASSROOM_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-];
-
-const TECHNOLOGY_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.COORDINADOR_AREA,
-];
-
-const STAFF_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-];
-
-const ACTIVITY_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-];
-
-const MONITORING_ROLES = [
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.MONITOR,
-];
-
 @ApiTags('Analytics')
 @Controller('analytics')
+@RequirePermission('read', 'analytics')
 export class AnalyticsController {
   constructor(
     private readonly filterOptionsService: AnalyticsFilterOptionsService,
@@ -118,7 +61,6 @@ export class AnalyticsController {
   ) {}
 
   @Get('filter-options')
-  @Roles(...ANALYTICS_ROLES)
   @ApiOperation({
     summary: 'Obtener contexto y filtros autorizados de Analytics',
   })
@@ -134,7 +76,6 @@ export class AnalyticsController {
   }
 
   @Get('academic-load')
-  @Roles(...ACADEMIC_LOAD_ROLES)
   @ApiOperation({ summary: 'Obtener resumen de carga académica' })
   getAcademicLoad(
     @GetCurrentUserId() userId: string,
@@ -144,7 +85,6 @@ export class AnalyticsController {
   }
 
   @Get('academic-load/details')
-  @Roles(...ACADEMIC_LOAD_ROLES)
   @ApiOperation({ summary: 'Obtener detalle paginado de carga por docente' })
   getAcademicLoadDetails(
     @GetCurrentUserId() userId: string,
@@ -154,7 +94,6 @@ export class AnalyticsController {
   }
 
   @Get('academic-load/export')
-  @Roles(...ACADEMIC_LOAD_ROLES)
   @ApiOperation({ summary: 'Exportar detalle de carga académica a XLSX' })
   async exportAcademicLoadDetails(
     @GetCurrentUserId() userId: string,
@@ -171,7 +110,6 @@ export class AnalyticsController {
   }
 
   @Get('enrollment')
-  @Roles(...ENROLLMENT_ROLES)
   @ApiOperation({ summary: 'Obtener resumen de matrícula y capacidad' })
   getEnrollment(
     @GetCurrentUserId() userId: string,
@@ -181,7 +119,6 @@ export class AnalyticsController {
   }
 
   @Get('enrollment/details')
-  @Roles(...ENROLLMENT_ROLES)
   @ApiOperation({ summary: 'Obtener detalle de matrícula y capacidad' })
   getEnrollmentDetails(
     @GetCurrentUserId() userId: string,
@@ -191,7 +128,6 @@ export class AnalyticsController {
   }
 
   @Get('enrollment/export')
-  @Roles(...ENROLLMENT_ROLES)
   @ApiOperation({ summary: 'Exportar detalle de matrícula a XLSX' })
   async exportEnrollmentDetails(
     @GetCurrentUserId() userId: string,
@@ -208,7 +144,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Obtener disponibilidad planificada de aulas' })
   getClassroomAvailability(
     @GetCurrentUserId() userId: string,
@@ -218,7 +153,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms/details')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Obtener detalle de disponibilidad de aulas' })
   getClassroomAvailabilityDetails(
     @GetCurrentUserId() userId: string,
@@ -228,7 +162,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms/export')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Exportar disponibilidad de aulas a XLSX' })
   async exportClassroomAvailabilityDetails(
     @GetCurrentUserId() userId: string,
@@ -248,7 +181,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms/capacity')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Obtener capacidad instalada de aulas' })
   getClassroomCapacity(
     @GetCurrentUserId() userId: string,
@@ -258,7 +190,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms/capacity/details')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Obtener detalle de capacidad instalada' })
   getClassroomCapacityDetails(
     @GetCurrentUserId() userId: string,
@@ -268,7 +199,6 @@ export class AnalyticsController {
   }
 
   @Get('classrooms/capacity/export')
-  @Roles(...CLASSROOM_ROLES)
   @ApiOperation({ summary: 'Exportar capacidad instalada a XLSX' })
   async exportClassroomCapacityDetails(
     @GetCurrentUserId() userId: string,
@@ -288,7 +218,6 @@ export class AnalyticsController {
   }
 
   @Get('technology')
-  @Roles(...TECHNOLOGY_ROLES)
   @ApiOperation({ summary: 'Obtener resumen de tecnología en aulas' })
   getTechnology(
     @GetCurrentUserId() userId: string,
@@ -298,7 +227,6 @@ export class AnalyticsController {
   }
 
   @Get('technology/details')
-  @Roles(...TECHNOLOGY_ROLES)
   @ApiOperation({
     summary: 'Obtener detalle de tecnología en aulas',
     description:
@@ -312,7 +240,6 @@ export class AnalyticsController {
   }
 
   @Get('technology/export')
-  @Roles(...TECHNOLOGY_ROLES)
   @ApiOperation({ summary: 'Exportar detalle de tecnología a XLSX' })
   async exportTechnologyDetails(
     @GetCurrentUserId() userId: string,
@@ -329,7 +256,6 @@ export class AnalyticsController {
   }
 
   @Get('staff')
-  @Roles(...STAFF_ROLES)
   @ApiOperation({ summary: 'Obtener resumen del personal actual' })
   getStaff(
     @GetCurrentUserId() userId: string,
@@ -339,7 +265,6 @@ export class AnalyticsController {
   }
 
   @Get('staff/details')
-  @Roles(...STAFF_ROLES)
   @ApiOperation({ summary: 'Obtener detalle paginado del personal actual' })
   getStaffDetails(
     @GetCurrentUserId() userId: string,
@@ -349,7 +274,6 @@ export class AnalyticsController {
   }
 
   @Get('staff/export')
-  @Roles(...STAFF_ROLES)
   @ApiOperation({ summary: 'Exportar personal actual a XLSX' })
   async exportStaff(
     @GetCurrentUserId() userId: string,
@@ -362,7 +286,6 @@ export class AnalyticsController {
   }
 
   @Get('activities')
-  @Roles(...ACTIVITY_ROLES)
   @ApiOperation({ summary: 'Obtener resumen de actividades complementarias' })
   getActivities(
     @GetCurrentUserId() userId: string,
@@ -372,7 +295,6 @@ export class AnalyticsController {
   }
 
   @Get('activities/details')
-  @Roles(...ACTIVITY_ROLES)
   @ApiOperation({ summary: 'Obtener detalle paginado de actividades' })
   getActivityDetails(
     @GetCurrentUserId() userId: string,
@@ -382,7 +304,6 @@ export class AnalyticsController {
   }
 
   @Get('activities/export')
-  @Roles(...ACTIVITY_ROLES)
   @ApiOperation({ summary: 'Exportar actividades a XLSX' })
   async exportActivities(
     @GetCurrentUserId() userId: string,
@@ -400,7 +321,6 @@ export class AnalyticsController {
   }
 
   @Get('monitoring')
-  @Roles(...MONITORING_ROLES)
   @ApiOperation({ summary: 'Obtener resumen analítico de monitoreo' })
   getMonitoring(
     @GetCurrentUserId() userId: string,
@@ -410,7 +330,6 @@ export class AnalyticsController {
   }
 
   @Get('monitoring/details')
-  @Roles(...MONITORING_ROLES)
   @ApiOperation({ summary: 'Obtener detalle paginado de monitoreo' })
   getMonitoringDetails(
     @GetCurrentUserId() userId: string,
@@ -420,7 +339,6 @@ export class AnalyticsController {
   }
 
   @Get('monitoring/export')
-  @Roles(...MONITORING_ROLES)
   @ApiOperation({ summary: 'Exportar detalle de monitoreo a XLSX' })
   async exportMonitoring(
     @GetCurrentUserId() userId: string,

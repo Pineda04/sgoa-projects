@@ -4,6 +4,10 @@ import { alertSuccess } from '@shared/utils';
 import { TCreatePosition, TUpdatePosition } from '@features/admin';
 import { positionsApi, positionsKeys, TOutputPosition } from './';
 
+type TPositionsCache = Awaited<
+	ReturnType<typeof positionsApi.getAllPositionsForTable>
+>;
+
 export const useCreatePosition = () =>
     useMutation({
         mutationFn: (body: TCreatePosition) => positionsApi.createPosition(body),
@@ -13,17 +17,16 @@ export const useCreatePosition = () =>
         onSuccess: async res => {
             alertSuccess(res);
             const created: TOutputPosition | undefined = res?.data?.data;
-            const previous = queryClient.getQueryData<any>(positionsKeys.all);
+            const previous = queryClient.getQueryData<TPositionsCache>(positionsKeys.all);
 
-            if (created) {
-                if (Array.isArray(previous)) {
-                    queryClient.setQueryData(positionsKeys.all, [created, ...previous]);
-                } else if (previous && typeof previous === 'object' && Array.isArray(previous.data)) {
-                    queryClient.setQueryData(positionsKeys.all, {
+            if (created && previous) {
+                queryClient.setQueryData<TPositionsCache>(positionsKeys.all, {
                         ...previous,
-                        data: [created, ...previous.data],
+                        data: {
+							...previous.data,
+							data: [created, ...previous.data.data],
+						},
                     });
-                }
             }
 
             await Promise.all([
@@ -59,25 +62,21 @@ export const useDeletePositionMutation = (positionId: string) => {
         // Optimistic update: remove item from cache immediately and rollback on error
         onMutate: async (id: string) => {
             await queryClient.cancelQueries({ queryKey: positionsKeys.all });
-            const previous = queryClient.getQueryData<any>(positionsKeys.all);
+            const previous = queryClient.getQueryData<TPositionsCache>(positionsKeys.all);
 
-            // If cache is an array of positions
-            if (Array.isArray(previous)) {
-                queryClient.setQueryData<TOutputPosition[] | undefined>(
-                    positionsKeys.all,
-                    previous.filter((p: TOutputPosition) => p.id !== id)
-                );
-            } else if (previous && typeof previous === 'object' && Array.isArray(previous.data)) {
-                // If cache shape is { data: [...] }
-                queryClient.setQueryData(positionsKeys.all, {
+            if (previous) {
+                queryClient.setQueryData<TPositionsCache>(positionsKeys.all, {
                     ...previous,
-                    data: previous.data.filter((p: TOutputPosition) => p.id !== id),
+                    data: {
+						...previous.data,
+						data: previous.data.data.filter(position => position.id !== id),
+					},
                 });
-            } // else: unknown shape, do nothing
+            }
 
-            return { previous } as { previous?: unknown };
+            return { previous };
         },
-        onError: (_err, _id, context: any) => {
+        onError: (_err, _id, context) => {
             if (context?.previous) {
                 queryClient.setQueryData(positionsKeys.all, context.previous);
             }

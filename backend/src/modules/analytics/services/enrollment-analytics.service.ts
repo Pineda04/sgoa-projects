@@ -22,11 +22,13 @@ import {
 } from '../types';
 import { analyticsScopeToCourseClassroomWhere } from '../utils';
 import { AnalyticsScopeService } from './analytics-scope.service';
+import { EClassModality } from 'src/modules/course-classrooms/enums/modality.enum';
 
 type EnrollmentSection = {
   id: string;
   groupCode: string;
   studentCount: number | null;
+  modality: { name: string };
   course: { code: string; name: string };
   classroom: { id: string; name: string; maxCapacity: number | null };
   teachingSession: {
@@ -78,6 +80,7 @@ type EnrollmentDetailsRuntimeInput = EnrollmentDetailsDto & {
 const CURRENT_CAPACITY_NOTES: AnalyticsMetricNote[] = [
   'current_classroom_capacity',
 ];
+const VIRTUAL_MODALITY_NAME: string = EClassModality.VIRTUAL_SPACE;
 
 @Injectable()
 export class EnrollmentAnalyticsService {
@@ -339,6 +342,7 @@ export class EnrollmentAnalyticsService {
         id: true,
         groupCode: true,
         studentCount: true,
+        modality: { select: { name: true } },
         course: { select: { code: true, name: true } },
         classroom: {
           select: { id: true, name: true, maxCapacity: true },
@@ -370,6 +374,9 @@ export class EnrollmentAnalyticsService {
   private aggregate(sections: EnrollmentSection[]): EnrollmentAggregate {
     const uniqueSections = this.deduplicate(sections);
     const total = uniqueSections.length;
+    const physicalTotal = uniqueSections.filter(
+      ({ modality }) => modality.name !== VIRTUAL_MODALITY_NAME,
+    ).length;
     let knownEnrollment = 0;
     let reportedEnrollments = 0;
     let comparable = 0;
@@ -388,6 +395,8 @@ export class EnrollmentAnalyticsService {
         knownEnrollment += 1;
         reportedEnrollments += section.studentCount;
       }
+
+      if (section.modality.name === VIRTUAL_MODALITY_NAME) continue;
 
       const capacity = section.classroom.maxCapacity;
       if (capacity === null) {
@@ -426,7 +435,11 @@ export class EnrollmentAnalyticsService {
         total,
         enrollmentReasons,
       ),
-      capacityCoverage: this.coverage(comparable, total, capacityReasons),
+      capacityCoverage: this.coverage(
+        comparable,
+        physicalTotal,
+        capacityReasons,
+      ),
     };
   }
 
@@ -533,7 +546,10 @@ export class EnrollmentAnalyticsService {
     const teacher = section.teachingSession.assignmentReport.teacher;
     const capacity = section.classroom.maxCapacity;
     const isComparable =
-      section.studentCount !== null && capacity !== null && capacity > 0;
+      section.modality.name !== VIRTUAL_MODALITY_NAME &&
+      section.studentCount !== null &&
+      capacity !== null &&
+      capacity > 0;
     return {
       sectionId: section.id,
       courseCode: section.course.code,

@@ -1,10 +1,10 @@
-import { EUserRole } from 'src/common/enums';
 import { AnalyticsDomain } from './analytics-domain.type';
 import { AnalyticsScopeBranch } from './analytics-scope-branch.type';
 
 export type AnalyticsContext = {
   userId: string;
-  roles: EUserRole[];
+  permissions: string[];
+  isSuperAdmin: boolean;
   teacherId: string | null;
   centerDepartmentIds: string[];
   monitorBuildingIds: string[];

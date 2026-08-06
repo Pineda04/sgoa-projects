@@ -1,7 +1,10 @@
 import '../../../App.css';
 import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UpdatePasswordLogged } from '@features/admin/users';
+import {
+	UpdatePasswordLogged,
+	UserView,
+} from '@features/admin/users';
 import { User } from 'lucide-react';
 import {
 	LockClosedIcon,
@@ -9,26 +12,38 @@ import {
 	XMarkIcon,
 	QuestionMarkCircleIcon,
 	Square2StackIcon,
+	ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { AuthContext, useAuth, useUser } from '@config/providers';
-import { useModal } from '@shared/hooks';
+import { useModal, useIsOnline } from '@shared/hooks';
 import { Button, ModalBase } from '../ui';
-import { Can } from '@config/lib';
+import { useAbility } from '@config/lib';
+import { CATALOG_SUBJECTS } from '@features/others/catalog';
 
 export const UserMenu = () => {
 	const navigate = useNavigate();
 	const searchRef = useRef<HTMLDivElement>(null);
 	const handleToggle = () => setIsOpen(!isOpen);
 	const [isOpen, setIsOpen] = useState(false);
+	const isOnline = useIsOnline();
 	const {
 		authState: { user },
 	} = useAuth();
 	const { user: userInfo } = useUser();
 	const { logout } = useContext(AuthContext);
+	const ability = useAbility();
+	const canSeeCatalog = CATALOG_SUBJECTS.some(subject =>
+		ability.can('read', subject)
+	);
 	const [
 		showModalUpdatePassword,
 		handleShowModalUpdatePassword,
 		handleCloseModalUpdatePassword,
+	] = useModal();
+	const [
+		showModalProfile,
+		handleShowModalProfile,
+		handleCloseModalProfile,
 	] = useModal();
 
 	useEffect(() => {
@@ -61,12 +76,17 @@ export const UserMenu = () => {
 
 	const handleProfile = () => {
 		setIsOpen(false);
-		navigate('/admin/users/profile', { replace: true });
+		handleShowModalProfile();
 	};
 
 	const handleHelp = () => {
 		setIsOpen(false);
 		navigate('/help', { replace: true });
+	};
+
+	const handleRoles = () => {
+		setIsOpen(false);
+		navigate('/admin/roles', { replace: true });
 	};
 
 	const getInitials = (name?: string) => {
@@ -136,17 +156,17 @@ export const UserMenu = () => {
 							{/* Perfil */}
 							<button
 								onClick={handleProfile}
-								disabled={!userInfo}
+								disabled={!userInfo || !isOnline}
 								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
 									${
-										!userInfo
+										!userInfo || !isOnline
 											? 'opacity-50 cursor-not-allowed text-gray-400'
 											: 'text-gray-700 hover:bg-gray-100 hover:text-primary cursor-pointer'
 									}`}
 							>
 								<div
 									className={`size-9 rounded-lg flex items-center justify-center
-									${userInfo ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}
+									${userInfo && isOnline ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}
 								>
 									<User className="size-4.5" />
 								</div>
@@ -163,7 +183,8 @@ export const UserMenu = () => {
 							{/* Cambiar contraseña */}
 							<button
 								onClick={handleChangePassword}
-								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								disabled={!isOnline}
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 									<LockClosedIcon className="size-4.5" />
@@ -179,10 +200,11 @@ export const UserMenu = () => {
 							</button>
 
 							{/* Catalogo */}
-							<Can action="read" subject="catalog">
+							{canSeeCatalog && (
 								<button
 									onClick={handleConfiguration}
-									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+									disabled={!isOnline}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 										<Square2StackIcon className="size-4.5" />
@@ -196,12 +218,34 @@ export const UserMenu = () => {
 										</p>
 									</div>
 								</button>
-							</Can>
+							)}
+
+							{/* Roles y Permisos */}
+							{user?.isSuperAdmin && (
+								<button
+									onClick={handleRoles}
+									disabled={!isOnline}
+									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+										<ShieldCheckIcon className="size-4.5" />
+									</div>
+									<div>
+										<p className="text-sm font-medium">
+											Roles y Permisos
+										</p>
+										<p className="text-xs text-gray-400 mt-0.5">
+											Administra los roles del sistema
+										</p>
+									</div>
+								</button>
+							)}
 
 							{/* Ayuda */}
 							<button
 								onClick={handleHelp}
-								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer"
+								disabled={!isOnline}
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
 									<QuestionMarkCircleIcon className="size-4.5" />
@@ -243,6 +287,14 @@ export const UserMenu = () => {
 				<UpdatePasswordLogged
 					onCancel={handleCloseModalUpdatePassword}
 				/>
+			</ModalBase>
+			<ModalBase
+				isOpen={showModalProfile}
+				onClose={handleCloseModalProfile}
+			>
+				{userInfo && (
+					<UserView initialData={userInfo} isModal />
+				)}
 			</ModalBase>
 		</>
 	);

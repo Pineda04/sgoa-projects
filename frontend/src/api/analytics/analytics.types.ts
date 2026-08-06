@@ -224,8 +224,7 @@ export type AnalyticsMetricNote =
 	| 'current_position_catalog'
 	| 'current_activity_type_catalog'
 	| 'assignment_reports_without_workflow'
-	| 'observed_digital_blackboard_use'
-	| 'legacy_checks_without_blackboard_use_capture';
+	| 'observed_digital_blackboard_use';
 
 export interface AnalyticsMetricResult {
 	key: string;

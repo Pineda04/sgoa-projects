@@ -24,8 +24,8 @@ export function PdfFontSelector({ onChange }: PdfFontSelectorProps) {
 	return (
 		<select
 			value={selectedFont}
-			onChange={handleChange}
-			className="h-10 px-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#144C74] cursor-pointer md:h-11 md:px-4"
+      onChange={handleChange}
+			className="w-auto bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 		>
 			<option value={EPdfFont.Calibri}>Calibri</option>
 			<option value={EPdfFont.TimesNewRoman}>Times New Roman</option>

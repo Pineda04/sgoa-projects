@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, FileText, Loader2, Pencil } from 'lucide-react';
 import {
 	monitorApi,
 	TCheckFilters,
 	TMonitorReportSummary,
 	TScheduleComplianceCheckDetail,
 } from '@api/monitor';
+import { useAuth } from '@config/providers';
 import {
 	Button,
 	DataTable,
@@ -13,14 +14,22 @@ import {
 	TagError,
 	type IDataTableColumn,
 } from '@shared/components';
-import { ESwalIcons, genericAlert } from '@shared/utils';
+import { useModal } from '@shared/hooks';
+import { ESwalIcons, formatHondurasDateTime, genericAlert } from '@shared/utils';
+import { useAbility } from '@config';
+import { EditCheckModal } from './EditCheckModal';
 import {
 	buildExportRows,
 	EXPORT_ALL_CHECKS_SIZE,
 } from './monitor-report-export.utils';
 import { exportMonitorReportExcel } from './monitor-report-excel.utils';
 import { exportMonitorReportPdf } from './monitor-report-pdf.utils';
-import { formatCheckDate, STATUS_BADGE_CONFIG } from './monitor-reports.utils';
+import {
+	formatCheckDate,
+	formatBlackboardUse,
+	isCheckEdited,
+	STATUS_BADGE_CONFIG,
+} from './monitor-reports.utils';
 
 type TExportFormat = 'pdf' | 'excel';
 
@@ -31,7 +40,10 @@ const EMPTY_SUMMARY: TMonitorReportSummary = {
 	complianceRate: 0,
 };
 
-const columns: IDataTableColumn<TScheduleComplianceCheckDetail>[] = [
+const buildColumns = (
+	canEditRow: (row: TScheduleComplianceCheckDetail) => boolean,
+	onEdit: (row: TScheduleComplianceCheckDetail) => void
+): IDataTableColumn<TScheduleComplianceCheckDetail>[] => [
 	{
 		key: 'checkDate',
 		header: 'Fecha',
@@ -62,10 +74,43 @@ const columns: IDataTableColumn<TScheduleComplianceCheckDetail>[] = [
 		},
 	},
 	{
+		key: 'digitalBlackboardUseStatus',
+		header: 'Pizarra',
+		hiddenOnMobile: true,
+		render: row => formatBlackboardUse(row.digitalBlackboardUseStatus),
+	},
+	{
 		key: 'observation',
 		header: 'Observaciones',
 		hiddenOnMobile: true,
-		render: row => row.observation || '-',
+		render: row => (
+			<>
+				<span>{row.observation || '-'}</span>
+				{isCheckEdited(row) && (
+					<p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+						Editado: {formatHondurasDateTime(row.updatedAt)}
+					</p>
+				)}
+			</>
+		),
+	},
+	{
+		key: 'actions',
+		header: 'Acciones',
+		render: row =>
+			canEditRow(row) ? (
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					onClick={() => onEdit(row)}
+				>
+					<Pencil className="size-4" />
+					<span className="hidden sm:inline">Editar</span>
+				</Button>
+			) : (
+				<span className="text-muted-foreground">-</span>
+			),
 	},
 ];
 
@@ -86,9 +131,27 @@ export const MonitorReportTable = ({
 	filters,
 	summary,
 }: MonitorReportTableProps) => {
+	const { authState } = useAuth();
+	const ability = useAbility();
 	const [exportingFormat, setExportingFormat] = useState<TExportFormat | null>(
 		null
 	);
+	const [editingCheck, setEditingCheck] =
+		useState<TScheduleComplianceCheckDetail | null>(null);
+	const [isEditModalOpen, openEditModal, closeEditModal] = useModal();
+
+	// Editar es una capacidad, no un nombre de rol: cualquier rol con el permiso
+	// puede corregir sus propias verificaciones.
+	const canEditChecks = ability.can('update', 'schedule-compliance-check');
+	const currentUserId = authState.user?.sub;
+
+	const canEditRow = (row: TScheduleComplianceCheckDetail) =>
+		canEditChecks && row.monitor.id === currentUserId;
+
+	const handleOpenEdit = (row: TScheduleComplianceCheckDetail) => {
+		setEditingCheck(row);
+		openEditModal();
+	};
 
 	const handleExport = async (format: TExportFormat) => {
 		setExportingFormat(format);
@@ -184,7 +247,7 @@ export const MonitorReportTable = ({
 			) : (
 				<>
 					<DataTable
-						columns={columns}
+						columns={buildColumns(canEditRow, handleOpenEdit)}
 						data={data}
 						loading={isLoading}
 						getRowKey={row => row.id}
@@ -193,6 +256,12 @@ export const MonitorReportTable = ({
 					<Pagination totalPages={totalPages} />
 				</>
 			)}
+
+			<EditCheckModal
+				isOpen={isEditModalOpen}
+				onClose={closeEditModal}
+				check={editingCheck}
+			/>
 		</div>
 	);
 };

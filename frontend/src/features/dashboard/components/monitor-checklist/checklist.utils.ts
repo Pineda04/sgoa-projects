@@ -116,19 +116,25 @@ export const getCurrentTimeString = (): string => {
 	return `${hours}:${minutes}`;
 };
 
+export const isCheckEdited = (
+	check: Pick<TMonitorAssignmentCheckStatus, 'createdAt' | 'updatedAt'>
+): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+
 export type TChecklistView = 'COMPACT' | 'DETAILED' | 'GRID';
 export type TStatusFilter = 'ALL' | 'PENDING' | 'VERIFIED';
 
 export const CHECKLIST_VIEW_STORAGE_KEY = 'monitor-checklist-view';
 
-export const isChecklistView = (value: unknown): value is TChecklistView =>
+export const isChecklistView = (value: string): value is TChecklistView =>
 	value === 'COMPACT' || value === 'DETAILED' || value === 'GRID';
 
 export interface TChecklistItem {
 	id: string;
 	assignment: TMonitorCurrentAssignment;
 	check: TMonitorAssignmentCheckStatus | null;
+	checkSource: 'SERVER' | 'LOCAL' | null;
 	status: TAssignmentStatus;
+	canEditCheck: boolean;
 	buildingId: string;
 	buildingName: string;
 	classroomId: string;
@@ -153,6 +159,7 @@ export interface TAssignmentViewProps {
 	disabled: boolean;
 	onConfirm: (isPresent: boolean) => void;
 	onOpenModal: () => void;
+	onEditCheck: () => void;
 }
 
 export interface TChecklistScope {
@@ -177,16 +184,20 @@ const compareItems = (a: TChecklistItem, b: TChecklistItem): number => {
 
 export const buildChecklistItems = (
 	buildings: TMonitorBuildingAssignments[],
-	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>
+	checkOverrides: Record<string, TMonitorAssignmentCheckStatus>,
+	currentUserId?: string
 ): TChecklistItem[] => {
 	const items = buildings.flatMap(building =>
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
-				const override = checkOverrides[assignment.courseClassroomId];
-				const check =
-					override?.syncStatus === 'pending' && assignment.check
-						? assignment.check
-						: override ?? assignment.check;
+				const serverCheck = assignment.check;
+				const localOverride = checkOverrides[assignment.courseClassroomId] ?? null;
+				const check = localOverride ?? serverCheck ?? null;
+				const checkSource: TChecklistItem['checkSource'] = localOverride
+					? 'LOCAL'
+					: serverCheck
+						? 'SERVER'
+						: null;
 				const startMinutes = parseStartMinutes(assignment.section);
 				const startTime =
 					startMinutes === null ? null : formatMinutes(startMinutes);
@@ -196,7 +207,11 @@ export const buildChecklistItems = (
 					id: assignment.courseClassroomId,
 					assignment,
 					check,
+					checkSource,
 					status: getAssignmentStatus(check),
+					canEditCheck:
+						checkSource === 'LOCAL' ||
+						(checkSource === 'SERVER' && serverCheck?.monitorId === currentUserId),
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,

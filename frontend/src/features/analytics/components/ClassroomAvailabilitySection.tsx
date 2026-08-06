@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, CircleHelp, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleHelp } from 'lucide-react';
 import type { IResponsiveColumn } from '@shared/components';
 import {
 	Button,
 	PaginationControls,
-	ResponsiveTable,
-	Skeleton,
+	DataTable,
 } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
@@ -19,6 +18,8 @@ import {
 	type ClassroomAvailabilityStatus,
 } from '@api/analytics';
 import { useAnalyticsFilters } from '../hooks';
+import { AnalyticsSummarySkeleton } from './AnalyticsSkeletons';
+import { AnalyticsExportButton } from './AnalyticsExportButton';
 import { MetricCard } from './MetricCard';
 
 const DAYS = [
@@ -326,11 +327,10 @@ export const ClassroomAvailabilitySection = () => {
 					No fue posible cargar los indicadores de disponibilidad de aulas.
 				</div>
 			) : summary.isPending ? (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-					{METRICS.map(metric => (
-						<Skeleton key={metric.key} className="h-36 rounded-xl" />
-					))}
-				</div>
+				<AnalyticsSummarySkeleton
+					count={METRICS.length}
+					gridClassName="sm:grid-cols-2 lg:grid-cols-5"
+				/>
 			) : (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
 					{METRICS.map(metric => (
@@ -361,9 +361,9 @@ export const ClassroomAvailabilitySection = () => {
 								</p>
 							) : null}
 						</div>
-						<div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-							<label className="text-sm font-semibold text-foreground">
-								<span className="mb-1 block">Ordenar por</span>
+						<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+							<label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+								<span className="shrink-0">Ordenar por:</span>
 								<select
 									value={classroomSort}
 									onChange={event => handleSortChange(event.target.value)}
@@ -377,12 +377,7 @@ export const ClassroomAvailabilitySection = () => {
 								</select>
 							</label>
 							{options?.capabilities.canExport ? (
-								<Button onClick={handleExport} disabled={isExporting}>
-									{isExporting ? (
-										<Loader2 className="size-4 animate-spin" aria-hidden="true" />
-									) : null}
-									{isExporting ? 'Exportando…' : 'Exportar Excel'}
-								</Button>
+								<AnalyticsExportButton onClick={handleExport} isExporting={isExporting} />
 							) : null}
 						</div>
 					</div>
@@ -410,7 +405,7 @@ export const ClassroomAvailabilitySection = () => {
 						</div>
 					) : (
 						<>
-							<ResponsiveTable<ClassroomAvailabilityRow>
+							<DataTable<ClassroomAvailabilityRow>
 								columns={COLUMNS}
 								data={details.data?.rows ?? []}
 								getRowKey={row => row.classroomId}

@@ -1,12 +1,29 @@
 import { useMemo, useState } from 'react';
-import { CircleCheck } from 'lucide-react';
-import { useGetCurrentAssignments } from '@api/monitor';
-import { SkeletonCard, useLocalStorageState, useModal } from '@shared';
+import { AlertTriangle, CircleCheck } from 'lucide-react';
+import {
+	type DigitalBlackboardUseStatus,
+	useGetCurrentAssignments,
+} from '@api/monitor';
+import { useAuth } from '@config/providers';
+import { db } from '@config/lib';
+import {
+	useCachedAssignments,
+	useIsOnline,
+	useLocalStorageState,
+	useModal,
+} from '@shared/hooks';
+import type { TSyncStatus } from '@shared/hooks';
+import { SkeletonCard } from '@shared';
+import { askConfirm } from '@shared/utils';
 import { BuildingAccordion } from './BuildingAccordion';
 import { CheckModal } from './CheckModal';
 import { ChecklistProgress } from './ChecklistProgress';
 import { ChecklistToolbar } from './ChecklistToolbar';
 import { useRegisterCheck } from './useRegisterCheck';
+import {
+	useOfflineChecksToday,
+	useOfflineSyncIssues,
+} from './useOfflineChecksToday';
 import {
 	buildChecklistItems,
 	CHECKLIST_VIEW_STORAGE_KEY,
@@ -23,21 +40,43 @@ import {
 	TStatusFilter,
 } from './checklist.utils';
 
-export const MonitorChecklist = () => {
-	const { data, isLoading, isError } = useGetCurrentAssignments();
-	const {
-		registerCheck,
-		checkOverrides,
-		submittingId,
-		isRegistering,
-		pendingSyncCount,
-		synchronize,
-	} = useRegisterCheck();
+interface MonitorChecklistProps {
+	syncStatus?: TSyncStatus;
+	syncPendingCount?: number;
+	onSyncRetry?: () => void;
+}
+
+export const MonitorChecklist = ({
+	syncStatus = 'SYNCED',
+	syncPendingCount = 0,
+	onSyncRetry,
+}: MonitorChecklistProps) => {
+	const isOnline = useIsOnline();
+	// Feature: email de la sesión (JWT) como clave de la caché Dexie; disponible offline.
+	const { authState } = useAuth();
+	const sessionEmail = authState.user?.email;
+	const { data, isLoading, isError } = useGetCurrentAssignments({
+		enabled: isOnline,
+		email: sessionEmail,
+	});
+	// Feature: leer las asignaciones desde Dexie cuando no hay red (sin llamar al endpoint).
+	// Fallback encadenado: conserva los datos ya cargados durante la transición de red,
+	// cuando la fuente nueva aún no se resolvió (fetch remoto o lectura asíncrona de Dexie).
+	const cachedAssignments = useCachedAssignments(sessionEmail);
+	const sourceData = data ?? cachedAssignments;
+	// Feature: los registros locales (Dexie) del día son la fuente de respaldo del estado
+	// registrado mientras el servidor no confirme el check (aún no sincronizado). useLiveQuery
+	// reacciona a cada add/update/delete, sobrevive a los desmontajes (navegar a otra página)
+	// y evita duplicados al sincronizar.
+	const effectiveOverrides = useOfflineChecksToday(sessionEmail);
+	const syncIssues = useOfflineSyncIssues(sessionEmail);
+	const { registerCheck, editCheck, submittingId, isRegistering } =
+		useRegisterCheck(sessionEmail, isOnline);
 
 	const [view, setView] = useLocalStorageState<TChecklistView>(
 		CHECKLIST_VIEW_STORAGE_KEY,
 		'COMPACT',
-		isChecklistView
+		(value): value is TChecklistView => isChecklistView(String(value))
 	);
 	const [jornada, setJornada] = useState<TJornadaFilter>(getCurrentJornada);
 	const [buildingId, setBuildingId] = useState('');
@@ -48,20 +87,23 @@ export const MonitorChecklist = () => {
 		new Set()
 	);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 	const [isModalOpen, openModal, closeModal] = useModal();
 
+	const currentUserId = authState.user?.sub;
+
 	const items = useMemo(
-		() => buildChecklistItems(data ?? [], checkOverrides),
-		[data, checkOverrides]
+		() => buildChecklistItems(sourceData ?? [], effectiveOverrides, currentUserId),
+		[sourceData, effectiveOverrides, currentUserId]
 	);
 
 	const buildingOptions = useMemo(
 		() =>
-			(data ?? []).map(building => ({
+			(sourceData ?? []).map(building => ({
 				id: building.buildingId,
 				name: building.buildingName,
 			})),
-		[data]
+		[sourceData]
 	);
 
 	const jornadaPendingCounts = useMemo(() => {
@@ -106,6 +148,16 @@ export const MonitorChecklist = () => {
 		setSearch('');
 	};
 
+	const handleDiscardSyncIssue = async (offlineId: string) => {
+		const confirmed = await askConfirm(
+			'Esta verificación se eliminará de este dispositivo y no se podrá recuperar. ¿Deseas descartarla?',
+			'Descartar'
+		);
+		if (!confirmed) return;
+
+		void db.offlineChecks.delete(offlineId);
+	};
+
 	const handleQuickConfirm = (item: TChecklistItem, isPresent: boolean) => {
 		if (isPresent && item.assignment.hasDigitalBlackboard) {
 			handleOpenModal(item);
@@ -116,15 +168,34 @@ export const MonitorChecklist = () => {
 
 	const handleOpenModal = (item: TChecklistItem) => {
 		setSelectedId(item.id);
+		setModalMode('create');
+		openModal();
+	};
+
+	const handleOpenEditModal = (item: TChecklistItem) => {
+		setSelectedId(item.id);
+		setModalMode('edit');
 		openModal();
 	};
 
 	const handleModalSubmit = (
 		isPresent: boolean,
 		observation: string,
-		digitalBlackboardUseStatus?: 'USED' | 'NOT_USED' | 'UNKNOWN'
+		digitalBlackboardUseStatus?: DigitalBlackboardUseStatus
 	) => {
 		if (!selectedItem) return Promise.resolve(false);
+
+		if (modalMode === 'edit' && selectedItem.check) {
+			return editCheck({
+				checkId: selectedItem.check.id,
+				courseClassroomId: selectedItem.id,
+				isPresent,
+				observation,
+				checkTime: selectedItem.check.checkTime,
+				isLocalOnly: selectedItem.checkSource === 'LOCAL',
+				digitalBlackboardUseStatus,
+			});
+		}
 
 		return registerCheck({
 			courseClassroomId: selectedItem.id,
@@ -134,7 +205,7 @@ export const MonitorChecklist = () => {
 		});
 	};
 
-	if (isLoading) {
+	if (isLoading && !sourceData) {
 		return (
 			<div className="space-y-3">
 				<SkeletonCard fields={5} />
@@ -144,7 +215,7 @@ export const MonitorChecklist = () => {
 		);
 	}
 
-	if (isError) {
+	if (isError && !sourceData) {
 		return (
 			<p className="text-sm text-destructive">
 				Error al cargar las asignaciones del día. Intenta nuevamente.
@@ -162,22 +233,43 @@ export const MonitorChecklist = () => {
 
 	return (
 		<div className="space-y-4">
-			{pendingSyncCount > 0 ? (
-				<div className="flex flex-col gap-3 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-					<p>
-						{pendingSyncCount} verificación
-						{pendingSyncCount === 1 ? '' : 'es'} pendiente
-						{pendingSyncCount === 1 ? '' : 's'} de sincronización.
-					</p>
-					<button
-						type="button"
-						className="font-semibold text-primary"
-						onClick={() => void synchronize()}
-					>
-						Sincronizar ahora
-					</button>
-				</div>
-			) : null}
+			{syncIssues.length > 0 && (
+				<section
+					className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40"
+					aria-labelledby="sync-issues-title"
+				>
+					<div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
+						<AlertTriangle className="size-5" />
+						<h3 id="sync-issues-title" className="font-semibold">
+							Verificaciones que requieren revisión
+						</h3>
+					</div>
+					<ul className="mt-3 space-y-2 text-sm">
+						{syncIssues.map(issue => {
+							const item = items.find(
+								check => check.id === issue.courseClassroomId
+							);
+							return (
+								<li
+									key={issue.offlineId}
+									className="flex flex-wrap items-center justify-between gap-2 rounded border border-amber-200 bg-background p-2 dark:border-amber-900"
+								>
+									<span>
+										{item?.assignment.courseName ?? issue.courseClassroomId}: {issue.syncReason}
+									</span>
+									<button
+										type="button"
+										onClick={() => handleDiscardSyncIssue(issue.offlineId)}
+										className="rounded border border-amber-400 px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 dark:text-amber-200"
+									>
+										Descartar
+									</button>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			)}
 			<ChecklistToolbar
 				jornada={jornada}
 				onJornadaChange={setJornada}
@@ -195,6 +287,9 @@ export const MonitorChecklist = () => {
 				areFiltersOpen={areFiltersOpen}
 				onToggleFilters={() => setAreFiltersOpen(prev => !prev)}
 				onResetFilters={handleResetFilters}
+				syncStatus={syncStatus}
+				syncPendingCount={syncPendingCount}
+				onSyncRetry={onSyncRetry ?? (() => undefined)}
 			/>
 
 			{scopeSummary.total > 0 && <ChecklistProgress summary={scopeSummary} />}
@@ -230,6 +325,7 @@ export const MonitorChecklist = () => {
 							isRegistering={isRegistering}
 							onConfirm={handleQuickConfirm}
 							onOpenModal={handleOpenModal}
+							onEditCheck={handleOpenEditModal}
 						/>
 					))}
 				</div>
@@ -239,6 +335,7 @@ export const MonitorChecklist = () => {
 				isOpen={isModalOpen}
 				onClose={closeModal}
 				item={selectedItem}
+				mode={modalMode}
 				isSubmitting={isRegistering}
 				onSubmit={handleModalSubmit}
 			/>

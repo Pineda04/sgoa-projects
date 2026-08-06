@@ -12,8 +12,7 @@ import {
 import { ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { ResponseMessage, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { RequirePermission, ResponseMessage } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateModalityDto, UpdateModalityDto } from '../dto';
 import { ModalitiesService } from '../services/modalities.service';
@@ -23,12 +22,7 @@ export class ModalitiesController {
   constructor(private readonly modalitiesService: ModalitiesService) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'courses')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una modalidad de curso.')
   @ApiBody({
@@ -45,13 +39,7 @@ export class ModalitiesController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de modalidades de curso.')
   @ApiCommonResponses({
@@ -63,13 +51,7 @@ export class ModalitiesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la modalidad de curso.')
   @ApiParam({
@@ -88,12 +70,7 @@ export class ModalitiesController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la modalidad de curso.')
   @ApiParam({
@@ -117,12 +94,7 @@ export class ModalitiesController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado una modalidad de curso.')
   @ApiParam({

@@ -15,6 +15,7 @@ import {
 import { queryClient, Can } from '@config/lib';
 import { type Subjects } from '@config/lib';
 import { CatalogCard, CatalogCrudModal } from '../components';
+import { CATALOG_SUBJECTS } from '../constants';
 import { Square2StackIcon } from '@heroicons/react/24/outline';
 import {
 	useGetAllContractTypes,
@@ -75,19 +76,7 @@ type EntityConfig = {
 	) => Promise<{ createdIds: string[] }>;
 };
 
-const entitySubjects = new Set<string>([
-	'teacher-categories',
-	'contract-types',
-	'shifts',
-	'brands',
-	'conditions',
-	'connectivities',
-	'room-types',
-	'pc-types',
-	'monitor-types',
-	'monitor-sizes',
-	'audio-equipments',
-]);
+const entitySubjects = new Set<string>(CATALOG_SUBJECTS);
 
 const configItems = [
 	{

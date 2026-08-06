@@ -9,6 +9,7 @@ import {
 	useGetCoursesCenterDepartmentBySearchTerm,
 } from '@api/courses';
 import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
+import { useGetAcademicPeriodNextToCreate } from '@api/periods';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
 import { DAY_OPTIONS } from '@features/academic/planifications/utils';
@@ -18,6 +19,7 @@ import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
 import { ClassroomAvailabilityModal } from '@features/infrastructure/classrooms/components/ClassroomAvailabilityModal';
 import { ScheduleRangeField } from './ScheduleRangeField';
+import { FiSave } from 'react-icons/fi';
 
 interface IPlanificationFormProps {
 	centerDepartmentId: string;
@@ -80,6 +82,8 @@ export const PlanificationForm = ({
 		string | null
 	>(null);
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
+
+	const { data: nextPeriod } = useGetAcademicPeriodNextToCreate();
 
 	const useCoursesSearch = (searchTerm: string) =>
 		useGetCoursesCenterDepartmentBySearchTerm(
@@ -528,25 +532,25 @@ export const PlanificationForm = ({
 					onClose={closeAvail}
 					classroomId={availableClassroomId}
 					classroomName={formik.values.classroomName}
+					defaultPeriodId={nextPeriod?.id}
 				/>
 			) : null}
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					className="w-25 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					form="form-planificacion"
-					variant="unstyled"
-				>
-					Guardar
-				</Button>
-				<Button
 					type="button"
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
 					onClick={onCancel}
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+					form="form-planificacion"
+				>
+					<FiSave className="size-4" />
+					<span>Guardar Asignación</span>
 				</Button>
 			</div>
 		</div>

@@ -11,10 +11,10 @@ import {
 } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ConnectivityService } from '../services/connectivity.service';
 import { CreateConnectivityDto } from '../dto/create-connectivity.dto';
@@ -22,18 +22,11 @@ import { UpdateConnectivityDto } from '../dto/update-connectivity.dto';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('connectivities')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.MONITOR,
-)
 export class ConnectivityController {
   constructor(private readonly connectivityService: ConnectivityService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'connectivities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una conectividad.')
   @ApiBody({ type: CreateConnectivityDto })
@@ -48,14 +41,8 @@ export class ConnectivityController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'connectivities')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de conectividades.')
   @ApiCommonResponses({
@@ -67,6 +54,7 @@ export class ConnectivityController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información de la conectividad.')
   @ApiCommonResponses({
@@ -79,7 +67,7 @@ export class ConnectivityController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la conectividad.')
   @ApiBody({ type: UpdateConnectivityDto })
@@ -97,7 +85,7 @@ export class ConnectivityController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'connectivities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado la conectividad.')
   @ApiCommonResponses({

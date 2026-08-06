@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Check, X } from 'lucide-react';
 import { Button, ModalBase } from '@shared';
 import type { DigitalBlackboardUseStatus } from '@api/monitor';
+import { CheckPresenceFields } from './CheckPresenceFields';
 import { TChecklistItem } from './checklist.utils';
+
+type TCheckModalMode = 'create' | 'edit';
 
 interface CheckModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	item: TChecklistItem | null;
+	mode?: TCheckModalMode;
 	isSubmitting: boolean;
 	onSubmit: (
 		isPresent: boolean,
@@ -16,19 +19,20 @@ interface CheckModalProps {
 	) => Promise<boolean>;
 }
 
-const BLACKBOARD_USE_OPTIONS = [
+const BLACKBOARD_USE_OPTIONS: ReadonlyArray<{
+	value: DigitalBlackboardUseStatus;
+	label: string;
+}> = [
 	{ value: 'USED', label: 'Usada' },
 	{ value: 'NOT_USED', label: 'No usada' },
 	{ value: 'UNKNOWN', label: 'No se pudo determinar' },
-] satisfies readonly {
-	value: DigitalBlackboardUseStatus;
-	label: string;
-}[];
+];
 
 export const CheckModal = ({
 	isOpen,
 	onClose,
 	item,
+	mode = 'create',
 	isSubmitting,
 	onSubmit,
 }: CheckModalProps) => {
@@ -38,12 +42,18 @@ export const CheckModal = ({
 		useState<DigitalBlackboardUseStatus | null>(null);
 
 	useEffect(() => {
-		if (isOpen) {
+		if (!isOpen) return;
+
+		if (mode === 'edit' && item?.check) {
+			setIsPresent(item.check.isPresent);
+			setObservation(item.check.observation ?? '');
+			setBlackboardUse(item.check.digitalBlackboardUseStatus ?? null);
+		} else {
 			setIsPresent(null);
 			setObservation('');
 			setBlackboardUse(null);
 		}
-	}, [isOpen, item?.id]);
+	}, [isOpen, item?.id, item?.check, mode]);
 
 	if (!item) return null;
 
@@ -51,7 +61,9 @@ export const CheckModal = ({
 		e.preventDefault();
 		if (
 			isPresent === null ||
-			(isPresent && item.assignment.hasDigitalBlackboard && !blackboardUse)
+			(isPresent &&
+				item.assignment.hasDigitalBlackboard &&
+				!blackboardUse)
 		)
 			return;
 
@@ -69,10 +81,12 @@ export const CheckModal = ({
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="sm:min-w-md">
 				<h1 className="mb-1 text-lg font-bold text-foreground sm:text-xl">
-					Registrar verificación
+					{mode === 'edit' ? 'Editar verificación' : 'Registrar verificación'}
 				</h1>
 				<p className="mb-4 text-xs text-muted-foreground">
-					Confirma si el docente se encuentra presente en el aula.
+					{mode === 'edit'
+						? 'Corrige la información registrada para esta verificación.'
+						: 'Confirma si el docente se encuentra presente en el aula.'}
 				</p>
 
 				<dl className="mb-5 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-muted p-3 text-sm">
@@ -115,49 +129,16 @@ export const CheckModal = ({
 				</dl>
 
 				<form onSubmit={handleSubmit} className="space-y-5">
-					<fieldset>
-						<legend className="mb-2 text-sm font-semibold text-foreground">
-							¿El docente está presente?
-						</legend>
-						<div className="grid grid-cols-2 gap-3">
-							<label
-								className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 py-4 text-sm font-semibold transition-colors ${
-									isPresent === true
-										? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300'
-										: 'border-border text-muted-foreground hover:border-border-strong'
-								}`}
-							>
-								<input
-									type="radio"
-									name="isPresent"
-									className="sr-only"
-									checked={isPresent === true}
-									onChange={() => setIsPresent(true)}
-								/>
-								<Check className="size-4" />
-								Presente
-							</label>
-							<label
-								className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 py-4 text-sm font-semibold transition-colors ${
-									isPresent === false
-										? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300'
-										: 'border-border text-muted-foreground hover:border-border-strong'
-								}`}
-							>
-								<input
-									type="radio"
-									name="isPresent"
-									className="sr-only"
-									checked={isPresent === false}
-									onChange={() => setIsPresent(false)}
-								/>
-								<X className="size-4" />
-								Ausente
-							</label>
-						</div>
-					</fieldset>
+					<CheckPresenceFields
+						isPresent={isPresent}
+						onIsPresentChange={setIsPresent}
+						observation={observation}
+						onObservationChange={setObservation}
+						disabled={isSubmitting}
+					/>
 
-					{isPresent && item.assignment.hasDigitalBlackboard ? (
+					{isPresent &&
+					item.assignment.hasDigitalBlackboard ? (
 						<fieldset>
 							<legend className="mb-2 text-sm font-semibold text-foreground">
 								¿Se utilizó la pizarra digital?
@@ -182,24 +163,6 @@ export const CheckModal = ({
 						</fieldset>
 					) : null}
 
-					<div>
-						<label
-							htmlFor="check-observation"
-							className="mb-2 block text-sm font-semibold text-foreground"
-						>
-							Observaciones (opcional)
-						</label>
-						<textarea
-							id="check-observation"
-							value={observation}
-							onChange={e => setObservation(e.target.value)}
-							placeholder="Ej. El docente llegó 10 minutos tarde."
-							rows={3}
-							className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-primary/20"
-							disabled={isSubmitting}
-						/>
-					</div>
-
 					<div className="mt-4 flex flex-col-reverse gap-3 border-t border-border pt-4 sm:flex-row sm:justify-end">
 						<Button
 							type="button"
@@ -219,7 +182,11 @@ export const CheckModal = ({
 								isSubmitting
 							}
 						>
-							{isSubmitting ? 'Guardando...' : 'Guardar'}
+							{isSubmitting
+								? 'Guardando...'
+								: mode === 'edit'
+									? 'Guardar cambios'
+									: 'Guardar'}
 						</Button>
 					</div>
 				</form>

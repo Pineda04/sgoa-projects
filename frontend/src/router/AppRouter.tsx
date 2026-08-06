@@ -7,8 +7,13 @@ import { AuthRouter, authRoutes } from '@features/auth';
 import { homeRoutes } from '@features/others/home';
 import { helpRoutes } from '@features/others/help/routes';
 import { usersRoutes } from '@features/admin/users/routes';
-import { departmentsRoutes, degreesRoutes, positionsRoutes, facultiesRoutes } from '@features/admin';
-import { coursesRoutes } from '@features/academic/courses/routes';
+import {
+	departmentsRoutes,
+	degreesRoutes,
+	positionsRoutes,
+	facultiesRoutes,
+	rolesRoutes,
+} from '@features/admin';
 import { planificationsRoutes } from '@features/academic/planifications/routes';
 import { reportsRoutes } from '@features/academic/reports/routes';
 import { AcademicAssignmentReport, MonitorReport } from '@features/academic/reports/pages';
@@ -27,10 +32,8 @@ import {
 import { buildingsRoutes } from '@features/infrastructure/buildings/routes/BuildingsRoutes';
 import { classroomsRoutes } from '@features/infrastructure/classrooms/routes';
 import { airConditionersRoutes, digitalBlackboardsRoutes } from '@features/inventory';
-import { catalogRoutes } from '@features/others';
+import { catalogRoutes, CATALOG_SUBJECTS } from '@features/others';
 import { analyticsRoutes } from '@features/analytics';
-
-
 
 const router = createBrowserRouter(
 	[
@@ -62,7 +65,9 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'catalog',
-			element: <ProtectedRoute action="read" subject="catalog" />,
+			element: (
+				<ProtectedRoute action="read" subject={CATALOG_SUBJECTS} />
+			),
 			children: catalogRoutes,
 			errorElement: <div>404</div>,
 		},
@@ -103,12 +108,6 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/courses/*',
-			element: <ProtectedRoute action="read" subject="courses" />,
-			children: coursesRoutes,
-			errorElement: <div>404</div>,
-		},
-		{
 			path: 'academic/planifications/*',
 			element: <ProtectedRoute action="read" subject="planifications" />,
 			children: planificationsRoutes,
@@ -127,7 +126,7 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
-			path: 'academic/reports/*',
+			path: 'academic/reports',
 			element: <ProtectedRoute action="read" subject="reports" />,
 			children: reportsRoutes,
 			errorElement: <div>404</div>,
@@ -163,6 +162,12 @@ const router = createBrowserRouter(
 			errorElement: <div>404</div>,
 		},
 		{
+			path: 'admin/roles/*',
+			element: <ProtectedRoute superAdminOnly />,
+			children: rolesRoutes,
+			errorElement: <div>404</div>,
+		},
+		{
 			path: 'infrastructure/centers',
 			element: <ProtectedRoute action="read" subject="centers" />,
 			children: centersRoutes,
@@ -176,7 +181,12 @@ const router = createBrowserRouter(
 		},
 		{
 			path: 'infrastructure/classrooms/*',
-			element: <ProtectedRoute action="read" subject="classrooms" />,
+			element: (
+				<ProtectedRoute
+					action="read"
+					subject={['classrooms', 'dashboard-tab-classrooms']}
+				/>
+			),
 			children: classroomsRoutes,
 			errorElement: <div>404</div>,
 		},

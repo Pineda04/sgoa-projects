@@ -1,11 +1,5 @@
-import { useSearchParams } from 'react-router-dom';
 import {
-	isAcademicLoadDetailSort,
-	isClassroomAvailabilitySort,
-	isClassroomCapacitySort,
 	isClassroomDayOfWeek,
-	isEnrollmentDetailSort,
-	isTechnologyDetailMetric,
 	useAnalyticsFilterOptions,
 	type AcademicLoadDetailSort,
 	type AcademicLoadFilters,
@@ -26,7 +20,7 @@ import {
 	type MonitoringDetailSort,
 	type MonitoringFilters,
 } from '@api/analytics';
-import { buildCanonicalAnalyticsSearchParams } from './analytics-url';
+import { useAnalyticsSearchParams } from './analytics-search-params';
 
 export type ImplementedAnalyticsDomain = AnalyticsDomain;
 export type ClassroomView = 'availability' | 'capacity';
@@ -43,8 +37,6 @@ export type MonitoringBreakdown =
 	| 'period';
 
 const DETAILS_PAGE_SIZE = 25;
-const CANONICAL_TIME = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
-const CANONICAL_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const institutionalDate = (date: Date) =>
 	new Intl.DateTimeFormat('en-CA', {
@@ -71,47 +63,6 @@ const resolveDomainValue = (
 	return undefined;
 };
 
-const getPage = (value: string | null) => {
-	const page = Number(value ?? '1');
-	return Number.isInteger(page) && page > 0 ? page : 1;
-};
-
-const isStaffSort = (value: string | null): value is StaffDetailSort => {
-	switch (value) {
-		case 'name:asc':
-		case 'name:desc':
-		case 'code:asc':
-		case 'code:desc':
-		case 'contractName:asc':
-		case 'contractName:desc':
-		case 'categoryName:asc':
-		case 'categoryName:desc':
-		case 'shiftName:asc':
-		case 'shiftName:desc':
-			return true;
-		default:
-			return false;
-	}
-};
-
-const isActivitySort = (value: string | null): value is ActivityDetailSort => {
-	switch (value) {
-		case 'activityName:asc':
-		case 'activityName:desc':
-		case 'typeName:asc':
-		case 'typeName:desc':
-		case 'teacherName:asc':
-		case 'teacherName:desc':
-		case 'period:asc':
-		case 'period:desc':
-		case 'progressLevel:asc':
-		case 'progressLevel:desc':
-			return true;
-		default:
-			return false;
-	}
-};
-
 const technologyDefaultSort = (
 	metric: TechnologyDetailMetric
 ): TechnologyDetailSort => {
@@ -122,7 +73,7 @@ const technologyDefaultSort = (
 
 const technologySort = (
 	metric: TechnologyDetailMetric,
-	value: string | null
+	value: TechnologyDetailSort
 ): TechnologyDetailSort => {
 	if (metric === 'equipped_classrooms') {
 		switch (value) {
@@ -169,12 +120,12 @@ const technologySort = (
 export const useAnalyticsFilters = (
 	domain: ImplementedAnalyticsDomain = 'academic-load'
 ) => {
-	const [searchParams, setSearchParams] = useSearchParams();
+	const [query, setQuery] = useAnalyticsSearchParams();
 	const baseOptions = useAnalyticsFilterOptions();
 	const data = baseOptions.data;
 	const baseContext = data?.domainContexts[domain];
 	const baseMonitoringContext = data?.domainContexts.monitoring;
-	const requestedBuildingId = searchParams.get('buildingId');
+	const requestedBuildingId = query.buildingId;
 	const effectiveBuildingId =
 		domain === 'monitoring' && baseMonitoringContext
 			? resolveDomainValue(
@@ -184,7 +135,7 @@ export const useAnalyticsFilters = (
 					baseMonitoringContext.defaults.buildingId
 				)
 			: undefined;
-	const requestedCenterId = searchParams.get('centerDepartmentId');
+	const requestedCenterId = query.centerDepartmentId;
 	const effectiveCenterId = baseContext
 		? resolveDomainValue(
 				baseContext.filters.centerDepartmentId,
@@ -202,14 +153,14 @@ export const useAnalyticsFilters = (
 		effectiveCenterId || effectiveBuildingId ? scopedOptions.data : data;
 	const context = effectiveOptions?.domainContexts[domain] ?? baseContext;
 	const periodOptions = data?.options.periods ?? [];
-	const requestedPeriodId = searchParams.get('periodId');
+	const requestedPeriodId = query.periodId;
 	const defaultPeriodId = data?.defaults.periodId ?? null;
 	const effectivePeriodId = includesId(periodOptions, requestedPeriodId)
 		? requestedPeriodId ?? undefined
 		: includesId(periodOptions, defaultPeriodId)
 			? defaultPeriodId ?? undefined
 			: undefined;
-	const requestedComparisonId = searchParams.get('comparisonPeriodId');
+	const requestedComparisonId = query.comparisonPeriodId;
 	const effectiveComparisonPeriodId =
 		(domain === 'academic-load' || domain === 'enrollment') &&
 		data?.capabilities.canComparePeriods &&
@@ -217,7 +168,7 @@ export const useAnalyticsFilters = (
 		requestedComparisonId !== effectivePeriodId
 			? requestedComparisonId ?? undefined
 			: undefined;
-	const requestedTeacherId = searchParams.get('teacherId');
+	const requestedTeacherId = query.teacherId;
 	const effectiveTeacherId = context
 		? resolveDomainValue(
 				context.filters.teacherId,
@@ -258,13 +209,10 @@ export const useAnalyticsFilters = (
 					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
 				}
 			: undefined;
-	const rawDayOfWeek = searchParams.get('dayOfWeek');
-	const dayOfWeek = isClassroomDayOfWeek(rawDayOfWeek) ? rawDayOfWeek : 'Lu';
-	const requestedStartTime = searchParams.get('startTime') ?? '07:00';
-	const requestedEndTime = searchParams.get('endTime') ?? '08:00';
+	const dayOfWeek = query.dayOfWeek;
+	const requestedStartTime = query.startTime;
+	const requestedEndTime = query.endTime;
 	const requestedRangeIsValid =
-		CANONICAL_TIME.test(requestedStartTime) &&
-		CANONICAL_TIME.test(requestedEndTime) &&
 		requestedStartTime < requestedEndTime;
 	const startTime = requestedRangeIsValid ? requestedStartTime : '07:00';
 	const endTime = requestedRangeIsValid ? requestedEndTime : '08:00';
@@ -287,60 +235,59 @@ export const useAnalyticsFilters = (
 					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
 					...(catalogValue(
 						staffContext.catalogs.contractTypes,
-						searchParams.get('contractTypeId')
+						query.contractTypeId
 					)
 						? {
 								contractTypeId: catalogValue(
 									staffContext.catalogs.contractTypes,
-									searchParams.get('contractTypeId')
+									query.contractTypeId
 								),
 							}
 						: {}),
 					...(catalogValue(
 						staffContext.catalogs.categories,
-						searchParams.get('categoryId')
+						query.categoryId
 					)
 						? {
 								categoryId: catalogValue(
 									staffContext.catalogs.categories,
-									searchParams.get('categoryId')
+									query.categoryId
 								),
 							}
 						: {}),
 					...(catalogValue(
 						staffContext.catalogs.shifts,
-						searchParams.get('shiftId')
+						query.shiftId
 					)
 						? {
 								shiftId: catalogValue(
 									staffContext.catalogs.shifts,
-									searchParams.get('shiftId')
+									query.shiftId
 								),
 							}
 						: {}),
 					...(catalogValue(
 						staffContext.catalogs.positions,
-						searchParams.get('positionId')
+						query.positionId
 					)
 						? {
 								positionId: catalogValue(
 									staffContext.catalogs.positions,
-									searchParams.get('positionId')
+									query.positionId
 								),
 							}
 						: {}),
 				}
 			: undefined;
 	const activityContext = effectiveOptions?.domainContexts.activities;
-	const activityTimeMode: ActivityTimeMode =
-		searchParams.get('activityTimeMode') === 'year' ? 'year' : 'period';
+	const activityTimeMode: ActivityTimeMode = query.activityTimeMode;
 	const availableYears = activityContext?.catalogs.availableYears ?? [];
-	const requestedYear = Number(searchParams.get('activityYear'));
+	const requestedYear = query.activityYear ?? Number.NaN;
 	const activityYear = availableYears.includes(requestedYear)
 		? requestedYear
 		: availableYears[0];
-	const rawPac = searchParams.get('activityPac');
-	const rawPacModality = searchParams.get('activityPacModality');
+	const rawPac = query.activityPac;
+	const rawPacModality = query.activityPacModality;
 	const selectedPac = rawPac ? Number(rawPac) : undefined;
 	const validPacPair = periodOptions.some(
 		period =>
@@ -368,12 +315,12 @@ export const useAnalyticsFilters = (
 					...(effectiveTeacherId ? { teacherId: effectiveTeacherId } : {}),
 					...(catalogValue(
 						activityContext.catalogs.activityTypes,
-						searchParams.get('activityTypeId')
+						query.activityTypeId
 					)
 						? {
 								activityTypeId: catalogValue(
 									activityContext.catalogs.activityTypes,
-									searchParams.get('activityTypeId')
+									query.activityTypeId
 								),
 							}
 						: {}),
@@ -383,16 +330,12 @@ export const useAnalyticsFilters = (
 	const monthAgoDate = new Date();
 	monthAgoDate.setDate(monthAgoDate.getDate() - 30);
 	const defaultDateFrom = institutionalDate(monthAgoDate);
-	const requestedDateFrom = searchParams.get('dateFrom');
-	const requestedDateTo = searchParams.get('dateTo');
+	const requestedDateFrom = query.dateFrom;
+	const requestedDateTo = query.dateTo;
 	const dateFrom =
-		requestedDateFrom && CANONICAL_DATE.test(requestedDateFrom)
-			? requestedDateFrom
-			: defaultDateFrom;
+		requestedDateFrom ?? defaultDateFrom;
 	const dateTo =
-		requestedDateTo && CANONICAL_DATE.test(requestedDateTo)
-			? requestedDateTo
-			: today;
+		requestedDateTo ?? today;
 	const monitoringFilters: MonitoringFilters | undefined =
 		domain === 'monitoring' &&
 		domainAvailable &&
@@ -408,156 +351,74 @@ export const useAnalyticsFilters = (
 				}
 			: undefined;
 
-	const classroomView: ClassroomView =
-		searchParams.get('classroomView') === 'capacity'
-			? 'capacity'
-			: 'availability';
-	const pageParam =
+	const classroomView: ClassroomView = query.classroomView;
+	const page =
 		domain === 'academic-load'
-			? 'loadPage'
+			? query.loadPage
 			: domain === 'enrollment'
-				? 'enrollmentPage'
+				? query.enrollmentPage
 				: domain === 'classrooms'
 					? classroomView === 'capacity'
-						? 'capacityPage'
-						: 'classroomPage'
+						? query.capacityPage
+						: query.classroomPage
 					: domain === 'technology'
-						? 'technologyPage'
+						? query.technologyPage
 						: domain === 'staff'
-							? 'staffPage'
+							? query.staffPage
 							: domain === 'activities'
-								? 'activityPage'
-								: 'monitoringPage';
-	const page = getPage(searchParams.get(pageParam));
-	const rawLoadSort = searchParams.get('loadSort');
-	const loadSort = isAcademicLoadDetailSort(rawLoadSort)
-		? rawLoadSort
-		: 'name:asc';
-	const rawEnrollmentSort = searchParams.get('enrollmentSort');
-	const enrollmentSort = isEnrollmentDetailSort(rawEnrollmentSort)
-		? rawEnrollmentSort
-		: 'courseCode:asc';
-	const rawClassroomSort = searchParams.get('classroomSort');
-	const classroomSort = isClassroomAvailabilitySort(rawClassroomSort)
-		? rawClassroomSort
-		: 'classroomName:asc';
-	const rawCapacitySort = searchParams.get('capacitySort');
-	const capacitySort = isClassroomCapacitySort(rawCapacitySort)
-		? rawCapacitySort
-		: 'classroomName:asc';
-	const rawTechnologyMetric = searchParams.get('technologyMetric');
-	const technologyMetric = isTechnologyDetailMetric(rawTechnologyMetric)
-		? rawTechnologyMetric
-		: 'equipped_classrooms';
+								? query.activityPage
+								: query.monitoringPage;
+	const loadSort = query.loadSort;
+	const enrollmentSort = query.enrollmentSort;
+	const classroomSort = query.classroomSort;
+	const capacitySort = query.capacitySort;
+	const technologyMetric = query.technologyMetric;
 	const technologyDetailSort = technologySort(
 		technologyMetric,
-		searchParams.get('technologySort')
+		query.technologySort
 	);
-	const rawStaffSort = searchParams.get('staffSort');
-	const staffSort = isStaffSort(rawStaffSort) ? rawStaffSort : 'name:asc';
-	const rawActivitySort = searchParams.get('activitySort');
-	const activitySort = isActivitySort(rawActivitySort)
-		? rawActivitySort
-		: 'activityName:asc';
-	const monitoringMetric: MonitoringDetailMetric =
-		searchParams.get('monitoringMetric') === 'digital_blackboard_use'
-			? 'digital_blackboard_use'
-			: 'monitoring_checks';
-	const rawMonitoringSort = searchParams.get('monitoringSort');
-	const monitoringSort: MonitoringDetailSort =
-		rawMonitoringSort === 'checkDate:asc' ||
-		rawMonitoringSort === 'teacherName:asc' ||
-		rawMonitoringSort === 'teacherName:desc' ||
-		rawMonitoringSort === 'buildingName:asc' ||
-		rawMonitoringSort === 'buildingName:desc'
-			? rawMonitoringSort
-			: 'checkDate:desc';
-	const rawTechnologyBreakdown = searchParams.get('technologyBreakdown');
-	const technologyBreakdown: TechnologyBreakdown =
-		rawTechnologyBreakdown === 'condition' ||
-		rawTechnologyBreakdown === 'building'
-			? rawTechnologyBreakdown
-			: 'type';
-	const rawStaffBreakdown = searchParams.get('staffBreakdown');
-	const staffBreakdown: StaffBreakdown =
-		rawStaffBreakdown === 'category' ||
-		rawStaffBreakdown === 'shift' ||
-		rawStaffBreakdown === 'position'
-			? rawStaffBreakdown
-			: 'contract';
-	const rawActivityBreakdown = searchParams.get('activityBreakdown');
-	const activityBreakdown: ActivityBreakdown =
-		rawActivityBreakdown === 'period' ||
-		rawActivityBreakdown === 'center' ||
-		rawActivityBreakdown === 'teacher'
-			? rawActivityBreakdown
-			: 'type';
-	const rawMonitoringBreakdown = searchParams.get('monitoringBreakdown');
-	const monitoringBreakdown: MonitoringBreakdown =
-		rawMonitoringBreakdown === 'teacher' ||
-		rawMonitoringBreakdown === 'building' ||
-		rawMonitoringBreakdown === 'center' ||
-		rawMonitoringBreakdown === 'centerDepartment' ||
-		rawMonitoringBreakdown === 'period'
-			? rawMonitoringBreakdown
-			: 'day';
-	const canonicalSearchParams = buildCanonicalAnalyticsSearchParams({
-		domain,
-		periodId: effectivePeriodId,
-		comparisonPeriodId: effectiveComparisonPeriodId,
-		centerDepartmentId: effectiveCenterId,
-		teacherId: effectiveTeacherId,
-		dayOfWeek,
-		startTime,
-		endTime,
-		classroomView,
-		contractTypeId: staffFilters?.contractTypeId,
-		categoryId: staffFilters?.categoryId,
-		shiftId: staffFilters?.shiftId,
-		positionId: staffFilters?.positionId,
-		activityTypeId: activityFilters?.activityTypeId,
-		activityTimeMode,
-		activityYear,
-		activityPac: validPacPair ? String(selectedPac) : undefined,
-		activityPacModality: validPacPair
-			? rawPacModality ?? undefined
-			: undefined,
-		page,
-		loadSort,
-		enrollmentSort,
-		classroomSort,
-		capacitySort,
-		technologyMetric,
-		technologySort: technologyDetailSort,
-		technologyBreakdown,
-		staffSort,
-		staffBreakdown,
-		activitySort,
-		activityBreakdown,
-		buildingId: effectiveBuildingId,
-		dateFrom,
-		dateTo,
-		monitoringMetric,
-		monitoringSort,
-		monitoringBreakdown,
-	});
-
+	const staffSort = query.staffSort;
+	const activitySort = query.activitySort;
+	const monitoringMetric: MonitoringDetailMetric = query.monitoringMetric;
+	const monitoringSort: MonitoringDetailSort = query.monitoringSort;
+	const technologyBreakdown: TechnologyBreakdown = query.technologyBreakdown;
+	const staffBreakdown: StaffBreakdown = query.staffBreakdown;
+	const activityBreakdown: ActivityBreakdown = query.activityBreakdown;
+	const monitoringBreakdown: MonitoringBreakdown = query.monitoringBreakdown;
+	type QueryUpdates = Partial<{
+		[Key in keyof typeof query]: (typeof query)[Key] | null;
+	}>;
+	const pageReset = {
+		loadPage: null,
+		enrollmentPage: null,
+		classroomPage: null,
+		capacityPage: null,
+		technologyPage: null,
+		staffPage: null,
+		activityPage: null,
+		monitoringPage: null,
+	} satisfies QueryUpdates;
 	const updateParams = (
-		updates: Record<string, string | null>,
+		updates: QueryUpdates,
 		resetPage = true
 	) => {
-		setSearchParams(current => {
-			const next = new URLSearchParams(current);
-			for (const [key, value] of Object.entries(updates)) {
-				if (value) next.set(key, value);
-				else next.delete(key);
-			}
-			if (resetPage) next.delete(pageParam);
-			return next;
-		});
+		void setQuery(resetPage ? { ...updates, ...pageReset } : updates);
 	};
-	const setPage = (value: number) =>
-		updateParams({ [pageParam]: value === 1 ? null : String(value) }, false);
+	const setPage = (value: number) => {
+		const nextPage = value === 1 ? null : value;
+		if (domain === 'academic-load') updateParams({ loadPage: nextPage }, false);
+		else if (domain === 'enrollment') updateParams({ enrollmentPage: nextPage }, false);
+		else if (domain === 'classrooms' && classroomView === 'capacity')
+			updateParams({ capacityPage: nextPage }, false);
+		else if (domain === 'classrooms')
+			updateParams({ classroomPage: nextPage }, false);
+		else if (domain === 'technology')
+			updateParams({ technologyPage: nextPage }, false);
+		else if (domain === 'staff') updateParams({ staffPage: nextPage }, false);
+		else if (domain === 'activities')
+			updateParams({ activityPage: nextPage }, false);
+		else updateParams({ monitoringPage: nextPage }, false);
+	};
 
 	return {
 		baseOptions,
@@ -578,8 +439,6 @@ export const useAnalyticsFilters = (
 		activityFilters,
 		monitoringFilters,
 		classroomRangeIsValid,
-		canonicalSearchParams,
-		isCanonicalReady: Boolean(data && context && hasResolvedScope),
 		values: {
 			periodId: effectivePeriodId,
 			comparisonPeriodId: effectiveComparisonPeriodId,
@@ -671,14 +530,33 @@ export const useAnalyticsFilters = (
 			updateParams({ monitoringSort: value }),
 		setMonitoringBreakdown: (value: MonitoringBreakdown) =>
 			updateParams({ monitoringBreakdown: value }),
+		setTechnologyBreakdown: (value: TechnologyBreakdown) =>
+			updateParams({ technologyBreakdown: value }),
+		setStaffBreakdown: (value: StaffBreakdown) =>
+			updateParams({ staffBreakdown: value }),
+		setActivityBreakdown: (value: ActivityBreakdown) =>
+			updateParams({ activityBreakdown: value }),
+		setClassroomView: (value: ClassroomView) =>
+			updateParams({
+				classroomView: value,
+				classroomPage: null,
+				capacityPage: null,
+			}),
 		setClassroomDayOfWeek: (value: string) => {
 			if (isClassroomDayOfWeek(value)) updateParams({ dayOfWeek: value });
 		},
 		setClassroomStartTime: (value: string) =>
 			updateParams({ startTime: value }),
 		setClassroomEndTime: (value: string) => updateParams({ endTime: value }),
-		setCatalogFilter: (key: string, value: string) =>
-			updateParams({ [key]: value || null }),
+		setCatalogFilter: (
+			key:
+				| 'contractTypeId'
+				| 'categoryId'
+				| 'shiftId'
+				| 'positionId'
+				| 'activityTypeId',
+			value: string
+		) => updateParams({ [key]: value || null }),
 		setActivityTimeMode: (value: ActivityTimeMode) =>
 			updateParams({
 				activityTimeMode: value,
@@ -687,7 +565,7 @@ export const useAnalyticsFilters = (
 			}),
 		setActivityYear: (value: string) =>
 			updateParams({
-				activityYear: value,
+				activityYear: value ? Number(value) : null,
 				activityPac: null,
 				activityPacModality: null,
 			}),

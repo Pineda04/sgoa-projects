@@ -9,7 +9,7 @@ export async function exportPlanification(
 	departmentName: string,
 	fontFamily?: EPdfFont
 ) {
-	const 	selectedFont = fontFamily ?? getPdfFontPreference();
+	const selectedFont = fontFamily ?? getPdfFontPreference();
 	const jsPdfFont = getJsPdfFontName(selectedFont);
 
 	const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
@@ -75,18 +75,19 @@ export async function exportPlanification(
 		info.observation ?? '',
 	]);
 
+	let tableFinalY = headerY + 55;
 	autoTable(doc, {
 		head,
 		body,
 		startY: 120,
 		styles: { fontSize: 8, cellPadding: 4 },
 		headStyles: { fillColor: [20, 76, 116] },
+		didDrawPage: tableData => {
+			tableFinalY = tableData.cursor?.y ?? tableFinalY;
+		},
 	});
 
-	type LastAutoTable = { finalY?: number };
-	const lastTable = (doc as unknown as { lastAutoTable?: LastAutoTable })
-		.lastAutoTable;
-	const y = (lastTable?.finalY ?? headerY + 55) + 45;
+	const y = tableFinalY + 80;
 
 	const lineWidth = 200;
 	const marginCenter = (doc.internal.pageSize.getWidth() - lineWidth) / 2;
@@ -100,15 +101,18 @@ export async function exportPlanification(
 		doc.addPage();
 	}
 
-	const newY = (doc as unknown as { lastAutoTable?: LastAutoTable })
-		.lastAutoTable?.finalY ?? y;
+	let firmaY = y;
+	if (firmaY + firmaHeight > pageHeight - marginBottom) {
+		doc.addPage();
+		firmaY = 140;
+	}
 
-	doc.line(marginCenter, newY, marginCenter + lineWidth, newY);
+	doc.line(marginCenter, firmaY, marginCenter + lineWidth, firmaY);
 	doc.setFontSize(10);
 	doc.text(
 		'Firma del coordinador de carrera',
 		marginCenter + lineWidth / 2,
-		newY + 18,
+		firmaY + 18,
 		{ align: 'center' }
 	);
 

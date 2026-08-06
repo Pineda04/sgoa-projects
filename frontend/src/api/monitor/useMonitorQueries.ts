@@ -2,20 +2,41 @@ import { useQuery } from '@tanstack/react-query';
 import { monitorApi } from './monitor.api';
 import { monitorKeys } from './monitor.keys';
 import { TCheckFilters, TReportFilters } from './monitor.types';
-import { STALE_TIME } from '@config/lib';
+import { STALE_TIME, saveCurrentAssignments } from '@config/lib';
+import { useAuth } from '@config/providers';
 import { useDebounce, usePaginationParams } from '@shared/hooks';
 
 const CURRENT_ASSIGNMENTS_REFETCH_INTERVAL = 60 * 1000;
 const FILTERS_DEBOUNCE_DELAY = 400;
 
-export const useGetCurrentAssignments = () =>
-	useQuery({
-		queryKey: monitorKeys.currentAssignments(),
-		queryFn: () => monitorApi.getCurrentAssignments(),
+export const useGetCurrentAssignments = (options?: {
+	enabled?: boolean;
+	email?: string;
+}) => {
+	const { enabled = true, email } = options ?? {};
+	const sessionEmail = useAuth().authState.user?.email;
+	const cacheEmail = email ?? sessionEmail;
+
+	return useQuery({
+		queryKey: monitorKeys.currentAssignments(cacheEmail),
+		queryFn: async () => {
+			const res = await monitorApi.getCurrentAssignments();
+			// Feature: sobreescribir la caché local (Dexie) en cada fetch exitoso
+			// para habilitar el modo offline del monitor.
+			try {
+				if (cacheEmail) await saveCurrentAssignments(cacheEmail, res.data.data);
+			} catch (error) {
+				console.warn('No se pudo actualizar la caché de asignaciones:', error);
+			}
+			return res;
+		},
+		enabled,
 		staleTime: STALE_TIME.SHORT,
-		refetchInterval: CURRENT_ASSIGNMENTS_REFETCH_INTERVAL,
+		refetchInterval: () =>
+			enabled && navigator.onLine ? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL : false,
 		select: res => res.data.data,
 	});
+};
 
 export const useGetMonitorBuildings = () =>
 	useQuery({

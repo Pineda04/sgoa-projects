@@ -267,10 +267,10 @@ export async function exportReportActivities(
 				d.course.name,
 				d.section,
 				d.course.uvs,
-				d.courseStadistic.APB,
-				d.courseStadistic.RPB,
-				d.courseStadistic.NSP,
-				d.courseStadistic.ABD,
+				d.courseStadistic?.APB ?? 'Sin información',
+				d.courseStadistic?.RPB ?? 'Sin información',
+				d.courseStadistic?.NSP ?? 'Sin información',
+				d.courseStadistic?.ABD ?? 'Sin información',
 				d.studentCount ?? 'Sin información',
 			]
 		),
@@ -342,7 +342,7 @@ export async function exportReportActivities(
 			d.isRegistered! ? 'Sí' : 'No',
 			d.fileNumber!,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -367,7 +367,7 @@ export async function exportReportActivities(
 			d.isRegistered! ? 'Sí' : 'No',
 			d.fileNumber!,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -383,7 +383,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -399,9 +399,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			!d.verificationMedia
-				? 'Sin descripción...'
-				: d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -432,7 +430,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 

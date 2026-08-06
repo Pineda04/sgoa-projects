@@ -1,6 +1,5 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EUserRole } from 'src/common/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EPosition } from 'src/modules/teachers-config/enums';
 import { AnalyticsScopeService } from '../analytics-scope.service';
@@ -9,6 +8,34 @@ import { AnalyticsDomainScope } from '../../types';
 const USER_ID = 'user-id';
 const TEACHER_ID = 'teacher-id';
 const CENTER_DEPARTMENT_IDS = ['center-department-1', 'center-department-2'];
+const DOMAIN_SUBJECTS = {
+  'academic-load': 'analytics-academic-load',
+  enrollment: 'analytics-enrollment',
+  classrooms: 'analytics-classrooms',
+  staff: 'analytics-staff',
+  technology: 'analytics-technology',
+  activities: 'analytics-activities',
+  monitoring: 'analytics-monitoring',
+} as const;
+
+type AnalyticsDomain = keyof typeof DOMAIN_SUBJECTS;
+type PermissionAction = 'read' | 'manage';
+type MockRole = {
+  name: string;
+  isSuperAdmin?: boolean;
+  permissions?: { action: PermissionAction; subject: string }[];
+};
+
+const permission = (action: PermissionAction, domain: AnalyticsDomain) => ({
+  action,
+  subject: DOMAIN_SUBJECTS[domain],
+});
+
+const role = (
+  name: string,
+  permissions: MockRole['permissions'] = [],
+  isSuperAdmin = false,
+): MockRole => ({ name, permissions, isSuperAdmin });
 
 type ScopeUserQuery = {
   select: {
@@ -35,7 +62,7 @@ describe('AnalyticsScopeService', () => {
   };
 
   const mockUser = (
-    roles: EUserRole[],
+    roles: MockRole[],
     options: {
       teacherId?: string | null;
       centerDepartmentIds?: string[];
@@ -65,7 +92,15 @@ describe('AnalyticsScopeService', () => {
 
       return Promise.resolve({
         id: USER_ID,
-        userRoles: roles.map((name) => ({ role: { name } })),
+        userRoles: roles.map((mockRole) => ({
+          role: {
+            name: mockRole.name,
+            isSuperAdmin: mockRole.isSuperAdmin ?? false,
+            rolePermissions: (mockRole.permissions ?? []).map((permission) => ({
+              permission,
+            })),
+          },
+        })),
         monitorBuildingAssignments: (options.monitorBuildingIds ?? []).map(
           (buildingId) => ({ buildingId }),
         ),
@@ -97,8 +132,8 @@ describe('AnalyticsScopeService', () => {
   });
 
   describe('getDomainScope', () => {
-    it('reloads the active user, current roles and current department-head appointments', async () => {
-      mockUser([EUserRole.COORDINADOR_AREA]);
+    it('reloads the active user, current permissions and current department-head appointments', async () => {
+      mockUser([role('any-name', [permission('read', 'staff')])]);
 
       await service.getDomainScope(USER_ID, 'staff');
 
@@ -112,7 +147,20 @@ describe('AnalyticsScopeService', () => {
         where: { id: USER_ID, activeStatus: true },
         select: {
           id: true,
-          userRoles: { select: { role: { select: { name: true } } } },
+          userRoles: {
+            select: {
+              role: {
+                select: {
+                  isSuperAdmin: true,
+                  rolePermissions: {
+                    select: {
+                      permission: { select: { action: true, subject: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
           teacher: {
             select: {
               id: true,
@@ -150,8 +198,8 @@ describe('AnalyticsScopeService', () => {
       'technology',
       'activities',
       'monitoring',
-    ] as const)('grants ADMIN global scope for %s', async (domain) => {
-      mockUser([EUserRole.ADMIN]);
+    ] as const)('grants a super admin global scope for %s', async (domain) => {
+      mockUser([role('arbitrary-super-admin-name', [], true)]);
 
       await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
         domain,
@@ -159,69 +207,30 @@ describe('AnalyticsScopeService', () => {
       });
     });
 
-    it('makes ADMIN prevail over all combined roles', async () => {
-      mockUser([
-        EUserRole.DOCENTE,
-        EUserRole.COORDINADOR_AREA,
-        EUserRole.ADMIN,
-      ]);
+    it('uses the persisted isSuperAdmin flag independently of role name', async () => {
+      mockUser([role('RENAMED_SUPER_ADMIN', [], true)]);
 
       await expect(
-        service.getDomainScope(USER_ID, 'academic-load'),
+        service.getDomainScope(USER_ID, 'monitoring'),
       ).resolves.toEqual({
-        domain: 'academic-load',
+        domain: 'monitoring',
         branches: [{ type: 'global' }],
       });
     });
 
-    it('grants DIRECCION global scope in every domain', async () => {
-      mockUser([EUserRole.DIRECCION]);
+    it('does not infer super-admin scope from a role name', async () => {
+      mockUser([role('SUPER_ADMIN')]);
 
-      for (const domain of [
-        'academic-load',
-        'enrollment',
-        'classrooms',
-        'staff',
-        'technology',
-        'activities',
-        'monitoring',
-      ] as const) {
-        await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
-          domain,
-          branches: [{ type: 'global' }],
-        });
-      }
+      await expect(
+        service.getDomainScope(USER_ID, 'monitoring'),
+      ).resolves.toEqual({ domain: 'monitoring', branches: [] });
     });
 
-    it.each(['academic-load', 'staff'] as const)(
-      'grants RRHH global scope for %s',
-      async (domain) => {
-        mockUser([EUserRole.RRHH]);
-
-        await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
-          domain,
-          branches: [{ type: 'global' }],
-        });
-      },
-    );
-
-    it.each([
-      'enrollment',
-      'classrooms',
-      'technology',
-      'activities',
-      'monitoring',
-    ] as const)('does not expand RRHH into %s', async (domain) => {
-      mockUser([EUserRole.RRHH]);
-
-      await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
-        domain,
-        branches: [],
-      });
-    });
-
-    it('normalizes a global domain grant when RRHH has another role', async () => {
-      mockUser([EUserRole.RRHH, EUserRole.DOCENTE]);
+    it('makes isSuperAdmin prevail over permissions and relation branches', async () => {
+      mockUser([
+        role('reader', [permission('read', 'academic-load')]),
+        role('super', [], true),
+      ]);
 
       await expect(
         service.getDomainScope(USER_ID, 'academic-load'),
@@ -235,49 +244,102 @@ describe('AnalyticsScopeService', () => {
       'academic-load',
       'enrollment',
       'classrooms',
+      'staff',
+      'technology',
       'activities',
-    ] as const)(
-      'grants DOCENTE only the own teacher branch for %s',
-      async (domain) => {
-        mockUser([EUserRole.DOCENTE]);
+      'monitoring',
+    ] as const)('grants manage:%s global scope', async (domain) => {
+      mockUser([role('domain-manager', [permission('manage', domain)])]);
 
-        await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
-          domain,
-          branches: [{ type: 'teacher', teacherId: TEACHER_ID }],
-        });
-      },
-    );
+      await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
+        domain,
+        branches: [{ type: 'global' }],
+      });
+    });
 
-    it.each(['staff', 'technology', 'monitoring'] as const)(
-      'does not expand DOCENTE into %s',
-      async (domain) => {
-        mockUser([EUserRole.DOCENTE]);
-
-        await expect(service.getDomainScope(USER_ID, domain)).resolves.toEqual({
-          domain,
-          branches: [],
-        });
-      },
-    );
-
-    it('grants COORDINADOR_AREA only current department-head center departments', async () => {
-      mockUser([EUserRole.COORDINADOR_AREA]);
+    it('does not grant one domain from another domain permission', async () => {
+      mockUser([role('manager', [permission('manage', 'staff')])]);
 
       await expect(
         service.getDomainScope(USER_ID, 'technology'),
       ).resolves.toEqual({
         domain: 'technology',
-        branches: [
-          {
-            type: 'centerDepartments',
-            centerDepartmentIds: CENTER_DEPARTMENT_IDS,
-          },
-        ],
+        branches: [],
       });
     });
 
-    it('does not grant a coordinator branch without a current appointment', async () => {
-      mockUser([EUserRole.COORDINADOR_AREA], { centerDepartmentIds: [] });
+    it.each([
+      ['academic-load', ['teacher', 'centerDepartments']],
+      ['enrollment', ['teacher', 'centerDepartments']],
+      ['classrooms', ['teacher', 'centerDepartments']],
+      ['staff', ['centerDepartments']],
+      ['technology', ['centerDepartments']],
+      ['activities', ['teacher', 'centerDepartments']],
+      ['monitoring', ['buildings']],
+    ] as const)(
+      'grants read:%s only through actual applicable relations',
+      async (domain, branchTypes) => {
+        mockUser([role('reader', [permission('read', domain)])], {
+          monitorBuildingIds: ['building-1', 'building-2'],
+        });
+
+        const scope = await service.getDomainScope(USER_ID, domain);
+
+        expect(scope.domain).toBe(domain);
+        expect(scope.branches.map(({ type }) => type)).toEqual(branchTypes);
+        if ((branchTypes as readonly string[]).includes('teacher')) {
+          expect(scope.branches).toContainEqual({
+            type: 'teacher',
+            teacherId: TEACHER_ID,
+          });
+        }
+        if ((branchTypes as readonly string[]).includes('centerDepartments')) {
+          expect(scope.branches).toContainEqual({
+            type: 'centerDepartments',
+            centerDepartmentIds: CENTER_DEPARTMENT_IDS,
+          });
+        }
+        if ((branchTypes as readonly string[]).includes('buildings')) {
+          expect(scope.branches).toContainEqual({
+            type: 'buildings',
+            buildingIds: ['building-1', 'building-2'],
+            centerDepartmentIds: [],
+          });
+        }
+      },
+    );
+
+    it('makes manage prevail over read and normalizes to global', async () => {
+      mockUser([
+        role('reader', [permission('read', 'academic-load')]),
+        role('manager', [permission('manage', 'academic-load')]),
+      ]);
+
+      await expect(
+        service.getDomainScope(USER_ID, 'academic-load'),
+      ).resolves.toEqual({
+        domain: 'academic-load',
+        branches: [{ type: 'global' }],
+      });
+    });
+
+    it('uses permission grants regardless of role names', async () => {
+      for (const name of ['DIRECCION', 'completely-renamed-role']) {
+        mockUser([role(name, [permission('manage', 'technology')])]);
+
+        await expect(
+          service.getDomainScope(USER_ID, 'technology'),
+        ).resolves.toEqual({
+          domain: 'technology',
+          branches: [{ type: 'global' }],
+        });
+      }
+    });
+
+    it('does not grant a center branch without a current appointment', async () => {
+      mockUser([role('reader', [permission('read', 'staff')])], {
+        centerDepartmentIds: [],
+      });
 
       await expect(service.getDomainScope(USER_ID, 'staff')).resolves.toEqual({
         domain: 'staff',
@@ -286,7 +348,7 @@ describe('AnalyticsScopeService', () => {
     });
 
     it('excludes a department-head appointment that starts in the future', async () => {
-      mockUser([EUserRole.COORDINADOR_AREA], {
+      mockUser([role('reader', [permission('read', 'staff')])], {
         futureAppointmentOnly: true,
       });
 
@@ -297,17 +359,18 @@ describe('AnalyticsScopeService', () => {
     });
 
     it('excludes an appointment whose end date has passed', async () => {
-      mockUser([EUserRole.COORDINADOR_AREA], {
+      mockUser([role('reader', [permission('read', 'staff')])], {
         expiredAppointmentOnly: true,
       });
 
-      await expect(
-        service.getDomainScope(USER_ID, 'enrollment'),
-      ).resolves.toEqual({ domain: 'enrollment', branches: [] });
+      await expect(service.getDomainScope(USER_ID, 'staff')).resolves.toEqual({
+        domain: 'staff',
+        branches: [],
+      });
     });
 
-    it('keeps combined role branches in their own domains', async () => {
-      mockUser([EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA]);
+    it('combines teacher and department-head relations behind one read grant', async () => {
+      mockUser([role('reader', [permission('read', 'classrooms')])]);
 
       await expect(
         service.getDomainScope(USER_ID, 'classrooms'),
@@ -324,25 +387,20 @@ describe('AnalyticsScopeService', () => {
 
       await expect(service.getDomainScope(USER_ID, 'staff')).resolves.toEqual({
         domain: 'staff',
-        branches: [
-          {
-            type: 'centerDepartments',
-            centerDepartmentIds: CENTER_DEPARTMENT_IDS,
-          },
-        ],
+        branches: [],
       });
     });
 
-    it('gives MONITOR no scope in monitoring until building assignments exist', async () => {
-      mockUser([EUserRole.MONITOR]);
+    it('gives a monitoring reader no scope until building assignments exist', async () => {
+      mockUser([role('reader', [permission('read', 'monitoring')])]);
 
       await expect(
         service.getDomainScope(USER_ID, 'monitoring'),
       ).resolves.toEqual({ domain: 'monitoring', branches: [] });
     });
 
-    it('limits MONITOR monitoring to assigned buildings', async () => {
-      mockUser([EUserRole.MONITOR], {
+    it('limits monitoring read scope to assigned buildings', async () => {
+      mockUser([role('reader', [permission('read', 'monitoring')])], {
         monitorBuildingIds: ['building-1', 'building-2'],
       });
 
@@ -360,7 +418,7 @@ describe('AnalyticsScopeService', () => {
       });
     });
 
-    it('gives no scope when the user has no role applicable to the domain', async () => {
+    it('gives no scope without an applicable permission', async () => {
       mockUser([]);
 
       await expect(
@@ -368,13 +426,26 @@ describe('AnalyticsScopeService', () => {
       ).resolves.toEqual({ domain: 'monitoring', branches: [] });
     });
 
-    it('uses database roles rather than any caller-provided role state', async () => {
-      mockUser([EUserRole.MONITOR]);
+    it('combines permissions from multiple persisted roles', async () => {
+      mockUser([
+        role('first', [permission('read', 'staff')]),
+        role('second', [permission('manage', 'monitoring')]),
+      ]);
 
-      await expect(service.getDomainScope(USER_ID, 'staff')).resolves.toEqual({
-        domain: 'staff',
-        branches: [],
-      });
+      await expect(
+        service.getDomainScopes(USER_ID, ['staff', 'monitoring']),
+      ).resolves.toEqual([
+        {
+          domain: 'staff',
+          branches: [
+            {
+              type: 'centerDepartments',
+              centerDepartmentIds: CENTER_DEPARTMENT_IDS,
+            },
+          ],
+        },
+        { domain: 'monitoring', branches: [{ type: 'global' }] },
+      ]);
     });
   });
 
@@ -395,6 +466,16 @@ describe('AnalyticsScopeService', () => {
         {
           type: 'centerDepartments',
           centerDepartmentIds: CENTER_DEPARTMENT_IDS,
+        },
+      ],
+    };
+    const buildingScope: AnalyticsDomainScope = {
+      domain: 'monitoring',
+      branches: [
+        {
+          type: 'buildings',
+          buildingIds: ['building-1', 'building-2'],
+          centerDepartmentIds: [],
         },
       ],
     };
@@ -564,7 +645,32 @@ describe('AnalyticsScopeService', () => {
       );
     });
 
-    it('rejects explicit filters when the role has no scope', () => {
+    it('intersects explicitly requested buildings', () => {
+      expect(
+        service.intersectRequestedScope(buildingScope, {
+          buildingIds: ['building-2'],
+        }),
+      ).toEqual({
+        domain: 'monitoring',
+        branches: [
+          {
+            type: 'buildings',
+            buildingIds: ['building-2'],
+            centerDepartmentIds: [],
+          },
+        ],
+      });
+    });
+
+    it('rejects any explicitly requested building outside the scope', () => {
+      expect(() =>
+        service.intersectRequestedScope(buildingScope, {
+          buildingIds: ['building-1', 'another-building'],
+        }),
+      ).toThrow(ForbiddenException);
+    });
+
+    it('rejects explicit filters when the user has no scope', () => {
       const scope: AnalyticsDomainScope = {
         domain: 'technology',
         branches: [],
@@ -578,9 +684,14 @@ describe('AnalyticsScopeService', () => {
           centerDepartmentIds: CENTER_DEPARTMENT_IDS,
         }),
       ).toThrow(ForbiddenException);
+      expect(() =>
+        service.intersectRequestedScope(scope, {
+          buildingIds: ['building-1'],
+        }),
+      ).toThrow(ForbiddenException);
     });
 
-    it('keeps an empty effective scope when there is no applicable role', () => {
+    it('keeps an empty effective scope when there is no applicable permission', () => {
       const scope: AnalyticsDomainScope = {
         domain: 'monitoring',
         branches: [],

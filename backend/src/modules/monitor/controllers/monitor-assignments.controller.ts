@@ -3,19 +3,18 @@ import {
   ApiCommonResponses,
   GetCurrentUserId,
   ResponseMessage,
-  Roles,
+  RequirePermission,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { MonitorAssignmentsService } from '../services/monitor-assignments.service';
 
 @Controller('monitor')
-@Roles(EUserRole.MONITOR)
 export class MonitorAssignmentsController {
   constructor(
     private readonly monitorAssignmentsService: MonitorAssignmentsService,
   ) {}
 
   @Get('current-assignments')
+  @RequirePermission('read', 'schedule-compliance-check')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Asignaciones del período activo para el día de hoy, agrupadas por edificio y aula.',
@@ -29,6 +28,7 @@ export class MonitorAssignmentsController {
   }
 
   @Get('buildings')
+  @RequirePermission('read', 'schedule-compliance-check')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de edificios disponibles.')
   @ApiCommonResponses({

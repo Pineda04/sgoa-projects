@@ -1,4 +1,8 @@
-import { EReportGroupBy, TMonitorReportGroup } from '@api/monitor';
+import {
+	type DigitalBlackboardUseStatus,
+	EReportGroupBy,
+	TMonitorReportGroup,
+} from '@api/monitor';
 
 const toDateString = (date: Date): string => {
 	const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -26,6 +30,11 @@ export const formatCheckDate = (isoDate: string): string => {
 	return dateFormatter.format(new Date(isoDate));
 };
 
+export const isCheckEdited = (check: {
+	createdAt: string;
+	updatedAt: string;
+}): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+
 export const STATUS_BADGE_CONFIG = {
 	PRESENT: {
 		label: 'Presente',
@@ -37,11 +46,33 @@ export const STATUS_BADGE_CONFIG = {
 	},
 } as const;
 
+export const BLACKBOARD_USE_LABELS: Record<DigitalBlackboardUseStatus, string> = {
+	USED: 'Usada',
+	NOT_USED: 'No usada',
+	UNKNOWN: 'No determinado',
+};
+
+export const BLACKBOARD_USE_OPTIONS: ReadonlyArray<{
+	value: DigitalBlackboardUseStatus;
+	label: string;
+}> = [
+	{ value: 'USED', label: BLACKBOARD_USE_LABELS.USED },
+	{ value: 'NOT_USED', label: BLACKBOARD_USE_LABELS.NOT_USED },
+	{ value: 'UNKNOWN', label: BLACKBOARD_USE_LABELS.UNKNOWN },
+];
+
+export const formatBlackboardUse = (
+	status: DigitalBlackboardUseStatus | null
+): string => (status ? BLACKBOARD_USE_LABELS[status] : 'No aplica');
+
 export const GROUP_BY_OPTIONS: { value: EReportGroupBy; label: string }[] = [
 	{ value: EReportGroupBy.DAY, label: 'Día' },
 	{ value: EReportGroupBy.TEACHER, label: 'Docente' },
 	{ value: EReportGroupBy.BUILDING, label: 'Edificio' },
 ];
+
+export const isReportGroupBy = (value: string): value is EReportGroupBy =>
+	GROUP_BY_OPTIONS.some(option => option.value === value);
 
 export const getGroupByChartTitle = (groupBy: EReportGroupBy): string => {
 	switch (groupBy) {

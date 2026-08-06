@@ -1,6 +1,8 @@
 export interface IUser {
 	email: string;
 	roles: string[];
+	permissions: string[];
+	isSuperAdmin: boolean;
 	sub: string;
 }
 

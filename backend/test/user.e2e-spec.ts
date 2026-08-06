@@ -11,7 +11,7 @@ import { App } from 'supertest/types';
 import { UsersModule } from '../src/modules/users/users.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
-import { EUserRole } from 'src/common/enums';
+import { ROLE_NAMES } from 'src/common/constants';
 import { Observable } from 'rxjs';
 import { Request } from 'express';
 import { TJwtPayload } from 'src/modules/auth/types';
@@ -26,7 +26,9 @@ class MockAuthGuard implements CanActivate {
   private user: TJwtPayload = {
     sub: Date.now().toString(),
     email: 'fake.user@test.com',
-    roles: [EUserRole.COORDINADOR_AREA],
+    roles: [ROLE_NAMES.COORDINADOR_AREA],
+    permissions: ['manage:user-roles'],
+    isSuperAdmin: false,
   };
 
   canActivate(
@@ -68,8 +70,19 @@ describe('UserController (e2e)', () => {
         Promise.resolve({
           id: 'role-' + Date.now().toString(),
           name: where?.name,
+          isSuperAdmin: where?.name === ROLE_NAMES.SUPER_ADMIN,
         }),
       ),
+      findMany: jest.fn().mockImplementation(({ where }) => {
+        const names: string[] = where?.name?.in ?? [];
+        return Promise.resolve(
+          names.map((name) => ({
+            id: 'role-' + name,
+            name,
+            isSuperAdmin: name === ROLE_NAMES.SUPER_ADMIN,
+          })),
+        );
+      }),
     },
     centerDepartment: {
       findMany: jest.fn().mockResolvedValue([
@@ -83,7 +96,7 @@ describe('UserController (e2e)', () => {
       findUnique: jest.fn().mockImplementation(({ where }) =>
         Promise.resolve({
           id: 'position-' + Date.now().toString(),
-          name: where?.name ?? 'Ninguno',
+          name: where?.name ?? 'Docente',
         }),
       ),
     },
@@ -156,7 +169,7 @@ describe('UserController (e2e)', () => {
       email: 'test.mock@university.edu',
       password: 'TestPassword123',
       passwordConfirm: 'TestPassword123',
-      roles: [EUserRole.DOCENTE],
+      roles: [ROLE_NAMES.DOCENTE],
       dummyFieldForTeacher: 'test',
       centerDepartmentId: TEST_CENTER_DEPARTMENT_ID,
     };
@@ -187,7 +200,7 @@ describe('UserController (e2e)', () => {
       email: 'test.mock@university.edu',
       password: 'TestPassword123',
       passwordConfirm: 'TestPassword123',
-      roles: [EUserRole.ADMIN],
+      roles: [ROLE_NAMES.SUPER_ADMIN],
       dummyFieldForTeacher: 'test',
     };
 
@@ -199,7 +212,7 @@ describe('UserController (e2e)', () => {
         statusCode: 403,
         error: 'Forbidden',
         message:
-          'Coordinadores de área o docentes no pueden asignar roles de RRHH, ADMIN o DIRECCIÓN.',
+          'Solo un super administrador puede asignar el rol de super administrador.',
       });
 
     return response;

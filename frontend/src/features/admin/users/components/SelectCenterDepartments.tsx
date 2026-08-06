@@ -3,7 +3,7 @@ import { useGetAllMyCoordinations } from '@api/teachers';
 import { ICreateUserProps } from '@api/users';
 import { Error, Loading } from '@shared/components';
 import { getUniqueCenters } from '@shared/utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const SelectCenterDepartments = ({
 	touched,
@@ -16,8 +16,6 @@ export const SelectCenterDepartments = ({
 	const [centerSelected, setCenterSelected] = useState(0);
 	const isLoading = [currentUserCoordinationsInfo].some(q => q.isLoading);
 
-	if (isLoading) return <Loading />;
-
 	const uniqueCenters =
 		currentUserCoordinationsInfo.data &&
 		getUniqueCenters(
@@ -29,6 +27,37 @@ export const SelectCenterDepartments = ({
 			p => p.center.id === uniqueCenters?.[centerSelected]?.id
 		) ?? [];
 
+	useEffect(() => {
+		if (uniqueCenters && uniqueCenters.length > 0) {
+			const currentCenter = uniqueCenters[centerSelected] || uniqueCenters[0];
+			if (!values.centerId || values.centerId !== currentCenter.id) {
+				setValues(prev => ({
+					...prev,
+					centerId: currentCenter.id,
+				}));
+			}
+		}
+	}, [uniqueCenters, centerSelected, values.centerId, setValues]);
+
+	useEffect(() => {
+		if (positionsByCenter && positionsByCenter.length > 0) {
+			const firstDeptId = positionsByCenter[0].centerDepartmentId;
+			const isCurrentValid = positionsByCenter.some(
+				p => p.centerDepartmentId === values.centerDepartmentId
+			);
+			if (!values.centerDepartmentId || !isCurrentValid) {
+				setValues(prev => ({
+					...prev,
+					centerDepartmentId: firstDeptId,
+				}));
+			}
+		}
+	}, [positionsByCenter, values.centerDepartmentId, setValues]);
+	if (isLoading) return <Loading />;
+
+	const selectedCenterIndex =
+		uniqueCenters?.findIndex(c => c.id === values.centerId) ?? 0;
+
 	return (
 		<>
 			<div className="mt-6">
@@ -39,23 +68,25 @@ export const SelectCenterDepartments = ({
 					id="center"
 					name="centerId"
 					className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
+					value={selectedCenterIndex >= 0 ? selectedCenterIndex : 'select'}
 					onChange={e => {
-						const centerId =
-							e.target.options[e.target.selectedIndex].id;
-						setValues({
-							...values,
-							centerId,
-						});
-						setCenterSelected(Number(e.target.value));
+						const index = Number(e.target.value);
+						const center = uniqueCenters?.[index];
+						if (center) {
+							setCenterSelected(index);
+							setValues(prev => ({
+								...prev,
+								centerId: center.id,
+							}));
+						}
 					}}
 					onBlur={handleBlur}
-					defaultValue={'select'}
 				>
 					<option value="select" disabled>
 						Seleccione
 					</option>
 					{uniqueCenters?.map((center, index) => (
-						<option key={center.id} id={center.id} value={index}>
+						<option key={center.id} value={index}>
 							{center.name}
 						</option>
 					))}
@@ -71,34 +102,31 @@ export const SelectCenterDepartments = ({
 				</label>
 				<select
 					id="department"
-					name="center-departments"
+					name="centerDepartmentId"
 					className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
+					value={values.centerDepartmentId || 'select'}
 					onChange={e => {
-						const centerDepartmentId =
-							e.target.options[e.target.selectedIndex].id;
-						setValues({
-							...values,
+						const centerDepartmentId = e.target.value;
+						setValues(prev => ({
+							...prev,
 							centerDepartmentId,
-						});
+						}));
 					}}
 					onBlur={handleBlur}
-					defaultValue={'select'}
 				>
 					<option value="select" disabled>
 						Seleccione
 					</option>
-					{positionsByCenter &&
-						positionsByCenter.map(
-							({ centerDepartmentId, department }) => (
-								<option
-									key={centerDepartmentId}
-									id={centerDepartmentId}
-									value={department.name}
-								>
-									{department.name}
-								</option>
-							)
-						)}
+					{positionsByCenter?.map(
+						({ centerDepartmentId, department }) => (
+							<option
+								key={centerDepartmentId}
+								value={centerDepartmentId}
+							>
+								{department.name}
+							</option>
+						)
+					)}
 				</select>
 				{touched.centerDepartmentId && errors.centerDepartmentId && (
 					<Error error={errors.centerDepartmentId} />

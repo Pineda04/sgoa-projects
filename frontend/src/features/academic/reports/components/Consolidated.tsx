@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useAuth } from '@config';
-import { EUserRole } from '@shared/constants';
+import { useAbility } from '@config';
 import { usePaginationParams, useDebounce } from '@shared/hooks';
 import {
 	useGetCurrentAcademicPeriod,
@@ -101,12 +100,9 @@ export const Consolidated = ({
 	centerDepartmentId: propCenterDepartmentId,
 	showDepartmentFilter = false,
 }: Props = {}) => {
-	const { authState } = useAuth();
-	const roles = authState.user?.roles ?? [];
-	const isAdminOrDireccion = roles.some(
-		r => r === EUserRole.ADMIN || r === EUserRole.DIRECCION
-	);
-	const isCoord = roles.includes(EUserRole.COORDINADOR_AREA);
+	const ability = useAbility();
+	const isAdminOrDireccion = ability.can('manage', 'dashboard-authorities');
+	const isCoord = ability.can('manage', 'dashboard-coordinator');
 
 	const { page, size, setPage } = usePaginationParams();
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();

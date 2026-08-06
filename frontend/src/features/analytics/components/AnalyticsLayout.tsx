@@ -1,29 +1,19 @@
 import type { ReactNode } from 'react';
 
 const AnalyticsLayoutRoot = ({ children }: { children: ReactNode }) => (
-	<main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+	<main className="analytics-root mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 		{children}
 	</main>
 );
 
-const AnalyticsLayoutHeader = ({ children }: { children?: ReactNode }) => (
-	<header className="mb-6 overflow-hidden rounded-2xl border border-card-border bg-card shadow-card">
-		<div className="border-l-4 border-accent px-5 py-5 sm:px-7">
-			<p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-				Control académico
+const AnalyticsLayoutHeader = () => (
+	<header className="mb-5">
+		<div>
+			<h1 className="text-2xl font-bold text-foreground">Analíticas</h1>
+			<p className="mt-1 max-w-2xl text-muted-foreground">
+				Consulta indicadores autorizados académicos, de infraestructura,
+				tecnología, personal y actividades.
 			</p>
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold text-card-foreground sm:text-3xl">
-						Analíticas
-					</h1>
-					<p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-						Consulta indicadores autorizados académicos, de infraestructura,
-						tecnología, personal y actividades.
-					</p>
-				</div>
-				{children}
-			</div>
 		</div>
 	</header>
 );

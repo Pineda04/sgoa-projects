@@ -4,6 +4,7 @@ import { useGetAllShifts } from '@api/shifts';
 import { useGetAllTeacherCategories } from '@api/teachers';
 import { TCreateUser, useCreateUser } from '@api/users';
 import { useAbility } from '@config';
+import { useAuth } from '@config/providers';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { initialValuesUser, userCreateSchema } from '../schemas';
@@ -11,9 +12,11 @@ import { errorsFormik, setOptions } from '@shared/utils';
 import { Button, Error, Loading } from '@shared/components';
 import { TAcademicCommonProps } from '@api/periods';
 import { SelectAccessRoles, SelectCenterDepartments } from '../components';
+import { FiSave } from 'react-icons/fi';
 
 export const CreateUser = () => {
 	const ability = useAbility();
+	const { authState } = useAuth();
 	const undergrads = useGetAllUndergrads();
 	const postgrads = useGetAllPostgrads();
 	const contractTypes = useGetAllContractTypes();
@@ -31,8 +34,11 @@ export const CreateUser = () => {
 	const { mutateAsync: addUserAsync } = useCreateUser();
 	const navigate = useNavigate();
 
-	const canManageRoles = ability.can('manage', 'user-roles');
+	// Solo el super admin puede elegir el rol de un usuario nuevo; los demás
+	// creadores siempre obtienen el rol por defecto (DOCENTE) en el backend.
+	const canManageRoles = !!authState.user?.isSuperAdmin;
 	const canManageDepartments = ability.can('manage', 'user-departments');
+	const extraFieldsEnabled = canManageRoles || canManageDepartments;
 
 	const {
 		values,
@@ -47,7 +53,7 @@ export const CreateUser = () => {
 		initialValues: {
 			...initialValuesUser,
 			roles: [],
-			extraFieldsEnabled: canManageRoles || canManageDepartments,
+			extraFieldsEnabled,
 		},
 		onSubmit: values => handleCreateUser(values),
 		validate: values => {
@@ -75,7 +81,7 @@ export const CreateUser = () => {
 			values: {
 				...initialValuesUser,
 				roles: [],
-				extraFieldsEnabled: canManageRoles || canManageDepartments,
+				extraFieldsEnabled,
 			},
 		});
 
@@ -199,7 +205,7 @@ export const CreateUser = () => {
 								setValues({ ...values, postgradId });
 							}}
 							onBlur={handleBlur}
-							defaultValue={''}
+							defaultValue={'select'}
 						>
 							<option value="select" disabled>
 								Seleccione
@@ -332,19 +338,22 @@ export const CreateUser = () => {
 						/>
 					)}
 
-					<div className="col-span-1 md:col-span-2 flex justify-center items-center gap-4 mt-6 flex-col sm:flex-row">
+					<div className="col-span-1 md:col-span-2 flex justify-end items-center gap-4 mt-6 flex-col sm:flex-row">
 						<Button
-							type="submit"
-							className="bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-500"
-						>
-							Guardar Cambios
-						</Button>
-						<Button
-							onClick={handleCancel}
 							type="button"
-							className="bg-[#DC3545] text-white p-2 hover:bg-red-300 transition duration-500"
+							variant="outline"
+							onClick={handleCancel}
 						>
 							Cancelar
+						</Button>
+						<Button
+							type="submit"
+							className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            >
+              <FiSave className="size-4" />
+              <span>
+                Guardar Usuario
+              </span>
 						</Button>
 					</div>
 				</form>

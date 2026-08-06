@@ -25,18 +25,18 @@ export const TeachingSession = ({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 
 	const [horaConsulta, setHoraConsulta] = useState<string>(
-		data ? toHondurasTimeInput(data.consultHour) : ''
+		data?.consultHour ? toHondurasTimeInput(data.consultHour) : ''
 	);
 	const [horaTutorias, setHoraTutorias] = useState<string>(
-		data ? toHondurasTimeInput(data.tutoringHour) : ''
+		data?.tutoringHour ? toHondurasTimeInput(data.tutoringHour) : ''
 	);
 
 	//Horas originales pero HH:MM
 	const [originalConsulta, setOriginalConsulta] = useState(
-		data ? toHondurasTimeInput(data.consultHour) : ''
+		data?.consultHour ? toHondurasTimeInput(data.consultHour) : ''
 	);
 	const [originalTutorias, setOriginalTutorias] = useState(
-		data ? toHondurasTimeInput(data.tutoringHour) : ''
+		data?.tutoringHour ? toHondurasTimeInput(data.tutoringHour) : ''
 	);
 
 	useEffect(() => {
@@ -47,7 +47,7 @@ export const TeachingSession = ({
 	//Darle formato correcto a las horas.
 	const formatTimeToISO = (
 		timeStr: string,
-		referenceIso?: string
+		referenceIso?: string | null
 	): string => {
 		const [hhStr, mmStr] = timeStr.split(':');
 		const hh = Number(hhStr);

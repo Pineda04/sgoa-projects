@@ -1,22 +1,23 @@
-import { useSearchParams } from 'react-router-dom';
+import { Tabs, TabsList, TabsTrigger } from '@shared/components';
+import { useAnalyticsFilters } from '../hooks';
 import { ClassroomAvailabilitySection } from './ClassroomAvailabilitySection';
 import { ClassroomCapacitySection } from './ClassroomCapacitySection';
 
 export const ClassroomsSection = () => {
-	const [searchParams, setSearchParams] = useSearchParams();
-	const view = searchParams.get('classroomView') === 'capacity' ? 'capacity' : 'availability';
+	const { setClassroomView, values } = useAnalyticsFilters('classrooms');
+	const view = values.classroomView;
 	const selectView = (nextView: 'availability' | 'capacity') => {
-		setSearchParams(current => {
-			const next = new URLSearchParams(current);
-			next.set('classroomView', nextView);
-			return next;
-		});
+		setClassroomView(nextView);
 	};
 	return <div>
-		<div className="mb-6 flex w-fit rounded-xl border border-border bg-muted p-1" role="tablist" aria-label="Vista de aulas">
-			<button type="button" role="tab" aria-selected={view === 'availability'} onClick={() => selectView('availability')} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${view === 'availability' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Disponibilidad</button>
-			<button type="button" role="tab" aria-selected={view === 'capacity'} onClick={() => selectView('capacity')} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${view === 'capacity' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Capacidad</button>
-		</div>
+		<Tabs value={view} onValueChange={value => {
+			if (value === 'availability' || value === 'capacity') selectView(value);
+		}} className="mb-6">
+			<TabsList variant="pills" aria-label="Vista de aulas">
+				<TabsTrigger value="availability">Disponibilidad</TabsTrigger>
+				<TabsTrigger value="capacity">Capacidad</TabsTrigger>
+			</TabsList>
+		</Tabs>
 		{view === 'availability' ? <ClassroomAvailabilitySection /> : <ClassroomCapacitySection />}
 	</div>;
 };

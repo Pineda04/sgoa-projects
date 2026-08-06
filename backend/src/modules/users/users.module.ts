@@ -4,6 +4,7 @@ import { UsersController } from './controllers/users.controller';
 import { RolesService } from './services/roles.service';
 import { RolesController } from './controllers/roles.controller';
 import { TeacherRequiredFieldsForRoleConstraint } from './validators/teacher-required-fields.validator';
+import { RolesExistByNameConstraint } from './validators/roles-exist.validator';
 import { TeachersModule } from '../teachers/teachers.module';
 import { MailModule } from '../mail/mail.module';
 import { TeachersConfigModule } from '../teachers-config/teachers-config.module';
@@ -21,6 +22,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     UsersService,
     RolesService,
     TeacherRequiredFieldsForRoleConstraint,
+    RolesExistByNameConstraint,
   ],
   exports: [UsersService, RolesService],
 })

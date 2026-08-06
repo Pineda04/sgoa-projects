@@ -13,7 +13,7 @@ export const toBase64 = (imgUrl: string) =>
 		);
 
 //Formato de horas consulta y tutoria
-export const formatHour = (data: string) => {
+export const formatHour = (data: string | null | undefined) => {
 	if (!data) return '';
 
 	const date = new Date(data);

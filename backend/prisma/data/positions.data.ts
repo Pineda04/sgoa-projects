@@ -30,5 +30,12 @@ export const positionsSeed = [
     id: '54a5b54d-4d18-43e8-80b9-bf9a8235f29f',
     name: 'Miembro de Consejo General de Carrera Docente',
   },
-  { id: 'a2de91eb-aed1-465f-a61e-e9b94c6f91e1', name: 'Ninguno' },
+  {
+    id: 'a2de91eb-aed1-465f-a61e-e9b94c6f91e1',
+    name: 'Docente',
+  },
+  {
+    id: 'f2738c46-c63b-4eb0-b96f-63827c7ff3ae',
+    name: 'Monitor',
+  },
 ];

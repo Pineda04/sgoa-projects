@@ -36,6 +36,7 @@ const sanitizeRowForExcel = (
 	edificio: sanitizeExcelCell(row.edificio),
 	docente: sanitizeExcelCell(row.docente),
 	estado: sanitizeExcelCell(row.estado),
+	pizarra: sanitizeExcelCell(row.pizarra),
 	observaciones: sanitizeExcelCell(row.observaciones),
 });
 
@@ -56,6 +57,7 @@ export async function exportMonitorReportExcel({
 		{ header: 'Edificio', key: 'edificio', width: 20 },
 		{ header: 'Docente', key: 'docente', width: 28 },
 		{ header: 'Estado', key: 'estado', width: 12 },
+		{ header: 'Pizarra digital', key: 'pizarra', width: 18 },
 		{ header: 'Observaciones', key: 'observaciones', width: 32 },
 	];
 	incidentsSheet.getRow(1).font = { bold: true };

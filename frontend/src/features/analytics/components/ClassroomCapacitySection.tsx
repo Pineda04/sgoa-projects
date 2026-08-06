@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, CircleHelp, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleHelp } from 'lucide-react';
 import type { IResponsiveColumn } from '@shared/components';
-import { Button, PaginationControls, ResponsiveTable, Skeleton } from '@shared/components';
+import { Button, DataTable, PaginationControls } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
 	analyticsApi,
@@ -12,6 +12,8 @@ import {
 	type ClassroomCapacitySort,
 } from '@api/analytics';
 import { useAnalyticsFilters } from '../hooks';
+import { AnalyticsSummarySkeleton } from './AnalyticsSkeletons';
+import { AnalyticsExportButton } from './AnalyticsExportButton';
 import { MetricCard } from './MetricCard';
 
 const SORTS = [
@@ -56,10 +58,10 @@ export const ClassroomCapacitySection = () => {
 	return (
 		<div>
 			<div className="mb-5"><h2 className="text-xl font-semibold text-card-foreground">Capacidad instalada</h2><p className="mt-1 text-sm text-muted-foreground">Capacidad y calidad de datos del catálogo actual de aulas.</p></div>
-		{summary.isError ? <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">No fue posible cargar la capacidad instalada.</p> : summary.isPending ? <div className="grid gap-4 sm:grid-cols-2">{[1, 2].map(item => <Skeleton key={item} className="h-36 rounded-xl" />)}</div> : <div className="grid gap-4 sm:grid-cols-2"><MetricCard label="Capacidad instalada" metric={summary.data.metrics.installedCapacity} /><MetricCard label="Cobertura de datos de capacidad" metric={summary.data.metrics.capacityDataCoverage} /></div>}
+		{summary.isError ? <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">No fue posible cargar la capacidad instalada.</p> : summary.isPending ? <AnalyticsSummarySkeleton count={2} gridClassName="sm:grid-cols-2" /> : <div className="grid gap-4 sm:grid-cols-2"><MetricCard label="Capacidad instalada" metric={summary.data.metrics.installedCapacity} /><MetricCard label="Cobertura de datos de capacidad" metric={summary.data.metrics.capacityDataCoverage} /></div>}
 		<div className="mt-8 border-t border-border pt-6">
-			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><h3 className="text-lg font-semibold text-card-foreground">Todas las aulas</h3><p className="text-xs text-muted-foreground">{details.data ? `${details.data.meta.total} aulas · capacidad y catálogo actuales` : 'Detalle paginado'}</p></div><div className="flex flex-col gap-2 sm:flex-row"><label className="text-sm font-semibold">Ordenar por<select value={capacitySort} onChange={event => { if (isClassroomCapacitySort(event.target.value)) setCapacitySort(event.target.value); }} className="mt-1 block min-h-10 rounded-lg border border-input bg-background px-3"><>{SORTS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</></select></label>{options?.capabilities.canExport ? <Button onClick={exportRows} disabled={isExporting}>{isExporting ? <Loader2 className="size-4 animate-spin" /> : null}{isExporting ? 'Exportando...' : 'Exportar Excel'}</Button> : null}</div></div>
-			{details.isError ? <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">No fue posible cargar el detalle de aulas.</p> : outOfRange ? <div className="rounded-xl bg-muted p-6 text-center"><p>La página solicitada no está disponible.</p><Button className="mt-3" size="sm" onClick={() => setPage(1)}>Volver a página 1</Button></div> : <><ResponsiveTable columns={COLUMNS} data={details.data?.rows ?? []} getRowKey={row => row.classroomId} loading={details.isPending} emptyMessage="No hay aulas para los filtros seleccionados" /><PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} /></>}
+			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-lg font-semibold text-card-foreground">Todas las aulas</h3><p className="text-xs text-muted-foreground">{details.data ? `${details.data.meta.total} aulas · capacidad y catálogo actuales` : 'Detalle paginado'}</p></div><div className="flex flex-col gap-2 sm:flex-row sm:items-center"><label className="flex items-center gap-2 text-sm font-semibold"><span className="shrink-0">Ordenar por:</span><select value={capacitySort} onChange={event => { if (isClassroomCapacitySort(event.target.value)) setCapacitySort(event.target.value); }}>{SORTS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>{options?.capabilities.canExport ? <AnalyticsExportButton onClick={exportRows} isExporting={isExporting} /> : null}</div></div>
+			{details.isError ? <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">No fue posible cargar el detalle de aulas.</p> : outOfRange ? <div className="rounded-xl bg-muted p-6 text-center"><p>La página solicitada no está disponible.</p><Button className="mt-3" size="sm" onClick={() => setPage(1)}>Volver a página 1</Button></div> : <><DataTable columns={COLUMNS} data={details.data?.rows ?? []} getRowKey={row => row.classroomId} loading={details.isPending} emptyMessage="No hay aulas para los filtros seleccionados" /><PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} /></>}
 		</div></div>
 	);
 };

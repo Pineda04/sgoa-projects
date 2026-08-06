@@ -1,6 +1,9 @@
+import { Pencil } from 'lucide-react';
 import { TMonitorAssignmentCheckStatus } from '@api/monitor';
+import { formatHondurasDateTime } from '@shared/utils';
 import {
 	ASSIGNMENT_STATUS_CONFIG,
+	isCheckEdited,
 	TAssignmentStatus,
 } from './checklist.utils';
 
@@ -25,30 +28,56 @@ export const StatusBadge = ({ status, className = '' }: StatusBadgeProps) => {
 
 interface CheckResultProps {
 	check: TMonitorAssignmentCheckStatus;
+	onEdit?: () => void;
+	disabled?: boolean;
 	className?: string;
 }
 
-export const CheckResult = ({ check, className = '' }: CheckResultProps) => (
-	<div className={`min-w-0 text-xs text-muted-foreground ${className}`}>
-		<p>
-			{check.syncStatus === 'pending'
-				? `Pendiente de sincronización · ${check.checkTime}`
-				: `Verificado a las ${check.checkTime}`}
-		</p>
-		{check.digitalBlackboardUseStatus ? (
+export const CheckResult = ({
+	check,
+	onEdit,
+	disabled = false,
+	className = '',
+}: CheckResultProps) => (
+	<div className={`flex min-w-0 items-start gap-2 ${className}`}>
+		<div className="min-w-0 text-xs text-muted-foreground">
 			<p>
-				Pizarra:{' '}
-				{check.digitalBlackboardUseStatus === 'USED'
-					? 'usada'
-					: check.digitalBlackboardUseStatus === 'NOT_USED'
-						? 'no usada'
-						: 'no se pudo determinar'}
+				{check.syncStatus === 'pending'
+					? `Pendiente de sincronización · ${check.checkTime}`
+					: `Verificado a las ${check.checkTime}`}
 			</p>
-		) : null}
-		{check.observation && (
-			<p className="line-clamp-2 italic" title={check.observation}>
-				“{check.observation}”
-			</p>
+			{check.digitalBlackboardUseStatus ? (
+				<p>
+					Pizarra:{' '}
+					{check.digitalBlackboardUseStatus === 'USED'
+						? 'usada'
+						: check.digitalBlackboardUseStatus === 'NOT_USED'
+							? 'no usada'
+							: 'no se pudo determinar'}
+				</p>
+			) : null}
+			{check.observation && (
+				<p className="line-clamp-2 italic" title={check.observation}>
+					“{check.observation}”
+				</p>
+			)}
+			{isCheckEdited(check) && (
+				<p className="font-medium text-amber-600 dark:text-amber-400">
+					Editado: {formatHondurasDateTime(check.updatedAt)}
+				</p>
+			)}
+		</div>
+		{onEdit && (
+			<button
+				type="button"
+				onClick={onEdit}
+				disabled={disabled}
+				title="Editar verificación"
+				aria-label="Editar verificación"
+				className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md p-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				<Pencil className="size-3.5" />
+			</button>
 		)}
 	</div>
 );

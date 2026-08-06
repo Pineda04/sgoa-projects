@@ -8,6 +8,7 @@ export const AssignmentCard = ({
 	disabled,
 	onConfirm,
 	onOpenModal,
+	onEditCheck,
 }: TAssignmentViewProps) => {
 	const isPending = item.status === 'PENDING';
 
@@ -72,7 +73,13 @@ export const AssignmentCard = ({
 						className="w-full"
 					/>
 				) : (
-					item.check && <CheckResult check={item.check} />
+					item.check && (
+						<CheckResult
+							check={item.check}
+							onEdit={item.canEditCheck ? onEditCheck : undefined}
+							disabled={disabled}
+						/>
+					)
 				)}
 			</div>
 		</li>

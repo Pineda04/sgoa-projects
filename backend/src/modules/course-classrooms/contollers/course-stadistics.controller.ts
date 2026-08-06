@@ -13,8 +13,11 @@ import {
 import { ApiParam } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
-import { Roles, ResponseMessage, ApiPagination } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import {
+  RequirePermission,
+  ResponseMessage,
+  ApiPagination,
+} from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import {
   CreateCourseStadisticDto,
@@ -25,19 +28,13 @@ import { CourseStadisticsService } from '../services/course-stadistics.service';
 import { QueryPaginationDto } from 'src/common/dto';
 
 @Controller('course-stadistics')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.DOCENTE,
-)
 export class CourseStadisticsController {
   constructor(
     private readonly courseStadisticsService: CourseStadisticsService,
   ) {}
 
   @Post()
+  @RequirePermission('create', 'courses')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una nueva estadística de asignatura.')
   @ApiBody({
@@ -54,7 +51,7 @@ export class CourseStadisticsController {
   }
 
   @Get()
-  @Roles(EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE, EUserRole.ADMIN)
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de estadísticas de asignatura.')
   @ApiPagination({
@@ -70,6 +67,7 @@ export class CourseStadisticsController {
   }
 
   @Get('consolidated')
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Consolidado de estadísticas según los filtros proporcionados.',
@@ -99,6 +97,7 @@ export class CourseStadisticsController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la estadística de asignatura.')
   @ApiParam({
@@ -117,6 +116,7 @@ export class CourseStadisticsController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la estadística de asignatura.')
   @ApiParam({
@@ -141,6 +141,7 @@ export class CourseStadisticsController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'courses')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado una estadística de asignatura.')
   @ApiParam({

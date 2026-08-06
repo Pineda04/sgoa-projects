@@ -1,6 +1,33 @@
 import { ForbiddenException } from '@nestjs/common';
-import { EUserRole } from 'src/common/enums';
 import { MonitorAccessService } from '../monitor-access.service';
+
+type TPermission = {
+  action: string;
+  subject: string;
+};
+
+const buildUser = ({
+  roleName = 'CUSTOM_ROLE',
+  isSuperAdmin = false,
+  permissions = [],
+  buildingIds = [],
+}: {
+  roleName?: string;
+  isSuperAdmin?: boolean;
+  permissions?: TPermission[];
+  buildingIds?: string[];
+} = {}) => ({
+  userRoles: [
+    {
+      role: {
+        name: roleName,
+        isSuperAdmin,
+        rolePermissions: permissions.map((permission) => ({ permission })),
+      },
+    },
+  ],
+  monitorBuildingAssignments: buildingIds.map((buildingId) => ({ buildingId })),
+});
 
 describe('MonitorAccessService', () => {
   const prisma = { user: { findFirst: jest.fn() } };
@@ -8,40 +35,129 @@ describe('MonitorAccessService', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns only assigned buildings for a monitor', async () => {
-    prisma.user.findFirst.mockResolvedValue({
-      userRoles: [{ role: { name: EUserRole.MONITOR } }],
-      monitorBuildingAssignments: [
-        { buildingId: 'building-1' },
-        { buildingId: 'building-2' },
-      ],
-    });
+  it('returns global read scope with manage:reports-monitor', async () => {
+    prisma.user.findFirst.mockResolvedValue(
+      buildUser({
+        roleName: 'ANY_REPORT_MANAGER',
+        permissions: [{ action: 'manage', subject: 'reports-monitor' }],
+      }),
+    );
 
-    await expect(service.resolveReadScope('monitor-1')).resolves.toEqual({
+    await expect(service.resolveReadScope('user-1')).resolves.toEqual({
+      type: 'global',
+    });
+  });
+
+  it('returns assigned buildings with read:reports-monitor', async () => {
+    prisma.user.findFirst.mockResolvedValue(
+      buildUser({
+        roleName: 'ANY_REPORT_READER',
+        permissions: [{ action: 'read', subject: 'reports-monitor' }],
+        buildingIds: ['building-1', 'building-2'],
+      }),
+    );
+
+    await expect(service.resolveReadScope('user-1')).resolves.toEqual({
       type: 'buildings',
       buildingIds: ['building-1', 'building-2'],
     });
   });
 
-  it.each([EUserRole.ADMIN, EUserRole.DIRECCION])(
-    'returns global read scope for %s',
-    async (role) => {
-      prisma.user.findFirst.mockResolvedValue({
-        userRoles: [{ role: { name: role } }],
-        monitorBuildingAssignments: [],
-      });
+  it.each(['MONITOR', 'DIRECCION', 'SUPER_ADMIN'])(
+    'does not grant read access based on the %s role name',
+    async (roleName) => {
+      prisma.user.findFirst.mockResolvedValue(buildUser({ roleName }));
 
-      await expect(service.resolveReadScope('user-1')).resolves.toEqual({
-        type: 'global',
-      });
+      await expect(service.resolveReadScope('user-1')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
     },
   );
 
-  it('rejects inactive users even when a stale token still has MONITOR', async () => {
+  it.each(['create', 'manage'])(
+    '%s:schedule-compliance-check allows capture',
+    async (action) => {
+      prisma.user.findFirst.mockResolvedValue(
+        buildUser({
+          roleName: 'ANY_CAPTURE_ROLE',
+          permissions: [{ action, subject: 'schedule-compliance-check' }],
+          buildingIds: ['building-1'],
+        }),
+      );
+
+      await expect(
+        service.getAssignedBuildingIdsForCapture('user-1'),
+      ).resolves.toEqual(['building-1']);
+    },
+  );
+
+  it('does not grant capture access based on an arbitrary role name', async () => {
+    prisma.user.findFirst.mockResolvedValue(
+      buildUser({ roleName: 'MONITOR', buildingIds: ['building-1'] }),
+    );
+
+    await expect(
+      service.getAssignedBuildingIdsForCapture('user-1'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('gives a superadmin global read and capture access without permissions', async () => {
+    prisma.user.findFirst.mockResolvedValue(
+      buildUser({
+        roleName: 'ANY_SUPERADMIN_ROLE',
+        isSuperAdmin: true,
+        buildingIds: ['building-1'],
+      }),
+    );
+
+    await expect(service.resolveReadScope('admin-1')).resolves.toEqual({
+      type: 'global',
+    });
+    await expect(
+      service.getAssignedBuildingIdsForCapture('admin-1'),
+    ).resolves.toEqual(['building-1']);
+  });
+
+  it.each([
+    ['read scope', () => service.resolveReadScope('inactive-user')],
+    [
+      'capture scope',
+      () => service.getAssignedBuildingIdsForCapture('inactive-user'),
+    ],
+  ])('rejects an inactive user when resolving %s', async (_label, resolve) => {
     prisma.user.findFirst.mockResolvedValue(null);
 
-    await expect(service.resolveReadScope('monitor-1')).rejects.toBeInstanceOf(
-      ForbiddenException,
+    await expect(resolve()).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('loads only active users and current authorization data', async () => {
+    prisma.user.findFirst.mockResolvedValue(
+      buildUser({
+        permissions: [{ action: 'read', subject: 'reports-monitor' }],
+      }),
     );
+
+    await service.resolveReadScope('user-1');
+
+    expect(prisma.user.findFirst).toHaveBeenCalledWith({
+      where: { id: 'user-1', activeStatus: true },
+      select: {
+        userRoles: {
+          select: {
+            role: {
+              select: {
+                isSuperAdmin: true,
+                rolePermissions: {
+                  select: {
+                    permission: { select: { action: true, subject: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        monitorBuildingAssignments: { select: { buildingId: true } },
+      },
+    });
   });
 });

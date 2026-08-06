@@ -11,7 +11,16 @@ export interface TUserListItem {
 	code: string;
 	email: string | null;
 	activeStatus: boolean;
-	userRoles: { role: { id: string; name: string } }[];
+	userRoles: {
+		role: {
+			id: string;
+			name: string;
+			isSuperAdmin: boolean;
+			rolePermissions: {
+				permission: { action: string; subject: string };
+			}[];
+		};
+	}[];
 }
 
 export interface TMonitorBuildingAssignmentResult {

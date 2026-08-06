@@ -17,10 +17,11 @@ export const CourseStadisticEdit = ({
 }: {
 	reportId: string;
 	infoCourseClassroom: TCourseClassroom & {
-		courseStadistic: TCourseStadistic;
+		courseStadistic: TCourseStadistic | null;
 	};
 	mode: 'view' | 'edit';
 }) => {
+	const courseStadistic = infoCourseClassroom.courseStadistic;
 	const { updateCourseStadistic } = useUpdateCourseStadistic(reportId);
 	const [isInputsActive, setIsInputsActive] = useState<boolean>(false);
 
@@ -35,10 +36,10 @@ export const CourseStadisticEdit = ({
 	} =
 		useFormik<TCourseStadisticOmit>({
 			initialValues: {
-				APB: infoCourseClassroom.courseStadistic.APB,
-				NSP: infoCourseClassroom.courseStadistic.NSP,
-				RPB: infoCourseClassroom.courseStadistic.RPB,
-				ABD: infoCourseClassroom.courseStadistic.ABD,
+				APB: courseStadistic?.APB ?? 0,
+				NSP: courseStadistic?.NSP ?? 0,
+				RPB: courseStadistic?.RPB ?? 0,
+				ABD: courseStadistic?.ABD ?? 0,
 			},
 			onSubmit: values => onSubmitting(values),
 			validateOnChange: true,
@@ -53,6 +54,7 @@ export const CourseStadisticEdit = ({
 
 	const [showSumError, setShowSumError] = useState(false);
 	const onSubmitting = async (values: TCourseStadisticOmit) => {
+		if (!courseStadistic) return;
 
 		const total = values.APB + values.RPB + values.NSP + values.ABD;
 		if (
@@ -65,8 +67,7 @@ export const CourseStadisticEdit = ({
 		}
 
 		await updateCourseStadistic({
-			courseClassroomId:
-				infoCourseClassroom.courseStadistic.courseClassroomId,
+			courseClassroomId: courseStadistic.courseClassroomId,
 			body: values,
 		});
 
@@ -92,67 +93,85 @@ export const CourseStadisticEdit = ({
 						touched.APB && errors.APB ? 'bg-red-200' : ''
 					}`}
 				>
-					<input
-						type="number"
-						name="APB"
-						className="w-12 ps-3 text-center"
-						value={values.APB}
-						disabled={!isInputsActive}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
+					{courseStadistic ? (
+						<input
+							type="number"
+							name="APB"
+							className="w-12 ps-3 text-center"
+							value={values.APB}
+							disabled={!isInputsActive}
+							onChange={handleChange}
+							onBlur={handleBlur}
+						/>
+					) : (
+						<span>Sin información</span>
+					)}
 				</td>
 				<td
 					className={`py-fit border ${
 						touched.RPB && errors.RPB ? 'bg-red-200' : ''
 					}`}
 				>
-					<input
-						type="number"
-						name="RPB"
-						className="w-12 ps-3 text-center"
-						value={values.RPB}
-						disabled={!isInputsActive}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
+					{courseStadistic ? (
+						<input
+							type="number"
+							name="RPB"
+							className="w-12 ps-3 text-center"
+							value={values.RPB}
+							disabled={!isInputsActive}
+							onChange={handleChange}
+							onBlur={handleBlur}
+						/>
+					) : (
+						<span>Sin información</span>
+					)}
 				</td>
 				<td
 					className={`py-fit border ${
 						touched.NSP && errors.NSP ? 'bg-red-200' : ''
 					}`}
 				>
-					<input
-						type="number"
-						name="NSP"
-						className="w-12 ps-3 text-center"
-						value={values.NSP}
-						disabled={!isInputsActive}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
+					{courseStadistic ? (
+						<input
+							type="number"
+							name="NSP"
+							className="w-12 ps-3 text-center"
+							value={values.NSP}
+							disabled={!isInputsActive}
+							onChange={handleChange}
+							onBlur={handleBlur}
+						/>
+					) : (
+						<span>Sin información</span>
+					)}
 				</td>
 				<td
 					className={`py-fit border ${
 						touched.ABD && errors.ABD ? 'bg-red-200' : ''
 					}`}
 				>
-					<input
-						type="number"
-						name="ABD"
-						className="w-12 ps-3 text-center"
-						value={values.ABD}
-						disabled={!isInputsActive}
-						onChange={handleChange}
-						onBlur={handleBlur}
-					/>
+					{courseStadistic ? (
+						<input
+							type="number"
+							name="ABD"
+							className="w-12 ps-3 text-center"
+							value={values.ABD}
+							disabled={!isInputsActive}
+							onChange={handleChange}
+							onBlur={handleBlur}
+						/>
+					) : (
+						<span>Sin información</span>
+					)}
 				</td>
 				<td className="py-fit border">
 					{infoCourseClassroom.studentCount ?? 'Sin información'}
 				</td>
 				{mode === 'edit' && (
 					<td className="py-fit border">
-						{isInputsActive ? (
+						{!courseStadistic ? (
+							<span>Sin información</span>
+						) : isInputsActive ? (
 							<div className="flex gap-2 justify-center">
 				<Button
 					type="button"
@@ -168,14 +187,10 @@ export const CourseStadisticEdit = ({
 									onClick={() => {
 										resetForm({
 											values: {
-												APB: infoCourseClassroom
-													.courseStadistic.APB,
-												RPB: infoCourseClassroom
-													.courseStadistic.RPB,
-												NSP: infoCourseClassroom
-													.courseStadistic.NSP,
-												ABD: infoCourseClassroom
-													.courseStadistic.ABD,
+													APB: courseStadistic.APB,
+													RPB: courseStadistic.RPB,
+													NSP: courseStadistic.NSP,
+													ABD: courseStadistic.ABD,
 											},
 										});
 										setIsInputsActive(false);

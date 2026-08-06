@@ -18,8 +18,6 @@ import {
   paginate,
   paginateOutput,
 } from 'src/common/utils';
-import { TPosition } from 'src/modules/teachers-config/types';
-import { TCenter, TDepartmentJoin } from 'src/modules/centers/types';
 import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
@@ -39,6 +37,13 @@ export class TeachersService {
           name: true,
           email: true,
           activeStatus: true,
+          userRoles: {
+            select: {
+              role: {
+                select: { id: true, name: true, isSuperAdmin: true },
+              },
+            },
+          },
         },
       },
       contractType: true,
@@ -446,15 +451,7 @@ export class TeachersService {
     return where;
   }
 
-  private mapTeacher(teacher: TTeacherJoin):
-    | TOutputTeacher
-    | (TOutputTeacher & {
-        positions: {
-          department: TDepartmentJoin;
-          center: TCenter;
-          position: TPosition;
-        }[];
-      }) {
+  private mapTeacher(teacher: TTeacherJoin): TOutputTeacher {
     return {
       id: teacher.id,
       name: teacher.user.name,
@@ -479,6 +476,7 @@ export class TeachersService {
         id: u.postgraduate.id,
         name: u.postgraduate.name,
       })),
+      roles: teacher.user.userRoles.map((ur) => ur.role),
       positions: teacher.positionHeld.map((ph) => ({
         // ...ph,
         centerDepartmentId: ph.centerDepartment.id,

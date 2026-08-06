@@ -1,3 +1,5 @@
+import { Info } from 'lucide-react';
+import { Popover } from 'radix-ui';
 import type {
 	AnalyticsCoverage,
 	AnalyticsCoverageReason,
@@ -10,32 +12,31 @@ import type {
 interface MetricCardProps {
 	label: string;
 	metric: AnalyticsMetricResult;
+	description?: string;
+	showNotes?: boolean;
 }
 
 const numberFormatter = new Intl.NumberFormat('es-HN', {
 	maximumFractionDigits: 2,
 });
 
-const STATUS_BADGES = {
-	complete: {
-		label: 'Completa',
-		className: 'border-primary/30 bg-primary-light text-primary',
-	},
+const STATUS_DETAILS = {
+	complete: null,
 	partial: {
-		label: 'Parcial',
-		className: 'border-accent/40 bg-accent/10 text-foreground',
+		title: 'Resultado con datos incompletos',
+		className: 'border-amber-300 bg-amber-50 text-amber-700',
 	},
 	unavailable: {
-		label: 'No disponible',
+		title: 'No se puede calcular',
 		className: 'border-destructive/30 bg-destructive/10 text-destructive',
 	},
 	not_applicable: {
-		label: 'No aplica',
+		title: 'No aplica a esta selección',
 		className: 'border-border bg-muted text-muted-foreground',
 	},
 } satisfies Record<
 	AnalyticsDataStatus,
-	{ label: string; className: string }
+	{ title: string; className: string } | null
 >;
 
 const COVERAGE_REASON_LABELS = {
@@ -58,10 +59,8 @@ const NOTE_LABELS = {
 	current_staff_attributes: 'Atributos actuales del personal',
 	current_position_catalog: 'Catálogo actual de cargos',
 	current_activity_type_catalog: 'Catálogo actual de tipos de actividad',
-	assignment_reports_without_workflow: 'Reportes sin estado de workflow',
+	assignment_reports_without_workflow: 'Sin estado de revisión o aprobación',
 	observed_digital_blackboard_use: 'Uso observado durante chequeos',
-	legacy_checks_without_blackboard_use_capture:
-		'Chequeos legados pueden no incluir captura de pizarra',
 } satisfies Record<AnalyticsMetricNote, string>;
 
 const formattedNumber = (
@@ -78,57 +77,151 @@ const signedNumber = (value: number | null, unit: AnalyticsMetricUnit) =>
 		? 'No calculable'
 		: `${value > 0 ? '+' : ''}${numberFormatter.format(value)}${unit === 'percentage' ? '%' : ''}`;
 
-const StatusBadge = ({ status }: { status: AnalyticsDataStatus }) => {
-	const badge = STATUS_BADGES[status];
+const nullMetricLabel = (
+	status: AnalyticsDataStatus,
+	unit: AnalyticsMetricUnit
+) =>
+	status === 'not_applicable'
+		? '—'
+		: unit === 'percentage'
+			? 'No calculable'
+			: 'Sin información';
+
+const NOT_APPLICABLE_DETAILS: Record<string, string> = {
+	capacityDataCoverage:
+		'No hay aulas aplicables en la selección actual, por lo que no existe una base para medir la cobertura de capacidad.',
+	digitalBlackboardCoverage:
+		'No hay aulas elegibles en la selección actual, por lo que no existe una base para calcular la cobertura tecnológica.',
+	equippedEnrollmentDataCoverage:
+		'No hay secciones aplicables en la selección actual, por lo que no existe una base para medir la cobertura de matrícula.',
+	complianceRate:
+		'No hay verificaciones en la selección actual, por lo que no existe una base para calcular el cumplimiento.',
+	observedBlackboardUseRate:
+		'No hay observaciones determinadas sobre uso de pizarra, por lo que no existe una base para calcular el porcentaje.',
+	blackboardObservationCoverage:
+		'No hay verificaciones elegibles para observar el uso de pizarra en la selección actual.',
+};
+
+const UNAVAILABLE_DETAILS: Record<string, string> = {
+	averageSectionsPerTeacher:
+		'No hay docentes asignados en la selección actual, por lo que no se puede calcular el promedio de secciones.',
+	averageUvsPerTeacher:
+		'No hay docentes asignados en la selección actual, por lo que no se puede calcular el promedio de UV.',
+	averageActivitiesPerReportedTeacher:
+		'No hay docentes con actividades reportadas en la selección actual, por lo que no se puede calcular el promedio.',
+};
+
+const coverageDetail = (coverage?: AnalyticsCoverage) => {
+	if (!coverage || coverage.total === 0) return null;
+	if (coverage.included === 0) {
+		return `Hay ${coverage.total} registros aplicables, pero ninguno contiene la información necesaria.`;
+	}
+	const excludedDetail =
+		coverage.excluded === 1
+			? 'El registro restante no se incluyó.'
+			: `Los ${coverage.excluded} registros restantes no se incluyeron.`;
+	return `El resultado se calculó con ${coverage.included} de ${coverage.total} registros. ${excludedDetail}`;
+};
+
+const statusDescription = (
+	status: AnalyticsDataStatus,
+	metricKey: string,
+	coverage?: AnalyticsCoverage
+) => {
+	if (status === 'not_applicable') {
+		return (
+			NOT_APPLICABLE_DETAILS[metricKey] ??
+			'No hay registros aplicables en la selección actual, por lo que este indicador no tiene una base de cálculo.'
+		);
+	}
+	if (status === 'unavailable') {
+		return (
+			UNAVAILABLE_DETAILS[metricKey] ??
+			coverageDetail(coverage) ??
+			'Existen registros aplicables, pero falta la información necesaria para calcular este indicador.'
+		);
+	}
 	return (
-		<span
-			className={`shrink-0 rounded-full border px-2 py-0.5 text-[0.625rem] font-semibold ${badge.className}`}
-		>
-			{badge.label}
-		</span>
+		coverageDetail(coverage) ??
+		'El indicador se calculó parcialmente porque algunos registros no tienen la información necesaria.'
 	);
 };
 
-const Coverage = ({
+const StatusInfo = ({
+	status,
+	metricKey,
+	metricLabel,
 	coverage,
-	label = 'Cobertura',
 }: {
-	coverage: AnalyticsCoverage;
-	label?: string;
-}) => (
-	<div className="mt-2 text-xs text-muted-foreground">
-		<p>
-			{label}:{' '}
-			<span className="font-semibold tabular-nums text-foreground">
-				{coverage.included}/{coverage.total}
-			</span>
-		</p>
-		{coverage.reasons.length ? (
-			<p className="mt-1">
-				{coverage.reasons.map(reason => COVERAGE_REASON_LABELS[reason]).join(', ')}
-			</p>
-		) : null}
-	</div>
-);
+	status: AnalyticsDataStatus;
+	metricKey: string;
+	metricLabel: string;
+	coverage?: AnalyticsCoverage;
+}) => {
+	const detail = STATUS_DETAILS[status];
+	if (!detail) return null;
+	const reasons = coverage?.reasons ?? [];
 
-export const MetricCard = ({ label, metric }: MetricCardProps) => {
+	return (
+		<Popover.Root>
+			<Popover.Trigger asChild>
+				<button
+					type="button"
+					aria-label={`Información sobre ${metricLabel}`}
+					className={`flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${detail.className}`}
+				>
+					<Info className="size-3" />
+				</button>
+			</Popover.Trigger>
+			<Popover.Portal>
+				<Popover.Content
+					sideOffset={6}
+					align="end"
+					collisionPadding={12}
+					className="z-50 w-72 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg outline-none"
+				>
+					<p className="text-sm font-semibold">{detail.title}</p>
+					<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+						{statusDescription(status, metricKey, coverage)}
+					</p>
+					{reasons.length ? (
+						<p className="mt-2 text-xs font-medium text-foreground">
+							Motivo: {reasons.map(reason => COVERAGE_REASON_LABELS[reason]).join(', ')}.
+						</p>
+					) : null}
+					<Popover.Arrow className="fill-card" />
+				</Popover.Content>
+			</Popover.Portal>
+		</Popover.Root>
+	);
+};
+
+export const MetricCard = ({
+	label,
+	metric,
+	description,
+	showNotes = true,
+}: MetricCardProps) => {
 	const currentStatus =
 		metric.comparison?.currentDataStatus ?? metric.dataStatus;
 	const currentCoverage =
 		metric.comparison?.currentCoverage ?? metric.coverage;
-	const nullLabel =
-		metric.unit === 'percentage' ? 'No calculable' : 'Sin información';
+	const nullLabel = nullMetricLabel(currentStatus, metric.unit);
 
 	return (
-		<article className="relative overflow-hidden rounded-xl border border-card-border bg-card p-4 shadow-sm">
-			<div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-			<div className="flex items-start justify-between gap-3">
+		<article className="rounded-xl border border-card-border bg-card p-4 shadow-sm">
+			<div className="flex items-center justify-between gap-3">
 				<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
 					{label}
 				</p>
-				<StatusBadge status={currentStatus} />
+				<StatusInfo
+					status={currentStatus}
+					metricKey={metric.key}
+					metricLabel={label}
+					coverage={currentCoverage}
+				/>
 			</div>
-			<p className="mt-3 text-3xl font-semibold tabular-nums text-card-foreground">
+			<p className={`mt-3 font-semibold tabular-nums text-card-foreground ${metric.value === null ? 'text-base' : 'text-3xl'}`}>
 				{formattedNumber(metric.value, metric.unit, nullLabel)}
 			</p>
 			{metric.numerator !== undefined && metric.denominator !== undefined ? (
@@ -140,13 +233,12 @@ export const MetricCard = ({ label, metric }: MetricCardProps) => {
 					</span>
 				</p>
 			) : null}
-			{currentCoverage ? (
-				<Coverage
-					coverage={currentCoverage}
-					label={metric.comparison ? 'Cobertura actual' : 'Cobertura'}
-				/>
+			{description ? (
+				<p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+					{description}
+				</p>
 			) : null}
-			{metric.notes?.map(note => (
+			{showNotes && metric.notes?.map(note => (
 				<p key={note} className="mt-2 text-xs font-medium text-muted-foreground">
 					{NOTE_LABELS[note]}
 				</p>
@@ -157,17 +249,23 @@ export const MetricCard = ({ label, metric }: MetricCardProps) => {
 						<p>
 							Período comparado:{' '}
 							<span className="font-semibold text-foreground">
-								{formattedNumber(metric.comparison.comparison, metric.unit)}
+								{formattedNumber(
+									metric.comparison.comparison,
+									metric.unit,
+									nullMetricLabel(
+										metric.comparison.comparisonDataStatus,
+										metric.unit
+									)
+								)}
 							</span>
 						</p>
-						<StatusBadge status={metric.comparison.comparisonDataStatus} />
-					</div>
-					{metric.comparison.comparisonCoverage ? (
-						<Coverage
+						<StatusInfo
+							status={metric.comparison.comparisonDataStatus}
+							metricKey={metric.key}
+							metricLabel={`${label} del período comparado`}
 							coverage={metric.comparison.comparisonCoverage}
-							label="Cobertura comparada"
 						/>
-					) : null}
+					</div>
 					<p className="mt-1">
 						Diferencia:{' '}
 						<span className="font-semibold text-foreground">

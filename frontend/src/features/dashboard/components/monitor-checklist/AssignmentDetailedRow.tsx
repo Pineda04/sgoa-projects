@@ -23,6 +23,7 @@ export const AssignmentDetailedRow = ({
 	disabled,
 	onConfirm,
 	onOpenModal,
+	onEditCheck,
 }: TAssignmentViewProps) => {
 	const isPending = item.status === 'PENDING';
 
@@ -68,7 +69,13 @@ export const AssignmentDetailedRow = ({
 						className="sm:max-w-md sm:ml-auto"
 					/>
 				) : (
-					item.check && <CheckResult check={item.check} />
+					item.check && (
+						<CheckResult
+							check={item.check}
+							onEdit={item.canEditCheck ? onEditCheck : undefined}
+							disabled={disabled}
+						/>
+					)
 				)}
 			</div>
 		</li>

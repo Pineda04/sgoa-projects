@@ -20,13 +20,12 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import {
-  Roles,
+  RequirePermission,
   ResponseMessage,
   ApiPagination,
   GetCurrentUserId,
   ApiCommonResponses,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { ComplementaryActivitiesService } from '../services/complementary-activities.service';
 import {
@@ -47,13 +46,7 @@ export class ComplementaryActivitiesController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('files', 5, multerConfig))
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('create', 'activities')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado una actividad complmentaria.')
   @ApiOperation({
@@ -82,7 +75,7 @@ export class ComplementaryActivitiesController {
   }
 
   @Get()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de todas las actividades complementarias.')
   @ApiOperation({
@@ -98,13 +91,7 @@ export class ComplementaryActivitiesController {
   }
 
   @Get(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('La información de la actividad complementaria.')
   @ApiOperation({
@@ -121,13 +108,7 @@ export class ComplementaryActivitiesController {
   }
 
   @Get('my')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de actividades complementarias del usuario autenticado.',
@@ -148,13 +129,7 @@ export class ComplementaryActivitiesController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el tipo de actividad.')
   @ApiOperation({
@@ -179,13 +154,7 @@ export class ComplementaryActivitiesController {
 
   @Patch('/files/:id')
   @UseInterceptors(FilesInterceptor('files', 5, multerConfig))
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('update', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado la actividad complmentaria.')
   @ApiOperation({
@@ -211,13 +180,7 @@ export class ComplementaryActivitiesController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('delete', 'activities')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado una actividad complmentaria.')
   @ApiOperation({

@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,12 +10,13 @@ import {
   Validate,
   ValidateIf,
 } from 'class-validator';
-import { EUserRole } from '../../../common/enums';
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTeacherDto } from 'src/modules/teachers/dto/create-teacher.dto';
 import { TeacherRequiredFieldsForRoleConstraint } from '../validators/teacher-required-fields.validator';
+import { RolesExistByNameConstraint } from '../validators/roles-exist.validator';
 import { ValidatorConstraintDecorator } from 'src/common/decorators';
 import { MatchConstraint } from '../validators/match.validator';
+import { ROLE_NAMES } from 'src/common/constants';
 
 export class CreateUserDto extends PartialType(CreateTeacherDto) {
   @ApiProperty({
@@ -99,29 +99,29 @@ export class CreateUserDto extends PartialType(CreateTeacherDto) {
   passwordConfirm: string;
 
   @ApiProperty({
-    description: 'Roles del usuario.',
-    example: [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA],
-    enum: EUserRole,
+    description: 'Roles del usuario (nombres de roles existentes).',
+    example: ['DOCENTE', 'COORDINADOR_AREA'],
     required: true,
   })
   @IsArray({ message: 'Los roles deben enviarse en un arreglo.' })
-  @IsEnum(EUserRole, {
-    each: true,
-    message: `Los roles deben ser uno de los siguientes: ${Object.values(EUserRole).join(', ')}`,
-  })
+  @IsString({ each: true, message: 'Cada rol debe ser una cadena de texto.' })
+  @Validate(RolesExistByNameConstraint)
   // @IsOptional()
   @IsNotEmpty({
     message: `El usuario debe contener al menos un rol.`,
   })
-  roles: EUserRole[];
+  roles: string[];
 
   @ValidateIf((o: CreateUserDto) => {
+    const teacherRoleNames: string[] = [
+      ROLE_NAMES.DOCENTE,
+      ROLE_NAMES.COORDINADOR_AREA,
+    ];
+
     return (
       Array.isArray(o.roles) &&
       o.roles.length > 0 &&
-      o.roles.some((role) =>
-        [EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA].includes(role),
-      )
+      o.roles.some((role) => teacherRoleNames.includes(role))
     );
   })
   @Validate(TeacherRequiredFieldsForRoleConstraint)

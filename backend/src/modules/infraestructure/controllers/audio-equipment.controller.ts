@@ -11,28 +11,21 @@ import {
 } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  LookupSource,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { CreateAudioEquipmentDto, UpdateAudioEquipmentDto } from '../dto';
 import { AudioEquipmentService } from '../services/audio-equipment.service';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('audio-equipments')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.DIRECCION,
-  EUserRole.RRHH,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.MONITOR,
-)
 export class AudioEquipmentController {
   constructor(private readonly audioEquipmentService: AudioEquipmentService) {}
 
   @Post()
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('create', 'audio-equipments')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Se ha creado un equipo de audio.')
   @ApiBody({ type: CreateAudioEquipmentDto })
@@ -47,14 +40,8 @@ export class AudioEquipmentController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'audio-equipments')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de equipos de audio.')
   @ApiCommonResponses({
@@ -66,6 +53,7 @@ export class AudioEquipmentController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'audio-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Información del equipo de audio.')
   @ApiCommonResponses({
@@ -78,7 +66,7 @@ export class AudioEquipmentController {
   }
 
   @Patch(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('update', 'audio-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha actualizado el equipo de audio.')
   @ApiBody({ type: UpdateAudioEquipmentDto })
@@ -96,7 +84,7 @@ export class AudioEquipmentController {
   }
 
   @Delete(':id')
-  @Roles(EUserRole.ADMIN, EUserRole.DIRECCION, EUserRole.RRHH)
+  @RequirePermission('delete', 'audio-equipments')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el equipo de audio.')
   @ApiCommonResponses({

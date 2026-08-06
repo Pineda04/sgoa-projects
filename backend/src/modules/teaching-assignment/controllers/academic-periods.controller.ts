@@ -14,8 +14,8 @@ import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
 import { AcademicPeriodsService } from '../services/academic-periods.service';
 import { CreateAcademicPeriodDto, UpdateAcademicPeriodDto } from '../dto';
-import { ResponseMessage, Roles } from 'src/common/decorators';
-import { EUserRole } from 'src/common/enums';
+import { LookupSource,
+  RequirePermission, ResponseMessage } from 'src/common/decorators';
 import { ValidateIdPipe } from 'src/common/pipes';
 import { TPacModality } from '../types';
 
@@ -26,12 +26,7 @@ export class AcademicPeriodsController {
   ) {}
 
   @Post()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('create', 'periods')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({
     type: CreateAcademicPeriodDto,
@@ -50,14 +45,8 @@ export class AcademicPeriodsController {
   }
 
   @Get()
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Listar periodos académicos',
@@ -75,13 +64,7 @@ export class AcademicPeriodsController {
   }
 
   @Get('one/:id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'periods')
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener periodo académico por ID',
@@ -96,14 +79,8 @@ export class AcademicPeriodsController {
   }
 
   @Get('current')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-    EUserRole.MONITOR,
-  )
+  @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener periodo académico actual',
@@ -126,13 +103,8 @@ export class AcademicPeriodsController {
   }
 
   @Get('next-to-create')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-    EUserRole.DOCENTE,
-  )
+  @RequirePermission('read', 'periods')
+  @LookupSource()
   @HttpCode(HttpStatus.OK)
   @ApiCommonResponses({
     summary: 'Obtener periodo académico siguiente a crear una planificación',
@@ -160,12 +132,7 @@ export class AcademicPeriodsController {
   }
 
   @Patch(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('update', 'periods')
   @HttpCode(HttpStatus.OK)
   @ApiBody({
     type: UpdateAcademicPeriodDto,
@@ -186,12 +153,7 @@ export class AcademicPeriodsController {
   }
 
   @Delete(':id')
-  @Roles(
-    EUserRole.ADMIN,
-    EUserRole.DIRECCION,
-    EUserRole.RRHH,
-    EUserRole.COORDINADOR_AREA,
-  )
+  @RequirePermission('delete', 'periods')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Se ha eliminado el periodo académico.')
   @ApiCommonResponses({

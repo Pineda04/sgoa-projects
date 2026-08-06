@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
-import { useGetAirConditioner, useUpdateAirConditioner } from '@api/air-conditioners';
+import {
+	useGetAirConditioner,
+	useUpdateAirConditioner,
+} from '@api/air-conditioners';
 import { Button, Loading, TagError } from '@shared/components';
 import { errorsFormik } from '@shared/utils';
 import {
@@ -10,6 +13,7 @@ import {
 	TAirConditionerFormValues,
 } from '../schemas';
 import { AirConditionerFormInputs } from './AirConditionerFormInputs';
+import { FiSave } from 'react-icons/fi';
 
 interface EditAirConditionerFormProps {
 	airConditionerId: string;
@@ -22,7 +26,6 @@ export const EditAirConditionerForm = ({
 	onCancel,
 	onSuccess,
 }: EditAirConditionerFormProps) => {
-
 	const {
 		data: airConditioner,
 		isLoading,
@@ -31,9 +34,8 @@ export const EditAirConditionerForm = ({
 
 	const { updateAirConditioner, isPendingUpdate } = useUpdateAirConditioner();
 
-	const [initialValues, setInitialValues] = useState<TAirConditionerFormValues>(
-		initialAirConditionerValues,
-	);
+	const [initialValues, setInitialValues] =
+		useState<TAirConditionerFormValues>(initialAirConditionerValues);
 	const hasInitialized = useRef(false);
 
 	useEffect(() => {
@@ -72,17 +74,18 @@ export const EditAirConditionerForm = ({
 	if (isLoading) return <Loading />;
 	if (isError || !airConditioner) return <TagError />;
 
-	const classroomDefaultOption =
-		airConditioner.classroom
-			? {
+	const classroomDefaultOption = airConditioner.classroom
+		? {
 				value: airConditioner.classroom.id,
 				label: airConditioner.classroom.name,
 			}
-			: null;
+		: null;
 
 	return (
 		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
-			<h1 className="text-xl font-bold mb-1 shrink-0">Editar Aire Acondicionado</h1>
+			<h1 className="text-xl font-bold mb-1 shrink-0">
+				Editar Aire Acondicionado
+			</h1>
 			<p className="text-sm text-gray-500 mb-3 shrink-0">
 				{airConditioner.description ?? 'Sin descripción'}
 			</p>
@@ -102,22 +105,25 @@ export const EditAirConditionerForm = ({
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
 				<Button
-					type="submit"
-					form="edit-air-conditioner-form"
-					disabled={isPendingUpdate}
-					className="w-30 justify-center bg-[#5BC85C] text-white p-2 hover:bg-green-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
-				>
-					{isPendingUpdate ? 'Guardando...' : 'Actualizar'}
-				</Button>
-				<Button
 					type="button"
 					onClick={onCancel}
 					disabled={isPendingUpdate}
-					className="w-25 justify-center bg-[#fc4c3f] text-white p-2 hover:bg-red-300 transition duration-300 cursor-pointer"
-					variant="unstyled"
+					variant="outline"
 				>
 					Cancelar
+				</Button>
+				<Button
+					type="submit"
+					form="edit-air-conditioner-form"
+					disabled={isPendingUpdate}
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+				>
+					{!isPendingUpdate && <FiSave className="size-4" />}
+					<span>
+						{isPendingUpdate
+							? 'Guardando...'
+							: 'Actualizar Aire Acondicionado'}
+					</span>
 				</Button>
 			</div>
 		</div>

@@ -16,29 +16,23 @@ import { CreateTeacherDepartmentPositionDto } from '../dto/create-teacher-depart
 import { UpdateTeacherDepartmentPositionDto } from '../dto/update-teacher-department-position.dto';
 import { TeacherDepartmentPositionService } from '../services/teacher-department-position.service';
 import { ValidateIdPipe } from 'src/common/pipes';
-import { EUserRole } from 'src/common/enums';
 import {
   ApiPagination,
   GetCurrentUserId,
+  RequirePermission,
   ResponseMessage,
-  Roles,
 } from 'src/common/decorators';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ApiParam } from '@nestjs/swagger';
 
 @Controller('teacher-department-position')
-@Roles(
-  EUserRole.ADMIN,
-  EUserRole.COORDINADOR_AREA,
-  EUserRole.RRHH,
-  EUserRole.DIRECCION,
-)
 export class TeacherDepartmentPositionController {
   constructor(
     private readonly teacherDepartmentPositionService: TeacherDepartmentPositionService,
   ) {}
 
   @Post()
+  @RequirePermission('create', 'users')
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage(
     'Se ha creado la relación docente–centro-departamento–cargo.',
@@ -67,6 +61,7 @@ export class TeacherDepartmentPositionController {
   }
 
   @Get()
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de docentes con su centro-departamento y cargo.')
   @ApiCommonResponses({
@@ -90,6 +85,7 @@ export class TeacherDepartmentPositionController {
   }
 
   @Get('center-department/:centerDepartmentId')
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de docentes con su centro-departamento y cargo en un centro-departamento específico.',
@@ -133,7 +129,6 @@ export class TeacherDepartmentPositionController {
   // no necesita el centerDepartmentId en la url si frontend lo provee de otra forma,
   // pero esta ruta exige centerDepartmentId para evitar ambigüedad si el usuario tiene múltiples coordinaciones
   @Get('coordinator/:centerDepartmentId')
-  @Roles(EUserRole.COORDINADOR_AREA)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Listado de docentes con su centro-departamento y cargo en el center-departamento especificado para coordinadores de área.',
@@ -170,6 +165,7 @@ export class TeacherDepartmentPositionController {
   }
 
   @Get(':id')
+  @RequirePermission('read', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Información de la relación docente–centro-departamento–cargo.',
@@ -186,7 +182,6 @@ export class TeacherDepartmentPositionController {
   }
 
   @Get('my/coordinations')
-  @Roles(EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Listado de coordinaciones activas del usuario autenticado.')
   @ApiCommonResponses({
@@ -203,7 +198,6 @@ export class TeacherDepartmentPositionController {
   }
 
   @Get('my/center-department/:centerDepartmentId')
-  @Roles(EUserRole.DOCENTE, EUserRole.COORDINADOR_AREA)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Información de las relaciones docente–centro-departamento para el usuario autenticado en el center-departamento especificado.',
@@ -230,6 +224,7 @@ export class TeacherDepartmentPositionController {
   }
 
   @Patch(':id')
+  @RequirePermission('update', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Relación docente–centro-departamento–cargo actualizada correctamente.',
@@ -253,6 +248,7 @@ export class TeacherDepartmentPositionController {
   }
 
   @Delete(':id')
+  @RequirePermission('delete', 'users')
   @HttpCode(HttpStatus.OK)
   @ResponseMessage(
     'Relación docente–centro-departamento–cargo eliminada correctamente.',

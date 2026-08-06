@@ -151,12 +151,14 @@ export function SkeletonTable({
 export function SkeletonCard({
 	fields = 4,
 	showNumber = true,
+	className,
 }: {
 	fields?: number;
 	showNumber?: boolean;
+	className?: string;
 }) {
 	return (
-		<div className="space-y-3 p-4 rounded-xl border border-border/50">
+		<div className={cn('space-y-3 p-4 rounded-xl border border-border/50', className)}>
 			{showNumber && (
 				<div className="flex justify-between items-center pb-3 border-b border-border/30">
 					<Skeleton className="h-4 w-10 rounded" />

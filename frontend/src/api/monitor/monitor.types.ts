@@ -2,11 +2,14 @@ export type DigitalBlackboardUseStatus = 'USED' | 'NOT_USED' | 'UNKNOWN';
 
 export type TMonitorAssignmentCheckStatus = {
 	id: string;
+	monitorId: string;
 	isPresent: boolean;
 	checkTime: string;
 	observation: string | null;
-	digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus | null;
 	syncStatus?: 'pending' | 'synced';
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type TMonitorCurrentAssignment = {
@@ -46,6 +49,13 @@ export type TCreateCheck = {
 	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 };
 
+export type TUpdateCheck = {
+	id: string;
+	isPresent?: boolean;
+	observation?: string;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
+};
+
 export type TScheduleComplianceCheck = {
 	id: string;
 	courseClassroomId: string;
@@ -82,6 +92,7 @@ export type TScheduleComplianceCheckDetail = TScheduleComplianceCheck & {
 		};
 		classroom: {
 			name: string;
+			hasDigitalBlackboard: boolean;
 			building: {
 				id: string;
 				name: string;

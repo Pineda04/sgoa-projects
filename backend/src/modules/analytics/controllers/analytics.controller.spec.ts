@@ -1,5 +1,5 @@
 import { AnalyticsController } from './analytics.controller';
-import { EUserRole } from 'src/common/enums';
+import { PERMISSION_KEY } from 'src/common/decorators';
 import { AnalyticsFilterOptionsService } from '../services/analytics-filter-options.service';
 import { AcademicLoadAnalyticsService } from '../services/academic-load-analytics.service';
 import { EnrollmentAnalyticsService } from '../services/enrollment-analytics.service';
@@ -183,123 +183,11 @@ describe('AnalyticsController', () => {
     });
   });
 
-  it('restricts enrollment routes to the four authorized roles', () => {
-    const expected = [
-      EUserRole.ADMIN,
-      EUserRole.DIRECCION,
-      EUserRole.COORDINADOR_AREA,
-      EUserRole.DOCENTE,
-    ];
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(Reflect.getMetadata('roles', controller.getEnrollment)).toEqual(
-      expected,
-    );
-    expect(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.getEnrollmentDetails),
-    ).toEqual(expected);
-    expect(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.exportEnrollmentDetails),
-    ).toEqual(expected);
-  });
-
-  it('uses the detail roles for academic load export', () => {
-    expect(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.exportAcademicLoadDetails),
-    ).toEqual(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.getAcademicLoadDetails),
-    );
-  });
-
-  it('restricts all classroom routes to the exact four authorized roles', () => {
-    const expected = [
-      EUserRole.ADMIN,
-      EUserRole.DIRECCION,
-      EUserRole.COORDINADOR_AREA,
-      EUserRole.DOCENTE,
-    ];
-    expect(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.getClassroomAvailability),
-    ).toEqual(expected);
-    expect(
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      Reflect.getMetadata('roles', controller.getClassroomAvailabilityDetails),
-    ).toEqual(expected);
-    expect(
-      Reflect.getMetadata(
-        'roles',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        controller.exportClassroomAvailabilityDetails,
-      ),
-    ).toEqual(expected);
-    for (const method of [
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getClassroomCapacity,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getClassroomCapacityDetails,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.exportClassroomCapacityDetails,
-    ]) {
-      expect(Reflect.getMetadata('roles', method)).toEqual(expected);
-    }
-  });
-
-  it('restricts technology routes to admin, direction and coordinator only', () => {
-    const expected = [
-      EUserRole.ADMIN,
-      EUserRole.DIRECCION,
-      EUserRole.COORDINADOR_AREA,
-    ];
-    for (const method of [
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getTechnology,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getTechnologyDetails,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.exportTechnologyDetails,
-    ]) {
-      expect(Reflect.getMetadata('roles', method)).toEqual(expected);
-    }
-  });
-
-  it('uses the exact phase 4 role matrices', () => {
-    const staffRoles = [
-      EUserRole.ADMIN,
-      EUserRole.DIRECCION,
-      EUserRole.RRHH,
-      EUserRole.COORDINADOR_AREA,
-    ];
-    const activityRoles = [
-      EUserRole.ADMIN,
-      EUserRole.DIRECCION,
-      EUserRole.COORDINADOR_AREA,
-      EUserRole.DOCENTE,
-    ];
-    for (const method of [
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getStaff,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getStaffDetails,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.exportStaff,
-    ]) {
-      expect(Reflect.getMetadata('roles', method)).toEqual(staffRoles);
-    }
-    for (const method of [
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getActivities,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.getActivityDetails,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      controller.exportActivities,
-    ]) {
-      expect(Reflect.getMetadata('roles', method)).toEqual(activityRoles);
-    }
+  it('requires read:analytics once for every controller route', () => {
+    expect(Reflect.getMetadata(PERMISSION_KEY, AnalyticsController)).toEqual({
+      action: 'read',
+      subject: 'analytics',
+    });
   });
 
   it.each([

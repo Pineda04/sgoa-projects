@@ -1,3 +1,4 @@
+export * from './confirm';
 export * from './delete-action';
 export * from './download-blob';
 export * from './errors-formik';

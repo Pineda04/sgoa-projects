@@ -36,6 +36,7 @@ export type TScheduleComplianceCheckDetail = TScheduleComplianceCheck & {
     };
     classroom: {
       name: string;
+      hasDigitalBlackboard: boolean;
       building: {
         id: string;
         name: string;

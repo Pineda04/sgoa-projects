@@ -10,17 +10,20 @@ import {
 	UsersIcon,
 	ClipboardDocumentListIcon,
 	HomeIcon,
+	ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
 import { useAbility, useAuth } from '@config';
 import type { Subjects } from '@config/lib/casl/ability';
+import { useIsOnline } from '@shared/hooks';
 import { Button } from '../ui';
 
 interface SectionConfig {
 	label: string;
 	path: string;
 	subject?: Subjects;
+	superAdminOnly?: boolean;
 }
 
 interface ModuleConfig {
@@ -62,7 +65,7 @@ const MODULES: ModuleConfig[] = [
 			},
 			{
 				label: 'Cargos',
-        path: '/admin/positions',
+				path: '/admin/positions',
 				subject: 'positions',
 			},
 		],
@@ -111,14 +114,51 @@ const MODULES: ModuleConfig[] = [
 			},
 		],
 	},
+	{
+		id: 'analytics',
+		label: 'Analíticas',
+		icon: ChartBarIcon,
+		sections: [
+			{
+				label: 'Carga académica',
+				path: '/analytics?section=academic-load',
+				subject: 'analytics-academic-load',
+			},
+			{
+				label: 'Matrícula',
+				path: '/analytics?section=enrollment',
+				subject: 'analytics-enrollment',
+			},
+			{
+				label: 'Aulas',
+				path: '/analytics?section=classrooms',
+				subject: 'analytics-classrooms',
+			},
+			{
+				label: 'Personal',
+				path: '/analytics?section=staff',
+				subject: 'analytics-staff',
+			},
+			{
+				label: 'Tecnología',
+				path: '/analytics?section=technology',
+				subject: 'analytics-technology',
+			},
+			{
+				label: 'Actividades',
+				path: '/analytics?section=activities',
+				subject: 'analytics-activities',
+			},
+			{
+				label: 'Monitoreo',
+				path: '/analytics?section=monitoring',
+				subject: 'analytics-monitoring',
+			},
+		],
+	},
 ];
 
 const DASHBOARD_CONFIG: DashboardConfig[] = [
-	{
-		subject: 'analytics',
-		path: '/analytics',
-		label: 'Analíticas',
-	},
 	{
 		subject: 'dashboard-authorities',
 		path: '/dashboard/authorities',
@@ -141,6 +181,33 @@ const DASHBOARD_CONFIG: DashboardConfig[] = [
 	},
 ];
 
+const matchesLocation = (
+	configuredLocation: string,
+	pathname: string,
+	search: string
+) => {
+	const queryIndex = configuredLocation.indexOf('?');
+	const configuredPath = configuredLocation.slice(
+		0,
+		queryIndex === -1 ? configuredLocation.length : queryIndex
+	);
+	const basePath = configuredPath.replace(/\/:\w+/g, '');
+	const pathMatches =
+		pathname === configuredPath || pathname.startsWith(`${basePath}/`);
+
+	if (!pathMatches || queryIndex === -1) return pathMatches;
+
+	const configuredParams = new URLSearchParams(
+		configuredLocation.slice(queryIndex + 1)
+	);
+	const currentParams = new URLSearchParams(search);
+	let paramsMatch = true;
+	configuredParams.forEach((value, key) => {
+		if (currentParams.get(key) !== value) paramsMatch = false;
+	});
+	return paramsMatch;
+};
+
 export const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -148,16 +215,23 @@ export const Navbar = () => {
 		null
 	);
 	const {
-		authState: { isAuthenticated, isLoading },
+		authState: { isAuthenticated, isLoading, user },
 	} = useAuth();
 	const navbarRef = useRef<HTMLDivElement>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
 	const ability = useAbility();
+	const isOnline = useIsOnline();
 
 	const availableDashboards = useMemo(() => {
-		return DASHBOARD_CONFIG.filter(d => ability.can('read', d.subject));
-	}, [ability]);
+		return DASHBOARD_CONFIG.filter(
+			d =>
+				ability.can('read', d.subject) &&
+				// Feature: sin conexión solo el dashboard de monitoreo es utilizable;
+				// el resto de dashboards dependen de peticiones al backend.
+				(isOnline || d.subject === 'dashboard-monitor')
+		);
+	}, [ability, isOnline]);
 
 	const dashboardSections: SectionConfig[] = useMemo(
 		() => availableDashboards.map(d => ({ label: d.label, path: d.path })),
@@ -181,12 +255,17 @@ export const Navbar = () => {
 			.map(mod => ({
 				...mod,
 				sections: mod.sections.filter(s => {
+					if (s.superAdminOnly) return !!user?.isSuperAdmin;
 					if (!s.subject) return true;
 					return ability.can('read', s.subject);
 				}),
 			}))
-			.filter(mod => mod.sections.length > 0);
-	}, [isAuthenticated, ability, modulesWithSections]);
+			.filter(mod => mod.sections.length > 0)
+			// Feature: sin conexión se ocultan los módulos que requieren red
+			// (Administración, Infraestructura, Inventario y demás dashboards);
+			// solo queda disponible el dashboard de monitoreo.
+			.filter(mod => isOnline || mod.id === 'dashboard');
+	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin, isOnline]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -207,26 +286,29 @@ export const Navbar = () => {
 		setOpenDropdownId(null);
 		setIsOpen(false);
 		setMobileExpandedId(null);
-	}, [location.pathname]);
+	}, [location.pathname, location.search]);
 
 	const handleModuleClick = (moduleId: string) => {
+		if (moduleId === 'dashboard') {
+			const mod = visibleModules.find(m => m.id === moduleId);
+			if (mod && mod.sections.length === 1) {
+				navigate(mod.sections[0].path);
+				return;
+			}
+		}
 		setOpenDropdownId(prev => (prev === moduleId ? null : moduleId));
 	};
 
 	const isModuleActive = (moduleId: string): boolean => {
 		const mod = modulesWithSections.find(m => m.id === moduleId);
 		if (!mod) return false;
-		return mod.sections.some(s =>
-			location.pathname.startsWith(s.path.replace(/\/:\w+/g, ''))
+		return mod.sections.some(section =>
+			matchesLocation(section.path, location.pathname, location.search)
 		);
 	};
 
 	const isSectionActive = (path: string): boolean => {
-		const basePath = path.replace(/\/:\w+/g, '');
-		return (
-			location.pathname === path ||
-			location.pathname.startsWith(basePath + '/')
-		);
+		return matchesLocation(path, location.pathname, location.search);
 	};
 
 	if (isLoading) {
@@ -234,7 +316,7 @@ export const Navbar = () => {
 			<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50">
 				<div className="flex items-center gap-2 md:gap-3">
 					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide">
-						SPI UNAH
+						SGOA UNAH
 					</span>
 				</div>
 				<div className="text-white/60 text-xs md:text-sm animate-pulse">
@@ -249,7 +331,7 @@ export const Navbar = () => {
 			<nav className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50">
 				<div className="flex items-center gap-2 md:gap-3">
 					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide">
-						SPI UNAH
+						SGOA UNAH
 					</span>
 				</div>
 				<Link to="/login">
@@ -268,36 +350,47 @@ export const Navbar = () => {
 	return (
 		<nav
 			ref={navbarRef}
-			className="flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
+			className="relative flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
 		>
 			<div>
-				<Link
-					to={'/home'}
-					className="flex items-center gap-2 md:gap-3 group"
-				>
-					<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
-						SPI UNAH
+				{isOnline ? (
+					<Link
+						to={'/home'}
+						className="flex items-center gap-2 md:gap-3 group"
+					>
+						<span className="font-display text-lg md:text-xl text-white/80 hover:text-white tracking-wide hidden lg:block">
+							SGOA UNAH
+						</span>
+					</Link>
+				) : (
+					// Feature: sin conexión el título no navega (iría a /home, que
+					// requiere red); se muestra como texto inerte.
+					<span
+						aria-disabled="true"
+						className="font-display text-lg md:text-xl text-white/50 tracking-wide hidden lg:block cursor-default select-none"
+					>
+						SGOA UNAH
 					</span>
-				</Link>
+				)}
 			</div>
 
 			{visibleModules.length > 0 && (
 				<>
-					<div className="hidden lg:flex items-center gap-1">
+					<div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
 						{visibleModules.map(mod => (
 							<div key={mod.id} className="relative">
 								<button
 									onClick={() => handleModuleClick(mod.id)}
-									className={`
-                    flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                    text-white/80 hover:bg-white/10 hover:text-white`}
+									className={`flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+										${isModuleActive(mod.id) ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
 									disabled={mod.disabled}
 								>
 									<mod.icon className="size-4 lg:size-5" />
 									<span className="hidden lg:inline">
 										{mod.label}
 									</span>
-									{mod.sections.length > 0 && (
+									{mod.sections.length >
+										(mod.id === 'dashboard' ? 1 : 0) && (
 										<ChevronDownIcon
 											className={`size-3.5 transition-transform duration-200 ${openDropdownId === mod.id
 													? 'rotate-180'

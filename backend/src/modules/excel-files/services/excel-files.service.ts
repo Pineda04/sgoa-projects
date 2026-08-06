@@ -2,6 +2,14 @@ import * as XlsxPopulate from 'xlsx-populate';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ExcelResponseDto } from '../dto/excel-response.dto';
 
+const HEADER_FIRST_COLUMN_TOKENS = [
+  '#',
+  'ID',
+  'id',
+  'NoEmpleado',
+  'numeroEmpleado',
+];
+
 @Injectable()
 export class ExcelFilesService<Type extends Record<number, string>, Dto> {
   // para que sea reutilizable
@@ -23,6 +31,44 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
     return file;
   }
 
+  async generateTemplate(
+    headers: string[],
+    rowCount: number = 20,
+  ): Promise<Buffer> {
+    const workbook = await XlsxPopulate.fromBlankAsync();
+    const sheet = workbook.sheet(0);
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1);
+      cell.value(header).style({
+        bold: true,
+        fontColor: 'FFFFFF',
+        fill: { type: 'solid', color: '144C74' },
+        border: { color: '000000', style: 'thin' },
+        verticalAlignment: 'center',
+        horizontalAlignment: 'center',
+        wrapText: true,
+      });
+    });
+
+    // Rango vacío para que el coordinador escriba los datos.
+    const firstDataRow = 2;
+    const lastRow = firstDataRow + rowCount - 1;
+    const lastColumn = headers.length;
+    const emptyRange = sheet.range(firstDataRow, 1, lastRow, lastColumn);
+    emptyRange.style({
+      border: { color: 'BFBFBF', style: 'thin' },
+    });
+
+    for (let column = 1; column <= lastColumn; column++) {
+      sheet.column(column).width(18);
+    }
+
+    return Buffer.from(
+      (await workbook.outputAsync()) as ArrayBuffer | Uint8Array,
+    );
+  }
+
   async processFile(
     properties: Type,
     buffer: Buffer,
@@ -33,15 +79,13 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      const title: string = sheet.cell('A1').value()?.toString() || '';
-      const subtitle: string = sheet.cell('A2').value()?.toString() || '';
-
-      const headers = this.getHeaders(sheet);
-      const records = this.getData(sheet, headers);
+      this.validateTemplate(sheet);
+      const headers = this.getHeaders(sheet, 1);
+      const records = this.getData(sheet, headers, 2);
 
       return {
-        title,
-        subtitle,
+        title: '',
+        subtitle: '',
         totalRecords: records.length,
         data: records,
       };
@@ -52,20 +96,35 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
     }
   }
 
-  private getHeaders(sheet: XlsxPopulate.Sheet): string[] {
+  private validateTemplate(sheet: XlsxPopulate.Sheet): void {
+    const firstRowFirstCell = sheet.cell(1, 1).value()?.toString().trim() ?? '';
+
+    if (!HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
+      throw new BadRequestException(
+        'El archivo no corresponde a la plantilla de asignación vigente.',
+      );
+    }
+  }
+
+  private getHeaders(sheet: XlsxPopulate.Sheet, headerRow: number): string[] {
     const headers: string[] = [];
 
-    for (let column = 1; column <= 14; column++) {
-      const cellValue = sheet.cell(4, column).value()?.toString().trim() || '';
+    for (let column = 1; column <= 15; column++) {
+      const cellValue =
+        sheet.cell(headerRow, column).value()?.toString().trim() || '';
       headers.push(cellValue);
     }
 
     return headers;
   }
 
-  private getData(sheet: XlsxPopulate.Sheet, headers: string[]): Dto[] {
+  private getData(
+    sheet: XlsxPopulate.Sheet,
+    headers: string[],
+    firstDataRow: number,
+  ): Dto[] {
     const records: Dto[] = [];
-    let row = 5;
+    let row = firstDataRow;
 
     while (true) {
       const firstCell = sheet.cell(row, 1).value();
@@ -75,7 +134,7 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       const rowData: Partial<Dto> = {};
       let hasData = false;
 
-      for (let column = 1; column <= 14; column++) {
+      for (let column = 1; column <= 15; column++) {
         const rawValue = sheet.cell(row, column).value();
         const value =
           typeof rawValue === 'string'
@@ -123,26 +182,36 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
     value: string,
     columnIndex: number,
     rawValue?: string | number | boolean | Date | null,
-  ): string | number | null {
-    //seccion
-    if (columnIndex === 5) {
+  ): string | number | boolean | null {
+    // seccion
+    if (columnIndex === 6) {
       return this.parseTimeValue(value, rawValue);
     }
 
     // Una matrícula vacía es desconocida; cualquier valor no entero se conserva
     // para que la validación de asignación académica pueda rechazarlo.
-    if (columnIndex === 8) {
+    if (columnIndex === 7) {
       if (value === '') return null;
 
       return /^-?\d+$/.test(value) ? Number(value) : value;
     }
 
-    // id, uv, días, numero de aula
-    const numericColumns = [0, 6, 7, 9];
+    // estudiantes por graduarse
+    if (columnIndex === 13) {
+      return this.parseNearGraduation(value);
+    }
+
+    // id, uv
+    const numericColumns = [0, 5];
     const number = parseInt(value);
     return numericColumns.includes(columnIndex) && !isNaN(number)
       ? number
       : value;
+  }
+
+  private parseNearGraduation(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return ['sí', 'si', 's', 'yes', 'y', 'true', '1'].includes(normalized);
   }
 
   private parseTimeValue(

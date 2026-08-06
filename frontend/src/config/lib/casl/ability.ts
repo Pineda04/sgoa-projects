@@ -1,5 +1,4 @@
 import { Ability, AbilityBuilder } from '@casl/ability';
-import { EUserRole } from '@shared/constants';
 import { createContext, useContext } from 'react';
 
 export const AbilityContext = createContext<AppAbility>(new Ability());
@@ -11,7 +10,20 @@ export const useAbility = () => {
 	return context;
 };
 
-export type Actions = 'manage' | 'read' | 'create' | 'update' | 'delete';
+export type AssignableActions =
+	| 'manage'
+	| 'read'
+	| 'create'
+	| 'update'
+	| 'delete';
+
+/**
+ * `lookup` no es asignable: el backend la deriva al emitir el JWT para los
+ * módulos de los que un rol depende (ej. quien gestiona Departamentos recibe
+ * `lookup:faculties` para poder llenar el selector de facultades). Solo habilita
+ * los listados de catálogo — nunca el menú, la ruta ni el CRUD del módulo.
+ */
+export type Actions = AssignableActions | 'lookup';
 export type Subjects =
 	| 'all'
 	| 'dashboard-authorities'
@@ -19,11 +31,17 @@ export type Subjects =
 	| 'dashboard-teacher'
 	| 'dashboard-monitor'
 	| 'analytics'
+	| 'analytics-academic-load'
+	| 'analytics-enrollment'
+	| 'analytics-classrooms'
+	| 'analytics-staff'
+	| 'analytics-technology'
+	| 'analytics-activities'
+	| 'analytics-monitoring'
+	| 'dashboard-tab-classrooms'
 	| 'users'
-	| 'user-roles'
 	| 'user-departments'
 	| 'user-status'
-	| 'monitor-building-assignments'
 	| 'activities'
 	| 'buildings'
 	| 'centers'
@@ -40,8 +58,7 @@ export type Subjects =
 	| 'air-conditioners'
 	| 'digital-blackboards'
 	| 'schedule-compliance-check'
-  | 'reports-monitor'
-	| 'catalog'
+	| 'reports-monitor'
 	| 'teacher-categories'
 	| 'contract-types'
 	| 'shifts'
@@ -59,131 +76,97 @@ export type Subjects =
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
-export function defineAbilityFor(roles: string[]): AppAbility {
+const actions: readonly string[] = [
+	'manage',
+	'read',
+	'create',
+	'update',
+	'delete',
+	'lookup',
+];
+
+const subjects: readonly string[] = [
+	'all',
+	'dashboard-authorities',
+	'dashboard-coordinator',
+	'dashboard-teacher',
+	'dashboard-monitor',
+	'analytics',
+	'analytics-academic-load',
+	'analytics-enrollment',
+	'analytics-classrooms',
+	'analytics-staff',
+	'analytics-technology',
+	'analytics-activities',
+	'analytics-monitoring',
+	'dashboard-tab-classrooms',
+	'users',
+	'user-departments',
+	'user-status',
+	'activities',
+	'buildings',
+	'centers',
+	'classrooms',
+	'courses',
+	'degrees',
+	'departments',
+	'faculties',
+	'periods',
+	'positions',
+	'planifications',
+	'reports',
+	'pc-equipments',
+	'air-conditioners',
+	'digital-blackboards',
+	'schedule-compliance-check',
+	'reports-monitor',
+	'teacher-categories',
+	'contract-types',
+	'shifts',
+	'brands',
+	'conditions',
+	'connectivities',
+	'room-types',
+	'pc-types',
+	'audio-equipments',
+	'monitor-types',
+	'monitor-sizes',
+	'home',
+	'help',
+	'profile',
+];
+
+const isAction = (value?: string): value is Actions =>
+	value !== undefined && actions.includes(value);
+
+const isSubject = (value?: string): value is Subjects =>
+	value !== undefined && subjects.includes(value);
+
+// Permisos ya no se hardcodean por nombre de rol: el backend resuelve, por cada
+// usuario, el set de permisos "action:subject" (o el flag isSuperAdmin) y los
+// entrega en el JWT. Este catálogo de Subjects/Actions se mantiene cerrado y
+// debe sincronizarse manualmente con backend/src/common/constants/permissions.constant.ts.
+export function defineAbilityFor(
+	permissions: string[],
+	isSuperAdmin: boolean
+): AppAbility {
 	const { can, cannot, build } = new AbilityBuilder<AppAbility>(Ability);
 
-	if (!roles || roles.length === 0) {
+	if (isSuperAdmin) {
+		can('manage', 'all');
+		return build();
+	}
+
+	if (permissions.length === 0) {
 		cannot('manage', 'all');
 		return build();
 	}
 
-	if (roles.includes(EUserRole.ADMIN)) {
-		can('manage', 'all');
-		cannot('read', 'dashboard-coordinator');
-		cannot('read', 'dashboard-teacher');
-		cannot('read', 'dashboard-monitor');
-		return build();
-	}
-
-	// ================== DIRECCION ==================
-	if (roles.includes(EUserRole.DIRECCION)) {
-    can('manage', 'dashboard-authorities');
-		can('read', 'analytics');
-
-    // Usuarios
-		can('read', 'users');
-
-    // Modulos/Secciones
-		can('manage', 'courses');
-		can('manage', 'departments');
-		can('manage', 'pc-equipments');
-		can('manage', 'centers');
-		can('manage', 'buildings');
-		can('manage', 'classrooms');
-		can('manage', 'degrees');
-		can('manage', 'faculties');
-		can('manage', 'positions');
-		can('manage', 'air-conditioners');
-		can('manage', 'digital-blackboards');
-    can('manage', 'periods');
-		can('read', 'reports');
-		can('read', 'planifications');
-
-    // Catalogo
-		can('manage', 'catalog');
-		can('manage', 'teacher-categories');
-		can('manage', 'contract-types');
-		can('manage', 'shifts');
-		can('manage', 'brands');
-		can('manage', 'conditions');
-		can('manage', 'connectivities');
-		can('manage', 'room-types');
-		can('manage', 'pc-types');
-		can('manage', 'audio-equipments');
-		can('manage', 'monitor-types');
-		can('manage', 'monitor-sizes');
-	}
-
-	// ==================== RRHH ====================
-	if (roles.includes(EUserRole.RRHH)) {
-		can('manage', 'dashboard-authorities');
-		can('read', 'analytics');
-
-		// Usuarios
-		can('read', 'users');
-		can('create', 'users');
-		can('manage', 'user-roles');
-		can('manage', 'user-departments');
-
-    // Modulos/Secciones
-		can('manage', 'courses');
-		can('manage', 'departments');
-		can('manage', 'buildings');
-		can('manage', 'classrooms');
-		can('manage', 'degrees');
-		can('manage', 'faculties');
-		can('manage', 'positions');
-    can('manage', 'periods');
-		can('read', 'reports');
-		can('read', 'planifications');
-
-		// Catalogo
-		can('manage', 'catalog');
-		can('manage', 'teacher-categories');
-		can('manage', 'contract-types');
-		can('manage', 'shifts');
-    can('manage', 'connectivities');
-    can('manage', 'room-types');
-	}
-
-	// ============== COORDINADOR_AREA ==============
-	if (roles.includes(EUserRole.COORDINADOR_AREA)) {
-		can('manage', 'dashboard-coordinator');
-		can('read', 'analytics');
-
-		// Usuarios
-		can('read', 'users');
-		can('create', 'users');
-
-    // Modulos/Secciones
-		can('manage', 'reports');
-		can('manage', 'planifications');
-		can('read', 'courses');
-		can('read', 'classrooms');
-	}
-
-	// =================== DOCENTE ==================
-	if (roles.includes(EUserRole.DOCENTE)) {
-		can('manage', 'dashboard-teacher');
-		can('read', 'analytics');
-
-		// Modulos/Secciones
-    can('read', 'courses');
-		can('read', 'reports');
-		can('read', 'planifications');
-		can('read', 'classrooms');
-	}
-
-	// =================== MONITOR ==================
-	if (roles.includes(EUserRole.MONITOR)) {
-		can('manage', 'dashboard-monitor');
-		can('read', 'analytics');
-
-		// Modulos/Secciones
-    can('manage', 'schedule-compliance-check');
-		can('read', 'classrooms');
-		can('read', 'buildings');
-		can('read', 'reports-monitor');
+	for (const entry of permissions) {
+		const [action, subject, extra] = entry.split(':');
+		if (extra === undefined && isAction(action) && isSubject(subject)) {
+			can(action, subject);
+		}
 	}
 
 	return build();

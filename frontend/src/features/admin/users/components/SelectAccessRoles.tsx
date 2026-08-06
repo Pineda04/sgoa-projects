@@ -1,17 +1,17 @@
 import Select, { StylesConfig } from 'react-select';
 import { useState } from 'react';
-import { EUserRole } from '@shared/constants';
+import { useAuth } from '@config/providers';
 import { ICreateUserProps } from '@api/users';
 import { useGetAllPositions } from '@api/positions';
 import { useGetAllCenters, useGetCenterById } from '@api/centers';
+import { useGetAllRoles } from '@api/roles';
 import { Error, Loading } from '@shared/components';
 import { setOptions } from '@shared/utils';
 import { TAcademicCommonProps } from '@api/periods';
-import { useAuth } from '@config';
 
 type TRoleOption = {
-	value: EUserRole;
-	label: EUserRole;
+	value: string;
+	label: string;
 };
 
 const customStyles: StylesConfig<TRoleOption, true> = {
@@ -86,15 +86,16 @@ export const SelectAccessRoles = ({
 	handleBlur,
 }: ICreateUserProps) => {
 	const { authState } = useAuth();
-	const allowedRoles = authState.user?.roles.includes(EUserRole.ADMIN)
-		? Object.values(EUserRole)
-		: [EUserRole.COORDINADOR_AREA, EUserRole.DOCENTE];
-	const roleOptions = allowedRoles.map(role => ({ value: role, label: role }));
 	const positions = useGetAllPositions();
 	const centers = useGetAllCenters();
+	const roles = useGetAllRoles();
 	const [centerId, setCenterId] = useState<string>('');
 	const centerInfo = useGetCenterById(centerId);
 	const isLoading = [positions, centers, centerInfo].some(q => q.isLoading);
+
+	const rolesAvailables = (roles.data ?? [])
+		.filter(role => !role.isSuperAdmin || authState.user?.isSuperAdmin)
+		.map(role => ({ value: role.name, label: role.name }));
 
 	return (
 		<>
@@ -211,11 +212,11 @@ export const SelectAccessRoles = ({
 				</label>
 				<Select<TRoleOption, true>
 					name="roles"
-					options={roleOptions}
+					options={rolesAvailables}
 					isMulti
 					isSearchable={false}
 					styles={customStyles}
-					placeholder="Seleccione..."
+					placeholder="Seleccione"
 					onChange={valuesSelected => {
 						const roles = valuesSelected.map(role => role.value);
 

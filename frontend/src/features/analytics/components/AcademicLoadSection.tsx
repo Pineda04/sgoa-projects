@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import type { IResponsiveColumn } from '@shared/components';
+import { Info } from 'lucide-react';
+import { Popover } from 'radix-ui';
+import type { IDataTableColumn } from '@shared/components';
 import {
 	Button,
 	PaginationControls,
-	ResponsiveTable,
-	Skeleton,
+	DataTable,
 } from '@shared/components';
 import { downloadBlob, ESwalIcons, genericAlert } from '@shared/utils';
 import {
@@ -19,6 +19,8 @@ import {
 	type AcademicLoadSummary,
 } from '@api/analytics';
 import { useAnalyticsFilters } from '../hooks';
+import { AnalyticsSummarySkeleton } from './AnalyticsSkeletons';
+import { AnalyticsExportButton } from './AnalyticsExportButton';
 import { MetricCard } from './MetricCard';
 
 const METRICS: { key: AcademicLoadMetricKey; label: string }[] = [
@@ -33,7 +35,7 @@ const METRICS: { key: AcademicLoadMetricKey; label: string }[] = [
 	{ key: 'averageUvsPerTeacher', label: 'Promedio UV / docente' },
 ];
 
-const COLUMNS: IResponsiveColumn<AcademicLoadDetailRow>[] = [
+const COLUMNS: IDataTableColumn<AcademicLoadDetailRow>[] = [
 	{ key: 'name', header: 'Docente' },
 	{ key: 'code', header: 'Código' },
 	{ key: 'sectionCount', header: 'Secciones' },
@@ -73,6 +75,12 @@ const COVERAGE_REASON_LABELS = {
 	invalid_schedule_section: 'Secciones con un rango horario inválido',
 };
 
+const meetingCountLabel = (count: number) =>
+	`${count} ${count === 1 ? 'reunión' : 'reuniones'}`;
+
+const sectionCountLabel = (count: number) =>
+	`${count} ${count === 1 ? 'sección' : 'secciones'}`;
+
 const ScheduleDistribution = ({
 	distribution,
 }: {
@@ -83,11 +91,22 @@ const ScheduleDistribution = ({
 		0
 	);
 	const statusLabel =
-		distribution.dataStatus === 'complete'
-			? 'Completa'
+		distribution.coverage.total === 0
+			? 'No aplica'
+			: distribution.dataStatus === 'complete'
+				? 'Sin incidencias'
 			: distribution.dataStatus === 'partial'
-				? 'Parcial'
+				? 'Con exclusiones'
 				: 'No disponible';
+	const statusDescription =
+		distribution.coverage.total === 0
+			? 'No hay secciones con los filtros seleccionados, por eso el estado de horarios no aplica.'
+			: distribution.dataStatus === 'complete'
+				? `${distribution.coverage.total === 1 ? 'Se evaluó' : 'Se evaluaron'} ${sectionCountLabel(distribution.coverage.total)} y ${distribution.coverage.total === 1 ? 'tiene' : 'todas tienen'} días y rangos horarios válidos.`
+				: `${sectionCountLabel(distribution.coverage.included)} de ${sectionCountLabel(distribution.coverage.total)} ${distribution.coverage.included === 1 ? 'tiene' : 'tienen'} horarios válidos. ${distribution.coverage.excluded === 1 ? 'Se excluyó' : 'Se excluyeron'} ${sectionCountLabel(distribution.coverage.excluded)}.`;
+	const exclusionReasons = distribution.coverage.reasons
+		.map(reason => COVERAGE_REASON_LABELS[reason])
+		.join(', ');
 
 	return (
 		<section className="mt-8 rounded-xl border border-card-border bg-card p-4 sm:p-5" aria-labelledby="schedule-distribution-title">
@@ -101,12 +120,32 @@ const ScheduleDistribution = ({
 					</p>
 				</div>
 				<p className="w-fit rounded-full bg-primary-light px-3 py-1.5 text-sm font-semibold text-primary">
-					{meetingCount} reunión{meetingCount === 1 ? '' : 'es'}
+					{meetingCountLabel(meetingCount)}
 				</p>
 			</div>
 
 			<dl className="mt-4 grid gap-2 rounded-lg bg-muted p-3 text-sm sm:grid-cols-4">
-				<div><dt className="text-xs text-muted-foreground">Calidad</dt><dd className="font-semibold">{statusLabel}</dd></div>
+				<div>
+					<dt className="flex items-center gap-1 text-xs text-muted-foreground">
+						Estado de horarios
+						<Popover.Root>
+							<Popover.Trigger asChild>
+								<button type="button" aria-label="Explicación del estado de horarios" className="flex size-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+									<Info className="size-3" />
+								</button>
+							</Popover.Trigger>
+							<Popover.Portal>
+								<Popover.Content sideOffset={6} align="start" collisionPadding={12} className="z-50 w-72 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg outline-none">
+									<p className="text-sm font-semibold">{statusLabel}</p>
+									<p className="mt-1 text-xs leading-relaxed text-muted-foreground">{statusDescription}</p>
+									{exclusionReasons ? <p className="mt-2 text-xs font-medium">Motivo: {exclusionReasons}.</p> : null}
+									<Popover.Arrow className="fill-card" />
+								</Popover.Content>
+							</Popover.Portal>
+						</Popover.Root>
+					</dt>
+					<dd className="font-semibold">{statusLabel}</dd>
+				</div>
 				<div><dt className="text-xs text-muted-foreground">Secciones incluidas</dt><dd className="font-semibold">{distribution.coverage.included}</dd></div>
 				<div><dt className="text-xs text-muted-foreground">Secciones evaluadas</dt><dd className="font-semibold">{distribution.coverage.total}</dd></div>
 				<div><dt className="text-xs text-muted-foreground">Secciones excluidas</dt><dd className="font-semibold">{distribution.coverage.excluded}</dd></div>
@@ -118,7 +157,7 @@ const ScheduleDistribution = ({
 						<li key={`${item.dayOfWeek}-${item.startTime}-${item.endTime}`} className="min-w-0 rounded-lg border border-border p-3">
 							<p className="font-semibold text-foreground">{DAY_LABELS[item.dayOfWeek]}</p>
 							<p className="text-sm text-muted-foreground">{item.startTime} a {item.endTime}</p>
-							<p className="mt-2 text-sm font-semibold text-primary">{item.meetingCount} reunión{item.meetingCount === 1 ? '' : 'es'}</p>
+							<p className="mt-2 text-sm font-semibold text-primary">{meetingCountLabel(item.meetingCount)}</p>
 						</li>
 					))}
 				</ul>
@@ -229,11 +268,7 @@ export const AcademicLoadSection = () => {
 					No fue posible cargar los indicadores de carga académica.
 				</div>
 			) : summary.isPending ? (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{METRICS.map(metric => (
-						<Skeleton key={metric.key} className="h-32 rounded-xl" />
-					))}
-				</div>
+				<AnalyticsSummarySkeleton count={METRICS.length} showDistribution />
 			) : (
 				<>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -261,9 +296,9 @@ export const AcademicLoadSection = () => {
 								: 'Detalle paginado'}
 						</p>
 					</div>
-					<div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-						<label className="text-sm font-semibold text-foreground">
-							<span className="mb-1 block">Ordenar por</span>
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+						<label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+							<span className="shrink-0">Ordenar por:</span>
 							<select
 								value={loadSort}
 								onChange={event => handleSortChange(event.target.value)}
@@ -277,12 +312,7 @@ export const AcademicLoadSection = () => {
 							</select>
 						</label>
 						{options?.capabilities.canExport ? (
-							<Button onClick={handleExport} disabled={isExporting}>
-								{isExporting ? (
-									<Loader2 className="size-4 animate-spin" aria-hidden="true" />
-								) : null}
-								{isExporting ? 'Exportando…' : 'Exportar Excel'}
-							</Button>
+							<AnalyticsExportButton onClick={handleExport} isExporting={isExporting} />
 						) : null}
 					</div>
 				</div>
@@ -306,7 +336,7 @@ export const AcademicLoadSection = () => {
 					</div>
 				) : (
 					<>
-						<ResponsiveTable<AcademicLoadDetailRow>
+						<DataTable<AcademicLoadDetailRow>
 							columns={COLUMNS}
 							data={details.data?.rows ?? []}
 							getRowKey={row => row.teacherId}

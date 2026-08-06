@@ -1,4 +1,4 @@
-import { RotateCcw } from 'lucide-react';
+import { ChevronDown, RotateCcw } from 'lucide-react';
 import { Button, SkeletonInput } from '@shared/components';
 import type { AnalyticsFilterMode } from '@api/analytics';
 import {
@@ -44,7 +44,7 @@ const FilterField = ({
 					value={value ?? ''}
 					onChange={event => onChange(event.target.value)}
 					disabled={disabled}
-					className="min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 font-normal text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+					className="min-h-11 w-full cursor-pointer rounded-md border border-input bg-gray-100 px-3 py-2 font-normal text-foreground shadow-md outline-none transition-colors focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					<option value="">{placeholder}</option>
 					{options.map(option => (
@@ -116,20 +116,23 @@ export const AnalyticsFilters = ({
 	)?.id;
 
 	return (
-		<div>
-			<div className="mb-4 flex items-center justify-between gap-3">
+		<details className="group">
+			<summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
 				<div>
 					<h2 className="text-lg font-semibold text-card-foreground">Filtros</h2>
 					<p className="text-xs text-muted-foreground">
 						Las opciones reflejan el alcance autorizado de esta sección.
 					</p>
 				</div>
+				<ChevronDown className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+			</summary>
+			<div className="mt-4 flex justify-end">
 				<Button variant="ghost" size="sm" onClick={resetFilters}>
 					<RotateCcw className="size-4" />
 					Restablecer
 				</Button>
 			</div>
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{domain === 'activities' ? (
 					<FilterField
 						label="Modo temporal"
@@ -267,6 +270,6 @@ export const AnalyticsFilters = ({
 					No fue posible actualizar las opciones del centro seleccionado.
 				</p>
 			) : null}
-		</div>
+		</details>
 	);
 };

@@ -72,7 +72,15 @@ export const MonitorBuildingAssignments = () => {
 	const buildings = useGetAllBuildings();
 	const assignments = useMonitorBuildingAssignments(monitorId);
 	const monitors = (users.data ?? []).filter(user =>
-		user.userRoles.some(({ role }) => role.name === 'MONITOR')
+		user.userRoles.some(
+			({ role }) =>
+				role.isSuperAdmin ||
+				role.rolePermissions.some(
+					({ permission }) =>
+						permission.subject === 'schedule-compliance-check' &&
+						(permission.action === 'manage' || permission.action === 'create')
+				)
+		)
 	);
 
 	return (

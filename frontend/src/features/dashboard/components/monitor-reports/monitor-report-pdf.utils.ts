@@ -56,6 +56,7 @@ export async function exportMonitorReportPdf({
 			row.edificio,
 			row.docente,
 			row.estado,
+			row.pizarra,
 			row.observaciones,
 		]),
 		styles: { fontSize: 9, font: jsPdfFont },
@@ -64,12 +65,10 @@ export async function exportMonitorReportPdf({
 		margin: { left: 40, right: 40 },
 	});
 
-	const lastTable = (doc as unknown as { lastAutoTable?: { finalY: number } })
-		.lastAutoTable;
-	const summaryStartY = (lastTable?.finalY ?? 75) + 20;
+	doc.addPage();
 
 	autoTable(doc, {
-		startY: summaryStartY,
+		startY: 40,
 		head: [['Resumen', '']],
 		body: [
 			['Total chequeos', String(summary.totalChecks)],

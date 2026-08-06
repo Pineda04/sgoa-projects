@@ -6,7 +6,14 @@ import { useUser } from '@config/providers';
 import { useGetAcademicAssignmentReportById } from '@api/assignment-reports';
 import { useGetTeacherPosition } from '@api/teachers';
 import { useTabWithReset } from '@shared/hooks';
-import { Button, Loading, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import {
+	Button,
+	Loading,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
 import { EActivityType } from '@shared/constants';
 import {
@@ -19,6 +26,7 @@ import {
 	exportReportActivities,
 	handleActivities,
 } from '../utils';
+import { ArrowLeftIcon } from 'lucide-react';
 
 export const AcademicAssignmentReport = () => {
 	const { id } = useParams();
@@ -102,25 +110,24 @@ export const AcademicAssignmentReport = () => {
 					{assignmentReportInfo.data &&
 						`No. ${assignmentReportInfo.data.period.pac}, ${assignmentReportInfo.data.period.pac_modality}, ${assignmentReportInfo.data.period.year}`}
 				</h1>
-				<div className="flex flex-col items-center sm:flex-row gap-2">
-					<PdfFontSelector onChange={handleFontChange} />
-					<Button
-						type="submit"
-						onClick={generateReport}
-						className="justify-center bg-[#C40C54] text-white hover:bg-pink-500 transition flex flex-row gap-2 duration-500 cursor-pointer"
-						variant="unstyled"
-					>
-						<DocumentArrowDownIcon className="size-6" />
-						Descargar informe
-					</Button>
-				</div>
+			</div>
+			<div className="flex flex-col items-center sm:flex-row gap-2 mt-4">
+				<Button onClick={() => navigate(-1)} variant="outline" className='bg-white hover:bg-white/50'>
+          <ArrowLeftIcon className="size-5" />
+				</Button>
+				<Button
+					type="submit"
+					onClick={generateReport}
+					className="justify-center bg-[#C40C54] text-white hover:bg-pink-500 transition flex flex-row gap-2 duration-500 cursor-pointer"
+					variant="unstyled"
+				>
+					<DocumentArrowDownIcon className="size-6" />
+					Descargar informe
+				</Button>
+				<PdfFontSelector onChange={handleFontChange} />
 			</div>
 
-			<Tabs
-				value={currentTab}
-				onValueChange={setTab}
-				className="mt-5"
-			>
+			<Tabs value={currentTab} onValueChange={setTab} className="mt-5">
 				<TabsList variant="pills">
 					<TabsTrigger value="0">Docencia</TabsTrigger>
 					<TabsTrigger value="1">
@@ -143,7 +150,7 @@ export const AcademicAssignmentReport = () => {
 					</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="0" className='bg-white'>
+				<TabsContent value="0" className="bg-white">
 					<TeachingSession
 						reportId={id ?? ''}
 						data={assignmentReportInfo.data?.teachingSession}
@@ -151,7 +158,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="1" className='bg-white'>
+				<TabsContent value="1" className="bg-white">
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.Research}
@@ -163,7 +170,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="2" className='bg-white'>
+				<TabsContent value="2" className="bg-white">
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.Outreach}
@@ -175,7 +182,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="3" className='bg-white'>
+				<TabsContent value="3" className="bg-white">
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.EducationalInnovation}
@@ -187,7 +194,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="4" className='bg-white'>
+				<TabsContent value="4" className="bg-white">
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.CurriculumDesignOrRedesign}
@@ -199,7 +206,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="5" className='bg-white'>
+				<TabsContent value="5" className="bg-white">
 					<AcademicPositionTeacher
 						positionTeacher={
 							(teacherPositionInfo.data &&
@@ -209,7 +216,7 @@ export const AcademicAssignmentReport = () => {
 					/>
 				</TabsContent>
 
-				<TabsContent value="6" className='bg-white'>
+				<TabsContent value="6" className="bg-white">
 					<TableActivities
 						reportId={id ?? ''}
 						activityType={EActivityType.OtherActivities}

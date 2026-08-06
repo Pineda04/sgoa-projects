@@ -1,3 +1,5 @@
+name: sgoa-projects
+
 services:
   postgres:
     image: postgres:17.5-alpine3.22
@@ -14,22 +16,8 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:9.4
-    container_name: sgoa_pgadmin
-    restart: always
-    env_file: .env
-    entrypoint: ["bash", "/pgadmin4-entrypoint.sh"]
-    volumes:
-      - local_pgadmin_data:/var/lib/pgadmin
-      - ./compose/pgadmin/entrypoint.sh:/pgadmin4-entrypoint.sh
-    ports:
-      - '5434:80'
-    depends_on:
-      - postgres
-
   backend:
-    container_name: spi_backend
+    container_name: sgoa_backend
     restart: always
     build:
       context: .
@@ -52,12 +40,12 @@ services:
     build:
       context: ./compose/nginx
       dockerfile: Dockerfile
-    container_name: spi_nginx
+    container_name: sgoa_nginx
     restart: always
     ports:
       - '${PORT:-3000}:443'
     # volumes:
-    #   - ./compose/nginx/nginx_config.conf:/etc/nginx/conf.d/spi_backend.conf:ro
+    #   - ./compose/nginx/nginx_config.conf:/etc/nginx/conf.d/sgoa_backend.conf:ro
     # volumes:
     # - ./certs:/etc/nginx/certs:ro
     # - ./compose/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -66,4 +54,3 @@ services:
 
 volumes:
   local_postgres_data:
-  local_pgadmin_data:

@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { EClassModality } from 'src/modules/course-classrooms/enums/modality.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EnrollmentAnalyticsService } from '../enrollment-analytics.service';
 import { AnalyticsScopeService } from '../analytics-scope.service';
@@ -12,11 +13,13 @@ const section = (
     courseCode?: string;
     teacherName?: string;
     classroomName?: string;
+    modalityName?: string;
   } = {},
 ) => ({
   id,
   groupCode: `G-${id}`,
   studentCount,
+  modality: { name: options.modalityName ?? EClassModality.PRESENTIAL },
   course: {
     code: options.courseCode ?? `C-${id}`,
     name: `Course ${id}`,
@@ -162,6 +165,46 @@ describe('EnrollmentAnalyticsService', () => {
     );
     expect(result.metrics.occupancyRate.value).toBe(75);
     expect(result.metrics.availablePhysicalSeats.value).toBe(5);
+  });
+
+  it('includes virtual sections in enrollment but excludes them from capacity metrics', async () => {
+    prisma.courseClassroom.findMany.mockResolvedValue([
+      section('physical', 10, 20),
+      section('virtual', 100, 1, {
+        modalityName: EClassModality.VIRTUAL_SPACE,
+      }),
+    ]);
+
+    const result = await service.getSummary('user-1', {
+      periodId: 'period-1',
+    });
+
+    expect(result.metrics.reportedEnrollments).toEqual(
+      expect.objectContaining({
+        value: 110,
+        coverage: {
+          included: 2,
+          total: 2,
+          excluded: 0,
+          reasons: [],
+        },
+      }),
+    );
+    expect(result.metrics.averageEnrollmentPerSection.value).toBe(55);
+    expect(result.metrics.enrollmentDataCoverage.value).toBe(100);
+    expect(result.metrics.sectionsOverCapacity).toEqual(
+      expect.objectContaining({
+        value: 0,
+        coverage: {
+          included: 1,
+          total: 1,
+          excluded: 0,
+          reasons: [],
+        },
+      }),
+    );
+    expect(result.metrics.availablePhysicalSeats.value).toBe(10);
+    expect(result.metrics.occupancyRate.value).toBe(50);
   });
 
   it('returns the specified zero and not-applicable semantics with no sections', async () => {
@@ -318,6 +361,30 @@ describe('EnrollmentAnalyticsService', () => {
         overCapacity: null,
       }),
     );
+  });
+
+  it('keeps virtual enrollment details but omits capacity-derived values', async () => {
+    prisma.courseClassroom.findMany.mockResolvedValue([
+      section('virtual', 100, 1, {
+        modalityName: EClassModality.VIRTUAL_SPACE,
+      }),
+    ]);
+
+    const result = await service.getDetails('user-1', {
+      metric: 'enrollment_capacity',
+      periodId: 'period-1',
+    });
+
+    expect(result.rows).toEqual([
+      expect.objectContaining({
+        sectionId: 'virtual',
+        studentCount: 100,
+        maxCapacity: 1,
+        occupancyRate: null,
+        availableSeats: null,
+        overCapacity: null,
+      }),
+    ]);
   });
 
   it('sorts stably and paginates details after deduplication', async () => {
