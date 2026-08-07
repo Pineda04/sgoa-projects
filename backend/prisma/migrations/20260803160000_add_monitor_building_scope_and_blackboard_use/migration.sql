@@ -36,23 +36,6 @@ BEGIN
     END IF;
 END $$;
 
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM "academic"."schedule_compliance_checks"
-        GROUP BY "courseClassroomId", "checkDate"
-        HAVING COUNT(*) > 1
-    ) THEN
-        RAISE EXCEPTION 'Multiple checks for one course section and date require manual remediation before this migration can continue.';
-    END IF;
-END $$;
-
-DROP INDEX "academic"."schedule_compliance_checks_courseClassroomId_checkDate_chec_key";
-
-CREATE UNIQUE INDEX "schedule_compliance_checks_courseClassroomId_checkDate_key"
-ON "academic"."schedule_compliance_checks"("courseClassroomId", "checkDate");
-
 CREATE UNIQUE INDEX "schedule_compliance_checks_monitorId_offlineId_key"
 ON "academic"."schedule_compliance_checks"("monitorId", "offlineId");
 
