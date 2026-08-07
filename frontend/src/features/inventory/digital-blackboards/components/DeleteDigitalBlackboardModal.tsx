@@ -12,18 +12,13 @@ export const DeleteDigitalBlackboardModal = ({
 	isOpen,
 	onClose,
 	onConfirm,
-	description,
 	isPending = false,
 }: DeleteDigitalBlackboardModalProps) => {
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-4">
 				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
-					¿Está seguro que desea eliminar la pizarra digital{' '}
-					<span className="font-medium text-gray-800">
-						&lt;{description || 'sin descripción'}&gt;
-					</span>
-					?
+					¿Está seguro que desea eliminar esta pizarra digital?
 				</p>
 
 				<div className="flex flex-row justify-center items-center gap-4 mt-6">

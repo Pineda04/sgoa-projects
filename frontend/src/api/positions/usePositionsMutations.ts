@@ -80,7 +80,6 @@ export const useDeletePositionMutation = (positionId: string) => {
 					},
 				});
 			}
-
 			return { previous };
 		},
 		onError: (_err, _id, context) => {

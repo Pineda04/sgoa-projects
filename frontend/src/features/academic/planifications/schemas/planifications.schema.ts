@@ -55,7 +55,7 @@ export const planificationSchema = z
 				message:
 					'Las observaciones no pueden superar los 250 caracteres.',
 			})
-			.optional(),
+			.nullish(),
 	})
 	.superRefine((data, ctx) => {
 		if (data.uv > 10) {

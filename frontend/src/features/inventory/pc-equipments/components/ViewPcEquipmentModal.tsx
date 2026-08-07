@@ -21,9 +21,15 @@ const DetailField = ({
 	label: string;
 	value?: string | null;
 }) => (
-	<div className="space-y-1">
-		<p className="text-sm font-medium text-foreground">{label}</p>
-		<p className="text-sm text-gray-800">{value || '—'}</p>
+	<div className="space-y-2">
+		<label className="text-sm font-medium text-foreground">{label}</label>
+		<input
+			type="text"
+			value={value || '—'}
+			disabled
+			readOnly
+			className="w-full h-10 px-3 bg-muted border border-border rounded-lg text-sm text-muted-foreground"
+		/>
 	</div>
 );
 
@@ -63,12 +69,19 @@ export const ViewPcEquipmentModal = ({
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
 			<div className="p-2">
-				<h1 className="text-xl font-bold mb-1">Detalle del Equipo</h1>
-				<p className="text-sm text-gray-500 mb-3">
-					{pcEquipment.inventoryNumber}
-				</p>
+				<div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mr-7 mb-1">
+					<div className="min-w-0">
+						<h1 className="text-xl font-bold text-slate-800 truncate">
+							Detalle del Equipo
+						</h1>
+						<p className="text-xs text-gray-500 truncate">
+							{pcEquipment.inventoryNumber}
+						</p>
+					</div>
+				</div>
+				<hr className="h-px my-3 bg-gray-100 border-0" />
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<DetailField
 						label="Número de inventario"
 						value={pcEquipment.inventoryNumber}

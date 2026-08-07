@@ -50,16 +50,30 @@ const ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS = [
   'Nombre',
   'Código',
   'Asignatura',
-  'UV',
   'Sección',
-  'No. Alumnos',
+  'UV',
   'Días',
-  'Centro / Telecentro',
+  'No. Alumnos de la sección',
   'N° de Aula',
-  'Carrera o Área',
-  'Jefe / Coordinador',
-  'Estudiantes por graduarse',
+  'Centro / Telecentro',
+  'Estudiantes por egresar',
   'Observaciones',
+];
+
+const ACADEMIC_ASSIGNMENT_EXAMPLE_ROW = [
+  '',
+  '3332',
+  'HUGO RICARDO ALARCON WELL',
+  'IS-510',
+  'Instalaciones Eléctricas',
+  '17:00',
+  '3',
+  'LuMaMi',
+  '12',
+  '17',
+  '',
+  'No',
+  '',
 ];
 
 @Controller('academic-assignment-reports')
@@ -447,6 +461,8 @@ export class AssignmentReportsController {
   async downloadTemplate(@Res() res: Response) {
     const buffer = await this.excelFilesService.generateTemplate(
       ACADEMIC_ASSIGNMENT_TEMPLATE_HEADERS,
+      undefined,
+      ACADEMIC_ASSIGNMENT_EXAMPLE_ROW,
     );
 
     res.set({

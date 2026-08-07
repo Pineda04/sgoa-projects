@@ -1,6 +1,7 @@
 import * as XlsxPopulate from 'xlsx-populate';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ExcelResponseDto } from '../dto/excel-response.dto';
+import { normalizeText } from 'src/common/utils/normalize-text.util';
 
 const HEADER_FIRST_COLUMN_TOKENS = [
   '#',
@@ -9,6 +10,46 @@ const HEADER_FIRST_COLUMN_TOKENS = [
   'NoEmpleado',
   'numeroEmpleado',
 ];
+
+const EXAMPLE_FIRST_CELL_TOKENS = ['EJEMPLO', 'EXAMPLE', 'EJ.'];
+
+// Encabezados que se ignoran al parsear (no se mapean a ninguna propiedad).
+const IGNORED_HEADERS = new Set<string>(['HORARIO DE TRABAJO']);
+
+// Mapeo por nombre de encabezado (normalizado) para no depender del orden
+// de las columnas del archivo.
+const HEADER_TO_PROPERTY: Record<string, string> = {
+  '#': 'id',
+  'NO.EMP': 'teacherCode',
+  'NO.EMPLEADO': 'teacherCode',
+  NOEMPLEADO: 'teacherCode',
+  NUMEROEMPLEADO: 'numeroEmpleado',
+  NOMBRE: 'teacherName',
+  CODIGO: 'courseCode',
+  ASIGNATURA: 'courseName',
+  SECCION: 'section',
+  UV: 'uv',
+  DIAS: 'days',
+  'NO. ALUMNOS': 'studentCount',
+  'NO. ALUMNOS DE LA SECCION': 'studentCount',
+  NUMEROALUMNOS: 'numeroAlumnos',
+  'N° DE AULA': 'classroomName',
+  'NO. DE AULA': 'classroomName',
+  'NO. AULA': 'classroomName',
+  'N° AULA': 'classroomName',
+  AULA: 'classroomName',
+  NUMEROAULA: 'numeroAula',
+  CENTRO: 'center',
+  'CENTRO / TELECENTRO': 'center',
+  CARRERA: 'departmentName',
+  'CARRERA O AREA': 'departmentName',
+  'JEFE / COORDINADOR': 'coordinator',
+  COORDINADOR: 'coordinator',
+  'ESTUDIANTES POR GRADUARSE': 'nearGraduation',
+  'ESTUDIANTES POR EGRESAR': 'nearGraduation',
+  OBSERVACIONES: 'observation',
+  OBSERVACION: 'observation',
+};
 
 @Injectable()
 export class ExcelFilesService<Type extends Record<number, string>, Dto> {
@@ -34,6 +75,7 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
   async generateTemplate(
     headers: string[],
     rowCount: number = 20,
+    exampleRow?: string[],
   ): Promise<Buffer> {
     const workbook = await XlsxPopulate.fromBlankAsync();
     const sheet = workbook.sheet(0);
@@ -51,8 +93,27 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       });
     });
 
+    let firstDataRow = 2;
+
+    if (exampleRow && exampleRow.length) {
+      exampleRow.forEach((value, index) => {
+        if (!value) return;
+        sheet
+          .cell(firstDataRow, index + 1)
+          .value(value)
+          .style({
+            italic: true,
+            fontColor: '808080',
+          });
+      });
+
+      // Marca la fila de ejemplo para que el parser la omita.
+      sheet.cell(firstDataRow, 1).value('Ejemplo');
+
+      firstDataRow = 3;
+    }
+
     // Rango vacío para que el coordinador escriba los datos.
-    const firstDataRow = 2;
     const lastRow = firstDataRow + rowCount - 1;
     const lastColumn = headers.length;
     const emptyRange = sheet.range(firstDataRow, 1, lastRow, lastColumn);
@@ -105,7 +166,6 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       );
     }
   }
-
   private getHeaders(sheet: XlsxPopulate.Sheet, headerRow: number): string[] {
     const headers: string[] = [];
 
@@ -131,6 +191,15 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       const secondCell = sheet.cell(row, 2).value();
       if (!firstCell && !secondCell) break; //supondriamos si no tiene id(#), ni NoEmpleado, no hay datos
 
+      // Omite filas de ejemplo/informativas marcadas en la primera columna.
+      if (
+        firstCell &&
+        EXAMPLE_FIRST_CELL_TOKENS.includes(normalizeText(firstCell.toString()))
+      ) {
+        row++;
+        continue;
+      }
+
       const rowData: Partial<Dto> = {};
       let hasData = false;
 
@@ -147,7 +216,14 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
           headers[column - 1],
           column - 1,
         );
-        rowData[propertyName] = this.convertValue(value, column - 1, rawValue);
+
+        if (!propertyName) continue;
+
+        rowData[propertyName] = this.convertValue(
+          value,
+          propertyName,
+          rawValue,
+        );
       }
 
       if (hasData) records.push(rowData as Dto);
@@ -158,55 +234,48 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
   }
 
   private mapHeaderToProperty(header: string, index: number): string {
-    // const properties = {
-    //   0: 'id',
-    //   1: 'numeroEmpleado',
-    //   2: 'nombre',
-    //   3: 'codigo',
-    //   4: 'asignatura',
-    //   5: 'seccion',
-    //   6: 'uv',
-    //   7: 'dias',
-    //   8: 'numeroAlumnos',
-    //   9: 'numeroAula',
-    //   10: 'carrera',
-    //   11: 'coordinador',
-    //   12: 'centro',
-    //   13: 'observaciones',
-    // };
+    const normalized = normalizeText(header);
 
-    return this.properties[index] || `columna${index}`;
+    if (!normalized) return '';
+
+    if (IGNORED_HEADERS.has(normalized)) return '';
+
+    const byHeader = HEADER_TO_PROPERTY[normalized];
+    if (byHeader) return byHeader;
+
+    const fallbackProperties = this.properties as unknown as Record<
+      number,
+      string
+    >;
+
+    return fallbackProperties?.[index] || `columna${index}`;
   }
 
   private convertValue(
     value: string,
-    columnIndex: number,
+    propertyName: string,
     rawValue?: string | number | boolean | Date | null,
   ): string | number | boolean | null {
-    // seccion
-    if (columnIndex === 6) {
-      return this.parseTimeValue(value, rawValue);
+    switch (propertyName) {
+      case 'section':
+      case 'seccion':
+        return this.parseTimeValue(value, rawValue);
+      case 'nearGraduation':
+        return this.parseNearGraduation(value);
+      case 'studentCount':
+        if (value === '') return null;
+
+        return /^-?\d+$/.test(value) ? Number(value) : value;
+      case 'id':
+      case 'uv':
+      case 'numeroAula':
+      case 'numeroAlumnos': {
+        const number = parseInt(value);
+        return !isNaN(number) ? number : value;
+      }
+      default:
+        return value;
     }
-
-    // Una matrícula vacía es desconocida; cualquier valor no entero se conserva
-    // para que la validación de asignación académica pueda rechazarlo.
-    if (columnIndex === 7) {
-      if (value === '') return null;
-
-      return /^-?\d+$/.test(value) ? Number(value) : value;
-    }
-
-    // estudiantes por graduarse
-    if (columnIndex === 13) {
-      return this.parseNearGraduation(value);
-    }
-
-    // id, uv
-    const numericColumns = [0, 5];
-    const number = parseInt(value);
-    return numericColumns.includes(columnIndex) && !isNaN(number)
-      ? number
-      : value;
   }
 
   private parseNearGraduation(value: string): boolean {

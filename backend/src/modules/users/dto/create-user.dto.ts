@@ -8,7 +8,6 @@ import {
   Length,
   Matches,
   Validate,
-  ValidateIf,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTeacherDto } from 'src/modules/teachers/dto/create-teacher.dto';
@@ -16,7 +15,6 @@ import { TeacherRequiredFieldsForRoleConstraint } from '../validators/teacher-re
 import { RolesExistByNameConstraint } from '../validators/roles-exist.validator';
 import { ValidatorConstraintDecorator } from 'src/common/decorators';
 import { MatchConstraint } from '../validators/match.validator';
-import { ROLE_NAMES } from 'src/common/constants';
 
 export class CreateUserDto extends PartialType(CreateTeacherDto) {
   @ApiProperty({
@@ -112,18 +110,6 @@ export class CreateUserDto extends PartialType(CreateTeacherDto) {
   })
   roles: string[];
 
-  @ValidateIf((o: CreateUserDto) => {
-    const teacherRoleNames: string[] = [
-      ROLE_NAMES.DOCENTE,
-      ROLE_NAMES.COORDINADOR_AREA,
-    ];
-
-    return (
-      Array.isArray(o.roles) &&
-      o.roles.length > 0 &&
-      o.roles.some((role) => teacherRoleNames.includes(role))
-    );
-  })
   @Validate(TeacherRequiredFieldsForRoleConstraint)
   dummyFieldForTeacher: string;
 }

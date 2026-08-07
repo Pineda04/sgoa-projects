@@ -1,0 +1,11 @@
+packages:
+  - '.'
+
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  prisma: true

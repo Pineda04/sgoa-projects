@@ -40,6 +40,7 @@ export type Subjects =
 	| 'analytics-monitoring'
 	| 'dashboard-tab-classrooms'
 	| 'users'
+	| 'user-roles'
 	| 'user-departments'
 	| 'user-status'
 	| 'activities'

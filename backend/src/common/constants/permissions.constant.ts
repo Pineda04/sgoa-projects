@@ -53,6 +53,7 @@ export const PERMISSION_SUBJECTS = [
   'reports-monitor',
   // Usuarios
   'users',
+  'user-roles',
   'user-departments',
   'user-status',
   // Vistas
