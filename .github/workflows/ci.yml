@@ -64,7 +64,7 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Unit tests
-        run: pnpm test --runInBand
+        run: pnpm exec jest --runInBand
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://test:test@localhost:5432/test?schema=public
