@@ -111,8 +111,7 @@ jobs:
 
   backend-build:
     name: Backend - build
-    if: github.event_name == 'push'
-    runs-on: [self-hosted, coolify]
+    runs-on: ${{ github.event.pull_request.head.repo.full_name == github.repository && 'self-hosted' || 'ubuntu-latest' }}
     defaults:
       run:
         working-directory: backend
@@ -142,8 +141,7 @@ jobs:
 
   frontend-build:
     name: Frontend - build
-    if: github.event_name == 'push'
-    runs-on: [self-hosted, coolify]
+    runs-on: ${{ github.event.pull_request.head.repo.full_name == github.repository && 'self-hosted' || 'ubuntu-latest' }}
     defaults:
       run:
         working-directory: frontend
