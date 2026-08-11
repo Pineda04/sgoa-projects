@@ -355,7 +355,7 @@ export const Navbar = () => {
 	return (
 		<nav
 			ref={navbarRef}
-			className="relative flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
+			className="sticky flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style top-0 z-50 shadow-lg shadow-primary/20"
 		>
 			<div>
 				{isOnline ? (
@@ -386,7 +386,7 @@ export const Navbar = () => {
 							<div key={mod.id} className="relative">
 								<button
 									onClick={() => handleModuleClick(mod.id)}
-									className={`flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+									className={`flex items-center gap-1 px-3 lg:px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
 										${isModuleActive(mod.id) ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
 									disabled={mod.disabled}
 								>
