@@ -9,12 +9,26 @@ services:
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
     ports:
-      - '5433:5432'
+      - '5432:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
       interval: 5s
       timeout: 5s
       retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:9.4
+    container_name: sgoa_pgadmin
+    restart: always
+    env_file: .env
+    entrypoint: ["bash", "/pgadmin4-entrypoint.sh"]
+    volumes:
+      - local_pgadmin_data:/var/lib/pgadmin
+      - ./compose/pgadmin/entrypoint.sh:/pgadmin4-entrypoint.sh
+    ports:
+      - '5433:80'
+    depends_on:
+      - postgres
 
   backend:
     container_name: sgoa_backend
@@ -54,3 +68,4 @@ services:
 
 volumes:
   local_postgres_data:
+  local_pgadmin_data:
