@@ -8,8 +8,8 @@ export const MonitorReport = () => {
 					Reporte de Cumplimiento — Monitoreo
 				</h1>
 				<p className="text-sm text-muted-foreground">
-					Consulta detallada de las verificaciones de cumplimiento de horario
-					registradas por los monitores.
+					Consulta detallada de las verificaciones de cumplimiento de
+					horario registradas por los monitores.
 				</p>
 			</div>
 

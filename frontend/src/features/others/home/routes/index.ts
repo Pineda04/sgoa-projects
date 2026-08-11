@@ -1,2 +1,2 @@
-export { HomeRouter } from "./HomeRouter";
-export { homeRoutes } from "./HomeRoutes";
+export { HomeRouter } from './HomeRouter';
+export { homeRoutes } from './HomeRoutes';

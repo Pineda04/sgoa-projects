@@ -29,7 +29,8 @@ export const SelectCenterDepartments = ({
 
 	useEffect(() => {
 		if (uniqueCenters && uniqueCenters.length > 0) {
-			const currentCenter = uniqueCenters[centerSelected] || uniqueCenters[0];
+			const currentCenter =
+				uniqueCenters[centerSelected] || uniqueCenters[0];
 			if (!values.centerId || values.centerId !== currentCenter.id) {
 				setValues(prev => ({
 					...prev,
@@ -68,7 +69,11 @@ export const SelectCenterDepartments = ({
 					id="center"
 					name="centerId"
 					className="w-full bg-gray-100 shadow-md rounded-md px-2 py-2 outline-none"
-					value={selectedCenterIndex >= 0 ? selectedCenterIndex : 'select'}
+					value={
+						selectedCenterIndex >= 0
+							? selectedCenterIndex
+							: 'select'
+					}
 					onChange={e => {
 						const index = Number(e.target.value);
 						const center = uniqueCenters?.[index];

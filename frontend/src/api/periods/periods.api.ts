@@ -1,6 +1,11 @@
 import { api } from '@config/lib';
 import { IResponse } from '@shared';
-import { TCreateAcademicPeriodDto, TCurrentAcademicPeriod, TPacModality, TUpdateAcademicPeriodDto } from "./periods.types";
+import {
+	TCreateAcademicPeriodDto,
+	TCurrentAcademicPeriod,
+	TPacModality,
+	TUpdateAcademicPeriodDto,
+} from './periods.types';
 
 export const academicPeriodsApi = {
 	getCurrentAcademicPeriod: () =>
@@ -11,7 +16,9 @@ export const academicPeriodsApi = {
 		if (year) params.set('year', year);
 		if (pac) params.set('pac', pac);
 		if (modality) params.set('modality', modality);
-		return api.get<IResponse<TCurrentAcademicPeriod[]>>(`/academic-periods?${params}`);
+		return api.get<IResponse<TCurrentAcademicPeriod[]>>(
+			`/academic-periods?${params}`
+		);
 	},
 
 	getAcademicPeriodNextToCreate: (modality: TPacModality = 'Trimestre') =>
@@ -23,7 +30,10 @@ export const academicPeriodsApi = {
 		api.post<IResponse<TCurrentAcademicPeriod>>(`/academic-periods`, data),
 
 	updateAcademicPeriod: (id: string, data: TUpdateAcademicPeriodDto) =>
-		api.patch<IResponse<TCurrentAcademicPeriod>>(`/academic-periods/${id}`, data),
+		api.patch<IResponse<TCurrentAcademicPeriod>>(
+			`/academic-periods/${id}`,
+			data
+		),
 
 	deleteAcademicPeriod: (id: string) =>
 		api.delete<IResponse<void>>(`/academic-periods/${id}`),

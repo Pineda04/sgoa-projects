@@ -32,6 +32,8 @@ export const coordinatorsKeys = {
 // Categorías de Docentes
 export const teacherCategoriesKeys = {
 	all: ['teacher-categories'] as const,
-	detail: (id: string) => [...teacherCategoriesKeys.all, 'detail', id] as const,
-	page: (page: number) => [...teacherCategoriesKeys.all, 'page', page] as const,
+	detail: (id: string) =>
+		[...teacherCategoriesKeys.all, 'detail', id] as const,
+	page: (page: number) =>
+		[...teacherCategoriesKeys.all, 'page', page] as const,
 };

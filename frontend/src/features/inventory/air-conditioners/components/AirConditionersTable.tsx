@@ -48,7 +48,7 @@ export const AirConditionersTable = ({
 			setSelectedAirConditioner(airConditioner);
 			openDelete();
 		},
-		[openDelete],
+		[openDelete]
 	);
 
 	const handleCloseDelete = () => {
@@ -67,7 +67,7 @@ export const AirConditionersTable = ({
 			setEditingAirConditionerId(airConditioner.id);
 			openEdit();
 		},
-		[openEdit],
+		[openEdit]
 	);
 
 	const handleCloseEdit = () => {
@@ -80,7 +80,7 @@ export const AirConditionersTable = ({
 			setViewingAirConditionerId(airConditioner.id);
 			openView();
 		},
-		[openView],
+		[openView]
 	);
 
 	const handleCloseView = () => {
@@ -173,7 +173,9 @@ export const AirConditionersTable = ({
 				onConfirm={handleConfirmDelete}
 				classroomName={selectedAirConditioner?.classroom?.name}
 				buildName={selectedAirConditioner?.classroom?.build?.name}
-				centerName={selectedAirConditioner?.classroom?.build?.center?.name}
+				centerName={
+					selectedAirConditioner?.classroom?.build?.center?.name
+				}
 				isPending={isPendingDelete}
 			/>
 

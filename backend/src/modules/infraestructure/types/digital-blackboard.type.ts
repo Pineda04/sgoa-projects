@@ -1,5 +1,3 @@
-
-
 // Tipo principal
 export type TDigitalBlackboard = {
   id: string;

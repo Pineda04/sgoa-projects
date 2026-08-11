@@ -1,18 +1,26 @@
 import { api } from '@config/lib';
 import { IResponse } from '@shared';
-import { TAssignmentReport, TPlanification, TPlanificationWithErrors } from "./assignment-reports.types";
-import { TCurrentAcademicPeriod, TPacData } from "../periods/periods.types";
+import {
+	TAssignmentReport,
+	TPlanification,
+	TPlanificationWithErrors,
+} from './assignment-reports.types';
+import { TCurrentAcademicPeriod, TPacData } from '../periods/periods.types';
 
 export const academicAssignmentReportsApi = {
 	createAcademicAssignment: (
 		centerDepartmentId: string,
 		formData: FormData
 	) =>
-		api.post(`/academic-assignment-reports/file/coordinator/${centerDepartmentId}`, formData, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-			},
-		}),
+		api.post(
+			`/academic-assignment-reports/file/coordinator/${centerDepartmentId}`,
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}
+		),
 
 	createAcademicAssignmentArray: (
 		centerDepartmentId: string,
@@ -23,9 +31,12 @@ export const academicAssignmentReportsApi = {
 				courses: TPlanification[];
 				invalidElements: TPlanificationWithErrors[];
 			}>
-		>(`/academic-assignment-reports/array/coordinator/${centerDepartmentId}`, {
-			assignments,
-		}),
+		>(
+			`/academic-assignment-reports/array/coordinator/${centerDepartmentId}`,
+			{
+				assignments,
+			}
+		),
 
 	getAcademicAssignmentArray: (
 		centerDepartmentId: string,
@@ -41,14 +52,20 @@ export const academicAssignmentReportsApi = {
 				courses: TPlanification[];
 				invalidElements: TPlanificationWithErrors[];
 			}>
-		>(`/academic-assignment-reports/file/coordinator/view/${centerDepartmentId}`, formData, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-			},
-		}),
+		>(
+			`/academic-assignment-reports/file/coordinator/view/${centerDepartmentId}`,
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}
+		),
 
 	getAcademicAssignment: () =>
-		api.get<IResponse<TAssignmentReport[]>>(`/academic-assignment-reports/coordinator`),
+		api.get<IResponse<TAssignmentReport[]>>(
+			`/academic-assignment-reports/coordinator`
+		),
 
 	getAcademicAssignmentTemplate: () =>
 		api.get('/academic-assignment-reports/template', {

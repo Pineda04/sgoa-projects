@@ -11,7 +11,10 @@ interface FieldProps {
 const Field = ({ label, value }: FieldProps) => (
 	<div className="min-w-0">
 		<dt className="text-xs text-muted-foreground">{label}</dt>
-		<dd className="truncate text-sm font-medium text-foreground" title={value}>
+		<dd
+			className="truncate text-sm font-medium text-foreground"
+			title={value}
+		>
 			{value}
 		</dd>
 	</div>
@@ -33,7 +36,7 @@ export const AssignmentDetailedRow = ({
 				<div className="flex min-w-0 items-start gap-3">
 					<span className="flex shrink-0 items-center gap-1.5 rounded-lg bg-muted px-2.5 py-1 text-sm font-semibold tabular-nums text-foreground">
 						<Clock className="size-3.5 text-muted-foreground" />
-						{item.startTime ?? '—'}
+						{item.timeRange ?? '—'}
 					</span>
 					<div className="min-w-0">
 						<p

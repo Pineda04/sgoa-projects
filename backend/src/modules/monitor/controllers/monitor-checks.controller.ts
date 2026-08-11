@@ -182,7 +182,7 @@ export class MonitorChecksController {
     summary: 'Listar verificaciones de cumplimiento de horario',
     okDescription: 'Listado obtenido correctamente.',
   })
-  findAll(@Query() query: CheckFiltersDto) {
-    return this.monitorChecksService.findAllWithFilters(query);
+  findAll(@GetCurrentUserId() userId: string, @Query() query: CheckFiltersDto) {
+    return this.monitorChecksService.findAllWithFilters(userId, query);
   }
 }

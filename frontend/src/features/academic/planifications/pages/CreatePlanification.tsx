@@ -265,7 +265,8 @@ export const CreatePlanification = () => {
 											{r.days}
 										</td>
 										<td className="py-2 px-2 border">
-											{r.studentCount}
+											{r.studentCount ??
+												'Sin información'}
 										</td>
 										<td className="py-2 px-2 border">
 											{r.classroomName}

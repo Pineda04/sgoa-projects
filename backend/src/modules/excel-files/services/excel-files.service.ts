@@ -51,10 +51,8 @@ const HEADER_TO_PROPERTY: Record<string, string> = {
   OBSERVACION: 'observation',
 };
 
-type TExcelFileFormat = 'template' | 'legacy';
-
 @Injectable()
-export class ExcelFilesService<Type, Dto> {
+export class ExcelFilesService<Type extends Record<number, string>, Dto> {
   // para que sea reutilizable
   private properties: Type;
 
@@ -142,43 +140,32 @@ export class ExcelFilesService<Type, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      const format = this.detectFormat(sheet);
-      const headerRow = format === 'template' ? 1 : 4;
-      const firstDataRow = format === 'template' ? 2 : 5;
-
-      const headers = this.getHeaders(sheet, headerRow);
-      const records = this.getData(sheet, headers, firstDataRow);
-
-      const isLegacy = format === 'legacy';
+      this.validateTemplate(sheet);
+      const headers = this.getHeaders(sheet, 1);
+      const records = this.getData(sheet, headers, 2);
 
       return {
-        title: isLegacy ? sheet.cell('A1').value()?.toString() || '' : '',
-        subtitle: isLegacy ? sheet.cell('A2').value()?.toString() || '' : '',
+        title: '',
+        subtitle: '',
         totalRecords: records.length,
         data: records,
       };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       throw new BadRequestException(`Error al procesar el archivo: ${message}`);
     }
   }
 
-  private detectFormat(sheet: XlsxPopulate.Sheet): TExcelFileFormat {
+  private validateTemplate(sheet: XlsxPopulate.Sheet): void {
     const firstRowFirstCell = sheet.cell(1, 1).value()?.toString().trim() ?? '';
-    const fourthRowFirstCell =
-      sheet.cell(4, 1).value()?.toString().trim() ?? '';
 
-    if (HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
-      return 'template';
+    if (!HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
+      throw new BadRequestException(
+        'El archivo no corresponde a la plantilla de asignación vigente.',
+      );
     }
-
-    if (HEADER_FIRST_COLUMN_TOKENS.includes(fourthRowFirstCell)) {
-      return 'legacy';
-    }
-
-    return 'legacy';
   }
-
   private getHeaders(sheet: XlsxPopulate.Sheet, headerRow: number): string[] {
     const headers: string[] = [];
 
@@ -268,16 +255,19 @@ export class ExcelFilesService<Type, Dto> {
     value: string,
     propertyName: string,
     rawValue?: string | number | boolean | Date | null,
-  ): string | number | boolean {
+  ): string | number | boolean | null {
     switch (propertyName) {
       case 'section':
       case 'seccion':
         return this.parseTimeValue(value, rawValue);
       case 'nearGraduation':
         return this.parseNearGraduation(value);
+      case 'studentCount':
+        if (value === '') return null;
+
+        return /^-?\d+$/.test(value) ? Number(value) : value;
       case 'id':
       case 'uv':
-      case 'studentCount':
       case 'numeroAula':
       case 'numeroAlumnos': {
         const number = parseInt(value);

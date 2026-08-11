@@ -6,8 +6,7 @@ export const AppLayout = () => {
 		<>
 			<Navbar />
 			<div className="min-h-screen pt-6 sm:pt-8 lg:pt-10 xl:pt-12 pb-12 lg:pb-16">
-				<div
-					className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<Outlet />
 				</div>
 			</div>

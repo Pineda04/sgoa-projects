@@ -9,6 +9,13 @@ import type { TCurrentAcademicPeriod } from '@api/periods';
 
 const normalizeEmail = (email: string) => email.toLowerCase();
 
+const getTodayDate = () => {
+	const now = new Date();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	return `${now.getFullYear()}-${month}-${day}`;
+};
+
 // Retención de los checks ya sincronizados: se conservan unos días por si se necesita
 // auditar localmente y luego se descartan para que la tabla no crezca sin límite.
 // El histórico definitivo vive en el backend.
@@ -21,6 +28,7 @@ export const saveCurrentAssignments = async (
 	try {
 		await db.monitorAssignments.put({
 			email: normalizeEmail(email),
+			date: getTodayDate(),
 			buildings,
 			fetchedAt: Date.now(),
 		});
@@ -30,7 +38,10 @@ export const saveCurrentAssignments = async (
 };
 
 export const getCachedAssignments = async (email: string) => {
-	const record = await db.monitorAssignments.get(normalizeEmail(email));
+	const record = await db.monitorAssignments.get([
+		normalizeEmail(email),
+		getTodayDate(),
+	]);
 	return record?.buildings ?? [];
 };
 
@@ -45,7 +56,10 @@ export const saveCurrentAcademicPeriod = async (
 			fetchedAt: Date.now(),
 		});
 	} catch (error) {
-		console.warn('No se pudo guardar la caché del período académico:', error);
+		console.warn(
+			'No se pudo guardar la caché del período académico:',
+			error
+		);
 	}
 };
 
@@ -64,8 +78,14 @@ export const clearOtherMonitorsCache = async (email: string) => {
 			db.monitorAssignments,
 			db.academicPeriods,
 			async () => {
-				await db.monitorAssignments.where('email').notEqual(normalized).delete();
-				await db.academicPeriods.where('email').notEqual(normalized).delete();
+				await db.monitorAssignments
+					.where('email')
+					.notEqual(normalized)
+					.delete();
+				await db.academicPeriods
+					.where('email')
+					.notEqual(normalized)
+					.delete();
 			}
 		);
 	} catch (error) {
@@ -84,6 +104,9 @@ export const cleanupSyncedChecks = async (email?: string) => {
 			.filter(check => check.createdAt < cutoff)
 			.delete();
 	} catch (error) {
-		console.warn('No se pudo limpiar los checks sincronizados antiguos:', error);
+		console.warn(
+			'No se pudo limpiar los checks sincronizados antiguos:',
+			error
+		);
 	}
 };

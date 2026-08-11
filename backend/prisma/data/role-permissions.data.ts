@@ -1,7 +1,9 @@
+import { ROLE_NAMES } from '../../src/common/constants';
+
 // Solo se listan los permisos asignados: el backend deriva los implícitos al
 // emitir el JWT (ver SUBJECT_IMPLIED_PERMISSIONS), así que no hace falta
 export const rolePermissionsSeed: Record<string, string[]> = {
-  DIRECCION: [
+  [ROLE_NAMES.DIRECCION]: [
     'manage:dashboard-authorities',
     'manage:users',
     'manage:user-roles',
@@ -34,8 +36,15 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:audio-equipments',
     'manage:monitor-types',
     'manage:monitor-sizes',
+    'manage:analytics-academic-load',
+    'manage:analytics-enrollment',
+    'manage:analytics-classrooms',
+    'manage:analytics-staff',
+    'manage:analytics-technology',
+    'manage:analytics-activities',
+    'manage:analytics-monitoring',
   ],
-  RRHH: [
+  [ROLE_NAMES.RRHH]: [
     'manage:dashboard-coordinator',
     'manage:dashboard-teacher',
     'manage:dashboard-monitor',
@@ -63,8 +72,10 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:teacher-categories',
     'manage:contract-types',
     'manage:shifts',
+    'manage:analytics-academic-load',
+    'manage:analytics-staff',
   ],
-  COORDINADOR_AREA: [
+  [ROLE_NAMES.COORDINADOR_AREA]: [
     'manage:dashboard-coordinator',
     'manage:dashboard-teacher',
     'manage:users',
@@ -96,12 +107,22 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:audio-equipments',
     'manage:monitor-types',
     'manage:monitor-sizes',
+    'read:analytics-academic-load',
+    'read:analytics-enrollment',
+    'read:analytics-classrooms',
+    'read:analytics-staff',
+    'read:analytics-technology',
+    'read:analytics-activities',
   ],
-  DOCENTE: [
+  [ROLE_NAMES.DOCENTE]: [
     'manage:dashboard-teacher',
     'read:pc-equipments',
+    'read:analytics-academic-load',
+    'read:analytics-enrollment',
+    'read:analytics-classrooms',
+    'read:analytics-activities',
   ],
-  MONITOR: [
+  [ROLE_NAMES.MONITOR]: [
     'manage:dashboard-monitor',
     'manage:schedule-compliance-check',
     'read:users',
@@ -119,5 +140,6 @@ export const rolePermissionsSeed: Record<string, string[]> = {
     'manage:reports',
     'manage:reports-monitor',
     'manage:shifts',
+    'read:analytics-monitoring',
   ],
 };

@@ -1,4 +1,11 @@
-import { LayoutGrid, List, Rows3, Search, SlidersHorizontal, X } from 'lucide-react';
+import {
+	LayoutGrid,
+	List,
+	Rows3,
+	Search,
+	SlidersHorizontal,
+	X,
+} from 'lucide-react';
 import { Button } from '@shared/components';
 import { TSyncStatus } from '@shared/hooks';
 import { SyncIndicator } from '../SyncIndicator';
@@ -115,7 +122,11 @@ export const ChecklistToolbar = ({
 	const statusOptions: TSegmentedOption<TStatusFilter>[] = [
 		{ value: 'ALL', label: 'Todas', badge: scopeSummary.total },
 		{ value: 'PENDING', label: 'Pendientes', badge: scopeSummary.pending },
-		{ value: 'VERIFIED', label: 'Verificadas', badge: scopeSummary.verified },
+		{
+			value: 'VERIFIED',
+			label: 'Verificadas',
+			badge: scopeSummary.verified,
+		},
 	];
 
 	return (

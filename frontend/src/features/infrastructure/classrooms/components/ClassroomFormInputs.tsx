@@ -62,7 +62,6 @@ interface SelectFieldProps {
 	onBlur: (e: React.FocusEvent<HTMLSelectElement>) => void;
 }
 
-
 const SelectField = ({
 	id,
 	label,
@@ -224,9 +223,8 @@ export const ClassroomFormInputs = ({
 	].map(field => ({
 		...field,
 		value:
-			(formik.values[
-				field.id as keyof TClassroomFormValues
-			] as string) ?? '',
+			(formik.values[field.id as keyof TClassroomFormValues] as string) ??
+			'',
 		disabled,
 		error: formik.errors[field.id as keyof TClassroomFormValues],
 		touched: Boolean(
@@ -236,13 +234,16 @@ export const ClassroomFormInputs = ({
 		onBlur: formik.handleBlur,
 	}));
 
-	const departmentOptions = departments.data?.map(d => ({ value: d.id, label: d.name })) ?? [];
+	const departmentOptions =
+		departments.data?.map(d => ({ value: d.id, label: d.name })) ?? [];
 
 	const selectedDepartmentIds = formik.values.departmentIds ?? [];
 
 	const handleToggleDepartment = (departmentId: string) => {
 		const current = formik.values.departmentIds ?? [];
-		const next = current.includes(departmentId) ? current.filter(id => id !== departmentId) : [...current, departmentId];
+		const next = current.includes(departmentId)
+			? current.filter(id => id !== departmentId)
+			: [...current, departmentId];
 		formik.setFieldValue('departmentIds', next);
 	};
 
@@ -296,8 +297,7 @@ export const ClassroomFormInputs = ({
 						placeholder={field.placeholder}
 						className={inputClassName}
 					/>
-					{formik.touched[field.name] &&
-					formik.errors[field.name] ? (
+					{formik.touched[field.name] && formik.errors[field.name] ? (
 						<p className="text-xs text-destructive">
 							{formik.errors[field.name]}
 						</p>
@@ -316,7 +316,9 @@ export const ClassroomFormInputs = ({
 				isLoading={departments.isLoading}
 				disabled={disabled}
 				error={
-					typeof formik.errors.departmentIds === 'string' ? formik.errors.departmentIds : undefined
+					typeof formik.errors.departmentIds === 'string'
+						? formik.errors.departmentIds
+						: undefined
 				}
 				touched={Boolean(formik.touched.departmentIds)}
 				onToggle={handleToggleDepartment}

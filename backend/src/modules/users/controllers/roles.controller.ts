@@ -66,7 +66,8 @@ export class RolesController {
     description:
       'Obtiene el catálogo completo de permisos (acción × módulo) disponible para armar roles.',
     okDescription: 'Catálogo de permisos obtenido correctamente.',
-    internalErrorDescription: 'Error interno al obtener el catálogo de permisos.',
+    internalErrorDescription:
+      'Error interno al obtener el catálogo de permisos.',
   })
   findAllPermissions() {
     return this.rolesService.findAllPermissions();
@@ -122,7 +123,8 @@ export class RolesController {
     summary: 'Actualizar permisos de un rol',
     description:
       'Reemplaza el set de permisos asignado a un rol (no aplica al rol de super administrador).',
-    internalErrorDescription: 'Error interno al actualizar los permisos del rol.',
+    internalErrorDescription:
+      'Error interno al actualizar los permisos del rol.',
     notFoundDescription: 'No se encontró el rol solicitado.',
   })
   updatePermissions(

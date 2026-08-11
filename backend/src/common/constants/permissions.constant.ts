@@ -17,6 +17,14 @@ export const PERMISSION_SUBJECTS = [
   'periods',
   'planifications',
   'reports',
+  'analytics',
+  'analytics-academic-load',
+  'analytics-enrollment',
+  'analytics-classrooms',
+  'analytics-staff',
+  'analytics-technology',
+  'analytics-activities',
+  'analytics-monitoring',
   // Organización
   'centers',
   'departments',
@@ -74,5 +82,6 @@ export const DEFAULT_PERMISSIONS = [
 ] as const;
 
 export const NON_ASSIGNABLE_SUBJECTS: readonly TPermissionSubject[] = [
+  'analytics',
   'dashboard-tab-classrooms',
 ];

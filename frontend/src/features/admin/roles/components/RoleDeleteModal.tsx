@@ -20,7 +20,10 @@ export const RoleDeleteModal = ({
 			<div className="p-4">
 				<p className="text-center text-gray-600 text-lg font-normal leading-relaxed">
 					¿Está seguro que desea eliminar el rol{' '}
-					<span className="font-medium text-gray-800">&lt;{roleName}&gt;</span>?
+					<span className="font-medium text-gray-800">
+						&lt;{roleName}&gt;
+					</span>
+					?
 				</p>
 				<p className="text-center text-xs text-gray-400 mt-2">
 					Si el rol tiene usuarios asignados no podrá eliminarse.

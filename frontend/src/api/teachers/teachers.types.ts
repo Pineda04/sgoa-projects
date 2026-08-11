@@ -1,5 +1,5 @@
-import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment } from "..";
-import { TPosition } from "../positions";
+import { TCenter, TCourseClassroom, TCourseStadistic, TDepartment } from '..';
+import { TPosition } from '../positions';
 
 export type TTeacherBasicInfo = {
 	name: string;
@@ -63,11 +63,11 @@ export type TTeacherPosition = {
 
 export type TTeachingSession = {
 	id: string;
-	consultHour: string; // ISO Date
-	tutoringHour: string; // ISO Date
+	consultHour: string | null; // ISO Date
+	tutoringHour: string | null; // ISO Date
 	assignmentReportId: string;
 	courseClassrooms: (TCourseClassroom & {
-		courseStadistic: TCourseStadistic;
+		courseStadistic: TCourseStadistic | null;
 	})[];
 };
 

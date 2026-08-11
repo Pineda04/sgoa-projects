@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { startOfDay } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AcademicPeriodsService } from 'src/modules/teaching-assignment/services/academic-periods.service';
 import {
   TMonitorBuildingAssignments,
   TMonitorClassroomAssignments,
 } from '../types';
+import { MonitorAccessService } from './monitor-access.service';
+import {
+  currentMonitoringDate,
+  currentMonitoringDayIndex,
+  monitoringDayStart,
+} from '../utils/monitoring-date.util';
 
 const DAY_ABBREVIATIONS = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
 
@@ -14,16 +19,24 @@ export class MonitorAssignmentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly academicPeriodsService: AcademicPeriodsService,
+    private readonly monitorAccessService: MonitorAccessService,
   ) {}
 
-  async findCurrentAssignments(): Promise<TMonitorBuildingAssignments[]> {
+  async findCurrentAssignments(
+    monitorId: string,
+  ): Promise<TMonitorBuildingAssignments[]> {
+    const buildingIds =
+      await this.monitorAccessService.getAssignedBuildingIdsForCapture(
+        monitorId,
+      );
     const currentPeriod =
       await this.academicPeriodsService.currentAcademicPeriod();
-    const today = startOfDay(new Date());
-    const todayAbbreviation = DAY_ABBREVIATIONS[today.getDay()];
+    const today = monitoringDayStart(currentMonitoringDate());
+    const todayAbbreviation = DAY_ABBREVIATIONS[currentMonitoringDayIndex()];
 
     const courseClassrooms = await this.prisma.courseClassroom.findMany({
       where: {
+        classroom: { buildingId: { in: buildingIds } },
         days: { contains: todayAbbreviation },
         teachingSession: {
           assignmentReport: {
@@ -38,6 +51,7 @@ export class MonitorAssignmentsService {
             id: true,
             name: true,
             building: { select: { id: true, name: true } },
+            digitalBlackboards: { select: { id: true } },
           },
         },
         teachingSession: {
@@ -62,6 +76,7 @@ export class MonitorAssignmentsService {
             isPresent: true,
             checkTime: true,
             observation: true,
+            digitalBlackboardUseStatus: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -107,6 +122,8 @@ export class MonitorAssignmentsService {
         groupCode: courseClassroom.groupCode,
         section: courseClassroom.section,
         days: courseClassroom.days,
+        hasDigitalBlackboard:
+          courseClassroom.classroom.digitalBlackboards.length > 0,
         teacher: {
           id: teacher.id,
           name: teacher.user.name,
@@ -118,6 +135,7 @@ export class MonitorAssignmentsService {
               isPresent: check.isPresent,
               checkTime: check.checkTime,
               observation: check.observation,
+              digitalBlackboardUseStatus: check.digitalBlackboardUseStatus,
               createdAt: check.createdAt,
               updatedAt: check.updatedAt,
             }
@@ -128,8 +146,16 @@ export class MonitorAssignmentsService {
     return Array.from(buildingsMap.values());
   }
 
-  async findBuildings(): Promise<{ id: string; name: string }[]> {
+  async findBuildings(
+    monitorId: string,
+  ): Promise<{ id: string; name: string }[]> {
+    const buildingIds =
+      await this.monitorAccessService.getAssignedBuildingIdsForCapture(
+        monitorId,
+      );
+
     return this.prisma.building.findMany({
+      where: { id: { in: buildingIds } },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     });

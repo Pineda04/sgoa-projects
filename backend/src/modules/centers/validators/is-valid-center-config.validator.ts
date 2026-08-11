@@ -12,9 +12,7 @@ import { CenterDepartmentsService } from '../services/center-departments.service
 //  FIXME: se debe arreglar esto
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidCenterConfigConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidCenterConfigConstraint implements ValidatorConstraintInterface {
   private cache = new Map<string, string[]>();
 
   constructor(

@@ -1,4 +1,8 @@
-import { TCurrentAcademicPeriod, TPacModality, useUpdateAcademicPeriod } from '@api/periods';
+import {
+	TCurrentAcademicPeriod,
+	TPacModality,
+	useUpdateAcademicPeriod,
+} from '@api/periods';
 import { Button, ModalBase } from '@shared/components';
 import { ESwalIcons, genericAlert } from '@shared/utils';
 import { useEffect, useState } from 'react';
@@ -56,8 +60,12 @@ export const EditAcademicPeriodModal = ({
 				id: period.id,
 				data: {
 					...form,
-					startDate: form.startDate ? `${form.startDate}T00:00:00.000Z` : undefined,
-					endDate: form.endDate ? `${form.endDate}T00:00:00.000Z` : undefined,
+					startDate: form.startDate
+						? `${form.startDate}T00:00:00.000Z`
+						: undefined,
+					endDate: form.endDate
+						? `${form.endDate}T00:00:00.000Z`
+						: undefined,
 				},
 			},
 			{
@@ -168,7 +176,6 @@ export const EditAcademicPeriodModal = ({
 								disabled={isPending}
 							/>
 						</div>
-
 					</div>
 
 					<div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
@@ -186,7 +193,11 @@ export const EditAcademicPeriodModal = ({
 							disabled={isPending}
 						>
 							{!isPending && <FiSave className="size-4" />}
-							<span>{isPending ? 'Guardando...' : 'Actualizar Periodo'}</span>
+							<span>
+								{isPending
+									? 'Guardando...'
+									: 'Actualizar Periodo'}
+							</span>
 						</Button>
 					</div>
 				</form>

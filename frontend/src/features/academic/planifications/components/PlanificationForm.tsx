@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { TPlanification } from '@api/assignment-reports';
 import {
 	TClassroomSearch,
@@ -12,15 +12,13 @@ import { TTeacherBasicInfo, useGetTeachersBySearchTerm } from '@api/teachers';
 import { useGetAcademicPeriodNextToCreate } from '@api/periods';
 import { useUser } from '@config/providers';
 import { planificationSchema } from '@features/academic/planifications/schemas';
-import {
-	DAY_OPTIONS,
-	generateTimeOptions,
-} from '@features/academic/planifications/utils';
+import { DAY_OPTIONS } from '@features/academic/planifications/utils';
 import { Button, Error, SearchAsyncSelect } from '@shared/components';
 import { useModal } from '@shared/hooks';
 import { customOptionsReactSelect, errorsFormik } from '@shared/utils';
 import { useFormik } from 'formik';
 import { ClassroomAvailabilityModal } from '@features/infrastructure/classrooms/components/ClassroomAvailabilityModal';
+import { ScheduleRangeField } from './ScheduleRangeField';
 import { FiSave } from 'react-icons/fi';
 
 interface IPlanificationFormProps {
@@ -30,32 +28,45 @@ interface IPlanificationFormProps {
 	onSubmit: (data: TPlanification) => void;
 }
 
-const FIELD_TYPE_TAG = {
-	TEXT: 'text',
-	NUMBER: 'number',
-	SELECT: 'select',
-	CUSTOM_SELECT: 'custom-select',
-	TIME_SELECT: 'time-select',
-	CHECKBOX: 'checkbox',
-} as const;
-
-type TField = (typeof FIELD_TYPE_TAG)[keyof typeof FIELD_TYPE_TAG];
-
-interface IFieldTag {
+interface IFormFieldProps {
 	label: string;
-	name: string;
-	type: TField;
-	readOnly: boolean;
-	element?: React.ReactNode;
-	checkboxLabel?: string;
+	children: ReactNode;
+	touched?: boolean;
+	error?: string;
+	breakErrorLine?: boolean;
+	className?: string;
 }
 
-const numericFields: (keyof TPlanification)[] = ['uv', 'studentCount'];
+const inputClassName =
+	'w-full rounded px-2 py-1.5 outline-none bg-white border hover:border-gray-400 transition';
+const readOnlyInputClassName =
+	'w-full cursor-not-allowed rounded px-2 py-1.5 outline-none bg-gray-100 shadow-md';
 
-const useTeachersSearch = (st: string) => useGetTeachersBySearchTerm(st);
+const FormField = ({
+	label,
+	children,
+	touched,
+	error,
+	breakErrorLine = true,
+	className,
+}: IFormFieldProps) => (
+	<div className={className}>
+		<label className="block mb-2 font-bold">{label}</label>
+		{children}
+		{touched && error ? (
+			<Error error={error} breakLine={breakErrorLine} />
+		) : null}
+	</div>
+);
 
-const useClassroomsSearch = (st: string, page?: number, size?: number) =>
-	useGetClassroomsBySearchTerm(st, page, size);
+const useTeachersSearch = (searchTerm: string) =>
+	useGetTeachersBySearchTerm(searchTerm);
+
+const useClassroomsSearch = (
+	searchTerm: string,
+	page?: number,
+	size?: number
+) => useGetClassroomsBySearchTerm(searchTerm, page, size);
 
 export const PlanificationForm = ({
 	centerDepartmentId,
@@ -65,50 +76,42 @@ export const PlanificationForm = ({
 }: IPlanificationFormProps) => {
 	const currentUser = useUser();
 	const currentCenter = currentUser.headPositions.find(
-		p => p.centerDepartmentId === centerDepartmentId
+		position => position.centerDepartmentId === centerDepartmentId
 	);
 	const [selectedClassroomId, setSelectedClassroomId] = useState<
 		string | null
 	>(null);
-
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
 
 	const { data: nextPeriod } = useGetAcademicPeriodNextToCreate();
 
-	const useCoursesSearch = (st: string) =>
-		useGetCoursesCenterDepartmentBySearchTerm(centerDepartmentId, st);
+	const useCoursesSearch = (searchTerm: string) =>
+		useGetCoursesCenterDepartmentBySearchTerm(
+			centerDepartmentId,
+			searchTerm
+		);
 
-	// Prefetch full objects from the APIs so we can provide a proper defaultOption
 	const teacherInitQuery = useGetTeachersBySearchTerm(
 		initialData?.teacherCode ?? ''
 	);
-
 	const courseInitQuery = useGetCoursesCenterDepartmentBySearchTerm(
 		centerDepartmentId,
 		initialData?.courseCode ?? ''
 	);
-
 	const classroomInitQuery = useGetClassroomsBySearchTerm(
 		initialData?.classroomName ?? '',
 		1,
 		50
 	);
 
-	useEffect(() => {
-		if (classroomInitQuery.data?.data?.length) {
-			setSelectedClassroomId(classroomInitQuery.data.data[0].id);
-		}
-	}, [classroomInitQuery.data]);
-
-	const teacherDefaultOption =
-		teacherInitQuery.data?.data && teacherInitQuery.data.data.length
-			? {
-					value: teacherInitQuery.data.data[0].id,
-					label: teacherInitQuery.data.data[0].code,
-					data: teacherInitQuery.data.data[0],
-				}
-			: null;
-
+	const initialTeacher = teacherInitQuery.data?.data[0];
+	const teacherDefaultOption = initialTeacher
+		? {
+				value: initialTeacher.id,
+				label: initialTeacher.code,
+				data: initialTeacher,
+			}
+		: null;
 	const finalTeacherDefaultOption =
 		teacherDefaultOption ??
 		(initialData?.teacherCode
@@ -125,15 +128,14 @@ export const PlanificationForm = ({
 				}
 			: null);
 
-	const courseDefaultOption =
-		courseInitQuery.data?.data && courseInitQuery.data.data.length
-			? {
-					value: courseInitQuery.data.data[0].id,
-					label: courseInitQuery.data.data[0].code,
-					data: courseInitQuery.data.data[0],
-				}
-			: null;
-
+	const initialCourse = courseInitQuery.data?.data[0];
+	const courseDefaultOption = initialCourse
+		? {
+				value: initialCourse.id,
+				label: initialCourse.code,
+				data: initialCourse,
+			}
+		: null;
 	const finalCourseDefaultOption =
 		courseDefaultOption ??
 		(initialData?.courseCode
@@ -154,15 +156,17 @@ export const PlanificationForm = ({
 				}
 			: null);
 
-	const classroomDefaultOption =
-		classroomInitQuery.data?.data && classroomInitQuery.data.data.length
-			? {
-					value: classroomInitQuery.data.data[0].id,
-					label: classroomInitQuery.data.data[0].name,
-					data: classroomInitQuery.data.data[0],
-				}
-			: null;
-
+	const initialClassroom =
+		classroomInitQuery.data?.data.find(
+			classroom => classroom.name === initialData?.classroomName
+		) ?? classroomInitQuery.data?.data[0];
+	const classroomDefaultOption = initialClassroom
+		? {
+				value: initialClassroom.id,
+				label: initialClassroom.name,
+				data: initialClassroom,
+			}
+		: null;
 	const finalClassroomDefaultOption =
 		classroomDefaultOption ??
 		(initialData?.classroomName
@@ -179,6 +183,8 @@ export const PlanificationForm = ({
 					},
 				}
 			: null);
+	const availableClassroomId =
+		selectedClassroomId ?? initialClassroom?.id ?? null;
 
 	const formik = useFormik<TPlanification>({
 		enableReinitialize: true,
@@ -189,7 +195,7 @@ export const PlanificationForm = ({
 			courseName: '',
 			uv: 1,
 			section: '',
-			studentCount: 1,
+			studentCount: null,
 			days: 'LuMaMiJuVi',
 			center: currentCenter?.center.name ?? '',
 			classroomName: '',
@@ -203,46 +209,33 @@ export const PlanificationForm = ({
 			if (result.success) return {};
 			return errorsFormik<TPlanification>(result);
 		},
-		onSubmit: values => {
-			onSubmit(values);
-		},
+		onSubmit,
 		validateOnChange: true,
 	});
 
-	const handleChange = (
-		e: React.ChangeEvent<
-			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-		>
-	) => {
-		const name = e.target.name as keyof TPlanification;
-		let value: string | number | boolean;
+	const handleTeacherInfo = (teacher: TTeacherBasicInfo) =>
+		formik.setValues({
+			...formik.values,
+			teacherCode: teacher.code,
+			teacherName: teacher.name,
+		});
 
-		if (e.target.type === 'checkbox') {
-			value = (e.target as HTMLInputElement).checked;
-		} else if (numericFields.includes(name)) {
-			const raw = e.target.value;
-			value = raw === '' ? 0 : Number(raw);
-		} else {
-			value = e.target.value;
-		}
+	const handleCourseInfo = (course: TCourseBasicInfo) =>
+		formik.setValues({
+			...formik.values,
+			courseCode: course.code,
+			courseName: course.name,
+			uv: course.uvs,
+		});
 
-		formik.setFieldValue(name, value);
+	const handleClassroomInfo = (classroom: TClassroomSearch) => {
+		setSelectedClassroomId(classroom.id);
+		formik.setFieldValue('classroomName', classroom.name);
 	};
 
-	const handleTeacherInfo = (data: TTeacherBasicInfo) =>
-		formik.setValues({
-			...formik.values,
-			teacherCode: data.code,
-			teacherName: data.name,
-		});
-
-	const handleCourseInfo = (data: TCourseBasicInfo) =>
-		formik.setValues({
-			...formik.values,
-			courseCode: data.code,
-			courseName: data.name,
-			uv: data.uvs,
-		});
+	const openClassroomAvailability = () => {
+		if (availableClassroomId) openAvail();
+	};
 
 	return (
 		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
@@ -256,360 +249,314 @@ export const PlanificationForm = ({
 				onSubmit={formik.handleSubmit}
 				className="flex-1 overflow-auto min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4"
 			>
-				{(
-					[
-						{
-							label: 'No. Empleado',
-							name: 'teacherCode',
-							type: 'custom-select',
-							readOnly: false,
-							element: (
-								<SearchAsyncSelect<TTeacherBasicInfo>
-									hook={useTeachersSearch}
-									handleChange={handleTeacherInfo}
-									getOptionValue={t => t.id}
-									getOptionLabel={t => t.code}
-									formatOptionLabel={(data, { context }) => {
-										return customOptionsReactSelect(
-											data.label,
-											data.data.name,
-											context
-										);
-									}}
-									defaultOption={finalTeacherDefaultOption}
-								/>
-							),
-						},
-						{
-							label: 'Nombre',
-							name: 'teacherName',
-							type: 'text',
-							readOnly: true,
-						},
-						{
-							label: 'Código',
-							name: 'courseCode',
-							type: 'custom-select',
-							readOnly: false,
-							element: (
-								<SearchAsyncSelect<TCourseBasicInfo>
-									hook={useCoursesSearch}
-									handleChange={handleCourseInfo}
-									getOptionValue={t => t.id}
-									getOptionLabel={t => t.code}
-									formatOptionLabel={(data, { context }) => {
-										return customOptionsReactSelect(
-											data.label,
-											data.data.name,
-											context
-										);
-									}}
-									defaultOption={finalCourseDefaultOption}
-								/>
-							),
-						},
-						{
-							label: 'Asignatura',
-							name: 'courseName',
-							type: 'text',
-							readOnly: true,
-						},
-						{
-							label: 'Estudiantes por egresar',
-							name: 'nearGraduation',
-							type: 'checkbox',
-							readOnly: false,
-							checkboxLabel:
-								'Sección con Estudiantes por egresar',
-						},
-						{
-							/* FIX: Debe ser hora */
-							label: 'Sección',
-							name: 'section',
-							type: 'time-select',
-							readOnly: false,
-						},
-						{
-							label: 'UV',
-							name: 'uv',
-							type: 'number',
-							readOnly: true,
-						},
-						{
-							label: 'Días',
-							name: 'days',
-							type: 'select',
-							readOnly: false,
-						},
-						{
-							label: 'No. Alumnos',
-							name: 'studentCount',
-							type: 'number',
-							readOnly: false,
-						},
-						{
-							label: 'Aula',
-							name: 'classroomName',
-							type: 'custom-select',
-							readOnly: false,
-							element: (
-								<SearchAsyncSelect<TClassroomSearch>
-									hook={useClassroomsSearch}
-									handleChange={(data: TClassroomSearch) => {
-										setSelectedClassroomId(data.id);
-										formik.setValues({
-											...formik.values,
-											classroomName: data.name,
-										});
-										return;
-									}}
-									getOptionValue={t => t.id}
-									getOptionLabel={t => t.name}
-									formatOptionLabel={(data, { context }) => {
-										return customOptionsReactSelect(
-											data.label,
-											data.data.building.name,
-											context
-										);
-									}}
-									defaultOption={finalClassroomDefaultOption}
-								/>
-							),
-						},
-						{
-							label: 'Carrera / Área',
-							name: 'departmentName',
-							type: 'text',
-							readOnly: true,
-						},
-						{
-							label: 'Jefe / Coordinador',
-							name: 'coordinator',
-							type: 'text',
-							readOnly: true,
-						},
-						{
-							label: 'Centro / Telecentro',
-							name: 'center',
-							type: 'text',
-							readOnly: true,
-						},
-					] as IFieldTag[]
-				).map(
-					({
-						label,
-						name,
-						type: fieldType,
-						readOnly,
-						element,
-						checkboxLabel,
-					}) => (
-						<div key={name}>
-							<label className="block mb-2 font-bold">
-								{label}
-							</label>
+				<FormField
+					label="No. Empleado"
+					touched={formik.touched.teacherCode}
+					error={formik.errors.teacherCode}
+					breakErrorLine={false}
+				>
+					<SearchAsyncSelect<TTeacherBasicInfo>
+						hook={useTeachersSearch}
+						handleChange={handleTeacherInfo}
+						getOptionValue={teacher => teacher.id}
+						getOptionLabel={teacher => teacher.code}
+						formatOptionLabel={(option, { context }) =>
+							customOptionsReactSelect(
+								option.label,
+								option.data.name,
+								context
+							)
+						}
+						defaultOption={finalTeacherDefaultOption}
+					/>
+				</FormField>
 
-							{fieldType === FIELD_TYPE_TAG.SELECT ? (
-								<select
-									name={name}
-									value={
-										formik.values[
-											name as keyof TPlanification
-										] as string
-									}
-									onChange={handleChange}
-									onBlur={formik.handleBlur}
-									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
-								>
-									<option value="select" disabled>
-										Seleccione...
-									</option>
-									{DAY_OPTIONS.map(day => (
-										<option key={day} value={day}>
-											{day}
-										</option>
-									))}
-								</select>
-							) : fieldType === FIELD_TYPE_TAG.CUSTOM_SELECT ? (
-								// Render the provided custom element (SearchAsyncSelect). The select
-								// receives `defaultOption` so it will show the code when editing.
-								<div className="flex items-center gap-2">
-									<div className="flex-1">
-										{element ?? null}
-									</div>
-									{name === 'classroomName' && (
-										<button
-											type="button"
-											onClick={() => {
-												if (!selectedClassroomId)
-													return;
-												openAvail();
-											}}
-											disabled={!selectedClassroomId}
-											className="size-10 inline-flex items-center justify-center p-1.5 text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 rounded-sm transition-all duration-200 cursor-pointer shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-											title="Ver disponibilidad"
-										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												className="size-4"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<rect
-													x="3"
-													y="4"
-													width="18"
-													height="18"
-													rx="2"
-													ry="2"
-												/>
-												<line
-													x1="16"
-													y1="2"
-													x2="16"
-													y2="6"
-												/>
-												<line
-													x1="8"
-													y1="2"
-													x2="8"
-													y2="6"
-												/>
-												<line
-													x1="3"
-													y1="10"
-													x2="21"
-													y2="10"
-												/>
-											</svg>
-										</button>
-									)}
-								</div>
-							) : fieldType === FIELD_TYPE_TAG.TIME_SELECT ? (
-								<select
-									name={name}
-									value={
-										formik.values[
-											name as keyof TPlanification
-										] as string
-									}
-									onChange={handleChange}
-									onBlur={formik.handleBlur}
-									className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
-								>
-									<option value="">
-										Seleccione una hora
-									</option>
-									{generateTimeOptions()}
-								</select>
-							) : fieldType === FIELD_TYPE_TAG.CHECKBOX ? (
-								<div className="flex items-center gap-2">
-									<input
-										type="checkbox"
-										name={name}
-										checked={
-											formik.values[
-												name as keyof TPlanification
-											] as boolean
-										}
-										onChange={handleChange}
-										onBlur={formik.handleBlur}
-										className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
-									/>
-									<span className="cursor-default">
-										{checkboxLabel}
-									</span>
-								</div>
-							) : (
-								<input
-									name={name}
-									type={fieldType}
-									value={
-										typeof formik.values[
-											name as keyof TPlanification
-										] === 'boolean'
-											? ''
-											: (formik.values[
-													name as keyof TPlanification
-												] as string | number)
-									}
-									onChange={handleChange}
-									onBlur={formik.handleBlur}
-									className={`${readOnly ? 'cursor-not-allowed' : 'cursor-text'} w-full ${readOnly ? 'bg-gray-100 shadow-md' : 'bg-white border hover:border-gray-400 transition'} rounded px-2 py-1.5 outline-none`}
-									readOnly={readOnly}
-								/>
-							)}
+				<FormField
+					label="Nombre"
+					touched={formik.touched.teacherName}
+					error={formik.errors.teacherName}
+				>
+					<input
+						name="teacherName"
+						type="text"
+						value={formik.values.teacherName}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
 
-							{formik.touched[name as keyof TPlanification] &&
-								formik.errors[name as keyof TPlanification] && (
-									<Error
-										error={
-											formik.errors[
-												name as keyof TPlanification
-											] as string
-										}
-										breakLine={
-											fieldType !==
-											FIELD_TYPE_TAG.CUSTOM_SELECT
-										}
-									/>
-								)}
+				<FormField
+					label="Código"
+					touched={formik.touched.courseCode}
+					error={formik.errors.courseCode}
+					breakErrorLine={false}
+				>
+					<SearchAsyncSelect<TCourseBasicInfo>
+						hook={useCoursesSearch}
+						handleChange={handleCourseInfo}
+						getOptionValue={course => course.id}
+						getOptionLabel={course => course.code}
+						formatOptionLabel={(option, { context }) =>
+							customOptionsReactSelect(
+								option.label,
+								option.data.name,
+								context
+							)
+						}
+						defaultOption={finalCourseDefaultOption}
+					/>
+				</FormField>
+
+				<FormField
+					label="Asignatura"
+					touched={formik.touched.courseName}
+					error={formik.errors.courseName}
+				>
+					<input
+						name="courseName"
+						type="text"
+						value={formik.values.courseName}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
+
+				<FormField
+					label="Estudiantes por egresar"
+					touched={formik.touched.nearGraduation}
+					error={formik.errors.nearGraduation}
+				>
+					<div className="flex items-center gap-2">
+						<input
+							type="checkbox"
+							name="nearGraduation"
+							checked={formik.values.nearGraduation}
+							onChange={event =>
+								formik.setFieldValue(
+									'nearGraduation',
+									event.target.checked
+								)
+							}
+							onBlur={formik.handleBlur}
+							className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
+						/>
+						<span className="cursor-default">
+							Sección con Estudiantes por egresar
+						</span>
+					</div>
+				</FormField>
+
+				<FormField
+					label="Sección"
+					touched={formik.touched.section}
+					error={formik.errors.section}
+				>
+					<ScheduleRangeField
+						value={formik.values.section}
+						onChange={value =>
+							formik.setFieldValue('section', value)
+						}
+						onBlur={() => formik.setFieldTouched('section', true)}
+					/>
+				</FormField>
+
+				<FormField
+					label="UV"
+					touched={formik.touched.uv}
+					error={formik.errors.uv}
+				>
+					<input
+						name="uv"
+						type="number"
+						value={formik.values.uv}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
+
+				<FormField
+					label="Días"
+					touched={formik.touched.days}
+					error={formik.errors.days}
+				>
+					<select
+						name="days"
+						value={formik.values.days}
+						onChange={event =>
+							formik.setFieldValue('days', event.target.value)
+						}
+						onBlur={formik.handleBlur}
+						className={`cursor-pointer ${inputClassName}`}
+					>
+						<option value="select" disabled>
+							Seleccione...
+						</option>
+						{DAY_OPTIONS.map(day => (
+							<option key={day} value={day}>
+								{day}
+							</option>
+						))}
+					</select>
+				</FormField>
+
+				<FormField
+					label="No. Alumnos"
+					touched={formik.touched.studentCount}
+					error={formik.errors.studentCount}
+				>
+					<input
+						name="studentCount"
+						type="number"
+						value={formik.values.studentCount ?? ''}
+						onChange={event =>
+							formik.setFieldValue(
+								'studentCount',
+								event.target.value === ''
+									? null
+									: Number(event.target.value)
+							)
+						}
+						onBlur={formik.handleBlur}
+						className={`cursor-text ${inputClassName}`}
+					/>
+				</FormField>
+
+				<FormField
+					label="Aula"
+					touched={formik.touched.classroomName}
+					error={formik.errors.classroomName}
+					breakErrorLine={false}
+				>
+					<div className="flex items-center gap-2">
+						<div className="flex-1">
+							<SearchAsyncSelect<TClassroomSearch>
+								hook={useClassroomsSearch}
+								handleChange={handleClassroomInfo}
+								getOptionValue={classroom => classroom.id}
+								getOptionLabel={classroom => classroom.name}
+								formatOptionLabel={(option, { context }) =>
+									customOptionsReactSelect(
+										option.label,
+										option.data.building.name,
+										context
+									)
+								}
+								defaultOption={finalClassroomDefaultOption}
+							/>
 						</div>
-					)
-				)}
+						<button
+							type="button"
+							onClick={openClassroomAvailability}
+							disabled={!availableClassroomId}
+							className="size-10 inline-flex items-center justify-center p-1.5 text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 rounded-sm transition-all duration-200 cursor-pointer shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+							title="Ver disponibilidad"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								className="size-4"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<rect
+									x="3"
+									y="4"
+									width="18"
+									height="18"
+									rx="2"
+									ry="2"
+								/>
+								<line x1="16" y1="2" x2="16" y2="6" />
+								<line x1="8" y1="2" x2="8" y2="6" />
+								<line x1="3" y1="10" x2="21" y2="10" />
+							</svg>
+						</button>
+					</div>
+				</FormField>
 
-				<div className="md:col-span-2">
-					<label className="block mb-2 font-bold">
-						Observaciones
-					</label>
+				<FormField
+					label="Carrera / Área"
+					touched={formik.touched.departmentName}
+					error={formik.errors.departmentName}
+				>
+					<input
+						name="departmentName"
+						type="text"
+						value={formik.values.departmentName}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
+
+				<FormField
+					label="Jefe / Coordinador"
+					touched={formik.touched.coordinator}
+					error={formik.errors.coordinator}
+				>
+					<input
+						name="coordinator"
+						type="text"
+						value={formik.values.coordinator}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
+
+				<FormField
+					label="Centro / Telecentro"
+					touched={formik.touched.center}
+					error={formik.errors.center}
+				>
+					<input
+						name="center"
+						type="text"
+						value={formik.values.center}
+						className={readOnlyInputClassName}
+						readOnly
+					/>
+				</FormField>
+
+				<FormField
+					label="Observaciones"
+					touched={formik.touched.observation}
+					error={formik.errors.observation}
+					className="md:col-span-2"
+				>
 					<textarea
 						name="observation"
 						value={formik.values.observation ?? ''}
-						onChange={handleChange}
+						onChange={formik.handleChange}
 						onBlur={formik.handleBlur}
 						rows={3}
 						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5 resize-none"
 					/>
-					{formik.touched.observation &&
-						formik.errors.observation && (
-							<Error
-								error={formik.errors.observation as string}
-							/>
-						)}
-				</div>
+				</FormField>
 			</form>
 
-			{selectedClassroomId && (
+			{availableClassroomId ? (
 				<ClassroomAvailabilityModal
 					isOpen={isAvailOpen}
 					onClose={closeAvail}
-					classroomId={selectedClassroomId}
+					classroomId={availableClassroomId}
 					classroomName={formik.values.classroomName}
 					defaultPeriodId={nextPeriod?.id}
 				/>
-			)}
+			) : null}
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
-				<Button
-					type="button"
-					onClick={onCancel}
-					variant="outline"
-				>
+				<Button type="button" onClick={onCancel} variant="outline">
 					Cancelar
 				</Button>
 				<Button
 					type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-          form="form-planificacion"
+					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+					form="form-planificacion"
 				>
-				  <FiSave className="size-4" />
-          <span>
-            Guardar Asignación
-          </span>
+					<FiSave className="size-4" />
+					<span>Guardar Asignación</span>
 				</Button>
 			</div>
 		</div>

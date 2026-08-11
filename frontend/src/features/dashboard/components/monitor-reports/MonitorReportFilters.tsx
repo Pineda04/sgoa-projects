@@ -1,9 +1,12 @@
 import { TMonitorBuilding } from '@api';
 import { EReportGroupBy } from '@api/monitor';
-import { TOutputTeacherPosition, useGetTeachersForAutocomplete } from '@api/teachers';
+import {
+	TOutputTeacherPosition,
+	useGetTeachersForAutocomplete,
+} from '@api/teachers';
 import { Button, SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
-import { GROUP_BY_OPTIONS } from './monitor-reports.utils';
+import { GROUP_BY_OPTIONS, isReportGroupBy } from './monitor-reports.utils';
 
 const useTeachersSearch = (searchTerm: string) =>
 	useGetTeachersForAutocomplete(searchTerm);
@@ -90,7 +93,11 @@ export const MonitorReportFilters = ({
 					getOptionValue={t => t.id}
 					getOptionLabel={t => t.name}
 					formatOptionLabel={(data, { context }) =>
-						customOptionsReactSelect(data.label, data.data.code, context)
+						customOptionsReactSelect(
+							data.label,
+							data.data.code,
+							context
+						)
 					}
 				/>
 			</div>
@@ -127,7 +134,11 @@ export const MonitorReportFilters = ({
 				<select
 					id="report-group-by-filter"
 					value={groupBy}
-					onChange={e => onGroupByChange(e.target.value as EReportGroupBy)}
+					onChange={e => {
+						if (isReportGroupBy(e.target.value)) {
+							onGroupByChange(e.target.value);
+						}
+					}}
 					className={inputClassName}
 				>
 					{GROUP_BY_OPTIONS.map(option => (

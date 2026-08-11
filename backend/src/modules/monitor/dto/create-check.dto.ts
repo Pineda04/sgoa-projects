@@ -2,11 +2,14 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsISO8601,
+  IsEnum,
+  MaxLength,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
 } from 'class-validator';
+import { DigitalBlackboardUseStatus } from 'src/generated/prisma/client';
 
 export class CreateCheckDto {
   @ApiProperty({
@@ -21,6 +24,9 @@ export class CreateCheckDto {
     example: '2026-07-18',
   })
   @IsISO8601()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'La propiedad <checkDate> debe tener el formato YYYY-MM-DD.',
+  })
   checkDate: string;
 
   @ApiProperty({
@@ -43,13 +49,22 @@ export class CreateCheckDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   observation?: string;
+
+  @ApiPropertyOptional({
+    description: 'Uso observado de la pizarra digital durante el chequeo.',
+    enum: DigitalBlackboardUseStatus,
+  })
+  @IsOptional()
+  @IsEnum(DigitalBlackboardUseStatus)
+  digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 
   @ApiPropertyOptional({
     description:
       'ID generado por el cliente cuando la verificación se registró sin conexión',
   })
   @IsOptional()
-  @IsString()
+  @IsUUID()
   offlineId?: string;
 }

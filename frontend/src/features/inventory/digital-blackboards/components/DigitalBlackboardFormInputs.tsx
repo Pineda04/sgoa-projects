@@ -1,8 +1,14 @@
 import type { FormikProps } from 'formik';
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
-import { useGetAllMonitorSizes, useGetAllMonitorTypes } from '@api/pc-equipments';
-import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import {
+	useGetAllMonitorSizes,
+	useGetAllMonitorTypes,
+} from '@api/pc-equipments';
+import {
+	TClassroomSearch,
+	useGetClassroomsBySearchTerm,
+} from '@api/classrooms';
 import { SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
 import { TDigitalBlackboardFormValues } from '../schemas';
@@ -186,7 +192,7 @@ export const DigitalBlackboardFormInputs = ({
 						customOptionsReactSelect(
 							data.label,
 							data.data?.building?.name ?? '',
-							context,
+							context
 						)
 					}
 					defaultOption={classroomDefaultOption}

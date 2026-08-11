@@ -67,5 +67,13 @@ export const SUBJECT_LABELS: Record<Subjects, string> = {
 	'dashboard-coordinator': 'Dashboard de coordinación',
 	'dashboard-teacher': 'Dashboard de docencia',
 	'dashboard-monitor': 'Dashboard de monitoreo',
+	analytics: 'Analíticas',
+	'analytics-academic-load': 'Analíticas: carga académica',
+	'analytics-enrollment': 'Analíticas: matrícula',
+	'analytics-classrooms': 'Analíticas: aulas',
+	'analytics-staff': 'Analíticas: personal',
+	'analytics-technology': 'Analíticas: tecnología',
+	'analytics-activities': 'Analíticas: actividades',
+	'analytics-monitoring': 'Analíticas: monitoreo',
 	'dashboard-tab-classrooms': 'Ficha de aula (desde dashboard)',
 };

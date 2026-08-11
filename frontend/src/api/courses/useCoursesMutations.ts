@@ -1,8 +1,16 @@
 import { useMutation } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
-import { courseClassroomsApi, coursesApi, courseStadisticsApi } from './courses.api';
+import {
+	courseClassroomsApi,
+	coursesApi,
+	courseStadisticsApi,
+} from './courses.api';
 import { alertSuccess } from '@shared';
-import { ICreateCourse, IUpdateCourse, IUpdateCourseClassroom } from './courses.interfaces';
+import {
+	ICreateCourse,
+	IUpdateCourse,
+	IUpdateCourseClassroom,
+} from './courses.interfaces';
 import { queryClient } from '@config';
 import { coursesKeys } from './courses.keys';
 import { TCourseStadisticOmit } from './courses.types';
@@ -43,7 +51,8 @@ export const useCreateCourse = () => {
 // Eliminar una sección de clase
 export const useDeleteCourseClassroom = () => {
 	const { mutateAsync, isPending } = useMutation({
-		mutationFn: (id: string) => courseClassroomsApi.deleteCourseClassroom(id),
+		mutationFn: (id: string) =>
+			courseClassroomsApi.deleteCourseClassroom(id),
 		onSuccess: async res => {
 			try {
 				await alertSuccess(res);
@@ -154,10 +163,7 @@ export const useUpdateCourseStadistic = (reportId: string) => {
 			courseClassroomId: string;
 			body: TCourseStadisticOmit;
 		}) =>
-			courseStadisticsApi.updateCourseStadistic(
-				courseClassroomId,
-				body
-			),
+			courseStadisticsApi.updateCourseStadistic(courseClassroomId, body),
 		onSuccess: async res => {
 			try {
 				await alertSuccess(res);

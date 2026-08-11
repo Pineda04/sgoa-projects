@@ -85,8 +85,40 @@ describe('ExcelFilesService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('studentCount conversion', () => {
+    type ServiceWithConvertValue = {
+      convertValue: (
+        value: string,
+        propertyName: string,
+        rawValue?: number | string,
+      ) => string | number | boolean | null;
+    };
+
+    const convertStudentCount = (value: string, rawValue?: number | string) =>
+      (service as unknown as ServiceWithConvertValue).convertValue(
+        value,
+        'studentCount',
+        rawValue,
+      );
+
+    it('preserves an empty cell as null', () => {
+      expect(convertStudentCount('')).toBeNull();
+    });
+
+    it('preserves an explicit zero as zero', () => {
+      expect(convertStudentCount('0', 0)).toBe(0);
+    });
+
+    it.each(['12.5', '12 estudiantes', 'sin dato'])(
+      'leaves invalid value %s for assignment validation',
+      (value) => {
+        expect(convertStudentCount(value, value)).toBe(value);
+      },
+    );
+  });
+
   describe('processFile', () => {
-    it('parses the legacy format (title A1, subtitle A2, headers row 4, data from row 5)', async () => {
+    it('rejects workbooks that do not use the current template', async () => {
       const buffer = await buildWorkbookBuffer((sheet) => {
         sheet.cell('A1').value('PLANIFICACIÓN ACADÉMICA');
         sheet.cell('A2').value('PAC No. 2, Semestre, 2026');
@@ -125,42 +157,9 @@ describe('ExcelFilesService', () => {
         sheet.cell(6, 14).value('No');
       });
 
-      const result = await service.processFile(
-        propertiesAcademicAssignment,
-        buffer,
-      );
-
-      expect(result.title).toBe('PLANIFICACIÓN ACADÉMICA');
-      expect(result.subtitle).toBe('PAC No. 2, Semestre, 2026');
-      expect(result.totalRecords).toBe(2);
-      expect(result.data[0]).toMatchObject({
-        teacherCode: 'DOC001',
-        teacherName: 'Juan Pérez',
-        courseCode: 'IS101-2025',
-        courseName: 'Ingeniería en Sistemas',
-        section: 'A1',
-        uv: 4,
-        days: 'LuMaMiVi',
-        studentCount: 35,
-        classroomName: 'Edificio C, Aula 302',
-        departmentName: 'Ingeniería en Sistemas',
-        coordinator: 'María López',
-        center: 'Centro Universitario Regional',
-        nearGraduation: true,
-        observation: 'Clase trasladada',
-      });
-      expect(result.data[1]).toMatchObject({
-        teacherCode: 'DOC002',
-        teacherName: 'Ana Gómez',
-        courseCode: 'MAT-201',
-        courseName: 'Matemáticas',
-        section: 'B2',
-        uv: 3,
-        days: 'MaJuVi',
-        studentCount: 25,
-        classroomName: 'Edificio A, Aula 105',
-        nearGraduation: false,
-      });
+      await expect(
+        service.processFile(propertiesAcademicAssignment, buffer),
+      ).rejects.toThrow('plantilla de asignación vigente');
     });
 
     it('parses the new template format (headers row 1, example row skipped, data from row 3)', async () => {

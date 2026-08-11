@@ -1,10 +1,14 @@
+import { DigitalBlackboardUseStatus } from 'src/generated/prisma/client';
+
 export type TScheduleComplianceCheck = {
   id: string;
   courseClassroomId: string;
   monitorId: string;
+  buildingId: string;
   checkDate: Date;
   checkTime: string;
   isPresent: boolean;
+  digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null;
   observation?: string | null;
   offlineId?: string | null;
   syncedAt?: Date | null;
@@ -32,6 +36,7 @@ export type TScheduleComplianceCheckDetail = TScheduleComplianceCheck & {
     };
     classroom: {
       name: string;
+      hasDigitalBlackboard: boolean;
       building: {
         id: string;
         name: string;

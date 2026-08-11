@@ -9,14 +9,19 @@ interface RoleFormModalProps {
 	role?: TRole;
 }
 
-export const RoleFormModal = ({ isOpen, onClose, role }: RoleFormModalProps) => {
+export const RoleFormModal = ({
+	isOpen,
+	onClose,
+	role,
+}: RoleFormModalProps) => {
 	const isEdit = !!role;
 
 	const [name, setName] = useState('');
 	const [description, setDescription] = useState('');
 	const [error, setError] = useState('');
 
-	const { mutateAsync: createRole, isPending: isPendingCreate } = useCreateRole();
+	const { mutateAsync: createRole, isPending: isPendingCreate } =
+		useCreateRole();
 	const { updateRole, isPendingUpdate } = useUpdateRole(role?.id ?? '');
 
 	const isPending = isPendingCreate || isPendingUpdate;
@@ -46,7 +51,10 @@ export const RoleFormModal = ({ isOpen, onClose, role }: RoleFormModalProps) => 
 		e.preventDefault();
 		if (!validate()) return;
 
-		const body = { name: name.trim(), description: description.trim() || null };
+		const body = {
+			name: name.trim(),
+			description: description.trim() || null,
+		};
 
 		if (isEdit) {
 			await updateRole(body);
@@ -86,7 +94,9 @@ export const RoleFormModal = ({ isOpen, onClose, role }: RoleFormModalProps) => 
 							disabled={isPending}
 							autoFocus
 						/>
-						{error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+						{error && (
+							<p className="mt-1 text-xs text-red-500">{error}</p>
+						)}
 					</div>
 
 					<div>

@@ -1,9 +1,12 @@
-import z from "zod";
-import { TComplementaryActivity } from "../activities";
-import { TCenterDepartment } from "../centers";
-import { TAcademicCommonProps, TCurrentAcademicPeriod } from "../periods/periods.types";
-import { TTeachingSession } from "../teachers";
-import { planificationSchema } from "@features/academic/planifications/schemas";
+import z from 'zod';
+import { TComplementaryActivity } from '../activities';
+import { TCenterDepartment } from '../centers';
+import {
+	TAcademicCommonProps,
+	TCurrentAcademicPeriod,
+} from '../periods/periods.types';
+import { TTeachingSession } from '../teachers';
+import { planificationSchema } from '@features/academic/planifications/schemas';
 
 export type TAssignmentReport = {
 	id: string;

@@ -11,7 +11,10 @@ export const ListRoles = () => {
 					Error al cargar los roles. Intenta nuevamente.
 				</p>
 			) : (
-				<RoleTable data={roles.data ?? []} isLoading={roles.isLoading} />
+				<RoleTable
+					data={roles.data ?? []}
+					isLoading={roles.isLoading}
+				/>
 			)}
 		</div>
 	);

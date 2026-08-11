@@ -10,6 +10,7 @@ import {
 	UsersIcon,
 	ClipboardDocumentListIcon,
 	HomeIcon,
+	ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { ComponentType, SVGProps } from 'react';
@@ -32,6 +33,8 @@ interface ModuleConfig {
 	sections: SectionConfig[];
 	disabled?: boolean;
 }
+
+type DashboardConfig = SectionConfig & { subject: Subjects };
 
 const MODULES: ModuleConfig[] = [
 	{
@@ -102,7 +105,7 @@ const MODULES: ModuleConfig[] = [
 			{
 				label: 'Aires Acondicionados',
 				path: '/inventory/air-conditioners',
-				subject: 'air-conditioners'
+				subject: 'air-conditioners',
 			},
 			{
 				label: 'Pizarras Digitales',
@@ -111,30 +114,99 @@ const MODULES: ModuleConfig[] = [
 			},
 		],
 	},
+	{
+		id: 'analytics',
+		label: 'Analíticas',
+		icon: ChartBarIcon,
+		sections: [
+			{
+				label: 'Carga académica',
+				path: '/analytics?section=academic-load',
+				subject: 'analytics-academic-load',
+			},
+			{
+				label: 'Matrícula',
+				path: '/analytics?section=enrollment',
+				subject: 'analytics-enrollment',
+			},
+			{
+				label: 'Aulas',
+				path: '/analytics?section=classrooms',
+				subject: 'analytics-classrooms',
+			},
+			{
+				label: 'Personal',
+				path: '/analytics?section=staff',
+				subject: 'analytics-staff',
+			},
+			{
+				label: 'Tecnología',
+				path: '/analytics?section=technology',
+				subject: 'analytics-technology',
+			},
+			{
+				label: 'Actividades',
+				path: '/analytics?section=activities',
+				subject: 'analytics-activities',
+			},
+			{
+				label: 'Monitoreo',
+				path: '/analytics?section=monitoring',
+				subject: 'analytics-monitoring',
+			},
+		],
+	},
 ];
 
-const DASHBOARD_CONFIG = [
+const DASHBOARD_CONFIG: DashboardConfig[] = [
 	{
-		subject: 'dashboard-authorities' as const,
+		subject: 'dashboard-authorities',
 		path: '/dashboard/authorities',
 		label: 'Autoridades',
 	},
 	{
-		subject: 'dashboard-coordinator' as const,
+		subject: 'dashboard-coordinator',
 		path: '/dashboard/coordinator',
 		label: 'Coordinación',
 	},
 	{
-		subject: 'dashboard-teacher' as const,
+		subject: 'dashboard-teacher',
 		path: '/dashboard/teacher',
 		label: 'Docencia',
 	},
 	{
-		subject: 'dashboard-monitor' as const,
+		subject: 'dashboard-monitor',
 		path: '/dashboard/monitor',
 		label: 'Monitoreo',
 	},
 ];
+
+const matchesLocation = (
+	configuredLocation: string,
+	pathname: string,
+	search: string
+) => {
+	const queryIndex = configuredLocation.indexOf('?');
+	const configuredPath = configuredLocation.slice(
+		0,
+		queryIndex === -1 ? configuredLocation.length : queryIndex
+	);
+	const basePath = configuredPath.replace(/\/:\w+/g, '');
+	const pathMatches =
+		pathname === configuredPath || pathname.startsWith(`${basePath}/`);
+
+	if (!pathMatches || queryIndex === -1) return pathMatches;
+
+	const configuredParams = new URLSearchParams(
+		configuredLocation.slice(queryIndex + 1)
+	);
+	const currentParams = new URLSearchParams(search);
+	let paramsMatch = true;
+	configuredParams.forEach((value, key) => {
+		if (currentParams.get(key) !== value) paramsMatch = false;
+	});
+	return paramsMatch;
+};
 
 export const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -179,28 +251,34 @@ export const Navbar = () => {
 	const visibleModules = useMemo(() => {
 		if (!isAuthenticated) return [];
 
-		return modulesWithSections
-			.map(mod => ({
-				...mod,
-				sections: mod.sections.filter(s => {
-					if (s.superAdminOnly) return !!user?.isSuperAdmin;
-					if (!s.subject) return true;
-					return ability.can('read', s.subject);
-				}),
-			}))
-			.filter(mod => mod.sections.length > 0)
-			// Feature: sin conexión se ocultan los módulos que requieren red
-			// (Administración, Infraestructura, Inventario y demás dashboards);
-			// solo queda disponible el dashboard de monitoreo.
-			.filter(mod => isOnline || mod.id === 'dashboard');
-	}, [isAuthenticated, ability, modulesWithSections, user?.isSuperAdmin, isOnline]);
+		return (
+			modulesWithSections
+				.map(mod => ({
+					...mod,
+					sections: mod.sections.filter(s => {
+						if (s.superAdminOnly) return !!user?.isSuperAdmin;
+						if (!s.subject) return true;
+						return ability.can('read', s.subject);
+					}),
+				}))
+				.filter(mod => mod.sections.length > 0)
+				// Feature: sin conexión se ocultan los módulos que requieren red
+				// (Administración, Infraestructura, Inventario y demás dashboards);
+				// solo queda disponible el dashboard de monitoreo.
+				.filter(mod => isOnline || mod.id === 'dashboard')
+		);
+	}, [
+		isAuthenticated,
+		ability,
+		modulesWithSections,
+		user?.isSuperAdmin,
+		isOnline,
+	]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
-			if (
-				navbarRef.current &&
-				!navbarRef.current.contains(e.target as Node)
-			) {
+			if (!(e.target instanceof Node)) return;
+			if (navbarRef.current && !navbarRef.current.contains(e.target)) {
 				setOpenDropdownId(null);
 			}
 		};
@@ -213,7 +291,7 @@ export const Navbar = () => {
 		setOpenDropdownId(null);
 		setIsOpen(false);
 		setMobileExpandedId(null);
-	}, [location.pathname]);
+	}, [location.pathname, location.search]);
 
 	const handleModuleClick = (moduleId: string) => {
 		if (moduleId === 'dashboard') {
@@ -229,17 +307,13 @@ export const Navbar = () => {
 	const isModuleActive = (moduleId: string): boolean => {
 		const mod = modulesWithSections.find(m => m.id === moduleId);
 		if (!mod) return false;
-		return mod.sections.some(s =>
-			location.pathname.startsWith(s.path.replace(/\/:\w+/g, ''))
+		return mod.sections.some(section =>
+			matchesLocation(section.path, location.pathname, location.search)
 		);
 	};
 
 	const isSectionActive = (path: string): boolean => {
-		const basePath = path.replace(/\/:\w+/g, '');
-		return (
-			location.pathname === path ||
-			location.pathname.startsWith(basePath + '/')
-		);
+		return matchesLocation(path, location.pathname, location.search);
 	};
 
 	if (isLoading) {
@@ -281,7 +355,7 @@ export const Navbar = () => {
 	return (
 		<nav
 			ref={navbarRef}
-			className="relative flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style sticky top-0 z-50 shadow-lg shadow-primary/20"
+			className="sticky flex w-full px-3 md:px-8 py-2 md:py-3 items-center justify-between Navbar-style top-0 z-50 shadow-lg shadow-primary/20"
 		>
 			<div>
 				{isOnline ? (
@@ -312,9 +386,8 @@ export const Navbar = () => {
 							<div key={mod.id} className="relative">
 								<button
 									onClick={() => handleModuleClick(mod.id)}
-									className={`
-                    flex items-center gap-1.5 px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                    text-white/80 hover:bg-white/10 hover:text-white`}
+									className={`flex items-center gap-1 px-3 lg:px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+										${isModuleActive(mod.id) ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
 									disabled={mod.disabled}
 								>
 									<mod.icon className="size-4 lg:size-5" />
@@ -324,10 +397,11 @@ export const Navbar = () => {
 									{mod.sections.length >
 										(mod.id === 'dashboard' ? 1 : 0) && (
 										<ChevronDownIcon
-											className={`size-3.5 transition-transform duration-200 ${openDropdownId === mod.id
+											className={`size-3.5 transition-transform duration-200 ${
+												openDropdownId === mod.id
 													? 'rotate-180'
 													: ''
-												}`}
+											}`}
 										/>
 									)}
 								</button>
@@ -346,21 +420,23 @@ export const Navbar = () => {
 														setOpenDropdownId(null)
 													}
 													className={`block px-4 py-2.5 text-sm transition-colors duration-150 border-b border-gray-50 last:border-b-0
-													${isSectionActive(
-														section.path
-													)
+													${
+														isSectionActive(
+															section.path
+														)
 															? 'text-primary font-semibold bg-primary/5'
 															: 'text-gray-700 hover:bg-gray-50 hover:text-primary'
-														}`}
+													}`}
 												>
 													<div className="flex items-center gap-2">
 														<span
-															className={`w-1 h-1 rounded-full ${isSectionActive(
-																section.path
-															)
+															className={`w-1 h-1 rounded-full ${
+																isSectionActive(
+																	section.path
+																)
 																	? 'bg-primary'
 																	: 'bg-gray-300'
-																}`}
+															}`}
 														/>
 														{section.label}
 													</div>
@@ -393,10 +469,7 @@ export const Navbar = () => {
 								to="/home"
 								onClick={() => setIsOpen(false)}
 								className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200 lg:hidden
-									${location.pathname === '/home'
-										? 'bg-white/15'
-										: 'hover:bg-white/5'
-									}`}
+									${location.pathname === '/home' ? 'bg-white/15' : 'hover:bg-white/5'}`}
 							>
 								<HomeIcon className="size-5 text-white/70 shrink-0" />
 								<span className="text-base font-medium text-white/90 flex-1 text-left">
@@ -424,12 +497,13 @@ export const Navbar = () => {
 											}
 										}}
 										className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all duration-200
-												${mod.disabled
-												? 'opacity-40'
-												: isModuleActive(mod.id)
-													? 'bg-white/15'
-													: 'hover:bg-white/5'
-											}`}
+												${
+													mod.disabled
+														? 'opacity-40'
+														: isModuleActive(mod.id)
+															? 'bg-white/15'
+															: 'hover:bg-white/5'
+												}`}
 									>
 										<mod.icon className="size-5 text-white/70 shrink-0" />
 										<span className="text-base font-medium text-white/90 flex-1 text-left">
@@ -442,10 +516,11 @@ export const Navbar = () => {
 										)}
 										{mod.sections.length > 1 && (
 											<ChevronDownIcon
-												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${mobileExpandedId === mod.id
+												className={`size-4 text-white/50 transition-transform duration-200 shrink-0 ${
+													mobileExpandedId === mod.id
 														? 'rotate-180'
 														: ''
-													}`}
+												}`}
 											/>
 										)}
 									</button>
@@ -461,12 +536,13 @@ export const Navbar = () => {
 															setIsOpen(false)
 														}
 														className={`block px-4 py-2.5 rounded-lg text-sm transition-colors duration-150
-																	${isSectionActive(
-															section.path
-														)
-																? 'text-accent font-medium bg-white/10'
-																: 'text-white/70 hover:text-white hover:bg-white/5'
-															}`}
+																	${
+																		isSectionActive(
+																			section.path
+																		)
+																			? 'text-accent font-medium bg-white/10'
+																			: 'text-white/70 hover:text-white hover:bg-white/5'
+																	}`}
 													>
 														{section.label}
 													</Link>

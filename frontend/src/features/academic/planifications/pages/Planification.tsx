@@ -14,7 +14,7 @@ import { ArrowLeftIcon } from 'lucide-react';
 // FIX: Segmentar segun el rol
 export const Planification = () => {
 	const { periodId, centerDepartmentId, year, pac } = useParams();
-  const currentUser = useUser();
+	const currentUser = useUser();
 	const navigate = useNavigate();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
@@ -65,10 +65,10 @@ export const Planification = () => {
 				</h2>
 			</div>
 
-      <div className="flex flex-row gap-2 justify-center pt-5">
-        <Button onClick={() => navigate(-1)} variant="outline">
-          <ArrowLeftIcon className="size-5" />
-          Volver
+			<div className="flex flex-row gap-2 justify-center pt-5">
+				<Button onClick={() => navigate(-1)} variant="outline">
+					<ArrowLeftIcon className="size-5" />
+					Volver
 				</Button>
 				<Button
 					onClick={() => {

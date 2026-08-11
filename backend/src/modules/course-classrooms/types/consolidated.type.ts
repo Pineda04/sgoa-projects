@@ -2,7 +2,7 @@ export type TOutputConsolidated = {
   courseCode: string;
   courseName: string;
   section: string;
-  initial: number;
+  initial: number | null;
   final: number;
   APB: number;
   RPB: number;
@@ -12,13 +12,13 @@ export type TOutputConsolidated = {
   teacherName: string;
   department: string;
   modality: string;
-  indexAPB: number;
-  indexRPB: number;
-  indexNSP: number;
-  indexABD: number;
+  indexAPB: number | null;
+  indexRPB: number | null;
+  indexNSP: number | null;
+  indexABD: number | null;
   finalSummatoryInconsistency: 'Error' | 'Correcto';
-  initialSummatoryInconsistency: 'Correcto' | 'Incorrecto';
-  terminalEfficiency: number;
+  initialSummatoryInconsistency: 'Correcto' | 'Incorrecto' | null;
+  terminalEfficiency: number | null;
   pac: number;
   year: number;
 };

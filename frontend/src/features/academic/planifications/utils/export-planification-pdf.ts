@@ -9,7 +9,7 @@ export async function exportPlanification(
 	departmentName: string,
 	fontFamily?: EPdfFont
 ) {
-	const 	selectedFont = fontFamily ?? getPdfFontPreference();
+	const selectedFont = fontFamily ?? getPdfFontPreference();
 	const jsPdfFont = getJsPdfFontName(selectedFont);
 
 	const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
@@ -65,7 +65,7 @@ export async function exportPlanification(
 		info.courseName,
 		info.uv,
 		info.section,
-		info.studentCount,
+		info.studentCount ?? 'Sin información',
 		info.days,
 		info.center,
 		info.classroomName,
@@ -75,18 +75,19 @@ export async function exportPlanification(
 		info.observation ?? '',
 	]);
 
+	let tableFinalY = headerY + 55;
 	autoTable(doc, {
 		head,
 		body,
 		startY: 120,
 		styles: { fontSize: 8, cellPadding: 4 },
 		headStyles: { fillColor: [20, 76, 116] },
+		didDrawPage: tableData => {
+			tableFinalY = tableData.cursor?.y ?? tableFinalY;
+		},
 	});
 
-	type LastAutoTable = { finalY?: number };
-	const lastTable = (doc as unknown as { lastAutoTable?: LastAutoTable })
-		.lastAutoTable;
-	const y = (lastTable?.finalY ?? headerY + 55) + 80;
+	const y = tableFinalY + 80;
 
 	const lineWidth = 200;
 	const marginCenter = (doc.internal.pageSize.getWidth() - lineWidth) / 2;
@@ -122,9 +123,14 @@ export async function exportPlanification(
 		doc.setPage(i);
 		doc.setFontSize(10);
 		doc.setFont(jsPdfFont, 'normal');
-		doc.text(`${i} de ${finalTotalPages}`, pageWidth - 50, pageHeight - 30, {
-			align: 'right',
-		});
+		doc.text(
+			`${i} de ${finalTotalPages}`,
+			pageWidth - 50,
+			pageHeight - 30,
+			{
+				align: 'right',
+			}
+		);
 	}
 
 	const fileName = 'Planificación académica ' + pac + 'PAC ' + year;

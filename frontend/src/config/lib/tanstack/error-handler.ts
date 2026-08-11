@@ -30,7 +30,8 @@ const errorHandler = (
 ) => {
 	// Fix: los errores de red no traen response (undefined) y el destructuring lanzaba
 	// un TypeError. Ahora se detecta y se sale sin tocar el flujo de 401/refresh.
-	const { status, data } = (error as AxiosError<IErrorResponse>).response ?? {};
+	const { status, data } =
+		(error as AxiosError<IErrorResponse>).response ?? {};
 
 	if (!status) {
 		console.error('Error de red o inesperado:', error);

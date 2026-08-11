@@ -25,7 +25,9 @@ const downloadBlob = (blob: Blob, fileName: string) => {
 const RISKY_LEADING_CHARS = ['=', '+', '-', '@'];
 
 const sanitizeExcelCell = (value: string): string =>
-	RISKY_LEADING_CHARS.some(char => value.startsWith(char)) ? `'${value}` : value;
+	RISKY_LEADING_CHARS.some(char => value.startsWith(char))
+		? `'${value}`
+		: value;
 
 const sanitizeRowForExcel = (
 	row: TMonitorReportExportRow
@@ -36,6 +38,7 @@ const sanitizeRowForExcel = (
 	edificio: sanitizeExcelCell(row.edificio),
 	docente: sanitizeExcelCell(row.docente),
 	estado: sanitizeExcelCell(row.estado),
+	pizarra: sanitizeExcelCell(row.pizarra),
 	observaciones: sanitizeExcelCell(row.observaciones),
 });
 
@@ -56,6 +59,7 @@ export async function exportMonitorReportExcel({
 		{ header: 'Edificio', key: 'edificio', width: 20 },
 		{ header: 'Docente', key: 'docente', width: 28 },
 		{ header: 'Estado', key: 'estado', width: 12 },
+		{ header: 'Pizarra digital', key: 'pizarra', width: 18 },
 		{ header: 'Observaciones', key: 'observaciones', width: 32 },
 	];
 	incidentsSheet.getRow(1).font = { bold: true };
@@ -72,7 +76,13 @@ export async function exportMonitorReportExcel({
 		{ label: 'Total chequeos', value: summary.totalChecks },
 		{ label: 'Presentes', value: summary.present },
 		{ label: 'Ausentes', value: summary.absent },
-		{ label: '% Cumplimiento', value: `${summary.complianceRate.toFixed(1)}%` },
+		{
+			label: '% Cumplimiento',
+			value:
+				summary.complianceRate === null
+					? 'No calculable'
+					: `${summary.complianceRate.toFixed(1)}%`,
+		},
 	]);
 
 	const buffer = await workbook.xlsx.writeBuffer();

@@ -104,10 +104,7 @@ export const ViewPcEquipmentModal = ({
 					/>
 					<DetailField label="Condición" value={conditionName} />
 					<DetailField label="Aula" value={classroomValue} />
-					<DetailField
-						label="Departamento"
-						value={departmentValue}
-					/>
+					<DetailField label="Departamento" value={departmentValue} />
 				</div>
 
 				<div className="flex justify-end pt-4 mt-4 border-t border-gray-100">

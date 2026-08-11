@@ -11,9 +11,7 @@ import { TeachingSessionsService } from '../services/teaching-sessions.service';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidIdsTeachingAssignmentConfigConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidIdsTeachingAssignmentConfigConstraint implements ValidatorConstraintInterface {
   constructor(
     private readonly academicAssignmentReportsService: AcademicAssignmentReportsService,
     private readonly academicPeriodsService: AcademicPeriodsService,

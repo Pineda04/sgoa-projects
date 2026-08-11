@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { useGetDepartments, useDeleteDepartmentMutation } from '@api/departments';
+import {
+	useGetDepartments,
+	useDeleteDepartmentMutation,
+} from '@api/departments';
 import { TOutputDepartment } from '@api/departments';
 import { useAbility } from '@config';
 import { Button, useModal } from '@shared';

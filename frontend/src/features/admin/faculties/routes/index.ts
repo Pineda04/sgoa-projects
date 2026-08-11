@@ -1,2 +1,2 @@
-export { FacultiesRouter } from './FacultiesRouter'
-export { facultiesRoutes } from './FacultiesRoutes'
+export { FacultiesRouter } from './FacultiesRouter';
+export { facultiesRoutes } from './FacultiesRoutes';

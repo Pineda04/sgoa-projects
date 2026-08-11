@@ -16,9 +16,12 @@ export const useCreateCheckMutation = () => {
 				// Ignore alert errors
 			}
 
-			await queryClient.invalidateQueries({
-				queryKey: monitorKeys.currentAssignments(sessionEmail),
-			});
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: monitorKeys.currentAssignments(sessionEmail),
+				}),
+				queryClient.invalidateQueries({ queryKey: ['analytics'] }),
+			]);
 		},
 	});
 

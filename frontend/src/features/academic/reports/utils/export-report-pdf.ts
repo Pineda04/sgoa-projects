@@ -111,7 +111,7 @@ export async function exportReportActivities(
 ) {
 	if (!data) return;
 
-	const 	selectedFont = fontFamily ?? getPdfFontPreference();
+	const selectedFont = fontFamily ?? getPdfFontPreference();
 	const jsPdfFont = getJsPdfFontName(selectedFont);
 
 	const [jsPDFModule, autoTableModule] = await Promise.all([
@@ -262,16 +262,18 @@ export async function exportReportActivities(
 			],
 		],
 		body: data.assignmentReportData.teachingSession.courseClassrooms.map(
-			(d: typeof data.assignmentReportData.teachingSession.courseClassrooms[0]) => [
+			(
+				d: (typeof data.assignmentReportData.teachingSession.courseClassrooms)[0]
+			) => [
 				d.course.code,
 				d.course.name,
 				d.section,
 				d.course.uvs,
-				d.courseStadistic.APB,
-				d.courseStadistic.RPB,
-				d.courseStadistic.NSP,
-				d.courseStadistic.ABD,
-				d.studentCount,
+				d.courseStadistic?.APB ?? 'Sin información',
+				d.courseStadistic?.RPB ?? 'Sin información',
+				d.courseStadistic?.NSP ?? 'Sin información',
+				d.courseStadistic?.ABD ?? 'Sin información',
+				d.studentCount ?? 'Sin información',
 			]
 		),
 		//al final de la tabla para los horarios de consulta y tutoria
@@ -342,7 +344,7 @@ export async function exportReportActivities(
 			d.isRegistered! ? 'Sí' : 'No',
 			d.fileNumber!,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -367,7 +369,7 @@ export async function exportReportActivities(
 			d.isRegistered! ? 'Sí' : 'No',
 			d.fileNumber!,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -383,7 +385,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -399,9 +401,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			!d.verificationMedia
-				? 'Sin descripción...'
-				: d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -432,7 +432,7 @@ export async function exportReportActivities(
 			i + 1,
 			d.name,
 			d.progressLevel,
-			d.verificationMedia.description,
+			d.verificationMedia?.description ?? 'Sin descripción...',
 		])
 	);
 
@@ -464,9 +464,14 @@ export async function exportReportActivities(
 		doc.setPage(i);
 		doc.setFontSize(10);
 		doc.setFont(jsPdfFont, 'normal');
-		doc.text(`${i} de ${finalTotalPages}`, pageWidth - 50, pageHeight - 30, {
-			align: 'right',
-		});
+		doc.text(
+			`${i} de ${finalTotalPages}`,
+			pageWidth - 50,
+			pageHeight - 30,
+			{
+				align: 'right',
+			}
+		);
 	}
 
 	//Formato para el archivo

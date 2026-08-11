@@ -269,6 +269,7 @@ export class AuthService {
         code: true,
         hash: true,
         hashedRt: true,
+        activeStatus: true,
         userRoles: {
           select: {
             role: {
@@ -287,7 +288,7 @@ export class AuthService {
       },
     });
 
-    if (!user || !user.hashedRt)
+    if (!user || !user.activeStatus || !user.hashedRt)
       throw new ForbiddenException('¡Acceso denegado!');
 
     const rtMatches = await argon.verify(user.hashedRt, rt);

@@ -26,7 +26,6 @@ export type TClassroom = {
   // courseClassrooms?: TCourseClassroom[];
 };
 
-
 export type TClassroomWithDepartments = TClassroom & {
   departments: TClassroomDepartmentInfo[];
 };
@@ -53,7 +52,7 @@ export type TCreateClassroom = Omit<
 // Tipo para actualización
 export type TUpdateClassroom = Partial<TCreateClassroom>;
 
-type Occupied = {
+export type Occupied = {
   startTime: string;
   endTime: string;
   courseId: string;
@@ -62,7 +61,7 @@ type Occupied = {
   teacherName: string;
 };
 
-type Available = {
+export type Available = {
   startTime: string;
   endTime: string;
 };
@@ -73,12 +72,12 @@ export type ClassroomScheduleDto = {
   schedule: Partial<Record<DayOfWeek, DaySchedule>>;
 };
 
-type DaySchedule = {
+export type DaySchedule = {
   occupied: Occupied[];
   available: Available[];
 };
 
-type DayOfWeek =
+export type DayOfWeek =
   | 'MONDAY'
   | 'TUESDAY'
   | 'WEDNESDAY'

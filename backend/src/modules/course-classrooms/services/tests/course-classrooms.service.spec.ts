@@ -16,7 +16,7 @@ describe('CourseClassroomsService', () => {
   let service: CourseClassroomsService;
 
   const mockPrismaService = {
-    courseClassrooms: {
+    courseClassroom: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
@@ -25,6 +25,7 @@ describe('CourseClassroomsService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CourseClassroomsService,
@@ -46,5 +47,43 @@ describe('CourseClassroomsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('normalizes days and section when creating', async () => {
+    mockPrismaService.courseClassroom.create.mockImplementation(({ data }) =>
+      Promise.resolve(data),
+    );
+
+    await service.create({
+      days: 'ViLu',
+      section: '8:00-9:30',
+    } as any);
+
+    expect(mockPrismaService.courseClassroom.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        days: 'LuVi',
+        section: '08:00 - 09:30',
+      }),
+    });
+  });
+
+  it('normalizes only provided schedule fields when updating', async () => {
+    mockPrismaService.courseClassroom.update.mockImplementation(({ data }) =>
+      Promise.resolve(data),
+    );
+
+    await service.update('course-classroom-id', { days: 'MiLu' } as any);
+
+    expect(mockPrismaService.courseClassroom.update).toHaveBeenCalledWith({
+      where: { id: 'course-classroom-id' },
+      data: { days: 'LuMi' },
+    });
+  });
+
+  it('rejects a single-hour legacy section without persisting it', async () => {
+    await expect(
+      service.create({ days: 'Lu', section: '08:00' } as any),
+    ).rejects.toThrow('inicio y fin');
+    expect(mockPrismaService.courseClassroom.create).not.toHaveBeenCalled();
   });
 });

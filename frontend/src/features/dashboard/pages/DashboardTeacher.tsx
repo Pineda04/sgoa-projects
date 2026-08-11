@@ -130,7 +130,7 @@ export const DashboardTeacher = () => {
 			render: (row: TCourseClassroom) => (
 				<span className="inline-flex items-center gap-1">
 					<Users className="w-3 h-3 text-muted-foreground" />
-					{row.studentCount}
+					{row.studentCount ?? 'Sin información'}
 				</span>
 			),
 		},
@@ -279,8 +279,8 @@ export const DashboardTeacher = () => {
 				</TabsContent>
 
 				{/* Aulas */}
-        <TabsContent value="2">
-          <ListClassrooms showHeader={false} />
+				<TabsContent value="2">
+					<ListClassrooms showHeader={false} />
 				</TabsContent>
 			</Tabs>
 		</div>

@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react';
-import { useUpdateCheckMutation } from '@api/monitor';
+import {
+	type DigitalBlackboardUseStatus,
+	useUpdateCheckMutation,
+} from '@api/monitor';
 import { db } from '@config/lib';
 import { getCurrentTimeString, getTodayDateString } from './checklist.utils';
 
@@ -7,16 +10,16 @@ interface RegisterCheckInput {
 	courseClassroomId: string;
 	isPresent: boolean;
 	observation?: string;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 }
 
-interface EditCheckInput {
+interface EditCheckInput extends RegisterCheckInput {
 	checkId: string;
-	courseClassroomId: string;
-	isPresent: boolean;
-	observation?: string;
 	checkTime?: string;
 	isLocalOnly?: boolean;
 }
+
+const getPendingStatus = (): 'PENDING' => 'PENDING';
 
 export const useRegisterCheck = (email?: string, isOnline = true) => {
 	const { updateCheck } = useUpdateCheckMutation();
@@ -27,54 +30,70 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 			courseClassroomId,
 			isPresent,
 			observation,
+			digitalBlackboardUseStatus,
 			checkTime,
 		}: RegisterCheckInput & { checkTime?: string }) => {
 			const checkDate = getTodayDateString();
 			const resolvedCheckTime = checkTime ?? getCurrentTimeString();
+			const normalizedObservation = observation?.trim() || undefined;
 
 			await db.transaction('rw', db.offlineChecks, async () => {
 				const existing = await db.offlineChecks
 					.where('[email+checkDate]')
 					.equals([email ?? '', checkDate])
-					.filter(check => check.courseClassroomId === courseClassroomId)
+					.filter(
+						check => check.courseClassroomId === courseClassroomId
+					)
 					.first();
 
 				if (existing) {
 					if (existing.syncStatus === 'PENDING') {
-						await db.offlineChecks.update(existing.offlineId, {
+						const changes = {
 							isPresent,
 							checkTime: resolvedCheckTime,
-							observation: observation?.trim() || undefined,
-						});
+							observation: normalizedObservation,
+							digitalBlackboardUseStatus: isPresent
+								? digitalBlackboardUseStatus
+								: undefined,
+						};
+						await db.offlineChecks.update(
+							existing.offlineId,
+							changes
+						);
 					}
 					return;
 				}
 
-				await db.offlineChecks.add({
+				const offlineCheck = {
 					offlineId: crypto.randomUUID(),
 					email: email ?? '',
 					courseClassroomId,
 					checkDate,
 					checkTime: resolvedCheckTime,
 					isPresent,
-					observation: observation?.trim() || undefined,
-					syncStatus: 'PENDING',
+					observation: normalizedObservation,
+					digitalBlackboardUseStatus,
+					syncStatus: getPendingStatus(),
 					createdAt: Date.now(),
-				});
+				};
+				await db.offlineChecks.add(offlineCheck);
 			});
 		},
 		[email]
 	);
 
 	const registerCheck = useCallback(
-		async ({ courseClassroomId, isPresent, observation }: RegisterCheckInput) => {
-			setSubmittingId(courseClassroomId);
+		async (input: RegisterCheckInput) => {
+			setSubmittingId(input.courseClassroomId);
 
 			try {
-				await saveOffline({ courseClassroomId, isPresent, observation });
+				await saveOffline(input);
 				return true;
 			} catch (error) {
-				console.error('Error al guardar verificación localmente:', error);
+				console.error(
+					'Error al guardar verificación localmente:',
+					error
+				);
 				return false;
 			} finally {
 				setSubmittingId(null);
@@ -89,6 +108,7 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 			courseClassroomId,
 			isPresent,
 			observation,
+			digitalBlackboardUseStatus,
 			checkTime,
 			isLocalOnly,
 		}: EditCheckInput) => {
@@ -96,7 +116,13 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 
 			try {
 				if (!isOnline || isLocalOnly) {
-					await saveOffline({ courseClassroomId, isPresent, observation, checkTime });
+					await saveOffline({
+						courseClassroomId,
+						isPresent,
+						observation,
+						digitalBlackboardUseStatus,
+						checkTime,
+					});
 					return true;
 				}
 
@@ -104,6 +130,7 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 					id: checkId,
 					isPresent,
 					observation: observation?.trim() ?? '',
+					digitalBlackboardUseStatus,
 				});
 
 				return true;
@@ -121,6 +148,6 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 		registerCheck,
 		editCheck,
 		submittingId,
-		isRegistering: !!submittingId,
+		isRegistering: Boolean(submittingId),
 	};
 };

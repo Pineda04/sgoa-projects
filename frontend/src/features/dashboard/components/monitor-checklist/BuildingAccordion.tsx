@@ -78,15 +78,15 @@ export const BuildingAccordion = ({
 				id={panelId}
 				className={`border-t border-border ${BODY_CLASSES[view]}`}
 			>
-					<AssignmentList
-						items={group.items}
-						view={view}
-						submittingId={submittingId}
-						isRegistering={isRegistering}
-						onConfirm={onConfirm}
-						onOpenModal={onOpenModal}
-						onEditCheck={onEditCheck}
-					/>
+				<AssignmentList
+					items={group.items}
+					view={view}
+					submittingId={submittingId}
+					isRegistering={isRegistering}
+					onConfirm={onConfirm}
+					onOpenModal={onOpenModal}
+					onEditCheck={onEditCheck}
+				/>
 			</div>
 		</section>
 	);

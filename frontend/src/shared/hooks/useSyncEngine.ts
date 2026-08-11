@@ -53,12 +53,14 @@ export const useSyncEngine = (email?: string) => {
 				checkTime: check.checkTime,
 				isPresent: check.isPresent,
 				observation: check.observation,
+				digitalBlackboardUseStatus: check.digitalBlackboardUseStatus,
 				offlineId: check.offlineId,
 			}));
 
 			// 2. Enviar lote al backend
-			const result = (await monitorApi.batchSync({ checks: checksToSync })).data
-				.data;
+			const result = (
+				await monitorApi.batchSync({ checks: checksToSync })
+			).data.data;
 
 			// 3. Marcar solo los registros persistidos. Los conflictos y rechazos
 			// se conservan para que el monitor los revise y descarte explícitamente.
@@ -102,7 +104,11 @@ export const useSyncEngine = (email?: string) => {
 				}
 			});
 
-			setStatus('SYNCED');
+			const hasFailures =
+				result.conflictIds.length > 0 ||
+				result.skippedIds.length > 0 ||
+				result.rejectedIds.length > 0;
+			setStatus(hasFailures ? 'ERROR' : 'SYNCED');
 
 			// 4. Limpieza: descartar SYNCED antiguos (política de retención)
 			await cleanupSyncedChecks(email);

@@ -9,7 +9,12 @@ import { Error, Loading } from '@shared/components';
 import { setOptions } from '@shared/utils';
 import { TAcademicCommonProps } from '@api/periods';
 
-const customStyles: StylesConfig = {
+type TRoleOption = {
+	value: string;
+	label: string;
+};
+
+const customStyles: StylesConfig<TRoleOption, true> = {
 	control: (base, state) => ({
 		...base,
 		backgroundColor: '#f3f4f6', // bg-gray-100
@@ -205,7 +210,7 @@ export const SelectAccessRoles = ({
 				<label className="block mb-2 font-bold" htmlFor="roles">
 					Roles de accesso
 				</label>
-				<Select
+				<Select<TRoleOption, true>
 					name="roles"
 					options={rolesAvailables}
 					isMulti
@@ -213,9 +218,7 @@ export const SelectAccessRoles = ({
 					styles={customStyles}
 					placeholder="Seleccione"
 					onChange={valuesSelected => {
-						const roles = valuesSelected.map(
-							v => (v as { value: string; label: string }).value
-						);
+						const roles = valuesSelected.map(role => role.value);
 
 						setValues({
 							...values,

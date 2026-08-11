@@ -114,25 +114,23 @@ export const EditPcEquipmentForm = ({
 			</form>
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
-  			<Button
-  				type="button"
-  				onClick={onCancel}
-  				disabled={isPendingUpdate}
-  				variant="outline"
-  			>
-  				Cancelar
-  			</Button>
+				<Button
+					type="button"
+					onClick={onCancel}
+					disabled={isPendingUpdate}
+					variant="outline"
+				>
+					Cancelar
+				</Button>
 				<Button
 					type="submit"
 					form="edit-pc-equipment-form"
 					disabled={isPendingUpdate}
 					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 				>
-          {!isPendingUpdate && <FiSave className="size-4" />}
+					{!isPendingUpdate && <FiSave className="size-4" />}
 					<span>
-						{isPendingUpdate
-							? 'Guardando...'
-							: 'Actualizar Equipo'}
+						{isPendingUpdate ? 'Guardando...' : 'Actualizar Equipo'}
 					</span>
 				</Button>
 			</div>

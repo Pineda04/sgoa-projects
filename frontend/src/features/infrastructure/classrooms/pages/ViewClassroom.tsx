@@ -64,13 +64,7 @@ const SectionCard = ({
 	</div>
 );
 
-const InfoField = ({
-	label,
-	value,
-}: {
-	label: string;
-	value?: ReactNode;
-}) => (
+const InfoField = ({ label, value }: { label: string; value?: ReactNode }) => (
 	<div className="min-w-0">
 		<p className="text-xs font-medium text-muted-foreground mb-1">
 			{label}
@@ -96,11 +90,7 @@ export const ViewClassroom = () => {
 
 	const [isAvailOpen, openAvail, closeAvail] = useModal();
 
-	const {
-		data: classroom,
-		isLoading,
-		isError,
-	} = useGetClassroomById(id);
+	const { data: classroom, isLoading, isError } = useGetClassroomById(id);
 
 	const buildings = useGetAllBuildings();
 	const roomTypes = useGetAllRoomTypes();
@@ -132,16 +122,16 @@ export const ViewClassroom = () => {
 		: undefined;
 
 	const classroomAirConditioners =
-		airConditioners.data?.filter(
-			ac => ac.classroom?.id === classroom.id
-		) ?? [];
+		airConditioners.data?.filter(ac => ac.classroom?.id === classroom.id) ??
+		[];
 
 	const classroomDigitalBlackboards =
 		digitalBlackboards.data?.filter(
 			db => db.classroom?.id === classroom.id
 		) ?? [];
 
-	const isVirtual = roomType?.description?.toLowerCase() === 'espacio virtual';
+	const isVirtual =
+		roomType?.description?.toLowerCase() === 'espacio virtual';
 	const isInactive = !classroom.activeStatus;
 	const disableAvailability = isVirtual || isInactive;
 
@@ -173,7 +163,9 @@ export const ViewClassroom = () => {
 											: 'bg-red-100 text-red-700'
 									}`}
 								>
-									{classroom.activeStatus ? 'Activa' : 'Inactiva'}
+									{classroom.activeStatus
+										? 'Activa'
+										: 'Inactiva'}
 								</span>
 							</div>
 							<p className="text-sm text-muted-foreground mt-1 truncate">
@@ -229,10 +221,15 @@ export const ViewClassroom = () => {
 						<div className="lg:col-span-2 space-y-6">
 							<SectionCard
 								title="Información general"
-								icon={<BuildingOffice2Icon className="size-4.5" />}
+								icon={
+									<BuildingOffice2Icon className="size-4.5" />
+								}
 							>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<InfoField label="Edificio" value={building?.name} />
+									<InfoField
+										label="Edificio"
+										value={building?.name}
+									/>
 									<InfoField
 										label="Tipo de aula"
 										value={roomType?.description}
@@ -254,16 +251,19 @@ export const ViewClassroom = () => {
 											label="Departamentos"
 											value={
 												classroom.departments &&
-												classroom.departments.length > 0 ? (
+												classroom.departments.length >
+													0 ? (
 													<div className="flex flex-wrap gap-1.5 mt-0.5">
-														{classroom.departments.map(d => (
-															<span
-																key={d.id}
-																className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium text-foreground"
-															>
-																{d.name}
-															</span>
-														))}
+														{classroom.departments.map(
+															d => (
+																<span
+																	key={d.id}
+																	className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium text-foreground"
+																>
+																	{d.name}
+																</span>
+															)
+														)}
 													</div>
 												) : undefined
 											}
@@ -332,31 +332,42 @@ export const ViewClassroom = () => {
 													<span>
 														Marca:{' '}
 														<span className="font-medium text-foreground">
-															{brands.data?.find(b => b.id === db.brandId)
-																?.name ?? '—'}
+															{brands.data?.find(
+																b =>
+																	b.id ===
+																	db.brandId
+															)?.name ?? '—'}
 														</span>
 													</span>
 													<span>
 														Tipo de monitor:{' '}
 														<span className="font-medium text-foreground">
 															{monitorTypes.data?.find(
-																t => t.id === db.monitorTypeId
-															)?.description ?? '—'}
+																t =>
+																	t.id ===
+																	db.monitorTypeId
+															)?.description ??
+																'—'}
 														</span>
 													</span>
 													<span>
 														Tamaño:{' '}
 														<span className="font-medium text-foreground">
 															{monitorSizes.data?.find(
-																s => s.id === db.monitorSizeId
-															)?.description ?? '—'}
+																s =>
+																	s.id ===
+																	db.monitorSizeId
+															)?.description ??
+																'—'}
 														</span>
 													</span>
 													<span>
 														Condición:{' '}
 														<span className="font-medium text-foreground">
 															{conditions.data?.find(
-																c => c.id === db.conditionId
+																c =>
+																	c.id ===
+																	db.conditionId
 															)?.status ?? '—'}
 														</span>
 													</span>
@@ -394,13 +405,15 @@ export const ViewClassroom = () => {
 													<span>
 														Marca:{' '}
 														<span className="font-medium text-foreground">
-															{ac.brand?.name ?? '—'}
+															{ac.brand?.name ??
+																'—'}
 														</span>
 													</span>
 													<span>
 														Condición:{' '}
 														<span className="font-medium text-foreground">
-															{ac.condition?.status ?? '—'}
+															{ac.condition
+																?.status ?? '—'}
 														</span>
 													</span>
 												</div>
@@ -428,7 +441,8 @@ export const ViewClassroom = () => {
 							</p>
 						) : pcEquipments.isError ? (
 							<EmptyState text="No se pudieron cargar las computadoras" />
-						) : !pcEquipments.data || pcEquipments.data.length === 0 ? (
+						) : !pcEquipments.data ||
+						  pcEquipments.data.length === 0 ? (
 							<EmptyState text="Sin computadoras asignadas" />
 						) : (
 							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -444,7 +458,8 @@ export const ViewClassroom = () => {
 											<span>
 												Tipo:{' '}
 												<span className="font-medium text-foreground">
-													{pc.pcType?.description ?? '—'}
+													{pc.pcType?.description ??
+														'—'}
 												</span>
 											</span>
 											<span>
@@ -468,7 +483,8 @@ export const ViewClassroom = () => {
 											<span>
 												Condición:{' '}
 												<span className="font-medium text-foreground">
-													{pc.condition?.status ?? '—'}
+													{pc.condition?.status ??
+														'—'}
 												</span>
 											</span>
 										</div>

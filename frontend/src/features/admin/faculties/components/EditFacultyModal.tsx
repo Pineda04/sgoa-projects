@@ -87,7 +87,9 @@ export const EditFacultyModal = ({
 						>
 							{!isPending && <FiSave className="size-4" />}
 							<span>
-								{isPending ? 'Guardando...' : 'Actualizar Facultad'}
+								{isPending
+									? 'Guardando...'
+									: 'Actualizar Facultad'}
 							</span>
 						</Button>
 					</div>

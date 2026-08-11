@@ -1,12 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { IAuthStateProps, IChildrenProps, IResponse, ITokenPayload, IUser } from '@shared/interfaces';
+import {
+	IAuthStateProps,
+	IChildrenProps,
+	IResponse,
+	ITokenPayload,
+	IUser,
+} from '@shared/interfaces';
 import { authApi, IAuthLogin, ITokens, useLogin } from '@api/auth';
-import { getAccessToken, removeAccessToken, setAccessToken } from '@features/auth';
-import { queryClient, db, saveCredentials, verifyCredentials, clearOtherMonitorsCache, cleanupSyncedChecks } from '@config/lib';
+import {
+	getAccessToken,
+	removeAccessToken,
+	setAccessToken,
+} from '@features/auth';
+import {
+	queryClient,
+	db,
+	saveCredentials,
+	verifyCredentials,
+	clearOtherMonitorsCache,
+	cleanupSyncedChecks,
+} from '@config/lib';
 import { askConfirm } from '@shared/utils';
 import { clear as clearIdb } from 'idb-keyval';
+import { isAxiosError } from 'axios';
 
 const initialState: IAuthStateProps = {
 	isAuthenticated: false,
@@ -38,7 +56,11 @@ const checkSessionToken = async (token: string) => {
 
 	//Si no hay internet y puede registrar verificaciones, omitir el refresh y usar el token cacheado
 	if (!navigator.onLine && canCheckOffline(decoded)) {
-		console.log('Modo offline detectado para Monitor: saltando refresh de token.');
+		if (decoded.exp < currentTime) {
+			throw new Error(
+				'La autorización offline expiró. Conéctate para renovarla.'
+			);
+		}
 		return decoded;
 	}
 
@@ -64,8 +86,12 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 		accessToken: string
 	): IResponse<ITokens> | null => {
 		const info = jwtDecode<ITokenPayload>(accessToken);
+		const currentTime = Date.now() / 1000;
 
-		if (!canCheckOffline(info)) return null;
+		if (!canCheckOffline(info) || info.exp < currentTime) return null;
+
+		queryClient.clear();
+		void clearIdb();
 
 		setAuthState({
 			isAuthenticated: true,
@@ -86,11 +112,17 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 		// Feature: dejar solo la caché local (asignaciones/período) de este monitor.
 		void clearOtherMonitorsCache(info.email).catch(err =>
-			console.error('No se pudo limpiar la caché de otros monitores:', err)
+			console.error(
+				'No se pudo limpiar la caché de otros monitores:',
+				err
+			)
 		);
 		// Política de retención: descartar checks SYNCED antiguos del monitor.
 		void cleanupSyncedChecks(info.email).catch(err =>
-			console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+			console.error(
+				'No se pudo limpiar los checks sincronizados antiguos:',
+				err
+			)
 		);
 
 		return {
@@ -135,12 +167,17 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 			const { data } = await loginRequest(userCredentials);
 			const info = jwtDecode<ITokenPayload>(data.data.access_token);
 
+			queryClient.clear();
+			await clearIdb();
+
 			setAuthState({
 				isAuthenticated: true,
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
-					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					permissions: Array.isArray(info.permissions)
+						? info.permissions
+						: [],
 					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},
@@ -152,31 +189,42 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 			// Feature: guardar credenciales cifradas para habilitar el login offline posterior.
 			// Se hace en segundo plano: no debe bloquear el login si el guardado fallara.
-			void saveCredentials({
-				email: userCredentials.email,
-				password: userCredentials.password,
-				accessToken: data.data.access_token,
-			}).catch(err =>
-				console.error('No se pudieron guardar las credenciales locales:', err)
-			);
+			if (canCheckOffline(info)) {
+				void saveCredentials({
+					email: userCredentials.email,
+					password: userCredentials.password,
+					accessToken: data.data.access_token,
+				}).catch(err =>
+					console.error(
+						'No se pudieron guardar las credenciales locales:',
+						err
+					)
+				);
+			} else {
+				void db.credentials.delete(userCredentials.email.toLowerCase());
+			}
 
 			// Feature: descartar la caché local de otros monitores del dispositivo.
 			void clearOtherMonitorsCache(userCredentials.email).catch(err =>
-				console.error('No se pudo limpiar la caché de otros monitores:', err)
+				console.error(
+					'No se pudo limpiar la caché de otros monitores:',
+					err
+				)
 			);
 			// Política de retención: descartar checks SYNCED antiguos del monitor.
 			void cleanupSyncedChecks(userCredentials.email).catch(err =>
-				console.error('No se pudo limpiar los checks sincronizados antiguos:', err)
+				console.error(
+					'No se pudo limpiar los checks sincronizados antiguos:',
+					err
+				)
 			);
 
 			return data;
-		} catch (error: unknown) {
+		} catch (error) {
 			// Feature: con "red" según el navegador pero sin conectividad real (error de red),
 			// se intenta validar contra las credenciales locales antes de mostrar el error.
 			const isNetworkError =
-				error && typeof error === 'object' && 'code' in error
-					? (error as { code?: string }).code === 'ERR_NETWORK'
-					: false;
+				isAxiosError(error) && error.code === 'ERR_NETWORK';
 
 			if (isNetworkError) {
 				const restoredToken = await verifyCredentials(userCredentials);
@@ -189,9 +237,10 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 			// Fix: los errores de red (AxiosError sin response) hacían que el mensaje quedara en
 			// undefined y no se mostrara el toast. Ahora siempre cae en el mensaje por defecto.
-			const message =
-				(error as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-				'Ocurrió un error al iniciar sesión.';
+			const message = isAxiosError<{ message?: string }>(error)
+				? (error.response?.data?.message ??
+					'Ocurrió un error al iniciar sesión.')
+				: 'Ocurrió un error al iniciar sesión.';
 
 			setAuthState(prev => ({
 				...prev,
@@ -225,7 +274,6 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 
 				// Limpiar los registros locales del usuario al salir
 				await db.offlineChecks.where('email').equals(email).delete();
-				await clearIdb();
 			}
 
 			setAuthState(prev => ({
@@ -243,6 +291,7 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 			}
 
 			queryClient.clear();
+			await clearIdb();
 
 			setAuthState({
 				...initialState,
@@ -250,7 +299,7 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 			});
 
 			removeAccessToken();
-		} catch (error: unknown) {
+		} catch (error) {
 			console.log(error);
 			setAuthState({
 				...initialState,
@@ -282,7 +331,9 @@ export const AuthProvider = ({ children }: IChildrenProps) => {
 				user: {
 					email: info.email,
 					roles: Array.isArray(info.roles) ? info.roles : [],
-					permissions: Array.isArray(info.permissions) ? info.permissions : [],
+					permissions: Array.isArray(info.permissions)
+						? info.permissions
+						: [],
 					isSuperAdmin: !!info.isSuperAdmin,
 					sub: info.sub,
 				},

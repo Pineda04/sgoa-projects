@@ -26,7 +26,9 @@ export const CreateAirConditionerForm = ({
 		initialValues: initialAirConditionerValues,
 		onSubmit: async values => {
 			try {
-				await createMutation.mutateAsync(buildAirConditionerBody(values));
+				await createMutation.mutateAsync(
+					buildAirConditionerBody(values)
+				);
 				formik.resetForm();
 				onSuccess();
 			} catch {
@@ -42,7 +44,9 @@ export const CreateAirConditionerForm = ({
 
 	return (
 		<div className="flex flex-col max-h-[calc(90vh-6rem)] min-h-0">
-			<h1 className="text-xl font-bold mb-1 shrink-0">Nuevo Aire Acondicionado</h1>
+			<h1 className="text-xl font-bold mb-1 shrink-0">
+				Nuevo Aire Acondicionado
+			</h1>
 			<p className="text-sm text-gray-500 mb-3 shrink-0">
 				Registrar un nuevo aire acondicionado
 			</p>
@@ -60,26 +64,26 @@ export const CreateAirConditionerForm = ({
 			</form>
 
 			<div className="flex justify-end gap-2 mt-2 shrink-0">
-  			<Button
-  				type="button"
-  				onClick={onCancel}
-  				disabled={createMutation.isPending}
-  				variant="outline"
-  			>
-  				Cancelar
-  			</Button>
+				<Button
+					type="button"
+					onClick={onCancel}
+					disabled={createMutation.isPending}
+					variant="outline"
+				>
+					Cancelar
+				</Button>
 				<Button
 					type="submit"
 					form="create-air-conditioner-form"
 					disabled={createMutation.isPending}
 					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 				>
-				{!createMutation.isPending && <FiSave className="size-4" />}
-				<span>
-					{createMutation.isPending
-						? 'Guardando...'
-						: 'Guardar Aire Acondicionado'}
-				</span>
+					{!createMutation.isPending && <FiSave className="size-4" />}
+					<span>
+						{createMutation.isPending
+							? 'Guardando...'
+							: 'Guardar Aire Acondicionado'}
+					</span>
 				</Button>
 			</div>
 		</div>

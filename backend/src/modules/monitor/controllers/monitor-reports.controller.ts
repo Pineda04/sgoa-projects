@@ -1,6 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import {
   ApiCommonResponses,
+  GetCurrentUserId,
   ResponseMessage,
   RequirePermission,
 } from 'src/common/decorators';
@@ -21,7 +22,10 @@ export class MonitorReportsController {
       'Devuelve el total de chequeos, presentes, ausentes y porcentaje de cumplimiento. Acepta filtros por fecha, docente, edificio y centro, y puede agruparse por día, docente o edificio mediante el parámetro groupBy.',
     okDescription: 'Reporte generado correctamente.',
   })
-  getReport(@Query() query: ReportFiltersDto) {
-    return this.monitorReportsService.getReport(query);
+  getReport(
+    @GetCurrentUserId() userId: string,
+    @Query() query: ReportFiltersDto,
+  ) {
+    return this.monitorReportsService.getReport(userId, query);
   }
 }

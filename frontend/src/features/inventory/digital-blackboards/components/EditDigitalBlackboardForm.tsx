@@ -121,7 +121,7 @@ export const EditDigitalBlackboardForm = ({
 					disabled={isPendingUpdate}
 					className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 				>
-          {!isPendingUpdate && <FiSave className="size-4" />}
+					{!isPendingUpdate && <FiSave className="size-4" />}
 					<span>
 						{isPendingUpdate
 							? 'Guardando...'

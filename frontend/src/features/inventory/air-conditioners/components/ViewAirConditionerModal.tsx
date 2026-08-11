@@ -33,7 +33,11 @@ export const ViewAirConditionerModal = ({
 	onClose,
 	airConditionerId,
 }: ViewAirConditionerModalProps) => {
-	const { data: airConditioner, isLoading, isError } = useGetAirConditioner(airConditionerId);
+	const {
+		data: airConditioner,
+		isLoading,
+		isError,
+	} = useGetAirConditioner(airConditionerId);
 
 	return (
 		<ModalBase isOpen={isOpen} onClose={onClose}>
@@ -91,7 +95,10 @@ export const ViewAirConditionerModal = ({
 							/>
 							<DetailField
 								label="Centro"
-								value={airConditioner.classroom?.build?.center?.name}
+								value={
+									airConditioner.classroom?.build?.center
+										?.name
+								}
 							/>
 						</div>
 					</>

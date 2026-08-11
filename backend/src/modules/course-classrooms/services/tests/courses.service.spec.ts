@@ -70,7 +70,12 @@ describe('CoursesService', () => {
     });
 
     it('should not include activeStatus in where clause when activeStatus is undefined', async () => {
-      await service.findBySearchTerm(searchTerm, mockQuery, undefined, undefined);
+      await service.findBySearchTerm(
+        searchTerm,
+        mockQuery,
+        undefined,
+        undefined,
+      );
 
       const callArgs = mockPrismaService.course.findMany.mock.calls[0][0];
       expect(callArgs.where).not.toHaveProperty('activeStatus');
@@ -78,7 +83,12 @@ describe('CoursesService', () => {
 
     it('should include centerDepartmentId filter when provided', async () => {
       const centerDepartmentId = '123e4567-e89b-12d3-a456-426614174000';
-      await service.findBySearchTerm(searchTerm, mockQuery, centerDepartmentId, true);
+      await service.findBySearchTerm(
+        searchTerm,
+        mockQuery,
+        centerDepartmentId,
+        true,
+      );
 
       expect(prisma.course.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -97,13 +107,21 @@ describe('CoursesService', () => {
     });
 
     it('should apply search term to both code and name fields', async () => {
-      await service.findBySearchTerm(searchTerm, mockQuery, undefined, undefined);
+      await service.findBySearchTerm(
+        searchTerm,
+        mockQuery,
+        undefined,
+        undefined,
+      );
 
       const callArgs = mockPrismaService.course.findMany.mock.calls[0][0];
       expect(callArgs.where.OR).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            code: { contains: searchTerm.replace(/-/g, ''), mode: 'insensitive' },
+            code: {
+              contains: searchTerm.replace(/-/g, ''),
+              mode: 'insensitive',
+            },
           }),
           expect.objectContaining({
             name: { contains: searchTerm, mode: 'insensitive' },

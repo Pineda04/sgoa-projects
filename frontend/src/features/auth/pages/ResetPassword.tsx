@@ -1,18 +1,8 @@
 import LogoUNAH from '/logo-unah-4.png';
 import { useFormik } from 'formik';
-import {
-	ArrowLeft,
-	EyeIcon,
-	EyeOff,
-	GraduationCap,
-	Lock,
-} from 'lucide-react';
+import { ArrowLeft, EyeIcon, EyeOff, GraduationCap, Lock } from 'lucide-react';
 import { useEffect } from 'react';
-import {
-	useSearchParams,
-	useNavigate,
-	Link,
-} from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { resetPasswordSchema } from '../schemas';
 import { TResetPassword, useResetPassword } from '@api/auth';
 import { Button, Error, errorsFormik, useShowPassword } from '@shared';
@@ -74,7 +64,7 @@ export const ResetPassword = () => {
 	};
 
 	useEffect(() => {
-			if (isError) navigate(`/auth/login`);
+		if (isError) navigate(`/auth/login`);
 	}, [isError]);
 
 	return (
@@ -134,7 +124,7 @@ export const ResetPassword = () => {
 
 			<div className="bg-background flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
 				<div className="w-full max-w-md animate-in slide-up stagger-2">
-					<div className='p-6 sm:p-8'>
+					<div className="p-6 sm:p-8">
 						<div className="my-8 text-center">
 							<h2 className="text-2xl sm:text-3xl font-display text-foreground mb-2">
 								Restablecer contraseña
@@ -231,7 +221,9 @@ export const ResetPassword = () => {
 									<Button
 										type="button"
 										onClick={() =>
-											handleShowPassword('passwordConfirm')
+											handleShowPassword(
+												'passwordConfirm'
+											)
 										}
 										className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
 										variant="ghost"

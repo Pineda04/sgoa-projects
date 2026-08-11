@@ -138,7 +138,7 @@ just dev     # Inicia backend y frontend en modo desarrollo
 | `just install-frontend` | Instala deps del frontend                                       |
 | `just dev`           | Inicia backend y frontend en modo desarrollo (BD debe estar activa)|
 | `just db-setup`      | Levanta la BD y aplica las migraciones de Prisma                   |
-| `just db-up`         | Levanta los contenedores de Docker (PostgreSQL + pgAdmin)          |
+| `just db-up`         | Levanta PostgreSQL en Docker                                        |
 | `just db-down`       | Detiene los contenedores de Docker                                 |
 | `just hooks`         | Instala los git hooks con Lefthook                                 |
 

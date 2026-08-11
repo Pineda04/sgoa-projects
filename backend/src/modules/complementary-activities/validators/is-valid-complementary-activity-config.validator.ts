@@ -10,9 +10,7 @@ import { ComplementaryActivitiesService } from '../services/complementary-activi
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidComplementaryActivityConfigConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidComplementaryActivityConfigConstraint implements ValidatorConstraintInterface {
   constructor(
     private readonly complementaryActivitiesService: ComplementaryActivitiesService,
     private readonly activityTypesService: ActivityTypesService,

@@ -68,7 +68,7 @@ db-setup: db-up
     npx prisma migrate deploy
     pnpm tsx prisma/seed.ts
 
-# Levantar los contenedores de Docker (PostgreSQL + pgAdmin)
+# Levantar PostgreSQL y pgAdmin en Docker
 [working-directory: 'backend']
 db-up:
     docker compose up -d postgres pgadmin

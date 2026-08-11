@@ -3,6 +3,7 @@ import {
 	TMonitorBuildingAssignments,
 	TMonitorCurrentAssignment,
 } from '@api/monitor';
+import { formatScheduleRange } from '@shared/utils';
 
 const DAY_LABELS: Record<string, string> = {
 	Do: 'Domingo',
@@ -117,14 +118,15 @@ export const getCurrentTimeString = (): string => {
 
 export const isCheckEdited = (
 	check: Pick<TMonitorAssignmentCheckStatus, 'createdAt' | 'updatedAt'>
-): boolean => new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
+): boolean =>
+	new Date(check.updatedAt).getTime() > new Date(check.createdAt).getTime();
 
 export type TChecklistView = 'COMPACT' | 'DETAILED' | 'GRID';
 export type TStatusFilter = 'ALL' | 'PENDING' | 'VERIFIED';
 
 export const CHECKLIST_VIEW_STORAGE_KEY = 'monitor-checklist-view';
 
-export const isChecklistView = (value: unknown): value is TChecklistView =>
+export const isChecklistView = (value: string): value is TChecklistView =>
 	value === 'COMPACT' || value === 'DETAILED' || value === 'GRID';
 
 export interface TChecklistItem {
@@ -140,6 +142,7 @@ export interface TChecklistItem {
 	classroomName: string;
 	startMinutes: number | null;
 	startTime: string | null;
+	timeRange: string | null;
 	jornada: TJornada | null;
 	schedule: string;
 	searchText: string;
@@ -189,7 +192,8 @@ export const buildChecklistItems = (
 		building.classrooms.flatMap(classroom =>
 			classroom.assignments.map<TChecklistItem>(assignment => {
 				const serverCheck = assignment.check;
-				const localOverride = checkOverrides[assignment.courseClassroomId] ?? null;
+				const localOverride =
+					checkOverrides[assignment.courseClassroomId] ?? null;
 				const check = localOverride ?? serverCheck ?? null;
 				const checkSource: TChecklistItem['checkSource'] = localOverride
 					? 'LOCAL'
@@ -199,6 +203,7 @@ export const buildChecklistItems = (
 				const startMinutes = parseStartMinutes(assignment.section);
 				const startTime =
 					startMinutes === null ? null : formatMinutes(startMinutes);
+				const timeRange = formatScheduleRange(assignment.section);
 
 				return {
 					id: assignment.courseClassroomId,
@@ -208,15 +213,17 @@ export const buildChecklistItems = (
 					status: getAssignmentStatus(check),
 					canEditCheck:
 						checkSource === 'LOCAL' ||
-						(checkSource === 'SERVER' && serverCheck?.monitorId === currentUserId),
+						(checkSource === 'SERVER' &&
+							serverCheck?.monitorId === currentUserId),
 					buildingId: building.buildingId,
 					buildingName: building.buildingName,
 					classroomId: classroom.classroomId,
 					classroomName: classroom.classroomName,
 					startMinutes,
 					startTime,
+					timeRange,
 					jornada: getJornadaFromMinutes(startMinutes),
-					schedule: `${formatDays(assignment.days)}${startTime ? ` · ${startTime}` : ''}`,
+					schedule: `${formatDays(assignment.days)}${timeRange ? ` · ${timeRange}` : ''}`,
 					searchText: [
 						assignment.courseName,
 						assignment.courseCode,
@@ -244,7 +251,9 @@ export const filterByScope = (
 	return items.filter(item => {
 		const matchesBuilding = !buildingId || item.buildingId === buildingId;
 		const matchesJornada =
-			jornada === 'ALL' || item.jornada === null || item.jornada === jornada;
+			jornada === 'ALL' ||
+			item.jornada === null ||
+			item.jornada === jornada;
 		const matchesSearch = !term || item.searchText.includes(term);
 
 		return matchesBuilding && matchesJornada && matchesSearch;
@@ -308,5 +317,7 @@ export const countPendingByJornada = (
 	items.filter(
 		item =>
 			item.status === 'PENDING' &&
-			(jornada === 'ALL' || item.jornada === null || item.jornada === jornada)
+			(jornada === 'ALL' ||
+				item.jornada === null ||
+				item.jornada === jornada)
 	).length;

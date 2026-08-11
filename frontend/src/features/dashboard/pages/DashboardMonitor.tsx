@@ -37,7 +37,7 @@ export const DashboardMonitor = () => {
 			<div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<h2 className="text-2xl font-semibold mb-2">
-						UNAH PAC{' '}{periodTitle ?? '...'}
+						UNAH PAC {periodTitle ?? '...'}
 					</h2>
 					<p className="text-sm">{currentUser.user?.name}</p>
 					<p className="text-sm">{currentUser.user?.code}</p>

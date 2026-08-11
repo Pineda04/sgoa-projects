@@ -3,7 +3,12 @@ import { useGetAllPeriodsForAuthorities } from '@api/assignment-reports';
 import { TCurrentAcademicPeriod, useGetAcademicPeriods } from '@api/periods';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetAllCenters } from '@api/centers';
-import { DataTable, IDataTableColumn, Pagination, Loading } from '@shared/components';
+import {
+	DataTable,
+	IDataTableColumn,
+	Pagination,
+	Loading,
+} from '@shared/components';
 import { EyeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePaginationParams } from '@shared/hooks';
@@ -173,7 +178,9 @@ export const ListPlanificationsAuthorities = () => {
 				<div className="w-full py-2">
 					<DataTable<TPlanificationAuthorityRow>
 						columns={columns}
-						data={(data?.data ?? []) as TPlanificationAuthorityRow[]}
+						data={
+							(data?.data ?? []) as TPlanificationAuthorityRow[]
+						}
 						getRowKey={row => `${row.id}-${row.centerDepartmentId}`}
 						loading={isLoading}
 						emptyMessage="No hay planificaciones registradas"

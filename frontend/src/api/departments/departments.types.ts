@@ -26,8 +26,8 @@ export type TDepartmentWithCoordinations = TDepartment & {
 // mostrada en la tabla de departamentos de RRHH en la ruta: /rrhh/departamentos
 
 export type TOutputDepartment = TDepartment & {
-	facultyName: string;	//descomentada linea del servicio
+	facultyName: string; //descomentada linea del servicio
 	coordinations: TDepartmentCoordination[];
 	// Ojo: en la propiedad TCoordinator de coordinator.types.ts la prop userId no viene en la respuesta, viene como id
 	// no se utiliza, pero por si llega a utilizar se deja el comentario
-}
+};

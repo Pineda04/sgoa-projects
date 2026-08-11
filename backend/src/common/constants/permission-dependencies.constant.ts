@@ -1,4 +1,7 @@
-import { DEFAULT_PERMISSIONS, TPermissionSubject } from './permissions.constant';
+import {
+  DEFAULT_PERMISSIONS,
+  TPermissionSubject,
+} from './permissions.constant';
 
 /**
  * Acción implícita de "lectura de referencia". No es asignable: nunca se
@@ -105,6 +108,13 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
   reports: lookup('departments', 'periods'),
   // La planificación asigna aulas dentro de un periodo.
   planifications: lookup('classrooms', 'periods'),
+  'analytics-academic-load': grant('read', 'analytics'),
+  'analytics-enrollment': grant('read', 'analytics'),
+  'analytics-classrooms': grant('read', 'analytics'),
+  'analytics-staff': grant('read', 'analytics'),
+  'analytics-technology': grant('read', 'analytics'),
+  'analytics-activities': grant('read', 'analytics'),
+  'analytics-monitoring': grant('read', 'analytics'),
 
   // --- Vistas compuestas: conceden lo que dejan hacer sus secciones -------
   // Ficha de aula abierta desde un dashboard: solo consulta. Trae los catálogos
@@ -126,7 +136,14 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
 
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Periodos, Consolidado.
   'dashboard-authorities': [
-    ...grant('manage', 'planifications', 'reports', 'users', 'courses', 'periods'),
+    ...grant(
+      'manage',
+      'planifications',
+      'reports',
+      'users',
+      'courses',
+      'periods',
+    ),
     ...lookup('departments'),
   ],
   // Pestañas: Planificaciones, Informes, Usuarios, Clases, Consolidado.

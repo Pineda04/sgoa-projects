@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsString, ValidateIf } from 'class-validator';
+import { IsBoolean, IsEnum, IsString, ValidateIf } from 'class-validator';
+import { DigitalBlackboardUseStatus } from 'src/generated/prisma/client';
 
 export class UpdateCheckDto {
   @ApiPropertyOptional({
@@ -15,4 +16,12 @@ export class UpdateCheckDto {
   @ValidateIf((_, value) => value !== undefined)
   @IsString()
   observation?: string;
+
+  @ApiPropertyOptional({
+    description: 'Uso observado de la pizarra digital durante el chequeo.',
+    enum: DigitalBlackboardUseStatus,
+  })
+  @ValidateIf((_, value) => value !== undefined)
+  @IsEnum(DigitalBlackboardUseStatus)
+  digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 }

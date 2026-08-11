@@ -20,7 +20,8 @@ export const useCreateRole = () =>
 
 export const useUpdateRole = (roleId: string) => {
 	const { mutateAsync, isPending } = useMutation({
-		mutationFn: (body: TUpdateRole) => rolesApi.update({ id: roleId, body }),
+		mutationFn: (body: TUpdateRole) =>
+			rolesApi.update({ id: roleId, body }),
 		onSuccess: async res => {
 			alertSuccess(res);
 			await Promise.all([

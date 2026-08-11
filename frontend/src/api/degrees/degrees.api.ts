@@ -1,7 +1,14 @@
 import { api } from '@config/lib';
 import { IResponse } from '@shared';
-import { TAcademicCommonProps } from "../periods/periods.types";
-import { TCreateDegreeName, TPostgrad, TPostgradDegree, TUndergrad, TUndergradDegree, TUpdateDegreeName } from "./degrees.types";
+import { TAcademicCommonProps } from '../periods/periods.types';
+import {
+	TCreateDegreeName,
+	TPostgrad,
+	TPostgradDegree,
+	TUndergrad,
+	TUndergradDegree,
+	TUpdateDegreeName,
+} from './degrees.types';
 
 // Titulos (Abarca Pregrados y Posgrados)
 export const degreesApi = {

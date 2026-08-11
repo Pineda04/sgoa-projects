@@ -12,9 +12,7 @@ import { ECourseClassroomConfig } from '../enums';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidClassroomConfigConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidClassroomConfigConstraint implements ValidatorConstraintInterface {
   constructor(
     private readonly courseClassroomsService: CourseClassroomsService,
     private readonly courseStadisticsService: CourseStadisticsService,

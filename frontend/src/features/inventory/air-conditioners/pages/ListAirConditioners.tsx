@@ -10,9 +10,15 @@ export const ListAirConditioners = () => {
 	const { data, isLoading } = useGetAirConditioners();
 	const [isCreateOpen, openCreate, closeCreate] = useModal();
 
-	const canCreate = ability.can('create', 'air-conditioners') || ability.can('manage', 'air-conditioners');
-	const canUpdate = ability.can('update', 'air-conditioners') || ability.can('manage', 'air-conditioners');
-	const canDelete = ability.can('delete', 'air-conditioners') || ability.can('manage', 'air-conditioners');
+	const canCreate =
+		ability.can('create', 'air-conditioners') ||
+		ability.can('manage', 'air-conditioners');
+	const canUpdate =
+		ability.can('update', 'air-conditioners') ||
+		ability.can('manage', 'air-conditioners');
+	const canDelete =
+		ability.can('delete', 'air-conditioners') ||
+		ability.can('manage', 'air-conditioners');
 
 	const handleCreateSuccess = () => {
 		closeCreate();

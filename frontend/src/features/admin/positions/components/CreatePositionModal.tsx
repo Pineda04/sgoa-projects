@@ -78,7 +78,9 @@ export const CreatePositionModal = ({
 						>
 							{!isPending && <FiSave className="size-4" />}
 							<span>
-								{isPending ? 'Guardando...' : 'Guardar Posición'}
+								{isPending
+									? 'Guardando...'
+									: 'Guardar Posición'}
 							</span>
 						</Button>
 					</div>

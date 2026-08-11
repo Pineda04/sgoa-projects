@@ -59,10 +59,7 @@ export const PlanificationAuthority = () => {
 			</div>
 
 			<div className="flex flex-row gap-2 justify-center pt-5">
-				<Button
-					onClick={() => navigate(-1)}
-					variant="outline"
-				>
+				<Button onClick={() => navigate(-1)} variant="outline">
 					<ArrowLeftIcon className="size-5" />
 					Volver
 				</Button>

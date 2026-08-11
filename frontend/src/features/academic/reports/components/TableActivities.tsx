@@ -23,7 +23,8 @@ export const TableActivities = ({
 	activities: TComplementaryActivity[];
 	mode: 'view' | 'edit';
 }) => {
-	const { delComplementaryActivity } = useDeleteComplementaryActivity(reportId);
+	const { delComplementaryActivity } =
+		useDeleteComplementaryActivity(reportId);
 
 	// Modal
 	const [showModal, handleShowModal, handleCloseModal] = useModal();

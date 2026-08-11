@@ -91,9 +91,7 @@ export const EditClassroom = () => {
 				<div className="flex justify-end gap-2 mt-4 md:col-span-2">
 					<Button
 						type="button"
-						onClick={() =>
-							navigate('/infrastructure/classrooms')
-						}
+						onClick={() => navigate('/infrastructure/classrooms')}
 						disabled={isPendingUpdate}
 						variant="outline"
 					>
@@ -104,10 +102,12 @@ export const EditClassroom = () => {
 						disabled={isPendingUpdate}
 						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 					>
-					  {!isPendingUpdate && <FiSave className="size-4" />}
-            <span>
-             	{isPendingUpdate ? 'Guardando...' : 'Actualizar Aula'}
-            </span>
+						{!isPendingUpdate && <FiSave className="size-4" />}
+						<span>
+							{isPendingUpdate
+								? 'Guardando...'
+								: 'Actualizar Aula'}
+						</span>
 					</Button>
 				</div>
 			</form>

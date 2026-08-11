@@ -19,9 +19,13 @@ export const useGetCurrentAcademicPeriod = (options?: {
 			// Feature: sobreescribir la caché local (Dexie) en cada fetch exitoso
 			// para mostrar el período vigente sin red.
 			try {
-				if (cacheEmail) await saveCurrentAcademicPeriod(cacheEmail, res.data.data);
+				if (cacheEmail)
+					await saveCurrentAcademicPeriod(cacheEmail, res.data.data);
 			} catch (error) {
-				console.warn('No se pudo actualizar la caché del período:', error);
+				console.warn(
+					'No se pudo actualizar la caché del período:',
+					error
+				);
 			}
 			return res;
 		},
@@ -33,10 +37,15 @@ export const useGetCurrentAcademicPeriod = (options?: {
 	});
 };
 
-export const useGetAcademicPeriods = (year?: string, pac?: string, modality?: string) =>
+export const useGetAcademicPeriods = (
+	year?: string,
+	pac?: string,
+	modality?: string
+) =>
 	useQuery({
 		queryKey: academicPeriodsKeys.lists(year, pac, modality),
-		queryFn: () => academicPeriodsApi.getAcademicPeriods(year, pac, modality),
+		queryFn: () =>
+			academicPeriodsApi.getAcademicPeriods(year, pac, modality),
 		retry: false,
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.LONG,

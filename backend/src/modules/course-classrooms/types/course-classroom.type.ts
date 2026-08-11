@@ -5,7 +5,7 @@ export type TCourseClassroom = {
   teachingSessionId: string;
   section: string;
   days: string;
-  studentCount: number;
+  studentCount: number | null;
   modalityId: string;
   nearGraduation: boolean;
   groupCode: string;

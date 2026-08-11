@@ -1,9 +1,13 @@
+export type DigitalBlackboardUseStatus = 'USED' | 'NOT_USED' | 'UNKNOWN';
+
 export type TMonitorAssignmentCheckStatus = {
 	id: string;
 	monitorId: string;
 	isPresent: boolean;
 	checkTime: string;
 	observation: string | null;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus | null;
+	syncStatus?: 'pending' | 'synced';
 	createdAt: string;
 	updatedAt: string;
 };
@@ -15,6 +19,7 @@ export type TMonitorCurrentAssignment = {
 	groupCode: string;
 	section: string;
 	days: string;
+	hasDigitalBlackboard: boolean;
 	teacher: {
 		id: string;
 		name: string;
@@ -41,21 +46,25 @@ export type TCreateCheck = {
 	isPresent: boolean;
 	observation?: string;
 	offlineId?: string;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 };
 
 export type TUpdateCheck = {
 	id: string;
 	isPresent?: boolean;
 	observation?: string;
+	digitalBlackboardUseStatus?: DigitalBlackboardUseStatus;
 };
 
 export type TScheduleComplianceCheck = {
 	id: string;
 	courseClassroomId: string;
 	monitorId: string;
+	buildingId: string;
 	checkDate: string;
 	checkTime: string;
 	isPresent: boolean;
+	digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null;
 	observation?: string | null;
 	offlineId?: string | null;
 	syncedAt?: string | null;
@@ -83,6 +92,7 @@ export type TScheduleComplianceCheckDetail = TScheduleComplianceCheck & {
 		};
 		classroom: {
 			name: string;
+			hasDigitalBlackboard: boolean;
 			building: {
 				id: string;
 				name: string;
@@ -101,12 +111,17 @@ export type TCheckFilters = {
 	teacherId?: string;
 	buildingId?: string;
 	centerId?: string;
+	periodId?: string;
+	centerDepartmentId?: string;
 };
 
 export enum EReportGroupBy {
 	DAY = 'day',
 	TEACHER = 'teacher',
 	BUILDING = 'building',
+	CENTER = 'center',
+	CENTER_DEPARTMENT = 'centerDepartment',
+	PERIOD = 'period',
 }
 
 export type TReportFilters = TCheckFilters & {
@@ -117,7 +132,7 @@ export type TMonitorReportSummary = {
 	totalChecks: number;
 	present: number;
 	absent: number;
-	complianceRate: number;
+	complianceRate: number | null;
 };
 
 export type TMonitorReportGroup = TMonitorReportSummary & {

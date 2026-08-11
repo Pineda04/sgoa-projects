@@ -4,3 +4,4 @@ export * from './pagination.util';
 export * from './format-date-time-zone.util';
 export * from './gen-password.util';
 export * from './date.utils';
+export * from './course-classroom-schedule.util';

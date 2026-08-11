@@ -13,10 +13,7 @@ import {
 	monitorTypesKeys,
 	monitorSizesKeys,
 } from './pc-equipments.keys';
-import {
-	TCreatePcEquipment,
-	TUpdatePcEquipment,
-} from './pc-equipments.types';
+import { TCreatePcEquipment, TUpdatePcEquipment } from './pc-equipments.types';
 
 export const useCreatePcEquipment = () =>
 	useMutation({

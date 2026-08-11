@@ -14,7 +14,10 @@ export const useGetAllCenters = (config?: { enabled?: boolean }) =>
 		enabled: config?.enabled,
 	});
 
-export const useGetCenterById = (centerId: string, config?: { enabled?: boolean }) =>
+export const useGetCenterById = (
+	centerId: string,
+	config?: { enabled?: boolean }
+) =>
 	useQuery({
 		queryKey: centersKeys.detail(centerId),
 		queryFn: () => centersApi.getCenterById(String(centerId)),

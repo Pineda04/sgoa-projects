@@ -11,6 +11,10 @@ export interface ICreateUserProps {
 	errors: { [K in keyof TCreateUser]?: string };
 	handleBlur: {
 		(e: React.FocusEvent<HTMLInputElement, Element>): void;
-		<T = string | React.FocusEvent<HTMLInputElement, Element>>(fieldOrEvent: T): T extends string ? (e: React.FocusEvent<HTMLInputElement, Element>) => void : void;
+		<T = string | React.FocusEvent<HTMLInputElement, Element>>(
+			fieldOrEvent: T
+		): T extends string
+			? (e: React.FocusEvent<HTMLInputElement, Element>) => void
+			: void;
 	};
 }

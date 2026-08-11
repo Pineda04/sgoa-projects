@@ -29,6 +29,7 @@ import { AppController } from './app.controller';
 import { TeachersDegreesModule } from './modules/teachers-degrees/teachers-degrees.module';
 import { PlanificatorAiModule } from './modules/planificator-ai/planificator-ai.module';
 import { MonitorModule } from './modules/monitor/monitor.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { MonitorModule } from './modules/monitor/monitor.module';
     TeachersDegreesModule,
     PlanificatorAiModule,
     MonitorModule,
+    AnalyticsModule,
   ],
   providers: [
     {

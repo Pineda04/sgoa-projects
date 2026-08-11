@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { contractTypesKeys } from "./contract-types.keys";
-import { contractTypesApi } from "./contract-types.api";
+import { useQuery } from '@tanstack/react-query';
+import { contractTypesKeys } from './contract-types.keys';
+import { contractTypesApi } from './contract-types.api';
 import { STALE_TIME } from '@config/lib';
 
 export const useGetAllContractTypes = () =>
@@ -11,4 +11,4 @@ export const useGetAllContractTypes = () =>
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.VERY_LONG,
 		select: res => res.data.data,
-  });
+	});

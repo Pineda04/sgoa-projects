@@ -51,7 +51,12 @@ const deriveMasterBits = async (password: string, salt: Uint8Array) => {
 	);
 
 	return crypto.subtle.deriveBits(
-		{ name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+		{
+			name: 'PBKDF2',
+			salt,
+			iterations: PBKDF2_ITERATIONS,
+			hash: 'SHA-256',
+		},
 		baseKey,
 		256
 	);
@@ -102,7 +107,8 @@ const timingSafeEqual = (a: Uint8Array, b: Uint8Array) => {
 
 // crypto.subtle solo existe en contextos seguros (localhost/https). En http por IP-LAN
 // se degrada sin romper: no se guarda ni se verifica localmente.
-const hasCrypto = () => typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
+const hasCrypto = () =>
+	typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
 
 export const saveCredentials = async ({
 	email,
@@ -119,7 +125,11 @@ export const saveCredentials = async ({
 		const key = await deriveCryptoKey(masterBits);
 
 		const encryptedToken = new Uint8Array(
-			await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoder.encode(accessToken))
+			await crypto.subtle.encrypt(
+				{ name: 'AES-GCM', iv },
+				key,
+				encoder.encode(accessToken)
+			)
 		);
 
 		await db.credentials.put({
@@ -172,7 +182,10 @@ export const verifyCredentials = async ({
 
 		return decoder.decode(decrypted);
 	} catch (error) {
-		console.warn('No se pudieron verificar las credenciales locales:', error);
+		console.warn(
+			'No se pudieron verificar las credenciales locales:',
+			error
+		);
 		return null;
 	}
 };

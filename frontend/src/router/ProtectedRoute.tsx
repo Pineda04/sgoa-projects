@@ -50,7 +50,11 @@ export const ProtectedRoute = ({
 			: [subject]
 		: [];
 
-	if (action && subjects.length && !subjects.some(s => ability.can(action, s)))
+	if (
+		action &&
+		subjects.length &&
+		!subjects.some(s => ability.can(action, s))
+	)
 		return <Navigate to="/home" replace />;
 
 	return <AppLayout />;

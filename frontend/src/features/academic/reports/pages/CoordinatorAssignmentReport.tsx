@@ -28,7 +28,7 @@ import {
 import { ArrowLeftIcon } from 'lucide-react';
 
 export const CoordinatorAssignmentReport = () => {
-  const { id } = useParams();
+	const { id } = useParams();
 	const navigate = useNavigate();
 	const [selectedFont, setSelectedFont] = useState<EPdfFont | undefined>();
 
@@ -91,8 +91,12 @@ export const CoordinatorAssignmentReport = () => {
 						{assignmentReportInfo.data &&
 							`No. ${assignmentReportInfo.data.period.pac}, ${assignmentReportInfo.data.period.pac_modality}, ${assignmentReportInfo.data.period.year}`}
 					</h1>
-					<h2 className="text-center sm:text-left text-xl mt-2">Docente: {teacherInfo.data?.name}</h2>
-					<h2 className="text-center sm:text-left text-xl">Codigo: {teacherInfo.data?.code}</h2>
+					<h2 className="text-center sm:text-left text-xl mt-2">
+						Docente: {teacherInfo.data?.name}
+					</h2>
+					<h2 className="text-center sm:text-left text-xl">
+						Codigo: {teacherInfo.data?.code}
+					</h2>
 				</div>
 			</div>
 			<div className="flex flex-col items-center sm:flex-row gap-2 mt-4">

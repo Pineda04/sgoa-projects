@@ -19,12 +19,17 @@ const buildCheckFiltersParams = (filters?: TCheckFilters) => {
 	if (filters?.teacherId) params.set('teacherId', filters.teacherId);
 	if (filters?.buildingId) params.set('buildingId', filters.buildingId);
 	if (filters?.centerId) params.set('centerId', filters.centerId);
+	if (filters?.periodId) params.set('periodId', filters.periodId);
+	if (filters?.centerDepartmentId)
+		params.set('centerDepartmentId', filters.centerDepartmentId);
 	return params;
 };
 
 export const monitorApi = {
 	getCurrentAssignments: () =>
-		api.get<IResponse<TMonitorBuildingAssignments[]>>('/monitor/current-assignments'),
+		api.get<IResponse<TMonitorBuildingAssignments[]>>(
+			'/monitor/current-assignments'
+		),
 
 	getBuildings: () =>
 		api.get<IResponse<TMonitorBuilding[]>>('/monitor/buildings'),

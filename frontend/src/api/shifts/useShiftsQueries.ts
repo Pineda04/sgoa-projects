@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { shiftsKeys } from "./shifts.keys";
-import { shiftsApi } from "./shifts.api";
+import { useQuery } from '@tanstack/react-query';
+import { shiftsKeys } from './shifts.keys';
+import { shiftsApi } from './shifts.api';
 import { STALE_TIME } from '@config/lib';
 
 export const useGetAllShifts = () =>
@@ -11,4 +11,4 @@ export const useGetAllShifts = () =>
 		refetchOnWindowFocus: false,
 		staleTime: STALE_TIME.VERY_LONG,
 		select: res => res.data.data,
-  });
+	});

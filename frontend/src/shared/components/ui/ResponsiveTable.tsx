@@ -63,7 +63,7 @@ export function ResponsiveTable<T>({
 	return (
 		<div className={`overflow-x-auto rounded-lg shadow-md ${className}`}>
 			<table className="w-full hidden md:table">
-				<thead className="bg-[#144C74] text-white">
+				<thead className="bg-primary text-primary-foreground">
 					<tr className="first:rounded-tl-lg last:rounded-tr-lg">
 						{showRowNumber && (
 							<th className="py-3 px-4 text-center font-semibold text-sm w-16 first:rounded-tl-lg">
@@ -73,7 +73,7 @@ export function ResponsiveTable<T>({
 						{columns.map((col, i) => (
 							<th
 								key={col.key}
-								className={`py-3 px-4 text-center font-semibold text-sm ${col.headerClassName || ''} ${i === columns.length - 1 && showRowNumber ? 'last:rounded-tr-lg' : ''} ${i === columns.length - 1 && !showRowNumber ? 'last:rounded-tr-lg' : ''} ${col.sticky === 'right' ? 'sticky right-0 z-20 bg-[#144C74]' : ''} ${col.sticky === 'left' ? 'sticky left-0 z-20 bg-[#144C74]' : ''}`}
+								className={`py-3 px-4 text-center font-semibold text-sm ${col.headerClassName || ''} ${i === columns.length - 1 && showRowNumber ? 'last:rounded-tr-lg' : ''} ${i === columns.length - 1 && !showRowNumber ? 'last:rounded-tr-lg' : ''} ${col.sticky === 'right' ? 'sticky right-0 z-20 bg-primary' : ''} ${col.sticky === 'left' ? 'sticky left-0 z-20 bg-primary' : ''}`}
 							>
 								{col.header}
 							</th>
@@ -84,7 +84,9 @@ export function ResponsiveTable<T>({
 					{data.length === 0 ? (
 						<tr>
 							<td
-								colSpan={columns.length + (showRowNumber ? 1 : 0)}
+								colSpan={
+									columns.length + (showRowNumber ? 1 : 0)
+								}
 								className="py-8 text-muted-foreground"
 							>
 								{emptyMessage}
@@ -95,26 +97,29 @@ export function ResponsiveTable<T>({
 							<tr
 								key={getRowKey(row)}
 								className={`
-                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}
-                  hover:bg-gray-200 transition-colors duration-150
+                  ${index % 2 === 0 ? 'bg-card' : 'bg-muted'}
+                  hover:bg-primary-light transition-colors duration-150
                   ${onRowClick ? 'cursor-pointer' : ''}
                   ${rowClassName ? rowClassName(row, index) : ''}
                 `}
 								onClick={() => onRowClick?.(row)}
 							>
 								{showRowNumber && (
-									<td className="py-3 px-4 border-t border-gray-200">
+									<td className="py-3 px-4 border-t border-border">
 										{index + 1}
 									</td>
 								)}
 								{columns.map(col => (
 									<td
 										key={col.key}
-										className={`py-3 px-4 border-t border-gray-200 ${col.className || ''} ${col.sticky === 'right' ? 'sticky right-0 z-10 ' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-100') : ''} ${col.sticky === 'left' ? 'sticky left-0 z-10 ' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-100') : ''}`}
+										className={`py-3 px-4 border-t border-border ${col.className || ''} ${col.sticky === 'right' ? 'sticky right-0 z-10 ' + (index % 2 === 0 ? 'bg-card' : 'bg-muted') : ''} ${col.sticky === 'left' ? 'sticky left-0 z-10 ' + (index % 2 === 0 ? 'bg-card' : 'bg-muted') : ''}`}
 									>
 										{col.render
 											? col.render(row, index)
-											: (getNestedValue(row, col.key) as ReactNode)}
+											: (getNestedValue(
+													row,
+													col.key
+												) as ReactNode)}
 									</td>
 								))}
 							</tr>
@@ -123,7 +128,7 @@ export function ResponsiveTable<T>({
 				</tbody>
 			</table>
 
-			<div className="md:hidden space-y-3">
+			<div className="min-w-0 space-y-3 md:hidden">
 				{data.length === 0 ? (
 					<div className="bg-card border border-card-border rounded-xl p-8 text-center text-muted-foreground">
 						{emptyMessage}
@@ -145,22 +150,34 @@ export function ResponsiveTable<T>({
 						>
 							{showRowNumber && (
 								<div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
-									<span className="text-xs font-medium text-muted-foreground">#</span>
-									<span className="font-semibold text-primary">{index + 1}</span>
+									<span className="text-xs font-medium text-muted-foreground">
+										#
+									</span>
+									<span className="font-semibold text-primary">
+										{index + 1}
+									</span>
 								</div>
 							)}
-							<dl className="space-y-2">
+							<dl className="min-w-0 space-y-2">
 								{columns
 									.filter(col => !col.hiddenOnMobile)
 									.map(col => (
-										<div key={col.key} className="flex justify-between items-start gap-2">
+										<div
+											key={col.key}
+											className="grid min-w-0 grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-start gap-2"
+										>
 											<dt className="text-xs text-muted-foreground shrink-0">
 												{col.mobileLabel || col.header}
 											</dt>
-											<dd className="text-sm font-medium text-foreground text-right shrink-0">
+											<dd className="min-w-0 break-words text-right text-sm font-medium text-foreground [overflow-wrap:anywhere]">
 												{col.render
 													? col.render(row, index)
-													: String(getNestedValue(row, col.key) ?? '-')}
+													: String(
+															getNestedValue(
+																row,
+																col.key
+															) ?? '-'
+														)}
 											</dd>
 										</div>
 									))}

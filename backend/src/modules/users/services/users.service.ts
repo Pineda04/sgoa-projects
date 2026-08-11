@@ -38,7 +38,11 @@ export class UsersService {
     // roleId: true,
     userRoles: {
       include: {
-        role: true,
+        role: {
+          include: {
+            rolePermissions: { include: { permission: true } },
+          },
+        },
       },
     },
   };
@@ -398,7 +402,74 @@ export class UsersService {
     return paginateOutput(results, count, query);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<TUser> {
+  async findMonitorBuildingAssignments(userId: string) {
+    await this.assertActiveMonitor(userId);
+
+    const assignments = await this.prisma.monitorBuildingAssignment.findMany({
+      where: { monitorId: userId },
+      select: {
+        building: {
+          select: {
+            id: true,
+            name: true,
+            centerId: true,
+            center: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: [{ building: { name: 'asc' } }, { buildingId: 'asc' }],
+    });
+
+    return {
+      userId,
+      buildings: assignments.map(({ building }) => ({
+        id: building.id,
+        name: building.name,
+        centerId: building.centerId,
+        centerName: building.center.name,
+      })),
+    };
+  }
+
+  async replaceMonitorBuildingAssignments(
+    userId: string,
+    buildingIds: string[],
+  ) {
+    await this.assertActiveMonitor(userId);
+
+    const buildings = await this.prisma.building.findMany({
+      where: { id: { in: buildingIds } },
+      select: { id: true },
+    });
+
+    if (buildings.length !== buildingIds.length) {
+      throw new BadRequestException(
+        'Uno o más edificios seleccionados no existen.',
+      );
+    }
+
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.monitorBuildingAssignment.deleteMany({
+        where: { monitorId: userId },
+      });
+
+      if (buildingIds.length) {
+        await transaction.monitorBuildingAssignment.createMany({
+          data: buildingIds.map((buildingId) => ({
+            monitorId: userId,
+            buildingId,
+          })),
+        });
+      }
+    });
+
+    return this.findMonitorBuildingAssignments(userId);
+  }
+
+  async update(
+    id: string,
+    updateUserDto: Partial<UpdateUserDto>,
+  ): Promise<TUser> {
     const {
       name,
       code,
@@ -414,6 +485,28 @@ export class UsersService {
       roles && roles.length
         ? await this.roleService.findManyByNames(roles)
         : [];
+    const captureRoleCount =
+      roles === undefined
+        ? null
+        : await this.prisma.role.count({
+            where: {
+              name: { in: roles },
+              OR: [
+                { isSuperAdmin: true },
+                {
+                  rolePermissions: {
+                    some: {
+                      permission: {
+                        subject: 'schedule-compliance-check',
+                        action: { in: ['manage', 'create'] },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          });
+    const shouldClearMonitorAssignments = captureRoleCount === 0;
 
     const userData: Partial<Prisma.UserUpdateInput> = {
       name,
@@ -442,14 +535,21 @@ export class UsersService {
       };
     }
 
-    if (!Object.values(teacher).filter((el) => el).length)
-      return await this.prisma.user.update({
-        where: {
-          id,
-        },
-        data: userData,
-        select: this.selectPropsUser,
+    if (!Object.values(teacher).filter((el) => el).length) {
+      return this.prisma.$transaction(async (transaction) => {
+        const updatedUser = await transaction.user.update({
+          where: { id },
+          data: userData,
+          select: this.selectPropsUser,
+        });
+        if (shouldClearMonitorAssignments) {
+          await transaction.monitorBuildingAssignment.deleteMany({
+            where: { monitorId: id },
+          });
+        }
+        return updatedUser;
       });
+    }
 
     const teacherData: Prisma.TeacherUpdateInput = {
       category: teacher.categoryId
@@ -477,31 +577,91 @@ export class UsersService {
           : undefined,
     };
 
-    const [updatedUser, updatedTeacher] = await this.prisma.$transaction([
-      this.prisma.user.update({
+    const updatedUser = await this.prisma.$transaction(async (transaction) => {
+      const user = await transaction.user.update({
         where: { id },
         data: userData,
         select: this.selectPropsUser,
-      }),
-      this.prisma.teacher.update({
+      });
+      await transaction.teacher.update({
         where: { userId: id },
         data: teacherData,
-      }),
-    ]);
+      });
+      if (shouldClearMonitorAssignments) {
+        await transaction.monitorBuildingAssignment.deleteMany({
+          where: { monitorId: id },
+        });
+      }
+      return user;
+    });
 
     return updatedUser;
   }
 
-  async remove(id: string): Promise<boolean> {
-    const deleteUser = await this.prisma.user.update({
+  private async assertActiveMonitor(userId: string): Promise<void> {
+    const user = await this.prisma.user.findFirst({
       where: {
-        id,
+        id: userId,
+        activeStatus: true,
+        userRoles: {
+          some: {
+            role: {
+              OR: [
+                { isSuperAdmin: true },
+                {
+                  rolePermissions: {
+                    some: {
+                      permission: {
+                        subject: 'schedule-compliance-check',
+                        action: { in: ['manage', 'create'] },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
       },
-      data: {
-        activeStatus: false,
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException(
+        'El usuario debe estar activo y tener permiso para registrar verificaciones.',
+      );
+    }
+  }
+
+  async remove(id: string): Promise<boolean> {
+    const target = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userRoles: {
+          where: { role: { isSuperAdmin: true } },
+          select: { roleId: true },
+        },
       },
     });
 
-    return !!deleteUser;
+    if (!target) {
+      throw new NotFoundException(
+        `El usuario con id <${id}> no fue encontrado.`,
+      );
+    }
+
+    if (target.userRoles.length > 0) {
+      throw new ForbiddenException(
+        'No se puede desactivar una cuenta de super administrador.',
+      );
+    }
+
+    const deactivatedUser = await this.prisma.user.update({
+      where: { id },
+      data: { activeStatus: false, hashedRt: null },
+    });
+
+    return !!deactivatedUser;
   }
 }

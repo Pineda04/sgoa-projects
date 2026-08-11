@@ -79,16 +79,16 @@ const createCourseColumns = (
 					key: 'actions' as const,
 					header: 'Acciones',
 					mobileLabel: 'Acciones',
-        render: (row: CourseWithDepartment) => (
-            <div className='flex items-center justify-center'>
-  						<button
-  							onClick={() => onView(row.id)}
-  							title="Ver / Editar clase"
-  							className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
-  						>
-  							<EyeIcon className="size-5" />
-  						</button>
-            </div>
+					render: (row: CourseWithDepartment) => (
+						<div className="flex items-center justify-center">
+							<button
+								onClick={() => onView(row.id)}
+								title="Ver / Editar clase"
+								className="flex justify-center cursor-pointer text-primary hover:text-primary/80"
+							>
+								<EyeIcon className="size-5" />
+							</button>
+						</div>
 					),
 				},
 			]
@@ -143,9 +143,17 @@ export const CourseList = ({
 				? false
 				: undefined;
 
-	const coursesInfo = useSearchCourses(effectiveCenterDepartmentId, debValue, activeStatusParam);
+	const coursesInfo = useSearchCourses(
+		effectiveCenterDepartmentId,
+		debValue,
+		activeStatusParam
+	);
 
-	const allCoursesInfo = useGetAllCourses(showDepartmentFilter, debValue, activeStatusParam);
+	const allCoursesInfo = useGetAllCourses(
+		showDepartmentFilter,
+		debValue,
+		activeStatusParam
+	);
 
 	const hasFilter = selectedDepartment || searchTerm || activeFilter;
 
@@ -169,14 +177,10 @@ export const CourseList = ({
 
 	const columns = useMemo(
 		() =>
-			createCourseColumns(
-				!!showDepartmentInTable,
-				canUpdate,
-				id => {
-					setViewCourseId(id);
-					openView();
-				}
-			),
+			createCourseColumns(!!showDepartmentInTable, canUpdate, id => {
+				setViewCourseId(id);
+				openView();
+			}),
 		[showDepartmentInTable, canUpdate, openView]
 	);
 
@@ -192,7 +196,9 @@ export const CourseList = ({
 							type="text"
 							placeholder="Buscar por código o nombre..."
 							value={searchTerm}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>
+							) => {
 								setSearchTerm(e.target.value);
 								setPage(1);
 							}}
@@ -225,7 +231,9 @@ export const CourseList = ({
 						/>
 					)}
 				</div>
-				<div className={`flex justify-end col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}>
+				<div
+					className={`flex justify-end col-span-1 ${!showDepartmentFilter || !ability.can('read', 'centers') ? 'md:col-start-4' : ''}`}
+				>
 					{canCreateCourse && (
 						<Button
 							onClick={openCreate}

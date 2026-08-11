@@ -61,7 +61,7 @@ export const SyncIndicator = ({
 							pendingCount,
 							'',
 							's'
-					  )} en este dispositivo`
+						)} en este dispositivo`
 					: 'Sin conexión';
 			break;
 		case 'SYNCING':

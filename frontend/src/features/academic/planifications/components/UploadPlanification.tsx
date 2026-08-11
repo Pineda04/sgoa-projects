@@ -1,6 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { DocumentArrowDownIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
-import { TPlanification, TPlanificationWithErrors, useViewAcademicAssignmentMutation, academicAssignmentReportsApi } from '@api/assignment-reports';
+import {
+	DocumentArrowDownIcon,
+	DocumentArrowUpIcon,
+} from '@heroicons/react/24/outline';
+import {
+	TPlanification,
+	TPlanificationWithErrors,
+	useViewAcademicAssignmentMutation,
+	academicAssignmentReportsApi,
+} from '@api/assignment-reports';
 import { ESwalIcons, genericAlert } from '@shared/utils';
 import { Button } from '@shared/components';
 
@@ -104,10 +112,7 @@ export const UploadPlanification = ({
 			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
 		} catch {
-			genericAlert(
-				'No se pudo descargar la plantilla',
-				ESwalIcons.ERROR
-			);
+			genericAlert('No se pudo descargar la plantilla', ESwalIcons.ERROR);
 		}
 	};
 

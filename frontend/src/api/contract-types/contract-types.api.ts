@@ -10,8 +10,17 @@ export const contractTypesApi = {
 	createContractType: (body: { name: string }) =>
 		api.post<IResponse<TAcademicCommonProps>>(`/contract-types`, body),
 
-	updateContractType: ({ id, body }: { id: string; body: { name: string } }) =>
-		api.patch<IResponse<TAcademicCommonProps>>(`/contract-types/${id}`, body),
+	updateContractType: ({
+		id,
+		body,
+	}: {
+		id: string;
+		body: { name: string };
+	}) =>
+		api.patch<IResponse<TAcademicCommonProps>>(
+			`/contract-types/${id}`,
+			body
+		),
 
 	deleteContractType: (id: string) =>
 		api.delete<IResponse<void>>(`/contract-types/${id}`),

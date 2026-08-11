@@ -53,9 +53,7 @@ export const CreateClassroom = () => {
 					<Button
 						type="button"
 						variant="outline"
-						onClick={() =>
-							navigate('/infrastructure/classrooms')
-						}
+						onClick={() => navigate('/infrastructure/classrooms')}
 						disabled={isPendingCreate}
 					>
 						Cancelar
@@ -65,10 +63,10 @@ export const CreateClassroom = () => {
 						disabled={isPendingCreate}
 						className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
 					>
-            {!isPendingCreate && <FiSave className="size-4" />}
-							<span>
-								{isPendingCreate ? 'Guardando...' : 'Guardar Aula'}
-							</span>
+						{!isPendingCreate && <FiSave className="size-4" />}
+						<span>
+							{isPendingCreate ? 'Guardando...' : 'Guardar Aula'}
+						</span>
 					</Button>
 				</div>
 			</form>

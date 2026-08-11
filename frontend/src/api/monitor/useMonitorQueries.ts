@@ -24,16 +24,22 @@ export const useGetCurrentAssignments = (options?: {
 			// Feature: sobreescribir la caché local (Dexie) en cada fetch exitoso
 			// para habilitar el modo offline del monitor.
 			try {
-				if (cacheEmail) await saveCurrentAssignments(cacheEmail, res.data.data);
+				if (cacheEmail)
+					await saveCurrentAssignments(cacheEmail, res.data.data);
 			} catch (error) {
-				console.warn('No se pudo actualizar la caché de asignaciones:', error);
+				console.warn(
+					'No se pudo actualizar la caché de asignaciones:',
+					error
+				);
 			}
 			return res;
 		},
 		enabled,
 		staleTime: STALE_TIME.SHORT,
 		refetchInterval: () =>
-			enabled && navigator.onLine ? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL : false,
+			enabled && navigator.onLine
+				? CURRENT_ASSIGNMENTS_REFETCH_INTERVAL
+				: false,
 		select: res => res.data.data,
 	});
 };

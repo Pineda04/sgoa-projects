@@ -14,9 +14,7 @@ import { EInventoryConfig } from '../enums/inventory-config.enum';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsValidIdsInventoryConfigConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidIdsInventoryConfigConstraint implements ValidatorConstraintInterface {
   constructor(
     private readonly brandsService: BrandsService,
     private readonly conditionsService: ConditionsService,

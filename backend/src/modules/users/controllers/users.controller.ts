@@ -11,6 +11,7 @@ import {
   forwardRef,
   Inject,
   Query,
+  Put,
 } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-response.decorator';
@@ -19,6 +20,7 @@ import {
   GetCurrentUser,
   GetCurrentUserId,
   ResponseMessage,
+  SuperAdminOnly,
 } from 'src/common/decorators';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -28,6 +30,8 @@ import { RequirePermission } from 'src/common/decorators';
 import { TeachersService } from 'src/modules/teachers/services/teachers.service';
 import { TJwtPayload } from 'src/modules/auth/types';
 import { QueryPaginationDto } from 'src/common/dto';
+import { SetMonitorBuildingAssignmentsDto } from '../dto/set-monitor-building-assignments.dto';
+import { UpdateMyUserDto } from '../dto/update-my-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -124,7 +128,7 @@ export class UsersController {
     internalErrorDescription: 'Error interno al obtener los usuarios por rol.',
     notFoundDescription: 'No se encontraron usuarios para el rol especificado.',
   })
-  findAllUsersWithRole(@Param('roleId', ValidateIdPipe) roleId: string) {
+  findAllUsersWithRole(@Param('id', ValidateIdPipe) roleId: string) {
     return this.usersService.findAllUsersWithRole(roleId);
   }
 
@@ -153,7 +157,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({
-    type: UpdateUserDto,
+    type: UpdateMyUserDto,
     description: 'Datos para actualizar usuario autenticado',
     required: true,
   })
@@ -165,13 +169,35 @@ export class UsersController {
   })
   updateMy(
     @GetCurrentUserId() userId: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateMyUserDto,
   ) {
     return this.usersService.update(userId, updateUserDto);
   }
 
+  @Get(':id/monitor-buildings')
+  @SuperAdminOnly()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Asignaciones de edificios obtenidas correctamente.')
+  findMonitorBuildingAssignments(@Param('id', ValidateIdPipe) id: string) {
+    return this.usersService.findMonitorBuildingAssignments(id);
+  }
+
+  @Put(':id/monitor-buildings')
+  @SuperAdminOnly()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Asignaciones de edificios actualizadas correctamente.')
+  replaceMonitorBuildingAssignments(
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() dto: SetMonitorBuildingAssignmentsDto,
+  ) {
+    return this.usersService.replaceMonitorBuildingAssignments(
+      id,
+      dto.buildingIds,
+    );
+  }
+
   @Patch(':id')
-  @RequirePermission('update', 'users')
+  @SuperAdminOnly()
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Usuario actualizado correctamente.')
   @ApiBody({

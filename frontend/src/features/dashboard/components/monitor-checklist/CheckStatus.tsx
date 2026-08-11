@@ -20,7 +20,10 @@ export const StatusBadge = ({ status, className = '' }: StatusBadgeProps) => {
 		<span
 			className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${badgeClassName} ${className}`}
 		>
-			<span className={`size-1.5 rounded-full ${dotClassName}`} aria-hidden />
+			<span
+				className={`size-1.5 rounded-full ${dotClassName}`}
+				aria-hidden
+			/>
 			{label}
 		</span>
 	);
@@ -41,7 +44,21 @@ export const CheckResult = ({
 }: CheckResultProps) => (
 	<div className={`flex min-w-0 items-start gap-2 ${className}`}>
 		<div className="min-w-0 text-xs text-muted-foreground">
-			<p>Verificado a las {check.checkTime}</p>
+			<p>
+				{check.syncStatus === 'pending'
+					? `Pendiente de sincronización · ${check.checkTime}`
+					: `Verificado a las ${check.checkTime}`}
+			</p>
+			{check.digitalBlackboardUseStatus ? (
+				<p>
+					Pizarra:{' '}
+					{check.digitalBlackboardUseStatus === 'USED'
+						? 'usada'
+						: check.digitalBlackboardUseStatus === 'NOT_USED'
+							? 'no usada'
+							: 'no se pudo determinar'}
+				</p>
+			) : null}
 			{check.observation && (
 				<p className="line-clamp-2 italic" title={check.observation}>
 					“{check.observation}”

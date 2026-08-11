@@ -99,7 +99,7 @@ export class PcEquipmentsService {
       include: this.pcEquipmentInclude,
     });
 
-    return pcEquipments.map(pc => this.mapToPcEquipmentWithRelations(pc));
+    return pcEquipments.map((pc) => this.mapToPcEquipmentWithRelations(pc));
   }
 
   async findAllWithPagination(

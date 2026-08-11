@@ -23,6 +23,5 @@ export const centersApi = {
 	updateCenter: (id: string, data: { name: string }) =>
 		api.patch<IResponse<TCenter>>(`/centers/${id}`, data),
 
-	deleteCenter: (id: string) =>
-		api.delete<IResponse<void>>(`/centers/${id}`),
+	deleteCenter: (id: string) => api.delete<IResponse<void>>(`/centers/${id}`),
 };

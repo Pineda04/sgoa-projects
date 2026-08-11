@@ -91,3 +91,16 @@ export const useChangeStatusActiveStatus = () => {
 		isPendingChangeStatusActive: isPending,
 	};
 };
+
+export const useReplaceMonitorBuildingAssignments = () =>
+	useMutation({
+		mutationFn: usersApi.replaceMonitorBuildings,
+		onSuccess: async response => {
+			await alertSuccess(response);
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: usersKeys.all }),
+				queryClient.invalidateQueries({ queryKey: ['monitor'] }),
+				queryClient.invalidateQueries({ queryKey: ['analytics'] }),
+			]);
+		},
+	});

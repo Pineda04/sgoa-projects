@@ -15,13 +15,23 @@ export const teachersApi = {
 	getAllTeachers: (
 		page: number,
 		size: number,
-		filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+		filters?: {
+			searchTerm?: string;
+			categoryId?: string;
+			contractTypeId?: string;
+		}
 	) => {
-		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
 		if (filters?.searchTerm) params.set('searchTerm', filters.searchTerm);
 		if (filters?.categoryId) params.set('categoryId', filters.categoryId);
-		if (filters?.contractTypeId) params.set('contractTypeId', filters.contractTypeId);
-		return api.get<IResponse<TOutputTeacherPosition[]>>(`/teachers?${params.toString()}`);
+		if (filters?.contractTypeId)
+			params.set('contractTypeId', filters.contractTypeId);
+		return api.get<IResponse<TOutputTeacherPosition[]>>(
+			`/teachers?${params.toString()}`
+		);
 	},
 
 	getOneTeacher: (id: string) =>
@@ -46,12 +56,20 @@ export const teachersApi = {
 		page: number,
 		size: number,
 		centerDepartmentId: string,
-		filters?: { searchTerm?: string; categoryId?: string; contractTypeId?: string }
+		filters?: {
+			searchTerm?: string;
+			categoryId?: string;
+			contractTypeId?: string;
+		}
 	) => {
-		const params = new URLSearchParams({ page: String(page), size: String(size) });
+		const params = new URLSearchParams({
+			page: String(page),
+			size: String(size),
+		});
 		if (filters?.searchTerm) params.set('searchTerm', filters.searchTerm);
 		if (filters?.categoryId) params.set('categoryId', filters.categoryId);
-		if (filters?.contractTypeId) params.set('contractTypeId', filters.contractTypeId);
+		if (filters?.contractTypeId)
+			params.set('contractTypeId', filters.contractTypeId);
 		return api.get<IResponse<TOutputTeacher[]>>(
 			`/teachers/coordinator/center-department/${centerDepartmentId}?${params.toString()}`
 		);
@@ -75,13 +93,22 @@ export const teacherDepartmentPositionApi = {
 
 export const teacherCategoriesApi = {
 	getAllTeacherCategories: () =>
-    api.get<IResponse<TAcademicCommonProps[]>>(`/teacher-categories`),
+		api.get<IResponse<TAcademicCommonProps[]>>(`/teacher-categories`),
 
-  createTeacherCategory: (body: { name: string }) =>
+	createTeacherCategory: (body: { name: string }) =>
 		api.post<IResponse<TAcademicCommonProps>>(`/teacher-categories`, body),
 
-	updateTeacherCategory: ({ id, body }: { id: string; body: { name: string } }) =>
-		api.patch<IResponse<TAcademicCommonProps>>(`/teacher-categories/${id}`, body),
+	updateTeacherCategory: ({
+		id,
+		body,
+	}: {
+		id: string;
+		body: { name: string };
+	}) =>
+		api.patch<IResponse<TAcademicCommonProps>>(
+			`/teacher-categories/${id}`,
+			body
+		),
 
 	deleteTeacherCategory: (id: string) =>
 		api.delete<IResponse<void>>(`/teacher-categories/${id}`),

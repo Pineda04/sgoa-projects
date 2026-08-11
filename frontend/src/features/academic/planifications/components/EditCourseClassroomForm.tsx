@@ -12,7 +12,8 @@ import {
 	useGetClassroomsBySearchTerm,
 } from '@api/classrooms';
 import { editCourseClassroomSchema } from '../schemas';
-import { DAY_OPTIONS, generateTimeOptions } from '../utils';
+import { DAY_OPTIONS } from '../utils';
+import { ScheduleRangeField } from './ScheduleRangeField';
 import {
 	Button,
 	Error,
@@ -80,7 +81,7 @@ export const EditCourseClassroomForm = ({
 			classroomName: courseClassroom?.classroom.name ?? '',
 			section: courseClassroom?.section ?? '',
 			days: courseClassroom?.days ?? '',
-			studentCount: courseClassroom?.studentCount ?? 1,
+			studentCount: courseClassroom?.studentCount ?? null,
 			nearGraduation: courseClassroom?.nearGraduation ?? false,
 			observation: courseClassroom?.observation ?? '',
 		},
@@ -131,13 +132,13 @@ export const EditCourseClassroomForm = ({
 		>
 	) => {
 		const name = e.target.name as keyof TEditCourseClassroom;
-		let value: string | number | boolean;
+		let value: string | number | boolean | null;
 
 		if (e.target.type === 'checkbox') {
 			value = (e.target as HTMLInputElement).checked;
 		} else if (numericFields.includes(name)) {
 			const raw = e.target.value;
-			value = raw === '' ? 0 : Number(raw);
+			value = raw === '' ? null : Number(raw);
 		} else {
 			value = e.target.value;
 		}
@@ -255,16 +256,13 @@ export const EditCourseClassroomForm = ({
 
 				<div>
 					<label className="block mb-2 font-bold">Sección</label>
-					<select
-						name="section"
+					<ScheduleRangeField
 						value={formik.values.section}
-						onChange={handleChange}
-						onBlur={formik.handleBlur}
-						className="cursor-pointer w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
-					>
-						<option value="">Seleccione una hora</option>
-						{generateTimeOptions()}
-					</select>
+						onChange={value =>
+							formik.setFieldValue('section', value)
+						}
+						onBlur={() => formik.setFieldTouched('section', true)}
+					/>
 					{formik.touched.section && formik.errors.section && (
 						<Error error={formik.errors.section} />
 					)}
@@ -298,7 +296,7 @@ export const EditCourseClassroomForm = ({
 					<input
 						name="studentCount"
 						type="number"
-						value={formik.values.studentCount}
+						value={formik.values.studentCount ?? ''}
 						onChange={handleChange}
 						onBlur={formik.handleBlur}
 						className="cursor-text w-full bg-white border hover:border-gray-400 transition outline-none rounded px-2 py-1.5"
@@ -408,7 +406,8 @@ export const EditCourseClassroomForm = ({
 					classroomId={formik.values.classroomId}
 					classroomName={formik.values.classroomName}
 					defaultPeriodId={
-						courseClassroom.teachingSession.assignmentReport.periodId
+						courseClassroom.teachingSession.assignmentReport
+							.periodId
 					}
 				/>
 			)}

@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useAuth } from '@config';
-import { ROLE_NAMES } from '@shared/constants';
+import { useAbility } from '@config';
 import { usePaginationParams, useDebounce } from '@shared/hooks';
 import {
 	useGetCurrentAcademicPeriod,
@@ -9,11 +8,7 @@ import {
 import { useGetAllMyCoordinations } from '@api/teachers';
 import { useGetAllDepartments } from '@api/departments';
 import { useGetConsolidated } from '@api/courses';
-import {
-	DataTable,
-	Pagination,
-	SkeletonTable,
-} from '@shared/components';
+import { DataTable, Pagination, SkeletonTable } from '@shared/components';
 import { TOutputConsolidated } from '@api/courses/courses.types';
 
 interface Props {
@@ -41,6 +36,7 @@ const columns = [
 		key: 'initial',
 		header: 'Matrícula Inicial',
 		mobileLabel: 'Inicial',
+		render: (row: TOutputConsolidated) => row.initial ?? 'Sin información',
 	},
 	{
 		key: 'final',
@@ -61,25 +57,37 @@ const columns = [
 		key: 'indexABD',
 		header: '% ABD',
 		mobileLabel: '% ABD',
-		render: (row: TOutputConsolidated) => `${row.indexABD.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexABD === null
+				? 'Sin información'
+				: `${row.indexABD.toFixed(2)}%`,
 	},
 	{
 		key: 'indexNSP',
 		header: '% NSP',
 		mobileLabel: '% NSP',
-		render: (row: TOutputConsolidated) => `${row.indexNSP.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexNSP === null
+				? 'Sin información'
+				: `${row.indexNSP.toFixed(2)}%`,
 	},
 	{
 		key: 'indexRPB',
 		header: '% RPB',
 		mobileLabel: '% RPB',
-		render: (row: TOutputConsolidated) => `${row.indexRPB.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexRPB === null
+				? 'Sin información'
+				: `${row.indexRPB.toFixed(2)}%`,
 	},
 	{
 		key: 'indexAPB',
 		header: '% APB',
 		mobileLabel: '% APB',
-		render: (row: TOutputConsolidated) => `${row.indexAPB.toFixed(2)}%`,
+		render: (row: TOutputConsolidated) =>
+			row.indexAPB === null
+				? 'Sin información'
+				: `${row.indexAPB.toFixed(2)}%`,
 	},
 ];
 
@@ -87,12 +95,9 @@ export const Consolidated = ({
 	centerDepartmentId: propCenterDepartmentId,
 	showDepartmentFilter = false,
 }: Props = {}) => {
-	const { authState } = useAuth();
-	const roles = authState.user?.roles ?? [];
-	// DIRECCION es el nombre de rol por convención; el super admin siempre cuenta como tal.
-	const isAdminOrDireccion =
-		!!authState.user?.isSuperAdmin || roles.includes('DIRECCION');
-	const isCoord = roles.includes(ROLE_NAMES.COORDINADOR_AREA);
+	const ability = useAbility();
+	const isAdminOrDireccion = ability.can('manage', 'dashboard-authorities');
+	const isCoord = ability.can('manage', 'dashboard-coordinator');
 
 	const { page, size, setPage } = usePaginationParams();
 	const { data: currentPeriod } = useGetCurrentAcademicPeriod();
@@ -169,7 +174,9 @@ export const Consolidated = ({
 	return (
 		<div className="min-h-screen bg-transparent">
 			<div className="pb-4 grid items-end grid-cols-1 md:grid-cols-4 gap-4">
-				<div className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+				<div
+					className={`md:col-span-4 grid grid-cols-1 ${showDepartmentFilter ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}
+				>
 					<div>
 						<label className="block mb-2 font-semibold text-sm text-foreground">
 							Buscar Clase o Docente
@@ -198,7 +205,9 @@ export const Consolidated = ({
 								}}
 								className="w-full bg-gray-100 cursor-pointer shadow-md rounded-md px-3 py-2 outline-none border border-input focus:ring-2 focus:ring-primary/20 transition-colors"
 							>
-								<option value="">Todos los departamentos</option>
+								<option value="">
+									Todos los departamentos
+								</option>
 								{allDepartments?.map(d => (
 									<option key={d.id} value={d.id}>
 										{d.name}

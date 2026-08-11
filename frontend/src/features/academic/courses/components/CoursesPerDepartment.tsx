@@ -1,5 +1,11 @@
 import { ICoursesListProps, TCourse, useSearchCourses } from '@api/courses';
-import { Error, IResponsiveColumn, Loading, Pagination, ResponsiveTable } from '@shared/components';
+import {
+	Error,
+	IResponsiveColumn,
+	Loading,
+	Pagination,
+	ResponsiveTable,
+} from '@shared/components';
 import { useDebounce } from '@shared/hooks';
 import { useMemo, useState } from 'react';
 

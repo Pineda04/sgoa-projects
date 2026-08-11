@@ -1,2 +1,2 @@
-export * from './AirConditionersRouter'
-export * from './AirConditionersRoutes'
+export * from './AirConditionersRouter';
+export * from './AirConditionersRoutes';

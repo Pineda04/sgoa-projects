@@ -7,7 +7,10 @@ import {
 import { useGetAllBrands } from '@api/brands';
 import { useGetAllConditions } from '@api/conditions';
 import { useGetAllDepartments } from '@api/departments';
-import { TClassroomSearch, useGetClassroomsBySearchTerm } from '@api/classrooms';
+import {
+	TClassroomSearch,
+	useGetClassroomsBySearchTerm,
+} from '@api/classrooms';
 import { SearchAsyncSelect } from '@shared/components';
 import { customOptionsReactSelect } from '@shared/utils';
 import { TPcEquipmentFormValues } from '../schemas';

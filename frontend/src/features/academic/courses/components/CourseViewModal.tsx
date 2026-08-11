@@ -124,7 +124,8 @@ export const CourseViewModal = ({
 						</p>
 					</div>
 					<div className="flex items-center gap-2 shrink-0">
-					  {courseQuery.isLoading || courseQuery.isError ? null : isEditing ? (
+						{courseQuery.isLoading ||
+						courseQuery.isError ? null : isEditing ? (
 							<>
 								<Button
 									type="button"

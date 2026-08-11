@@ -91,5 +91,4 @@ export const academicPeriodsSeed: AcademicPeriod[] = [
     endDate: new Date(2028, 11, 20), // 20 de diciembre
     pac_modality: 'Trimestre',
   },
-]
-;
+];

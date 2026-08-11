@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import { verificationMediasApi } from "./verification-medias.api";
+import { useMutation } from '@tanstack/react-query';
+import { verificationMediasApi } from './verification-medias.api';
 import { alertSuccess } from '@shared';
 import { queryClient } from '@config/lib';
-import { academicAssignmentReportsKeys } from "../assignment-reports";
+import { academicAssignmentReportsKeys } from '../assignment-reports';
 
 export const useDeleteVerificationMediaFile = (reportId: string) => {
 	const { mutateAsync } = useMutation({

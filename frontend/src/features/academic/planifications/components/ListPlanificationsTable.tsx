@@ -17,7 +17,6 @@ export const ListPlanificationsTable = ({
 	isLoading,
 	data,
 }: ListPlanificationsTableProps) => {
-
 	const columns: IDataTableColumn<TPlanificationRow>[] = [
 		{
 			key: 'planification',

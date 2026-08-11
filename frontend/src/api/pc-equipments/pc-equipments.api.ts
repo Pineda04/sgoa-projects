@@ -27,8 +27,13 @@ export const pcEquipmentsApi = {
 	createPcEquipment: (body: TCreatePcEquipment) =>
 		api.post<IResponse<TPcEquipment>>(`/pc-equipments`, body),
 
-	updatePcEquipment: ({ id, body }: { id: string; body: TUpdatePcEquipment }) =>
-		api.patch<IResponse<TPcEquipment>>(`/pc-equipments/${id}`, body),
+	updatePcEquipment: ({
+		id,
+		body,
+	}: {
+		id: string;
+		body: TUpdatePcEquipment;
+	}) => api.patch<IResponse<TPcEquipment>>(`/pc-equipments/${id}`, body),
 
 	deletePcEquipment: (id: string) =>
 		api.delete<IResponse<TPcEquipment>>(`/pc-equipments/${id}`),

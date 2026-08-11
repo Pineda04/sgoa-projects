@@ -1,4 +1,5 @@
 import z from 'zod';
+import { isValidScheduleRange } from '@shared/utils';
 
 export const planificationSchema = z
 	.object({
@@ -29,10 +30,13 @@ export const planificationSchema = z
 					'El nombre de la asignatura no puede superar los 150 caracteres.',
 			}),
 		uv: z.number().min(1, { message: 'UV debe ser al menos 1.' }),
-		section: z.string().min(1, { message: 'La sección es obligatoria.' }),
+		section: z.string().refine(isValidScheduleRange, {
+			message: 'Seleccione un rango de horas válido.',
+		}),
 		studentCount: z
 			.number()
-			.min(1, { message: 'Debe haber al menos un alumno.' }),
+			.min(0, { message: 'El número de alumnos no puede ser negativo.' })
+			.nullable(),
 		days: z.string().min(2, { message: 'Seleccione un día válido.' }),
 		center: z.string().min(3, { message: 'El centro es obligatorio.' }),
 		classroomName: z
@@ -62,7 +66,7 @@ export const planificationSchema = z
 			});
 		}
 
-		if (data.studentCount > 100) {
+		if (data.studentCount !== null && data.studentCount > 100) {
 			ctx.addIssue({
 				code: 'custom',
 				message: 'El número de alumnos no puede ser mayor a 100.', // igual este

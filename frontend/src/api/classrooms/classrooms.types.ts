@@ -31,7 +31,7 @@ export type TClassroomSearch = {
 
 //Hize este cambio por diferencias entre los campos en BE de crear y TClassroom
 export type TCreateClassroom = Omit<TClassroom, 'id' | 'departments'> & {
-  departmentIds?: string[];
+	departmentIds?: string[];
 };
 
 export type TUpdateClassroom = Partial<TCreateClassroom>;

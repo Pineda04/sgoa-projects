@@ -18,8 +18,7 @@ export const rolesApi = {
 	getPermissionsCatalog: () =>
 		api.get<IResponse<TPermissionsCatalog>>(`/roles/permissions/catalog`),
 
-	create: (body: TCreateRole) =>
-		api.post<IResponse<TRole>>(`/roles`, body),
+	create: (body: TCreateRole) => api.post<IResponse<TRole>>(`/roles`, body),
 
 	update: ({ id, body }: { id: string; body: TUpdateRole }) =>
 		api.patch<IResponse<TRole>>(`/roles/${id}`, body),

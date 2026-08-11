@@ -7,4 +7,4 @@ export * from './lookup-source.decorator';
 export * from './super-admin-only.decorator';
 export * from './validator-constraint.decorator';
 export * from './pagination-swagger.decorator';
-export * from './api-response.decorator'
+export * from './api-response.decorator';

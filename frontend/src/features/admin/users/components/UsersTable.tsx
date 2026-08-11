@@ -1,7 +1,12 @@
 import { EyeIcon, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { UserView } from './UserView';
-import { TOutputTeacher, useGetAllTeacherCategories, useGetTeachers, useGetTeachersCoordinator } from '@api/teachers';
+import {
+	TOutputTeacher,
+	useGetAllTeacherCategories,
+	useGetTeachers,
+	useGetTeachersCoordinator,
+} from '@api/teachers';
 import { useGetAllContractTypes } from '@api/contract-types';
 import { useDebounce, useModal, usePaginationParams } from '@shared/hooks';
 import {
@@ -11,7 +16,8 @@ import {
 	ModalBase,
 	Pagination,
 } from '@shared/components';
-import { useAbility } from '@config';
+import { useAbility, useAuth } from '@config';
+import { MonitorBuildingAssignments } from './MonitorBuildingAssignments';
 
 interface UsersTableProps {
 	onNavigateToCreate?: () => void;
@@ -23,8 +29,10 @@ export const UsersTable = ({
 	centerDepartmentId,
 }: UsersTableProps) => {
 	const ability = useAbility();
+	const { authState } = useAuth();
 	const canCreate = ability.can('create', 'users');
 	const canRead = ability.can('read', 'users');
+	const canManageMonitorBuildings = !!authState.user?.isSuperAdmin;
 
 	const { setPage } = usePaginationParams();
 
@@ -39,8 +47,13 @@ export const UsersTable = ({
 		contractTypeId: contractTypeFilter || undefined,
 	};
 
-	const teachersQuery = useGetTeachers(filterParams, { enabled: !centerDepartmentId });
-	const teachersCoordinatorQuery = useGetTeachersCoordinator(centerDepartmentId ?? '', filterParams);
+	const teachersQuery = useGetTeachers(filterParams, {
+		enabled: !centerDepartmentId,
+	});
+	const teachersCoordinatorQuery = useGetTeachersCoordinator(
+		centerDepartmentId ?? '',
+		filterParams
+	);
 
 	const { data, isLoading, isError } = centerDepartmentId
 		? teachersCoordinatorQuery
@@ -126,8 +139,13 @@ export const UsersTable = ({
 
 	return (
 		<>
-      <div className="">
-			<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+			{canManageMonitorBuildings ? (
+				<div className="mb-6">
+					<MonitorBuildingAssignments />
+				</div>
+			) : null}
+			<div className="">
+				<div className="grid items-end grid-cols-1 md:grid-cols-4 gap-4 mb-5">
 					<div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
 						<div>
 							<label className="block mb-2 font-semibold text-sm text-foreground">

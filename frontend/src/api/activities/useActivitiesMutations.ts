@@ -1,15 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
-import { complementaryActivitiesApi } from "./activities.api";
+import { useMutation } from '@tanstack/react-query';
+import { complementaryActivitiesApi } from './activities.api';
 import { alertSuccess } from '@shared';
 import { queryClient } from '@config/lib';
-import { academicAssignmentReportsKeys } from "../assignment-reports";
+import { academicAssignmentReportsKeys } from '../assignment-reports';
 
 export const useCreateComplementaryActivity = (reportId: string) => {
 	const { mutateAsync } = useMutation({
 		mutationFn: (formData: FormData) =>
-			complementaryActivitiesApi.createComplementaryActivity(
-				formData
-			),
+			complementaryActivitiesApi.createComplementaryActivity(formData),
 		onSuccess: async res => {
 			try {
 				await alertSuccess(res);
