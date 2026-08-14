@@ -140,9 +140,9 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
       const workbook = await XlsxPopulate.fromDataAsync(buffer);
       const sheet = workbook.sheet(0);
 
-      this.validateTemplate(sheet);
-      const headers = this.getHeaders(sheet, 1);
-      const records = this.getData(sheet, headers, 2);
+      const headerRow = this.findHeaderRow(sheet);
+      const headers = this.getHeaders(sheet, headerRow);
+      const records = this.getData(sheet, headers, headerRow + 1);
 
       return {
         title: '',
@@ -157,14 +157,27 @@ export class ExcelFilesService<Type extends Record<number, string>, Dto> {
     }
   }
 
-  private validateTemplate(sheet: XlsxPopulate.Sheet): void {
-    const firstRowFirstCell = sheet.cell(1, 1).value()?.toString().trim() ?? '';
+  private findHeaderRow(sheet: XlsxPopulate.Sheet): number {
+    const lastRow = sheet.usedRange()?.endCell().rowNumber() ?? 0;
 
-    if (!HEADER_FIRST_COLUMN_TOKENS.includes(firstRowFirstCell)) {
-      throw new BadRequestException(
-        'El archivo no corresponde a la plantilla de asignación vigente.',
-      );
+    for (let row = 1; row <= Math.min(lastRow, 200); row++) {
+      const firstCell = sheet.cell(row, 1).value()?.toString().trim() ?? '';
+
+      if (!HEADER_FIRST_COLUMN_TOKENS.includes(firstCell)) continue;
+
+      const isHeaderRow = this.getHeaders(sheet, row).some((header, index) => {
+        if (index === 0) return false;
+
+        const property = this.mapHeaderToProperty(header, index);
+        return property !== '' && property !== `columna${index}`;
+      });
+
+      if (isHeaderRow) return row;
     }
+
+    throw new BadRequestException(
+      'El archivo no corresponde a la plantilla de asignación vigente.',
+    );
   }
   private getHeaders(sheet: XlsxPopulate.Sheet, headerRow: number): string[] {
     const headers: string[] = [];

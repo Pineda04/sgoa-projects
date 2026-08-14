@@ -106,7 +106,7 @@ export const UploadPlanification = ({
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement('a');
 			link.href = url;
-			link.download = 'plantilla-planificacion-academica.xlsx';
+			link.download = 'Plantilla Planificacion Academica.xlsx';
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);

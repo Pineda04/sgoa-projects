@@ -21,12 +21,7 @@ import {
 import { TeachersService } from 'src/modules/teachers/services/teachers.service';
 import { AcademicPeriodsService } from './academic-periods.service';
 import {
-  courseClassroomSchedulesConflict,
-  normalizeCourseClassroomDays,
-  normalizeCourseClassroomSection,
   normalizeText,
-  parseCourseClassroomDays,
-  parseCourseClassroomSection,
   paginate,
   paginateOutput,
 } from 'src/common/utils';
@@ -837,26 +832,6 @@ export class AcademicAssignmentReportsService {
       title: string;
     },
   ) {
-    const scheduleErrors = new Map<number, string[]>();
-
-    allData.forEach((item, index) => {
-      const errors: string[] = [];
-
-      try {
-        item.days = normalizeCourseClassroomDays(item.days);
-      } catch (error) {
-        errors.push((error as Error).message);
-      }
-
-      try {
-        item.section = normalizeCourseClassroomSection(item.section);
-      } catch (error) {
-        errors.push((error as Error).message);
-      }
-
-      if (errors.length) scheduleErrors.set(index, errors);
-    });
-
     const coordinator =
       await this.teacherDepartmentPositionService.findOneDepartmentHeadByUserIdAndCenterDepartment(
         currentUserId,
@@ -952,23 +927,13 @@ export class AcademicAssignmentReportsService {
     const classroomMap = new Map(
       classrooms.map((c) => [normalizeText(c.name), c]),
     );
-    const normalizedExistingCourseClassrooms = existingCourseClassrooms.map(
-      (cc) => ({
-        ...cc,
-        days: parseCourseClassroomDays(cc.days)?.join('') ?? cc.days,
-      }),
-    );
 
     const existingCourseClassroomsMap = new Map<
       string,
       TCourseClassroomSelectPeriod
     >();
-    normalizedExistingCourseClassrooms.forEach((cc) => {
-      const key = this.courseClassroomIdentityKey(
-        cc.teachingSession.assignmentReport.teacher.user.code,
-        cc.course.code,
-        cc.days,
-      );
+    existingCourseClassrooms.forEach((cc) => {
+      const key = `${cc.teachingSession.assignmentReport.teacher.user.code}|${cc.course.code}|${cc.days}`;
       existingCourseClassroomsMap.set(key, cc);
     });
 
@@ -976,7 +941,7 @@ export class AcademicAssignmentReportsService {
       string,
       TCourseClassroomSelectPeriod[]
     >();
-    normalizedExistingCourseClassrooms.forEach((cc) => {
+    existingCourseClassrooms.forEach((cc) => {
       const key = cc.teachingSession.assignmentReport.teacher.user.code;
 
       if (!existingCourseClassroomsTeacherMap.has(key)) {
@@ -989,22 +954,23 @@ export class AcademicAssignmentReportsService {
     const classroomNotAvailableMap = new Map<
       string,
       {
+        daysSet: Set<string>;
         days: string;
-        section: string;
         courseName: string;
         teacherCode: string;
       }[]
     >();
 
-    for (const cc of normalizedExistingCourseClassrooms) {
-      const key = normalizeText(cc.classroom.name);
+    for (const cc of existingCourseClassrooms) {
+      const key = `${cc.section}|${normalizeText(cc.classroom.name)}`;
+      const daysSet = new Set(cc.days.match(/.{1,2}/g) || []);
 
       if (!classroomNotAvailableMap.has(key)) {
         classroomNotAvailableMap.set(key, []);
       }
       classroomNotAvailableMap.get(key)!.push({
+        daysSet,
         days: cc.days,
-        section: cc.section,
         courseName: cc.course.name,
         teacherCode: cc.teachingSession.assignmentReport.teacher.user.code,
       });
@@ -1041,9 +1007,8 @@ export class AcademicAssignmentReportsService {
 
     const currentArrayClassroomMap = new Map<
       string,
-      { daysSet: Set<string>; section: string; item: TItemWithIndex }[]
+      { daysSet: Set<string>; item: TItemWithIndex }[]
     >();
-    const currentArrayTeacherMap = new Map<string, TItemWithIndex[]>();
 
     const coursesGroupByTeacherCodeEntries: Record<
       string,
@@ -1059,9 +1024,7 @@ export class AcademicAssignmentReportsService {
     const itemsToInvalidate: Set<number> = new Set();
 
     for (const item of currentCourseClassroomSetMap.items) {
-      const errors: string[] = [
-        ...(scheduleErrors.get(item.originalIndex) ?? []),
-      ];
+      const errors: string[] = [];
       // item.coordinator = coordinatorInfo.teacher.user.name;
       // item.center = coordinatorInfo.centerDepartment.center.name;
 
@@ -1071,8 +1034,9 @@ export class AcademicAssignmentReportsService {
       item.courseCode = normalizeText(item.courseCode.replace(/-/g, ''));
       item.nearGraduation = item.nearGraduation ?? false;
 
-      const studentCountError = this.validateStudentCount(item.studentCount);
-      if (studentCountError) errors.push(studentCountError);
+      const dayError = this.validateDays(item.days);
+
+      if (dayError) errors.push(dayError);
 
       const [teacher, teacherError] = this.findTeacher(
         teacherMap,
@@ -1128,36 +1092,42 @@ export class AcademicAssignmentReportsService {
       )
         errors.push(validateIfExistingAnotherCourseClassroomError);
 
-      const classroomKey = normalizeText(item.classroomName);
+      const classroomKey = `${item.section}|${normalizeText(item.classroomName)}`;
       const occupiedSchedules = classroomNotAvailableMap.get(classroomKey);
-      const itemDaysSet = new Set(parseCourseClassroomDays(item.days) ?? []);
-      const occupiedInfo = occupiedSchedules
-        ? this.findBatchScheduleConflict(occupiedSchedules, item)
-        : undefined;
+      const itemDaysSet = new Set(item.days.match(/.{1,2}/g) || []);
+
+      let hasOverlap = false;
+
+      if (occupiedSchedules) {
+        for (const occupied of occupiedSchedules) {
+          const hasCommonDay = [...itemDaysSet].some((day) =>
+            occupied.daysSet.has(day),
+          );
+
+          if (hasCommonDay) {
+            hasOverlap = true;
+            break;
+          }
+        }
+      }
 
       if (
         classroom &&
-        occupiedInfo &&
+        hasOverlap &&
         normalizeText(classroom.roomType.description) !==
-          normalizeText(EClassModality.VIRTUAL_SPACE)
+        normalizeText(EClassModality.VIRTUAL_SPACE)
       ) {
-        if (!parseCourseClassroomDays(occupiedInfo.days)) {
-          errors.push(
-            `No se puede descartar un traslape en el salón <${classroom.name}>: la clase existente <${occupiedInfo.courseName}> tiene días inválidos.`,
-          );
-        } else if (!parseCourseClassroomSection(occupiedInfo.section)) {
-          errors.push(
-            `No se puede descartar un traslape en el salón <${classroom.name}>: la clase existente <${occupiedInfo.courseName}> tiene un horario legado sin rango explícito.`,
-          );
-        } else {
-          const conflictInfo = occupiedInfo
-            ? ` por <${occupiedInfo.courseName}> (${occupiedInfo.teacherCode})`
-            : '';
+        const occupiedInfo = occupiedSchedules?.find((o) =>
+          [...itemDaysSet].some((day) => o.daysSet.has(day)),
+        );
 
-          errors.push(
-            `El salón de clase <${classroom.name}> ya se encuentra en uso${conflictInfo} los días <${item.days}> en la sección <${item.section}>.`,
-          );
-        }
+        const conflictInfo = occupiedInfo
+          ? ` por <${occupiedInfo.courseName}> (${occupiedInfo.teacherCode})`
+          : '';
+
+        errors.push(
+          `El salón de clase <${classroom.name}> ya se encuentra en uso${conflictInfo} los días <${item.days}> en la sección <${item.section}>.`,
+        );
       }
 
       const currentArrayOccupied = currentArrayClassroomMap.get(classroomKey);
@@ -1168,15 +1138,7 @@ export class AcademicAssignmentReportsService {
             occupied.daysSet.has(day),
           );
 
-          if (
-            hasCommonDay &&
-            courseClassroomSchedulesConflict(
-              item.days,
-              item.section,
-              occupied.item.days,
-              occupied.section,
-            )
-          ) {
+          if (hasCommonDay) {
             errors.push(
               `El salón de clase <${classroom.name}> ya se encuentra en uso por <${occupied.item.courseName}> (${occupied.item.teacherCode}) los días <${occupied.item.days}> en la sección <${occupied.item.section}>.`,
             );
@@ -1189,36 +1151,12 @@ export class AcademicAssignmentReportsService {
         }
       }
 
-      const currentTeacherOccupied = currentArrayTeacherMap.get(
-        item.teacherCode,
-      );
-
-      if (currentTeacherOccupied) {
-        const occupied = this.findBatchScheduleConflict(
-          currentTeacherOccupied,
-          item,
-        );
-
-        if (occupied) {
-          errors.push(
-            `El docente <${item.teacherCode} - ${item.teacherName}> tiene un traslape de horario con otro registro del mismo archivo.`,
-          );
-          itemsToInvalidate.add(item.originalIndex);
-          itemsToInvalidate.add(occupied.originalIndex);
-        }
-      }
-
       const [modality, modalityError] = this.getModalityId(
         item.classroomName,
         modalitySet,
       );
 
       if (!modality) errors.push(modalityError);
-
-      if (!currentArrayTeacherMap.has(item.teacherCode)) {
-        currentArrayTeacherMap.set(item.teacherCode, []);
-      }
-      currentArrayTeacherMap.get(item.teacherCode)!.push(item);
 
       if (errors.length) {
         invalidElements.push({
@@ -1233,7 +1171,6 @@ export class AcademicAssignmentReportsService {
 
           currentArrayClassroomMap.get(classroomKey)!.push({
             daysSet: itemDaysSet,
-            section: item.section,
             item: item,
           });
         }
@@ -1250,7 +1187,6 @@ export class AcademicAssignmentReportsService {
       }
       currentArrayClassroomMap.get(classroomKey)!.push({
         daysSet: itemDaysSet,
-        section: item.section,
         item: item,
       });
 
@@ -1270,7 +1206,9 @@ export class AcademicAssignmentReportsService {
         days: item.days.toString(),
         classroomId: classroom!.id,
         modalityId: modality!.id,
-        studentCount: item.studentCount,
+        studentCount: Number.isNaN(parseInt(String(item.studentCount), 10))
+          ? 0
+          : parseInt(String(item.studentCount), 10),
         groupCode: `${item.teacherCode}-${item.section}-${item.days}`, // Generamos un código de grupo único
         nearGraduation: item.nearGraduation,
         observation: item.observation || null, // Si no hay observación, se asigna
@@ -1289,7 +1227,9 @@ export class AcademicAssignmentReportsService {
         courseName: course!.name,
         uv: course!.uvs,
         section: item.section,
-        studentCount: item.studentCount,
+        studentCount: isNaN(parseInt(String(item.studentCount)))
+          ? 0
+          : item.studentCount,
         days: item.days.toString(),
         center: item.center,
         classroomName: classroom!.name,
@@ -1340,7 +1280,9 @@ export class AcademicAssignmentReportsService {
           days: item.days.toString(),
           classroomId: classroom.id,
           modalityId: modality.id,
-          studentCount: item.studentCount,
+          studentCount: isNaN(parseInt(String(item.studentCount)))
+            ? 0
+            : item.studentCount,
           groupCode: `${item.teacherCode}-${item.section}-${item.days}`,
           nearGraduation: item.nearGraduation,
           observation: item.observation || null,
@@ -1368,7 +1310,9 @@ export class AcademicAssignmentReportsService {
           courseName: course.name,
           uv: course.uvs,
           section: item.section,
-          studentCount: item.studentCount,
+          studentCount: isNaN(parseInt(String(item.studentCount)))
+            ? 0
+            : item.studentCount,
           days: item.days.toString(),
           center: item.center,
           classroomName: classroom.name,
@@ -1399,26 +1343,6 @@ export class AcademicAssignmentReportsService {
   async createFromArray(
     coursesGroupByTeacherCodeEntries: TGroupedCoursesByTeacher,
   ) {
-    let normalizedEntries: [string, TGroupedCoursesByTeacher[string]][];
-
-    try {
-      normalizedEntries = Object.entries(coursesGroupByTeacherCodeEntries).map(
-        ([key, academicInfo]) => [
-          key,
-          {
-            ...academicInfo,
-            courses: academicInfo.courses.map((course) => ({
-              ...course,
-              days: normalizeCourseClassroomDays(course.days),
-              section: normalizeCourseClassroomSection(course.section),
-            })),
-          },
-        ],
-      );
-    } catch (error) {
-      throw new BadRequestException((error as Error).message);
-    }
-
     const allAcademicAssignmentReports = await this.findAll();
     const results: TAcademicAssignmentReport[] &
       {
@@ -1427,7 +1351,9 @@ export class AcademicAssignmentReportsService {
         };
       }[] = [];
 
-    for (const [, academicInfo] of normalizedEntries) {
+    for (const [, academicInfo] of Object.entries(
+      coursesGroupByTeacherCodeEntries,
+    )) {
       const { teacherId, userId, centerDepartmentId, periodId, courses } =
         academicInfo;
 
@@ -1565,14 +1491,15 @@ export class AcademicAssignmentReportsService {
     }
   }
 
-  private validateStudentCount(studentCount: unknown): string | undefined {
-    if (
-      studentCount !== null &&
-      (typeof studentCount !== 'number' ||
-        !Number.isInteger(studentCount) ||
-        studentCount < 0)
-    ) {
-      return "El valor de 'studentCount' no es válido. Debe ser un número entero mayor o igual a cero, o estar vacío.";
+  private validateDays(days: string): string | undefined {
+    const validDays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+
+    const regex = /^(Lu|Ma|Mi|Ju|Vi|Sa|Do)+$/;
+
+    if (!regex.test(days)) {
+      return `El valor de 'days' (${days}) no es válido. Debe ser combinación de: ${validDays.join(
+        ', ',
+      )}.`;
     }
 
     return;
@@ -1662,7 +1589,7 @@ export class AcademicAssignmentReportsService {
     periodId: string,
   ): TCommonFindResponse<TCourseClassroomSelectPeriod | undefined> {
     const existingCourseClassroom = existingCourseClassroomsMap.get(
-      this.courseClassroomIdentityKey(teacherCode, courseCode, days),
+      `${teacherCode}|${courseCode}|${days}`,
     );
 
     return existingCourseClassroom &&
@@ -1675,28 +1602,6 @@ export class AcademicAssignmentReportsService {
       : [existingCourseClassroom, ''];
   }
 
-  private courseClassroomIdentityKey(
-    teacherCode: string,
-    courseCode: string,
-    days: string,
-  ): string {
-    const normalizedDays = parseCourseClassroomDays(days)?.join('') ?? days;
-    return `${teacherCode}|${courseCode}|${normalizedDays}`;
-  }
-
-  private findBatchScheduleConflict<
-    T extends { days: string; section: string },
-  >(existingItems: T[], item: T): T | undefined {
-    return existingItems.find((existing) =>
-      courseClassroomSchedulesConflict(
-        item.days,
-        item.section,
-        existing.days,
-        existing.section,
-      ),
-    );
-  }
-
   private validateIfExistingAnotherCourseClassroom(
     existingCourseClassroomsMap: Map<string, TCourseClassroomSelectPeriod[]>,
     key: string,
@@ -1707,22 +1612,23 @@ export class AcademicAssignmentReportsService {
 
     if (!existingCourseClassrooms) return [existingCourseClassrooms, ''];
 
-    for (const cc of existingCourseClassrooms) {
-      if (
-        courseClassroomSchedulesConflict(days, section, cc.days, cc.section)
-      ) {
-        if (!parseCourseClassroomSection(cc.section)) {
-          return [
-            null,
-            `No se puede descartar un traslape para el docente <${teacherCode} - ${teacherName}>: la clase existente <${cc.course.code}> tiene un horario legado sin rango explícito.`,
-          ];
-        }
+    const regex = new RegExp(
+      `(${days
+        .toString()
+        .trim()
+        .split(/([a-zA-Z]{2})/gm)
+        .slice(1, -1)
+        .filter((e) => e !== '')
+        .join('|')})`,
+      'gm',
+    );
 
+    for (const cc of existingCourseClassrooms) {
+      if (cc.days.match(regex) && cc.section === section)
         return [
           null,
           `El docente <${teacherCode} - ${teacherName}> tiene un traslape de horario con una clase existente <${cc.course.code}> en el periodo académico ${academicPeriodTitle}>, por favor revise de nuevo.`,
         ];
-      }
     }
 
     return [existingCourseClassrooms, ''];

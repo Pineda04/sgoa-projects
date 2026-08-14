@@ -118,7 +118,7 @@ describe('ExcelFilesService', () => {
   });
 
   describe('processFile', () => {
-    it('rejects workbooks that do not use the current template', async () => {
+    it('parses files with leading info rows before the table (header at row 4)', async () => {
       const buffer = await buildWorkbookBuffer((sheet) => {
         sheet.cell('A1').value('PLANIFICACIÓN ACADÉMICA');
         sheet.cell('A2').value('PAC No. 2, Semestre, 2026');
@@ -155,6 +155,94 @@ describe('ExcelFilesService', () => {
         sheet.cell(6, 12).value('Ingeniería en Sistemas');
         sheet.cell(6, 13).value('María López');
         sheet.cell(6, 14).value('No');
+      });
+
+      const result = await service.processFile(
+        propertiesAcademicAssignment,
+        buffer,
+      );
+
+      expect(result.title).toBe('');
+      expect(result.subtitle).toBe('');
+      expect(result.totalRecords).toBe(2);
+      expect(result.data[0]).toMatchObject({
+        teacherCode: 'DOC001',
+        teacherName: 'Juan Pérez',
+        courseCode: 'IS101-2025',
+        courseName: 'Ingeniería en Sistemas',
+        section: 'A1',
+        uv: 4,
+        days: 'LuMaMiVi',
+        studentCount: 35,
+        classroomName: 'Edificio C, Aula 302',
+        center: 'Centro Universitario Regional',
+        departmentName: 'Ingeniería en Sistemas',
+        coordinator: 'María López',
+        nearGraduation: true,
+        observation: 'Clase trasladada',
+      });
+      expect(result.data[1]).toMatchObject({
+        teacherCode: 'DOC002',
+        teacherName: 'Ana Gómez',
+        courseCode: 'MAT-201',
+        courseName: 'Matemáticas',
+        section: 'B2',
+        uv: 3,
+        days: 'MaJuVi',
+        studentCount: 25,
+        classroomName: 'Edificio A, Aula 105',
+        nearGraduation: false,
+      });
+    });
+
+    it('locates the header row even with several junk rows before the table', async () => {
+      const buffer = await buildWorkbookBuffer((sheet) => {
+        // Filas sin importancia antes de la tabla.
+        sheet.cell(1, 1).value('MINISTERIO DE EDUCACIÓN');
+        sheet.cell(2, 1).value('Dirección Académica');
+        sheet.cell(3, 1).value('Año 2026');
+        sheet.cell(4, 1).value('');
+        sheet.cell(5, 2).value('texto suelto');
+
+        TEMPLATE_HEADERS.forEach((header, index) =>
+          sheet.cell(6, index + 1).value(header),
+        );
+
+        sheet.cell(7, 2).value('DOC100');
+        sheet.cell(7, 3).value('Luis Ramírez');
+        sheet.cell(7, 4).value('IS-700');
+        sheet.cell(7, 5).value('Base de Datos');
+        sheet.cell(7, 6).value('18:00');
+        sheet.cell(7, 7).value(3);
+        sheet.cell(7, 8).value('LuJu');
+        sheet.cell(7, 9).value(20);
+        sheet.cell(7, 10).value('Aula 45');
+      });
+
+      const result = await service.processFile(
+        propertiesAcademicAssignment,
+        buffer,
+      );
+
+      expect(result.totalRecords).toBe(1);
+      expect(result.data[0]).toMatchObject({
+        teacherCode: 'DOC100',
+        teacherName: 'Luis Ramírez',
+        courseCode: 'IS-700',
+        courseName: 'Base de Datos',
+        section: '18:00',
+        uv: 3,
+        days: 'LuJu',
+        studentCount: 20,
+        classroomName: 'Aula 45',
+      });
+    });
+
+    it('rejects workbooks with no recognizable header row', async () => {
+      const buffer = await buildWorkbookBuffer((sheet) => {
+        sheet.cell('A1').value('PLANIFICACIÓN ACADÉMICA');
+        sheet.cell('A2').value('PAC No. 2, Semestre, 2026');
+        sheet.cell('A3').value('Datos varios');
       });
 
       await expect(
