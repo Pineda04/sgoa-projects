@@ -40,20 +40,20 @@ export async function exportPlanification(
 	const head = [
 		[
 			'#',
-			'No.Emp',
+			'No. Empleado',
 			'Nombre',
-			'Código',
+			'Codigo',
 			'Asignatura',
-			'UV',
 			'Sección',
-			'No. Alumnos',
+			'UV',
 			'Días',
-			'Centro / Telecentro',
-			'N° de Aula',
-			'Carrera o Área',
-			'Jefe / Coordinador',
-			'Estudiantes por graduarse',
-			'Observaciones',
+			'No. Alumnos',
+			'No. Aula',
+			'Carrera',
+			'Jefe/Coordinador',
+			'Centro/Telecentro',
+			'Est. Por Egresar',
+			'Observación',
 		],
 	];
 
@@ -63,14 +63,14 @@ export async function exportPlanification(
 		info.teacherName,
 		info.courseCode,
 		info.courseName,
-		info.uv,
 		info.section,
-		info.studentCount ?? 'Sin información',
+		info.uv,
 		info.days,
-		info.center,
+		info.studentCount ?? 'Sin información',
 		info.classroomName,
 		info.departmentName,
 		info.coordinator,
+		info.center,
 		info.nearGraduation ? 'Sí' : 'No',
 		info.observation ?? '',
 	]);
@@ -87,8 +87,6 @@ export async function exportPlanification(
 		},
 	});
 
-	const y = tableFinalY + 80;
-
 	const lineWidth = 200;
 	const marginCenter = (doc.internal.pageSize.getWidth() - lineWidth) / 2;
 
@@ -97,14 +95,10 @@ export async function exportPlanification(
 	const marginBottom = 45;
 	const firmaHeight = 70;
 
-	if (y + firmaHeight > pageHeight - marginBottom) {
-		doc.addPage();
-	}
+	const firmaY = pageHeight - marginBottom - firmaHeight;
 
-	let firmaY = y;
-	if (firmaY + firmaHeight > pageHeight - marginBottom) {
+	if (tableFinalY > firmaY) {
 		doc.addPage();
-		firmaY = 140;
 	}
 
 	doc.line(marginCenter, firmaY, marginCenter + lineWidth, firmaY);
