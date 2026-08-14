@@ -1206,9 +1206,9 @@ export class AcademicAssignmentReportsService {
         days: item.days.toString(),
         classroomId: classroom!.id,
         modalityId: modality!.id,
-        studentCount: isNaN(parseInt(String(item.studentCount)))
+        studentCount: Number.isNaN(parseInt(String(item.studentCount), 10))
           ? 0
-          : item.studentCount,
+          : parseInt(String(item.studentCount), 10),
         groupCode: `${item.teacherCode}-${item.section}-${item.days}`, // Generamos un código de grupo único
         nearGraduation: item.nearGraduation,
         observation: item.observation || null, // Si no hay observación, se asigna
