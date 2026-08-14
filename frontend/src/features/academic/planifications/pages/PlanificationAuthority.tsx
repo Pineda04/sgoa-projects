@@ -1,4 +1,4 @@
-import { exportPlanification } from '../utils';
+import { exportPlanification, exportPlanificationExcel } from '../utils';
 import { CourseClassroomsTable } from '../components';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { useGetAllCoursesAuthorityByPeriod } from '@api/courses';
 import { TPlanification } from '@api/assignment-reports';
 import { Button, Loading } from '@shared/components';
 import { PdfFontSelector } from '@shared/components/ui/PdfFontSelector';
-import { ArrowLeftIcon } from 'lucide-react';
+import { ArrowLeftIcon, FileSpreadsheet } from 'lucide-react';
 
 export const PlanificationAuthority = () => {
 	const { periodId, centerDepartmentId, year, pac } = useParams();
@@ -58,7 +58,7 @@ export const PlanificationAuthority = () => {
 				</h2>
 			</div>
 
-			<div className="flex flex-row gap-2 justify-center pt-5">
+			<div className="flex flex-wrap items-center justify-center gap-2 pt-5">
 				<Button onClick={() => navigate(-1)} variant="outline">
 					<ArrowLeftIcon className="size-5" />
 					Volver
@@ -85,6 +85,28 @@ export const PlanificationAuthority = () => {
 				>
 					<DocumentArrowDownIcon className="size-6" />
 					Descargar PDF
+				</Button>
+				<Button
+					onClick={() => {
+						const userDepartment =
+							coursesInfo.data?.[0]?.centerDepartment.department
+								.name ?? 'Autoridades';
+
+						exportPlanificationExcel(
+							planificationData,
+							Number(pac),
+							Number(year),
+							currentUser.user?.name ?? '',
+							userDepartment
+						);
+					}}
+					className="bg-green-600 text-white px-4 py-2 shadow hover:bg-green-700"
+					variant="unstyled"
+					size="default"
+					disabled={isLoading}
+				>
+					<FileSpreadsheet className="size-6" />
+					Descargar Excel
 				</Button>
 				<PdfFontSelector
 					onChange={font => {
