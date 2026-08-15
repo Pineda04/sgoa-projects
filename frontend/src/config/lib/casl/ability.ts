@@ -102,6 +102,7 @@ const subjects: readonly string[] = [
 	'analytics-monitoring',
 	'dashboard-tab-classrooms',
 	'users',
+	'user-roles',
 	'user-departments',
 	'user-status',
 	'activities',
