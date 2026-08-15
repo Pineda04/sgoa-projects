@@ -74,7 +74,7 @@ describe('ClassroomService', () => {
     });
   });
 
-  it('fails conservatively when an applicable legacy schedule has no range', async () => {
+  it('infers a one-hour range for a legacy 24h start time', async () => {
     mockPrismaService.classroom.findUnique.mockResolvedValue({
       id: 'classroom-id',
     });
@@ -83,6 +83,74 @@ describe('ClassroomService', () => {
         courseId: 'legacy-course-id',
         days: 'Lu',
         section: '10:00',
+        course: { name: 'Legacy' },
+        teachingSession: {
+          assignmentReport: {
+            teacherId: 'teacher-id',
+            teacher: { user: { name: 'Teacher' } },
+          },
+        },
+      },
+    ]);
+
+    const result = await service.getAvailability(
+      'classroom-id',
+      '123e4567-e89b-12d3-a456-426614174000',
+      'Lu',
+    );
+
+    expect(result.schedule.MONDAY?.occupied).toEqual([
+      expect.objectContaining({ startTime: '10:00', endTime: '11:00' }),
+    ]);
+    expect(result.schedule.MONDAY?.available).not.toContainEqual({
+      startTime: '10:00',
+      endTime: '11:00',
+    });
+    expect(result.schedule.MONDAY?.available).toContainEqual({
+      startTime: '11:00',
+      endTime: '12:00',
+    });
+  });
+
+  it('infers a one-hour range for a legacy 12h start time', async () => {
+    mockPrismaService.classroom.findUnique.mockResolvedValue({
+      id: 'classroom-id',
+    });
+    mockPrismaService.courseClassroom.findMany.mockResolvedValue([
+      {
+        courseId: 'legacy-course-id',
+        days: 'Vi',
+        section: '4:00 PM',
+        course: { name: 'Legacy' },
+        teachingSession: {
+          assignmentReport: {
+            teacherId: 'teacher-id',
+            teacher: { user: { name: 'Teacher' } },
+          },
+        },
+      },
+    ]);
+
+    const result = await service.getAvailability(
+      'classroom-id',
+      '123e4567-e89b-12d3-a456-426614174000',
+      'Vi',
+    );
+
+    expect(result.schedule.FRIDAY?.occupied).toEqual([
+      expect.objectContaining({ startTime: '16:00', endTime: '17:00' }),
+    ]);
+  });
+
+  it('fails conservatively when an applicable legacy schedule has no readable time', async () => {
+    mockPrismaService.classroom.findUnique.mockResolvedValue({
+      id: 'classroom-id',
+    });
+    mockPrismaService.courseClassroom.findMany.mockResolvedValue([
+      {
+        courseId: 'legacy-course-id',
+        days: 'Lu',
+        section: 'SEC-01',
         course: { name: 'Legacy' },
         teachingSession: {
           assignmentReport: {

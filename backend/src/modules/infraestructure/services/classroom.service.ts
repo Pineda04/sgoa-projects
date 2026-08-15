@@ -24,6 +24,7 @@ import {
   normalizeText,
   parseCourseClassroomDays,
   parseCourseClassroomSection,
+  inferCourseClassroomSection,
   paginate,
   paginateOutput,
 } from 'src/common/utils';
@@ -285,7 +286,9 @@ export class ClassroomService {
 
     for (const cc of courseClassrooms) {
       const days = parseCourseClassroomDays(cc.days);
-      const section = parseCourseClassroomSection(cc.section);
+      const section =
+        parseCourseClassroomSection(cc.section) ??
+        inferCourseClassroomSection(cc.section);
 
       if (!days) {
         throw new BadRequestException(

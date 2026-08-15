@@ -100,6 +100,41 @@ export function parseCourseClassroomSection(
   };
 }
 
+function formatMinutes(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}`;
+}
+
+/**
+ * Tolerancia para datos legados: un horario guardado solo con la hora de
+ * inicio (p. ej. `4:00 PM` o `10:00`) no tiene rango explícito. Si ya es un
+ * rango válido se devuelve tal cual; si no, se infiere una duración de una
+ * hora (el grano de los slots de disponibilidad). Devuelve `null` cuando ni
+ * siquiera se puede leer la hora de inicio.
+ */
+export function inferCourseClassroomSection(
+  value: string,
+): CourseClassroomSection | null {
+  if (typeof value !== 'string') return null;
+
+  const range = parseCourseClassroomSection(value);
+  if (range) return range;
+
+  const start = parseTime(value.trim());
+  if (!start) return null;
+
+  const endMinutes = start.minutes + 60;
+  return {
+    startTime: start.time,
+    endTime: formatMinutes(endMinutes),
+    startMinutes: start.minutes,
+    endMinutes,
+  };
+}
+
 export function normalizeCourseClassroomSection(value: string): string {
   const section = parseCourseClassroomSection(value);
 
