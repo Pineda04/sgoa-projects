@@ -6,7 +6,8 @@ import {
 	TMonitorReportSummary,
 	TScheduleComplianceCheckDetail,
 } from '@api/monitor';
-import { useAuth } from '@config/providers';
+import { useAuth, useUser } from '@config/providers';
+import { useGetCurrentAcademicPeriod } from '@api/periods';
 import {
 	Button,
 	DataTable,
@@ -137,6 +138,8 @@ export const MonitorReportTable = ({
 }: MonitorReportTableProps) => {
 	const { authState } = useAuth();
 	const ability = useAbility();
+	const currentUserProfile = useUser().user;
+	const academicPeriodInfo = useGetCurrentAcademicPeriod();
 	const [exportingFormat, setExportingFormat] =
 		useState<TExportFormat | null>(null);
 	const [editingCheck, setEditingCheck] =
@@ -179,6 +182,10 @@ export const MonitorReportTable = ({
 				summary: summary ?? EMPTY_SUMMARY,
 				dateFrom: filters.dateFrom,
 				dateTo: filters.dateTo,
+				campusName: currentUserProfile?.positions?.[0]?.center?.name,
+				periodTitle: academicPeriodInfo.data?.title,
+				userName: currentUserProfile?.name,
+				userEmail: authState.user?.email,
 			};
 
 			if (format === 'pdf') {
