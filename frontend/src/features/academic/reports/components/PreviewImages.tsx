@@ -78,7 +78,7 @@ export const PreviewImages = ({
 										alt={public_id}
 										className={commonClassesSquare(
 											sizeSquare,
-											'object-cover rounded border'
+											'object-contain rounded border'
 										)}
 									/>
 								);

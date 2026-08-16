@@ -5,12 +5,17 @@ import {
 	EXPORT_COLUMN_HEADERS,
 	TMonitorReportExportRow,
 } from './monitor-report-export.utils';
+import { formatCheckDate } from './monitor-reports.utils';
 
 interface IExportMonitorReportPdfParams {
 	rows: TMonitorReportExportRow[];
 	summary: TMonitorReportSummary;
 	dateFrom?: string;
 	dateTo?: string;
+	campusName?: string;
+	periodTitle?: string;
+	userName?: string;
+	userEmail?: string;
 }
 
 export async function exportMonitorReportPdf({
@@ -18,6 +23,10 @@ export async function exportMonitorReportPdf({
 	summary,
 	dateFrom,
 	dateTo,
+	campusName,
+	periodTitle,
+	userName,
+	userEmail,
 }: IExportMonitorReportPdfParams) {
 	const [jsPDFModule, autoTableModule] = await Promise.all([
 		import('jspdf'),
@@ -33,21 +42,51 @@ export async function exportMonitorReportPdf({
 
 	doc.setFont(jsPdfFont, 'bold');
 	doc.setFontSize(14);
-	doc.text('Reporte de Cumplimiento — Monitoreo', pageWidth / 2, 40, {
+	doc.text('Reporte de Cumplimiento Académico', pageWidth / 2, 40, {
 		align: 'center',
 	});
 
-	doc.setFont(jsPdfFont, 'normal');
-	doc.setFontSize(10);
-	doc.text(
-		`Periodo: ${dateFrom ?? '-'} al ${dateTo ?? '-'}`,
-		pageWidth / 2,
-		58,
-		{ align: 'center' }
-	);
+	const labelStyle = {
+		halign: 'left',
+		fillColor: [20, 76, 116],
+		textColor: 255,
+		fontStyle: 'bold' as const,
+	};
 
 	autoTable(doc, {
-		startY: 75,
+		startY: 55,
+		theme: 'striped',
+		styles: { fontSize: 10, font: jsPdfFont },
+		headStyles: { fillColor: [20, 76, 116], textColor: 255 },
+		body: [
+			[
+				{ content: 'Centro Universitario', styles: labelStyle },
+				campusName || '-',
+				{ content: 'Periodo académico', styles: labelStyle },
+				periodTitle || '-',
+			],
+			[
+				{ content: 'Usuario', styles: labelStyle },
+				userName || '-',
+				{ content: 'Correo', styles: labelStyle },
+				userEmail || '-',
+			],
+			[
+				{ content: 'Fecha de Inicio', styles: labelStyle },
+				{ content: formatCheckDate(dateFrom ?? '') },
+				{ content: 'Fecha de Fin', styles: labelStyle },
+				{ content: formatCheckDate(dateTo ?? '') },
+			],
+		] as Parameters<typeof autoTable>[0]['body'],
+		margin: { left: 40, right: 40 },
+	});
+
+	const startY =
+		((doc as unknown as { lastAutoTable?: { finalY: number } })
+			.lastAutoTable?.finalY ?? 55) + 15;
+
+	autoTable(doc, {
+		startY,
 		head: [EXPORT_COLUMN_HEADERS],
 		body: rows.map(row => [
 			row.fecha,

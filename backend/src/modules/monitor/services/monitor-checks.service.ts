@@ -1,22 +1,13 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  DigitalBlackboardUseStatus,
-  Prisma,
-} from 'src/generated/prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 import { IPaginateOutput } from 'src/common/interfaces';
-import {
-  paginate,
-  paginateOutput,
-  parseCourseClassroomDays,
-  parseCourseClassroomSection,
-} from 'src/common/utils';
+import { paginate, paginateOutput } from 'src/common/utils';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   BatchSyncChecksDto,
@@ -30,28 +21,7 @@ import {
 } from '../types';
 import { buildCheckWhere } from '../utils/build-check-where.util';
 import { MonitorAccessService } from './monitor-access.service';
-import {
-  INSTITUTIONAL_TIME_ZONE,
-  monitoringDayStart,
-} from '../utils/monitoring-date.util';
-import { formatInTimeZone } from 'date-fns-tz';
-
-const WEEKDAY_CODES = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'] as const;
-
-type TCheckCourseClassroom = {
-  id: string;
-  days: string;
-  section: string;
-  classroom: {
-    buildingId: string;
-    digitalBlackboards: { id: string }[];
-  };
-  teachingSession: {
-    assignmentReport: {
-      period: { startDate: Date; endDate: Date };
-    };
-  };
-};
+import { monitoringDayStart } from '../utils/monitoring-date.util';
 
 @Injectable()
 export class MonitorChecksService {
@@ -66,31 +36,11 @@ export class MonitorChecksService {
     monitorId: string,
     createCheckDto: CreateCheckDto,
   ): Promise<TScheduleComplianceCheck> {
-    const assignedBuildingIds =
-      await this.monitorAccessService.getAssignedBuildingIdsForCapture(
-        monitorId,
-      );
     const courseClassroom = await this.prisma.courseClassroom.findUnique({
       where: { id: createCheckDto.courseClassroomId },
       select: {
         id: true,
-        days: true,
-        section: true,
-        classroom: {
-          select: {
-            buildingId: true,
-            digitalBlackboards: { select: { id: true }, take: 1 },
-          },
-        },
-        teachingSession: {
-          select: {
-            assignmentReport: {
-              select: {
-                period: { select: { startDate: true, endDate: true } },
-              },
-            },
-          },
-        },
+        classroom: { select: { buildingId: true } },
       },
     });
 
@@ -99,11 +49,7 @@ export class MonitorChecksService {
         `La seccion de asignatura con id <${createCheckDto.courseClassroomId}> no fue encontrada.`,
       );
 
-    const { checkDate, digitalBlackboardUseStatus } = this.validateCheck(
-      createCheckDto,
-      courseClassroom,
-      assignedBuildingIds,
-    );
+    const checkDate = monitoringDayStart(createCheckDto.checkDate);
 
     if (createCheckDto.offlineId) {
       const replay = await this.prisma.scheduleComplianceCheck.findUnique({
@@ -149,7 +95,8 @@ export class MonitorChecksService {
           checkTime: createCheckDto.checkTime,
           isPresent: createCheckDto.isPresent,
           observation: createCheckDto.observation,
-          digitalBlackboardUseStatus,
+          digitalBlackboardUseStatus:
+            createCheckDto.digitalBlackboardUseStatus ?? null,
           offlineId: createCheckDto.offlineId,
           syncedAt: createCheckDto.offlineId ? new Date() : null,
         },
@@ -190,10 +137,6 @@ export class MonitorChecksService {
     const conflictIds: string[] = [];
     const skippedIds: string[] = [];
     const rejectedIds: string[] = [];
-    const assignedBuildingIds =
-      await this.monitorAccessService.getAssignedBuildingIdsForCapture(
-        monitorId,
-      );
     const courseClassroomIds = [
       ...new Set(dto.checks.map((check) => check.courseClassroomId)),
     ];
@@ -201,23 +144,7 @@ export class MonitorChecksService {
       where: { id: { in: courseClassroomIds } },
       select: {
         id: true,
-        days: true,
-        section: true,
-        classroom: {
-          select: {
-            buildingId: true,
-            digitalBlackboards: { select: { id: true }, take: 1 },
-          },
-        },
-        teachingSession: {
-          select: {
-            assignmentReport: {
-              select: {
-                period: { select: { startDate: true, endDate: true } },
-              },
-            },
-          },
-        },
+        classroom: { select: { buildingId: true } },
       },
     });
     const courseClassroomsById = new Map(
@@ -242,18 +169,12 @@ export class MonitorChecksService {
         continue;
       }
 
-      try {
-        checksToProcess.push({
-          check,
-          ...this.validateCheck(check, courseClassroom, assignedBuildingIds),
-        });
-      } catch (error) {
-        if (check.offlineId) rejectedIds.push(check.offlineId);
-        this.logger.warn(
-          `Rejected invalid offline check <${check.offlineId}> for monitor <${monitorId}>.`,
-          error instanceof Error ? error.message : String(error),
-        );
-      }
+      checksToProcess.push({
+        check,
+        checkDate: monitoringDayStart(check.checkDate),
+        buildingId: courseClassroom.classroom.buildingId,
+        digitalBlackboardUseStatus: check.digitalBlackboardUseStatus ?? null,
+      });
     }
 
     for (let start = 0; start < checksToProcess.length; start += 25) {
@@ -328,23 +249,8 @@ export class MonitorChecksService {
     id: string,
     updateCheckDto: UpdateCheckDto,
   ): Promise<TScheduleComplianceCheck> {
-    const assignedBuildingIds =
-      await this.monitorAccessService.getAssignedBuildingIdsForCapture(
-        monitorId,
-      );
     const check = await this.prisma.scheduleComplianceCheck.findUnique({
       where: { id },
-      include: {
-        courseClassroom: {
-          select: {
-            classroom: {
-              select: {
-                digitalBlackboards: { select: { id: true }, take: 1 },
-              },
-            },
-          },
-        },
-      },
     });
 
     if (!check)
@@ -357,25 +263,11 @@ export class MonitorChecksService {
         'No tienes permiso para modificar esta verificación.',
       );
 
-    if (!assignedBuildingIds.includes(check.buildingId))
-      throw new ForbiddenException(
-        'La verificación no pertenece a un edificio asignado al monitor.',
-      );
-
-    const isEquipped =
-      check.courseClassroom.classroom.digitalBlackboards.length > 0;
-    const isPresent = updateCheckDto.isPresent ?? check.isPresent;
     const digitalBlackboardUseStatus =
       updateCheckDto.isPresent === false
         ? null
         : (updateCheckDto.digitalBlackboardUseStatus ??
           check.digitalBlackboardUseStatus);
-
-    this.validateDigitalBlackboardUse(
-      isPresent,
-      digitalBlackboardUseStatus,
-      isEquipped,
-    );
 
     return this.prisma.scheduleComplianceCheck.update({
       where: { id },
@@ -473,108 +365,6 @@ export class MonitorChecksService {
     );
 
     return paginateOutput<TScheduleComplianceCheckDetail>(mapped, count, query);
-  }
-
-  private validateCheck(
-    dto: CreateCheckDto,
-    courseClassroom: TCheckCourseClassroom,
-    assignedBuildingIds: string[],
-  ): {
-    checkDate: Date;
-    buildingId: string;
-    digitalBlackboardUseStatus:
-      | CreateCheckDto['digitalBlackboardUseStatus']
-      | null;
-  } {
-    const buildingId = courseClassroom.classroom.buildingId;
-    if (!assignedBuildingIds.includes(buildingId)) {
-      throw new ForbiddenException(
-        'La sección no pertenece a un edificio asignado al monitor.',
-      );
-    }
-
-    const hasDigitalBlackboard =
-      courseClassroom.classroom.digitalBlackboards.length > 0;
-    const useStatus = dto.digitalBlackboardUseStatus;
-
-    this.validateDigitalBlackboardUse(
-      dto.isPresent,
-      useStatus ?? null,
-      hasDigitalBlackboard,
-    );
-
-    const checkDate = monitoringDayStart(dto.checkDate);
-    const period = courseClassroom.teachingSession.assignmentReport.period;
-    const periodStart = formatInTimeZone(
-      period.startDate,
-      INSTITUTIONAL_TIME_ZONE,
-      'yyyy-MM-dd',
-    );
-    const periodEnd = formatInTimeZone(
-      period.endDate,
-      INSTITUTIONAL_TIME_ZONE,
-      'yyyy-MM-dd',
-    );
-    if (dto.checkDate < periodStart || dto.checkDate > periodEnd) {
-      throw new BadRequestException(
-        'La fecha del chequeo está fuera del período académico de la clase.',
-      );
-    }
-
-    const weekday = Number(
-      formatInTimeZone(checkDate, INSTITUTIONAL_TIME_ZONE, 'i'),
-    );
-    const expectedDay = WEEKDAY_CODES[weekday - 1];
-    const scheduledDays = parseCourseClassroomDays(courseClassroom.days);
-    if (!expectedDay || !scheduledDays?.includes(expectedDay)) {
-      throw new BadRequestException(
-        'La clase no está programada para la fecha indicada.',
-      );
-    }
-
-    const scheduledSection = parseCourseClassroomSection(
-      courseClassroom.section,
-    );
-    if (
-      !scheduledSection ||
-      dto.checkTime < scheduledSection.startTime ||
-      dto.checkTime > scheduledSection.endTime
-    ) {
-      throw new BadRequestException(
-        'La hora del chequeo está fuera del horario programado de la clase.',
-      );
-    }
-
-    return {
-      checkDate,
-      buildingId,
-      digitalBlackboardUseStatus:
-        dto.isPresent && hasDigitalBlackboard ? (useStatus ?? null) : null,
-    };
-  }
-
-  private validateDigitalBlackboardUse(
-    isPresent: boolean,
-    useStatus: DigitalBlackboardUseStatus | null,
-    hasDigitalBlackboard: boolean,
-  ): void {
-    if (!isPresent && useStatus) {
-      throw new BadRequestException(
-        'Una ausencia no puede registrar uso de pizarra digital.',
-      );
-    }
-
-    if (isPresent && hasDigitalBlackboard && !useStatus) {
-      throw new BadRequestException(
-        'Debe registrar el uso observado de la pizarra digital.',
-      );
-    }
-
-    if (isPresent && !hasDigitalBlackboard && useStatus) {
-      throw new BadRequestException(
-        'El aula no tiene una pizarra digital registrada.',
-      );
-    }
   }
 
   private matchesReplay(

@@ -274,6 +274,29 @@ describe('Permisos implícitos', () => {
       expect(editarClase.canActivate(buildContext(coordinator))).toBe(true);
     });
 
+    it('el docente edita las estadísticas de sus clases sin gestionar el catálogo', () => {
+      const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
+
+      // PATCH /course-stadistics/:id exige update:courses para que el docente
+      // registre APB/RPB/NSP/ABD en su informe de actividades académicas.
+      expect(teacher).toContain('read:courses');
+      expect(teacher).toContain('update:courses');
+
+      const editarEstadisticas = buildGuard({
+        permission: { action: 'update', subject: 'courses' },
+      });
+      const crearClase = buildGuard({
+        permission: { action: 'create', subject: 'courses' },
+      });
+      const borrarClase = buildGuard({
+        permission: { action: 'delete', subject: 'courses' },
+      });
+
+      expect(editarEstadisticas.canActivate(buildContext(teacher))).toBe(true);
+      expect(crearClase.canActivate(buildContext(teacher))).toBe(false);
+      expect(borrarClase.canActivate(buildContext(teacher))).toBe(false);
+    });
+
     it('el docente abre la ficha de aula sin quedarse con el módulo Aulas', () => {
       const teacher = expandImpliedPermissions(['manage:dashboard-teacher']);
 

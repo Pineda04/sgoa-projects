@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { DigitalBlackboardUseStatus } from 'src/generated/prisma/client';
 import { MonitorChecksService } from '../monitor-checks.service';
@@ -13,21 +13,21 @@ const BASE_DTO = {
   isPresent: true,
 };
 
-const scheduledCourseClassroom = (
-  digitalBlackboards: { id: string }[] = [],
-) => ({
+const courseClassroomFixture = (buildingId = 'building-1') => ({
   id: BASE_DTO.courseClassroomId,
-  days: 'Lu',
-  section: '10:00 - 11:00',
-  classroom: { buildingId: 'building-1', digitalBlackboards },
-  teachingSession: {
-    assignmentReport: {
-      period: {
-        startDate: new Date('2026-08-01T06:00:00.000Z'),
-        endDate: new Date('2026-08-31T06:00:00.000Z'),
-      },
-    },
-  },
+  classroom: { buildingId },
+});
+
+const existingCheck = (
+  digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null = null,
+  monitorId = 'monitor-1',
+) => ({
+  id: 'check-1',
+  monitorId,
+  buildingId: 'building-1',
+  isPresent: true,
+  digitalBlackboardUseStatus,
+  checkDate: new Date('2026-08-03T06:00:00.000Z'),
 });
 
 describe('MonitorChecksService', () => {
@@ -51,166 +51,137 @@ describe('MonitorChecksService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    access.getAssignedBuildingIdsForCapture.mockResolvedValue(['building-1']);
     prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(null);
     prisma.scheduleComplianceCheck.findFirst.mockResolvedValue(null);
   });
 
-  it('rejects a section outside the assigned buildings', async () => {
-    prisma.courseClassroom.findUnique.mockResolvedValue({
-      id: BASE_DTO.courseClassroomId,
-      classroom: { buildingId: 'building-2', digitalBlackboards: [] },
+  describe('create', () => {
+    it('rejects a courseClassroom that does not exist', async () => {
+      prisma.courseClassroom.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.create('monitor-1', BASE_DTO),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    await expect(service.create('monitor-1', BASE_DTO)).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
-  });
+    it.each(['10:00 - 11:00', '10:00', '4:00 PM', 'SEC-01'])(
+      'accepts a check for any section format %s at any time',
+      async () => {
+        prisma.courseClassroom.findUnique.mockResolvedValue(
+          courseClassroomFixture(),
+        );
+        prisma.scheduleComplianceCheck.create.mockImplementation(({ data }) =>
+          Promise.resolve({
+            id: 'check-1',
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+        );
 
-  it('requires a blackboard status for presence in an equipped classroom', async () => {
-    prisma.courseClassroom.findUnique.mockResolvedValue(
-      scheduledCourseClassroom([{ id: 'board-1' }]),
+        const result = await service.create('monitor-1', {
+          ...BASE_DTO,
+          checkTime: '22:00',
+        });
+
+        expect(result).toMatchObject({
+          buildingId: 'building-1',
+          checkTime: '22:00',
+        });
+      },
     );
 
-    await expect(service.create('monitor-1', BASE_DTO)).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
-  });
+    it('stores observed use and marks queued checks as synchronized', async () => {
+      const offlineId = '22222222-2222-4222-8222-222222222222';
+      prisma.courseClassroom.findUnique.mockResolvedValue(
+        courseClassroomFixture(),
+      );
+      prisma.scheduleComplianceCheck.create.mockImplementation(({ data }) =>
+        Promise.resolve({
+          id: 'check-1',
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      );
 
-  it('stores observed use and marks queued checks as synchronized', async () => {
-    const offlineId = '22222222-2222-4222-8222-222222222222';
-    prisma.courseClassroom.findUnique.mockResolvedValue(
-      scheduledCourseClassroom([{ id: 'board-1' }]),
-    );
-    prisma.scheduleComplianceCheck.create.mockImplementation(({ data }) =>
-      Promise.resolve({
+      const result = await service.create('monitor-1', {
+        ...BASE_DTO,
+        offlineId,
+        digitalBlackboardUseStatus: DigitalBlackboardUseStatus.USED,
+      });
+
+      expect(result.digitalBlackboardUseStatus).toBe(
+        DigitalBlackboardUseStatus.USED,
+      );
+      expect(result.syncedAt).toBeInstanceOf(Date);
+    });
+
+    it('returns an identical offline replay and rejects conflicting content', async () => {
+      const offlineId = '22222222-2222-4222-8222-222222222222';
+      const replay = {
         id: 'check-1',
-        ...data,
+        courseClassroomId: BASE_DTO.courseClassroomId,
+        monitorId: 'monitor-1',
+        buildingId: 'building-1',
+        checkDate: new Date('2026-08-03T06:00:00.000Z'),
+        checkTime: BASE_DTO.checkTime,
+        isPresent: false,
+        observation: null,
+        digitalBlackboardUseStatus: null,
+        offlineId,
+        syncedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      }),
-    );
+      };
+      prisma.courseClassroom.findUnique.mockResolvedValue(
+        courseClassroomFixture(),
+      );
+      prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(replay);
 
-    const result = await service.create('monitor-1', {
-      ...BASE_DTO,
-      offlineId,
-      digitalBlackboardUseStatus: DigitalBlackboardUseStatus.USED,
+      await expect(
+        service.create('monitor-1', {
+          ...BASE_DTO,
+          isPresent: false,
+          offlineId,
+        }),
+      ).resolves.toEqual(replay);
+      await expect(
+        service.create('monitor-1', {
+          ...BASE_DTO,
+          isPresent: false,
+          observation: 'changed',
+          offlineId,
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    expect(result.digitalBlackboardUseStatus).toBe(
-      DigitalBlackboardUseStatus.USED,
-    );
-    expect(result.syncedAt).toBeInstanceOf(Date);
-  });
+    it('rejects a second check for the same section and date', async () => {
+      prisma.courseClassroom.findUnique.mockResolvedValue(
+        courseClassroomFixture(),
+      );
+      prisma.scheduleComplianceCheck.findFirst.mockResolvedValue({
+        id: 'existing-check',
+      });
 
-  it('returns an identical offline replay and rejects conflicting content', async () => {
-    const offlineId = '22222222-2222-4222-8222-222222222222';
-    const replay = {
-      id: 'check-1',
-      courseClassroomId: BASE_DTO.courseClassroomId,
-      monitorId: 'monitor-1',
-      buildingId: 'building-1',
-      checkDate: new Date('2026-08-03T06:00:00.000Z'),
-      checkTime: BASE_DTO.checkTime,
-      isPresent: false,
-      observation: null,
-      digitalBlackboardUseStatus: null,
-      offlineId,
-      syncedAt: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    prisma.courseClassroom.findUnique.mockResolvedValue(
-      scheduledCourseClassroom(),
-    );
-    prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(replay);
-
-    await expect(
-      service.create('monitor-1', {
-        ...BASE_DTO,
-        isPresent: false,
-        offlineId,
-      }),
-    ).resolves.toEqual(replay);
-    await expect(
-      service.create('monitor-1', {
-        ...BASE_DTO,
-        isPresent: false,
-        observation: 'changed',
-        offlineId,
-      }),
-    ).rejects.toBeInstanceOf(ConflictException);
-  });
-
-  it('rejects checks outside the scheduled day and time', async () => {
-    prisma.courseClassroom.findUnique.mockResolvedValue(
-      scheduledCourseClassroom(),
-    );
-
-    await expect(
-      service.create('monitor-1', {
-        ...BASE_DTO,
-        checkDate: '2026-08-04',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-    await expect(
-      service.create('monitor-1', {
-        ...BASE_DTO,
-        checkTime: '11:01',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-  });
-
-  it('rejects a second check for the same section and date', async () => {
-    prisma.courseClassroom.findUnique.mockResolvedValue(
-      scheduledCourseClassroom(),
-    );
-    prisma.scheduleComplianceCheck.findFirst.mockResolvedValue({
-      id: 'existing-check',
+      await expect(
+        service.create('monitor-1', BASE_DTO),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
-
-    await expect(service.create('monitor-1', BASE_DTO)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
   });
 
   describe('update', () => {
-    const existingCheck = (
-      digitalBlackboardUseStatus: DigitalBlackboardUseStatus | null,
-    ) => ({
-      id: 'check-1',
-      monitorId: 'monitor-1',
-      buildingId: 'building-1',
-      isPresent: true,
-      digitalBlackboardUseStatus,
-      courseClassroom: {
-        classroom: { digitalBlackboards: [{ id: 'board-1' }] },
-      },
-    });
-
-    it('updates the observed blackboard status in an equipped classroom', async () => {
+    it('rejects editing a check owned by another monitor', async () => {
       prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(
-        existingCheck(DigitalBlackboardUseStatus.USED),
+        existingCheck(null, 'other-monitor'),
       );
-      prisma.scheduleComplianceCheck.update.mockResolvedValue({
-        id: 'check-1',
-      });
 
-      await service.update('monitor-1', 'check-1', {
-        isPresent: true,
-        digitalBlackboardUseStatus: DigitalBlackboardUseStatus.NOT_USED,
-      });
-
-      expect(prisma.scheduleComplianceCheck.update).toHaveBeenCalledWith({
-        where: { id: 'check-1' },
-        data: {
-          isPresent: true,
-          digitalBlackboardUseStatus: DigitalBlackboardUseStatus.NOT_USED,
-        },
-      });
+      await expect(
+        service.update('monitor-1', 'check-1', { isPresent: false }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
-    it('clears blackboard use when an absence is registered', async () => {
+    it('updates presence and clears blackboard use when an absence is registered', async () => {
       prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(
         existingCheck(DigitalBlackboardUseStatus.USED),
       );
@@ -226,15 +197,23 @@ describe('MonitorChecksService', () => {
       });
     });
 
-    it('requires blackboard use when changing an equipped check to present', async () => {
-      prisma.scheduleComplianceCheck.findUnique.mockResolvedValue({
-        ...existingCheck(null),
-        isPresent: false,
+    it('preserves blackboard use when presence is kept without a new status', async () => {
+      prisma.scheduleComplianceCheck.findUnique.mockResolvedValue(
+        existingCheck(DigitalBlackboardUseStatus.USED),
+      );
+      prisma.scheduleComplianceCheck.update.mockResolvedValue({
+        id: 'check-1',
       });
 
-      await expect(
-        service.update('monitor-1', 'check-1', { isPresent: true }),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      await service.update('monitor-1', 'check-1', { isPresent: true });
+
+      expect(prisma.scheduleComplianceCheck.update).toHaveBeenCalledWith({
+        where: { id: 'check-1' },
+        data: {
+          isPresent: true,
+          digitalBlackboardUseStatus: DigitalBlackboardUseStatus.USED,
+        },
+      });
     });
   });
 
@@ -267,7 +246,7 @@ describe('MonitorChecksService', () => {
 
     it('reports an atomic ownership conflict without deleting the local id', async () => {
       prisma.courseClassroom.findMany.mockResolvedValue([
-        scheduledCourseClassroom(),
+        courseClassroomFixture(),
       ]);
       prisma.$queryRaw.mockResolvedValue([]);
 
@@ -285,7 +264,7 @@ describe('MonitorChecksService', () => {
         check(`id-${index}`),
       );
       prisma.courseClassroom.findMany.mockResolvedValue([
-        scheduledCourseClassroom(),
+        courseClassroomFixture(),
       ]);
       prisma.$queryRaw.mockResolvedValue([{ monitorId }]);
 
@@ -296,22 +275,17 @@ describe('MonitorChecksService', () => {
       expect(result.conflictIds).toEqual([]);
     });
 
-    it('rejects batch checks outside the monitor building scope', async () => {
+    it('syncs checks regardless of the section format', async () => {
       prisma.courseClassroom.findMany.mockResolvedValue([
-        {
-          ...scheduledCourseClassroom(),
-          classroom: { buildingId: 'building-2', digitalBlackboards: [] },
-        },
+        courseClassroomFixture(),
       ]);
+      prisma.$queryRaw.mockResolvedValue([{ monitorId }]);
 
-      await expect(
-        service.batchSync(monitorId, { checks: [check('outside-scope')] }),
-      ).resolves.toMatchObject({
-        synced: 0,
-        rejected: 1,
-        rejectedIds: ['outside-scope'],
+      const result = await service.batchSync(monitorId, {
+        checks: [check('legacy')],
       });
-      expect(prisma.$queryRaw).not.toHaveBeenCalled();
+
+      expect(result).toMatchObject({ synced: 1, rejected: 0 });
     });
   });
 });

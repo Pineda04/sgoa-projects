@@ -1,6 +1,7 @@
 import {
   courseClassroomSchedulesConflict,
   courseClassroomSectionsOverlap,
+  inferCourseClassroomSection,
   normalizeCourseClassroomDays,
   normalizeCourseClassroomSection,
   parseCourseClassroomSection,
@@ -49,5 +50,31 @@ describe('course classroom schedule utilities', () => {
     expect(
       courseClassroomSchedulesConflict('Lu', '08:00', 'Ma', '10:00 - 11:00'),
     ).toBe(false);
+  });
+
+  it.each([
+    ['4:00 PM', '16:00', '17:00', 16 * 60, 17 * 60],
+    ['10:00', '10:00', '11:00', 600, 660],
+    ['8:05 AM', '08:05', '09:05', 485, 545],
+  ])(
+    'infers a one-hour range for legacy section %s',
+    (section, startTime, endTime, startMinutes, endMinutes) => {
+      expect(inferCourseClassroomSection(section)).toEqual({
+        startTime,
+        endTime,
+        startMinutes,
+        endMinutes,
+      });
+    },
+  );
+
+  it('returns an explicit range unchanged and null when nothing is readable', () => {
+    expect(inferCourseClassroomSection('07:30 - 09:15')).toEqual({
+      startTime: '07:30',
+      endTime: '09:15',
+      startMinutes: 450,
+      endMinutes: 555,
+    });
+    expect(inferCourseClassroomSection('SEC-01')).toBeNull();
   });
 });

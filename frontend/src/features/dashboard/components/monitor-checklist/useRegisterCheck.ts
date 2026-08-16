@@ -47,19 +47,27 @@ export const useRegisterCheck = (email?: string, isOnline = true) => {
 					.first();
 
 				if (existing) {
+					const changes = {
+						isPresent,
+						checkTime: resolvedCheckTime,
+						observation: normalizedObservation,
+						digitalBlackboardUseStatus: isPresent
+							? digitalBlackboardUseStatus
+							: undefined,
+					};
 					if (existing.syncStatus === 'PENDING') {
-						const changes = {
-							isPresent,
-							checkTime: resolvedCheckTime,
-							observation: normalizedObservation,
-							digitalBlackboardUseStatus: isPresent
-								? digitalBlackboardUseStatus
-								: undefined,
-						};
 						await db.offlineChecks.update(
 							existing.offlineId,
 							changes
 						);
+					} else if (existing.syncStatus === 'SYNCED') {
+						// Re-encolar la edición para que el sync engine la propague
+						// al servidor (batchSync hace upsert por offlineId; checkTime
+						// y offlineId se conservan).
+						await db.offlineChecks.update(existing.offlineId, {
+							...changes,
+							syncStatus: 'PENDING',
+						});
 					}
 					return;
 				}

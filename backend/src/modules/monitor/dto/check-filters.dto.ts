@@ -10,8 +10,8 @@ export class CheckFiltersDto extends QueryPaginationDto {
   declare page?: string;
 
   @IsOptional()
-  @Matches(/^(?:[1-9]|[1-9]\d|100)$/, {
-    message: 'La propiedad <size> debe ser un entero entre 1 y 100.',
+  @Matches(/^(?:[1-9]\d{0,3})$/, {
+    message: 'La propiedad <size> debe ser un entero entre 1 y 5000.',
   })
   declare size?: string;
 

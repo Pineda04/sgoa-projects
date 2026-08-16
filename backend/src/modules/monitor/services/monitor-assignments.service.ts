@@ -34,9 +34,16 @@ export class MonitorAssignmentsService {
     const today = monitoringDayStart(currentMonitoringDate());
     const todayAbbreviation = DAY_ABBREVIATIONS[currentMonitoringDayIndex()];
 
+    // Feature: alcance por edificio. Si el monitor no tiene edificios asignados,
+    // se omite el filtro (comportamiento global) para no romper el checklist.
+    const buildingScope =
+      buildingIds.length > 0
+        ? { classroom: { buildingId: { in: buildingIds } } }
+        : {};
+
     const courseClassrooms = await this.prisma.courseClassroom.findMany({
       where: {
-        classroom: { buildingId: { in: buildingIds } },
+        ...buildingScope,
         days: { contains: todayAbbreviation },
         teachingSession: {
           assignmentReport: {
@@ -155,7 +162,7 @@ export class MonitorAssignmentsService {
       );
 
     return this.prisma.building.findMany({
-      where: { id: { in: buildingIds } },
+      where: buildingIds.length > 0 ? { id: { in: buildingIds } } : undefined,
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     });

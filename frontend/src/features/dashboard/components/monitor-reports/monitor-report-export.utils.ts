@@ -45,4 +45,6 @@ export const buildExportFileName = (
 	dateFrom?: string,
 	dateTo?: string
 ): string =>
-	`Reporte-Monitoreo_${dateFrom ?? '-'}_${dateTo ?? '-'}.${extension}`;
+	`Reporte Monitoreo ${dateFrom ?? '-'} a ${dateTo ?? '-'}`
+		//.replace(/-/g, ' ')
+		.concat(`.${extension}`);
