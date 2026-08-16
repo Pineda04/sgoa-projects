@@ -5,7 +5,7 @@ import { queryClient } from '@config/lib';
 import { academicAssignmentReportsKeys } from '../assignment-reports';
 
 export const useCreateComplementaryActivity = (reportId: string) => {
-	const { mutateAsync } = useMutation({
+	const { mutateAsync, isPending } = useMutation({
 		mutationFn: (formData: FormData) =>
 			complementaryActivitiesApi.createComplementaryActivity(formData),
 		onSuccess: async res => {
@@ -23,6 +23,7 @@ export const useCreateComplementaryActivity = (reportId: string) => {
 
 	return {
 		addComplementaryActivity: mutateAsync,
+		isPendingCreate: isPending,
 	};
 };
 

@@ -59,7 +59,7 @@ export const ComplementaryActivity = ({
 	onClose: () => void;
 	initialValuesData?: TComplementaryActivity;
 }) => {
-	const { addComplementaryActivity } =
+	const { addComplementaryActivity, isPendingCreate } =
 		useCreateComplementaryActivity(reportId);
 	const { updateComplementaryActivity, isPendingUpdate } =
 		useUpdateComplementaryActivity(reportId);
@@ -304,7 +304,7 @@ export const ComplementaryActivity = ({
 							value={values.progressLevel ?? ''}
 							onChange={handleChange}
 						>
-							<option disabled selected>
+							<option value="" disabled>
 								Seleccione...
 							</option>
 							{Object.values(EPogressLevel).map(
@@ -475,7 +475,7 @@ export const ComplementaryActivity = ({
 				<Button
 					type="button"
 					onClick={onClose}
-					disabled={isPendingUpdate}
+					disabled={isPendingCreate || isPendingUpdate}
 					variant="outline"
 				>
 					Cancelar
@@ -486,17 +486,24 @@ export const ComplementaryActivity = ({
 					form="form-complementary-activity"
 					onClick={handleClick}
 					disabled={
+						isPendingCreate ||
 						isPendingUpdate ||
 						(JSON.stringify(values) ===
 							JSON.stringify(initialValues) &&
 							files.length === 0)
 					}
 				>
-					<FiSave className="size-4" />
+					{isPendingCreate || isPendingUpdate ? (
+						<span className="inline-block size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+					) : (
+						<FiSave className="size-4" />
+					)}
 					<span>
-						{initialValuesData
-							? 'Actualizar Actividad'
-							: 'Agregar Actividad'}
+						{isPendingCreate || isPendingUpdate
+							? 'Guardando...'
+							: initialValuesData
+								? 'Actualizar Actividad'
+								: 'Agregar Actividad'}
 					</span>
 				</Button>
 			</div>
