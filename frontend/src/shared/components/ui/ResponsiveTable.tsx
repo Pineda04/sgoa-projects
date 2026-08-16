@@ -97,7 +97,7 @@ export function ResponsiveTable<T>({
 							<tr
 								key={getRowKey(row)}
 								className={`
-                  ${index % 2 === 0 ? 'bg-card' : 'bg-muted'}
+                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}
                   hover:bg-primary-light transition-colors duration-150
                   ${onRowClick ? 'cursor-pointer' : ''}
                   ${rowClassName ? rowClassName(row, index) : ''}

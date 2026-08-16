@@ -575,7 +575,9 @@ export const Navbar = () => {
 					</Button>
 				)}
 
-				<UserMenu />
+				<div className={isOpen ? 'hidden lg:block' : ''}>
+					<UserMenu />
+				</div>
 			</div>
 		</nav>
 	);
