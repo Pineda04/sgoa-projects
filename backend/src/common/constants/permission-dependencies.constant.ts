@@ -157,10 +157,11 @@ export const SUBJECT_IMPLIED_PERMISSIONS: Partial<
   ],
   // Pestañas: Clases asignadas e Informes, ambas acotadas al propio docente.
   // Refleja el alcance del rol DOCENTE sembrado: consulta lo suyo, edita su
-  // planificación y gestiona las actividades complementarias del informe.
+  // planificación, registra las estadísticas de sus clases y gestiona las
+  // actividades complementarias del informe.
   'dashboard-teacher': [
     ...grant('read', 'courses', 'reports', 'planifications'),
-    ...grant('update', 'planifications'),
+    ...grant('update', 'courses', 'planifications'),
     ...grant('manage', 'activities'),
     ...grant('read', 'dashboard-tab-classrooms'),
     ...lookup('periods'),
